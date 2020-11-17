@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ./index.ts",
-    "start": "node index.ts"
+    "dev": "nodemon ./index.js -e ts --exec \"npm run compile\"",
+    "build": "tsc index.ts",
+    "compile": "tsc && node ./index.js",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -19,12 +21,12 @@
   },
   "homepage": "https://github.com/mendahu/book-club-discord-bot#readme",
   "dependencies": {
-    "@types/node": "^14.14.7",
     "axios": "^0.21.0",
     "discord.js": "^12.4.1",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
+    "@types/node": "^14.14.7",
     "nodemon": "^2.0.6",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.5"
