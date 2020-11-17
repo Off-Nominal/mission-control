@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 
 require('dotenv').config();
 const Discord = require('discord.js');
-const { prefix } = require('./config.json');
+const { prefix } = require('../config/discord.json');
 import { handleRecommendCommand } from './commands/recommend';
 
 const client = new Discord.Client();

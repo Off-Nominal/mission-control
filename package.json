@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ./index.js -e ts --exec \"npm run compile\"",
+    "dev": "nodemon ./dist/index.js -e ts --exec \"npm run compile\"",
     "build": "tsc",
-    "compile": "tsc && node ./index.js",
+    "compile": "tsc && node ./dist/index.js",
     "start": "node index.js"
   },
   "repository": {
