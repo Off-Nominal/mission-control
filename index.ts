@@ -19,13 +19,13 @@ client.on('message', (message) => {
   if (command === `recommend`) {
     switch (args[0]) {
       case 'random':
-        console.log('random', args);
+        message.channel.send('here is a random book');
         break;
       case 'best':
-        console.log('highest rated', args);
+        message.channel.send('here is the highest rated book');
         break;
       case 'favourite':
-        console.log('favourite', args);
+        message.channel.send('here is the most liked book');
         break;
       default:
         console.log('some other command', args);
