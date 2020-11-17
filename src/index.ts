@@ -21,7 +21,8 @@ client.on('message', (message: Message) => {
   if (command === `recommend`) {
     handleRecommendCommand(args[0], message);
   } else if (command === 'help') {
-    handleHelpCommand(message);
+    const embed = new Discord.MessageEmbed();
+    handleHelpCommand(embed, message);
   }
 });
 
