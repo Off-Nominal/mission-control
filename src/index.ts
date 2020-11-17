@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import { handleHelpCommand } from './commands/help';
 
 require('dotenv').config();
 const Discord = require('discord.js');
@@ -19,6 +20,8 @@ client.on('message', (message: Message) => {
 
   if (command === `recommend`) {
     handleRecommendCommand(args[0], message);
+  } else if (command === 'help') {
+    handleHelpCommand(message);
   }
 });
 
