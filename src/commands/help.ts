@@ -1,6 +1,9 @@
+const Discord = require('discord.js');
 import { Message, MessageEmbed } from 'discord.js';
 
-export const handleHelpCommand = (embed: MessageEmbed, message: Message) => {
+export const handleHelpCommand = (message: Message) => {
+  const embed: MessageEmbed = new Discord.MessageEmbed();
+
   embed
     .setColor('#3e7493')
     .setTitle('Book Club Bot Help')
