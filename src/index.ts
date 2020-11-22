@@ -1,29 +1,48 @@
-import { Message } from 'discord.js';
-import { handleHelpCommand } from './commands/help';
-
 require('dotenv').config();
 const Discord = require('discord.js');
 const { prefix } = require('../config/discord.json');
+import { Client, GuildMember, Message, TextChannel } from 'discord.js';
+import { handleHelpCommand } from './commands/help';
+import { welcomeMember } from './welcome/welcome';
 import { handleRecommendCommand } from './commands/recommend';
+import { parseMessage } from './utility/parseMessage';
 
-const client = new Discord.Client();
+/***********************************
+ *  Off-Nominal Bot
+ ************************************/
 
-client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
+const offNomBot: Client = new Discord.Client();
+
+offNomBot.once('ready', () => {
+  console.log(`Logged in as ${offNomBot.user.tag}`);
 });
 
-client.on('message', (message: Message) => {
+offNomBot.on('guildMemberAdd', async (member: GuildMember) => {
+  welcomeMember(member);
+});
+
+offNomBot.login(process.env.OFFNOM_BOT_TOKEN_ID);
+
+/***********************************
+ *  Book Club Bot
+ ************************************/
+
+const bookClubBot: Client = new Discord.Client();
+
+bookClubBot.once('ready', () => {
+  console.log(`Logged in as ${bookClubBot.user.tag}`);
+});
+
+bookClubBot.on('message', (message: Message) => {
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
-  const args = message.content.slice(prefix.length).trim().split(/ +/);
-  const command = args.shift().toLowerCase();
+  const { args, command } = parseMessage(message);
 
   if (command === `recommend`) {
     handleRecommendCommand(args[0], message);
   } else if (command === 'help') {
-    const embed = new Discord.MessageEmbed();
-    handleHelpCommand(embed, message);
+    handleHelpCommand(message);
   }
 });
 
-client.login(process.env.DISCORD_TOKEN_ID);
+bookClubBot.login(process.env.BOOK_CLUB_BOT_TOKEN_ID);
