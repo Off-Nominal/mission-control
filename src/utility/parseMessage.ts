@@ -1,5 +1,5 @@
-import { Message } from 'discord.js';
 const { prefix } = require('../../config/discord.json');
+import { Message } from 'discord.js';
 
 export const parseMessage = (
   message: Message

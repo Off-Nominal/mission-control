@@ -1,7 +1,7 @@
 require('dotenv').config();
 const Discord = require('discord.js');
 const { prefix } = require('../config/discord.json');
-import { Client, GuildMember, Message, TextChannel } from 'discord.js';
+import { Client, GuildMember, Message } from 'discord.js';
 import { handleHelpCommand } from './commands/help';
 import { welcomeMember } from './welcome/welcome';
 import { handleRecommendCommand } from './commands/recommend';

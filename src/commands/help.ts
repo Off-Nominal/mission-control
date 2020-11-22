@@ -1,5 +1,5 @@
-import { Message, MessageEmbed } from 'discord.js';
 const Discord = require('discord.js');
+import { Message, MessageEmbed } from 'discord.js';
 
 export const handleHelpCommand = (message: Message) => {
   const embed: MessageEmbed = new Discord.MessageEmbed();
