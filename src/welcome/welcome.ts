@@ -4,7 +4,7 @@ const Discord = require('discord.js');
 export const welcomeMember = (member: GuildMember) => {
   console.log(member);
   const channel = member.guild.channels.cache.find(
-    (ch) => ch.name === 'member-log'
+    (ch) => ch.name === 'general'
   ) as TextChannel;
 
   console.log(channel);
