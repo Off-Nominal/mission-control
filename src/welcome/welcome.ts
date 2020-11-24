@@ -2,9 +2,12 @@ import { GuildMember, TextChannel, MessageEmbed } from 'discord.js';
 const Discord = require('discord.js');
 
 export const welcomeMember = (member: GuildMember) => {
+  console.log(member);
   const channel = member.guild.channels.cache.find(
     (ch) => ch.name === 'member-log'
   ) as TextChannel;
+
+  console.log(channel);
 
   if (!channel) return;
 

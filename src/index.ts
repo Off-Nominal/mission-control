@@ -18,6 +18,7 @@ offNomBot.once('ready', () => {
 });
 
 offNomBot.on('guildMemberAdd', async (member: GuildMember) => {
+  console.log('guildMemberAdd event fired');
   welcomeMember(member);
 });
 
