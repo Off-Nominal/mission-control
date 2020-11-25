@@ -36,7 +36,7 @@ export const welcomeUser = (member: GuildMember) => {
       },
       {
         name: '\u200B',
-        value: `You can learn more about the rules as well as some of the bots available to help you by checking out our [Welcome Guide](http://discord.offnominal.space 'The Off-Nominal Welcome Guide').`,
+        value: `You can learn more about the rules as well as some of the bots available to help you by checking out our [Welcome Guide](https://discord.offnominal.space 'The Off-Nominal Welcome Guide').`,
       }
     );
 
