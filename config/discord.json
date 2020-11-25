@@ -1,3 +1,4 @@
 {
-  "prefix": "!bc"
+  "bcbPrefix": "!bc",
+  "onbPrefix": "!ofn"
 }

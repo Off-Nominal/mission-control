@@ -1,11 +1,9 @@
 require('dotenv').config();
 const Discord = require('discord.js');
-const { prefix } = require('../config/discord.json');
-import { Client, GuildMember, Message } from 'discord.js';
-import { handleHelpCommand } from './commands/help';
-import { welcomeMember } from './welcome/welcome';
-import { handleRecommendCommand } from './commands/recommend';
-import { parseMessage } from './utility/parseMessage';
+import { Client, Message } from 'discord.js';
+import onbListeners from './onbListeners/';
+import utilityListeners from './utilityListeners/';
+import bcbListeners from './bcbListeners';
 
 /***********************************
  *  Off-Nominal Bot
@@ -13,14 +11,11 @@ import { parseMessage } from './utility/parseMessage';
 
 const offNomBot: Client = new Discord.Client();
 
-offNomBot.once('ready', () => {
-  console.log(`Logged in as ${offNomBot.user.tag}`);
-});
-
-offNomBot.on('guildMemberAdd', async (member: GuildMember) => {
-  console.log('guildMemberAdd event fired');
-  welcomeMember(member);
-});
+offNomBot.once('ready', () => utilityListeners.logReady(offNomBot.user.tag));
+offNomBot.on('message', (message: Message) =>
+  onbListeners.handleMessage(offNomBot, message)
+);
+offNomBot.on('guildMemberAdd', onbListeners.welcomeUser);
 
 offNomBot.login(process.env.OFFNOM_BOT_TOKEN_ID);
 
@@ -30,20 +25,9 @@ offNomBot.login(process.env.OFFNOM_BOT_TOKEN_ID);
 
 const bookClubBot: Client = new Discord.Client();
 
-bookClubBot.once('ready', () => {
-  console.log(`Logged in as ${bookClubBot.user.tag}`);
-});
-
-bookClubBot.on('message', (message: Message) => {
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
-
-  const { args, command } = parseMessage(message);
-
-  if (command === `recommend`) {
-    handleRecommendCommand(args[0], message);
-  } else if (command === 'help') {
-    handleHelpCommand(message);
-  }
-});
+bookClubBot.once('ready', () =>
+  utilityListeners.logReady(bookClubBot.user.tag)
+);
+bookClubBot.on('message', bcbListeners.handleMessage);
 
 bookClubBot.login(process.env.BOOK_CLUB_BOT_TOKEN_ID);

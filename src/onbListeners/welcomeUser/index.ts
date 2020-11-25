@@ -1,7 +1,8 @@
 import { GuildMember, TextChannel, MessageEmbed } from 'discord.js';
 const Discord = require('discord.js');
 
-export const welcomeMember = (member: GuildMember) => {
+export const welcomeUser = (member: GuildMember) => {
+  console.log('function fired for guildMemberAdd');
   console.log(member);
   const channel = member.guild.channels.cache.find(
     (ch) => ch.name === 'general'
