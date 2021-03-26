@@ -5,47 +5,40 @@ const Discord = require("discord.js");
 export const createSiteChecker = (client: Client, url: string) => {
   let eTag = "";
 
-  const checker = () => {
-    axios
-      .head(url)
-      .then((res) => {
-        let message = "eTag matches, carry on";
-        let messageNecessary = false;
+  const checker = async () => {
+    let response;
 
-        if (res.status !== 200) {
-          message = `There was an error reaching the Starship site. Error code ${res.status}`;
-        } else if (eTag === "") {
-          eTag = res.headers.etag;
-          message = `Setting eTag to ${res.headers.etag}`;
-        } else if (eTag !== res.headers.etag) {
-          message = "eTag does not match, sending Discord message";
-          messageNecessary = true;
-        }
+    try {
+      response = await axios.head(url);
+    } catch (err) {
+      console.error(err);
+    }
 
-        if (!messageNecessary) {
-          return message;
-        } else {
-          const embed: MessageEmbed = new Discord.MessageEmbed();
-          embed
-            .setColor("#3e7493")
-            .setTitle(`FYI - there has been an update to the Starship website.`)
-            .setURL("https://www.spacex.com/vehicles/starship/");
+    let message = "eTag matches, carry on";
 
-          const messageSent = client.channels
-            .fetch("781235493118672949")
-            .then((channel) => (channel as TextChannel).send(embed))
-            .finally(() => {
-              const message = "eTag does not match, sending Discord message";
-              return message;
-            });
-        }
-      })
-      .then((message) => {
-        return console.log(message);
-      })
-      .catch((err) => {
-        return console.log(err);
-      });
+    if (response.status !== 200) {
+      message = `There was an error reaching the Starship site. Error code ${response.status}`;
+    } else if (eTag === "") {
+      eTag = response.headers.etag;
+      message = `Setting eTag to ${response.headers.etag}`;
+    } else if (eTag !== response.headers.etag) {
+      message = "eTag does not match, sending Discord message";
+
+      const embed: MessageEmbed = new Discord.MessageEmbed();
+      embed
+        .setColor("#3e7493")
+        .setTitle(`FYI - there has been an update to the Starship website.`)
+        .setURL(url);
+
+      try {
+        const channel = await client.channels.fetch("781235493118672949");
+        await (channel as TextChannel).send(embed);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    return console.log(message);
   };
   return checker;
 };
