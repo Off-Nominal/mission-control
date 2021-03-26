@@ -1,9 +1,10 @@
-require('dotenv').config();
-const Discord = require('discord.js');
-import { Client, Message } from 'discord.js';
-import onbListeners from './onbListeners/';
-import utilityListeners from './utilityListeners/';
-import bcbListeners from './bcbListeners';
+require("dotenv").config();
+const Discord = require("discord.js");
+import { Client, Message } from "discord.js";
+import onbListeners from "./onbListeners/";
+import utilityListeners from "./utilityListeners/";
+import bcbListeners from "./bcbListeners";
+import { createSiteChecker } from "./utilityListeners/siteChecker";
 
 /***********************************
  *  Off-Nominal Bot
@@ -11,11 +12,11 @@ import bcbListeners from './bcbListeners';
 
 const offNomBot: Client = new Discord.Client();
 
-offNomBot.once('ready', () => utilityListeners.logReady(offNomBot.user.tag));
-offNomBot.on('message', (message: Message) =>
+offNomBot.once("ready", () => utilityListeners.logReady(offNomBot.user.tag));
+offNomBot.on("message", (message: Message) =>
   onbListeners.handleMessage(offNomBot, message)
 );
-offNomBot.on('guildMemberAdd', onbListeners.welcomeUser);
+offNomBot.on("guildMemberAdd", onbListeners.welcomeUser);
 
 offNomBot.login(process.env.OFFNOM_BOT_TOKEN_ID);
 
@@ -25,9 +26,22 @@ offNomBot.login(process.env.OFFNOM_BOT_TOKEN_ID);
 
 const bookClubBot: Client = new Discord.Client();
 
-bookClubBot.once('ready', () =>
+bookClubBot.once("ready", () =>
   utilityListeners.logReady(bookClubBot.user.tag)
 );
-bookClubBot.on('message', bcbListeners.handleMessage);
+bookClubBot.on("message", bcbListeners.handleMessage);
 
 bookClubBot.login(process.env.BOOK_CLUB_BOT_TOKEN_ID);
+
+/***********************************
+ *  Utility Listeners
+ ************************************/
+
+const starshipChecker = createSiteChecker(
+  offNomBot,
+  "https://www.spacex.com/vehicles/starship/"
+);
+
+setInterval(() => {
+  starshipChecker();
+}, 60000);
