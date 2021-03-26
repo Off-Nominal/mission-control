@@ -31,7 +31,7 @@ export const createSiteChecker = (client: Client, url: string) => {
         .setURL(url);
 
       try {
-        const channel = await client.channels.fetch("781235493118672949");
+        const channel = await client.channels.fetch("754432168293433354");
         await (channel as TextChannel).send(embed);
       } catch (err) {
         console.error(err);
