@@ -2,7 +2,11 @@ import axios from "axios";
 import { Client, MessageEmbed, TextChannel } from "discord.js";
 const Discord = require("discord.js");
 
-export const createSiteChecker = (client: Client, url: string) => {
+export const createSiteChecker = (
+  client: Client,
+  url: string,
+  channelId: string
+) => {
   let eTag = "";
 
   const checker = async () => {
@@ -11,18 +15,18 @@ export const createSiteChecker = (client: Client, url: string) => {
     try {
       response = await axios.head(url);
     } catch (err) {
+      console.error(`There was an error reaching the Starship site.`);
       console.error(err);
     }
 
-    let message = "eTag matches, carry on";
-
-    if (response.status !== 200) {
-      message = `There was an error reaching the Starship site. Error code ${response.status}`;
-    } else if (eTag === "") {
+    if (eTag === "") {
       eTag = response.headers.etag;
-      message = `Setting eTag to ${response.headers.etag}`;
+      console.log(`Site checker is now monitoring ${url}`);
+      console.log(`ETag for ${url} is ${eTag}`);
     } else if (eTag !== response.headers.etag) {
-      message = "eTag does not match, sending Discord message";
+      console.log(
+        `Site checker detected a change at ${url}. Sending Discord message.`
+      );
 
       const embed: MessageEmbed = new Discord.MessageEmbed();
       embed
@@ -31,14 +35,13 @@ export const createSiteChecker = (client: Client, url: string) => {
         .setURL(url);
 
       try {
-        const channel = await client.channels.fetch("754432168293433354");
+        const channel = await client.channels.fetch(channelId);
         await (channel as TextChannel).send(embed);
+        console.log(`Discord successfully notified of change to ${url}`);
       } catch (err) {
         console.error(err);
       }
     }
-
-    return console.log(message);
   };
   return checker;
 };

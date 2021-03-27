@@ -6,6 +6,9 @@ import utilityListeners from "./utilityListeners/";
 import bcbListeners from "./bcbListeners";
 import { createSiteChecker } from "./utilityListeners/siteChecker";
 
+const BOCACHICACHANNELID =
+  process.env.BOCACHICACHANNELID || "781235493118672949";
+
 /***********************************
  *  Off-Nominal Bot
  ************************************/
@@ -39,9 +42,10 @@ bookClubBot.login(process.env.BOOK_CLUB_BOT_TOKEN_ID);
 
 const starshipChecker = createSiteChecker(
   offNomBot,
-  "https://www.spacex.com/vehicles/starship/"
+  "https://www.spacex.com/vehicles/starship/",
+  BOCACHICACHANNELID
 );
 
 setInterval(() => {
   starshipChecker();
-}, 60000);
+}, 5000);
