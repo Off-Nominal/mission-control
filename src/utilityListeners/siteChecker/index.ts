@@ -28,6 +28,8 @@ export const createSiteChecker = (
         `Site checker detected a change at ${url}. Sending Discord message.`
       );
 
+      eTag = response.headers.etag;
+
       const embed: MessageEmbed = new Discord.MessageEmbed();
       embed
         .setColor("#3e7493")

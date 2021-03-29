@@ -20,12 +20,14 @@ export class FeedListener extends Watcher {
     feed: string,
     processor: (item: any) => FeedItem,
     client: Client,
-    channelId: string
+    channelId: string,
+    timeout: number = 0
   ) {
     super(feed, 60);
     this.processor = processor;
     this.client = client;
     this.channelId = channelId;
+    this.timeout = timeout;
   }
 
   private async fetchChannel() {
@@ -60,15 +62,17 @@ export class FeedListener extends Watcher {
     this.on("new entries", (entries) => {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode);
-        this.announceNewItem(mappedEpisode.title);
         this.episodes.push(mappedEpisode);
+        setTimeout(() => {
+          this.announceNewItem(mappedEpisode.url);
+        }, this.timeout);
       });
     });
   }
 
-  private announceNewItem(itemName) {
+  private announceNewItem(podcastURL) {
     this.channel.send(
-      `It's podcast release day in the ${this.title} feed! ${itemName}`
+      `It's podcast release day for ${this.title}!\n${podcastURL}`
     );
   }
 }

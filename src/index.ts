@@ -22,60 +22,54 @@ const HLFEED = process.env.HLFEED;
 
 const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
 const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
-const WM_TOKEN = process.env.WEMARTIANS_BOT_TOKEN;
+const WM_TOKEN = process.env.WEMARTIANS_BOT_TOKEN_ID;
 const MECO_TOKEN = process.env.MECO_BOT_TOKEN_ID;
 const OFN_TOKEN = process.env.OFFNOM_BOT_TOKEN_ID;
 const RPR_TOKEN = process.env.RPR_BOT_TOKEN_ID;
 const HL_TOKEN = process.env.HL_BOT_TOKEN_ID;
 
 /***********************************
- *  Utility Bot
+ *  Bot Initializations
  ************************************/
 
 const utilityBot: Client = new Discord.Client();
-
-utilityBot.once("ready", () => utilityListeners.logReady(utilityBot.user.tag));
-utilityBot.on("message", (message: Message) =>
-  onbListeners.handleMessage(utilityBot, message)
-);
-utilityBot.on("guildMemberAdd", onbListeners.welcomeUser);
-
-utilityBot.login(UTILITY_TOKEN);
-
-/***********************************
- *  Book Club Bot
- ************************************/
-
-const bookClubBot: Client = new Discord.Client();
-
-bookClubBot.once("ready", () =>
-  utilityListeners.logReady(bookClubBot.user.tag)
-);
-bookClubBot.on("message", bcbListeners.handleMessage);
-
-bookClubBot.login(BC_TOKEN);
-
-/***********************************
- *  Podcast Bots
- ************************************/
-
+const bcBot: Client = new Discord.Client();
 const wmBot: Client = new Discord.Client();
 const ofnBot: Client = new Discord.Client();
 const mecoBot: Client = new Discord.Client();
 const rprBot: Client = new Discord.Client();
 const hlBot: Client = new Discord.Client();
 
+utilityBot.login(UTILITY_TOKEN);
+bcBot.login(BC_TOKEN);
 wmBot.login(WM_TOKEN);
 ofnBot.login(OFN_TOKEN);
 mecoBot.login(MECO_TOKEN);
 rprBot.login(RPR_TOKEN);
 hlBot.login(HL_TOKEN);
 
+utilityBot.once("ready", () => utilityListeners.logReady(utilityBot.user.tag));
+bcBot.once("ready", () => utilityListeners.logReady(bcBot.user.tag));
 wmBot.once("ready", () => utilityListeners.logReady(wmBot.user.tag));
 ofnBot.once("ready", () => utilityListeners.logReady(ofnBot.user.tag));
 mecoBot.once("ready", () => utilityListeners.logReady(mecoBot.user.tag));
 rprBot.once("ready", () => utilityListeners.logReady(rprBot.user.tag));
 hlBot.once("ready", () => utilityListeners.logReady(hlBot.user.tag));
+
+/***********************************
+ *  Utility Bot Actions
+ ************************************/
+
+utilityBot.on("message", (message: Message) =>
+  onbListeners.handleMessage(utilityBot, message)
+);
+utilityBot.on("guildMemberAdd", onbListeners.welcomeUser);
+
+/***********************************
+ *  Book Club Bot Actions
+ ************************************/
+
+bcBot.on("message", bcbListeners.handleMessage);
 
 /***********************************
  *  Site Listeners
@@ -99,7 +93,8 @@ const wmFeedListener = new FeedListener(
   WMFEED,
   feedMapper,
   wmBot,
-  CONTENTCHANNELID
+  CONTENTCHANNELID,
+  600000
 );
 const mecoFeedListener = new FeedListener(
   MECOFEED,
@@ -131,12 +126,3 @@ mecoFeedListener.initialize();
 ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
-
-// const testFeedListener = new FeedListener(
-//   "https://lorem-rss.herokuapp.com/feed?unit=second&interval=30",
-//   (entry) => entry,
-//   offNomBot,
-//   CONTENTCHANNELID
-// );
-
-// testFeedListener.initialize();
