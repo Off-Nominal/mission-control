@@ -37,7 +37,7 @@ export class FeedListener extends Watcher {
   public async initialize() {
     try {
       const entries = await this.start();
-      this.episodes = entries.map(this.processor);
+      this.episodes = entries.map(this.processor).reverse();
       this.title = entries[0].meta.title;
       console.log(`${this.title} feed has been loaded.`);
       console.log(
