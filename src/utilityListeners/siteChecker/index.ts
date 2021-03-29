@@ -38,6 +38,7 @@ export const createSiteChecker = (
         const channel = await client.channels.fetch(channelId);
         await (channel as TextChannel).send(embed);
         console.log(`Discord successfully notified of change to ${url}`);
+        eTag = response.headers.etag;
       } catch (err) {
         console.error(err);
       }
