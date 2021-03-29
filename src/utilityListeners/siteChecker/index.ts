@@ -28,8 +28,6 @@ export const createSiteChecker = (
         `Site checker detected a change at ${url}. Sending Discord message.`
       );
 
-      eTag = response.headers.etag;
-
       const embed: MessageEmbed = new Discord.MessageEmbed();
       embed
         .setColor("#3e7493")
@@ -40,6 +38,7 @@ export const createSiteChecker = (
         const channel = await client.channels.fetch(channelId);
         await (channel as TextChannel).send(embed);
         console.log(`Discord successfully notified of change to ${url}`);
+        eTag = response.headers.etag;
       } catch (err) {
         console.error(err);
       }
