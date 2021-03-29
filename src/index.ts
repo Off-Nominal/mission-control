@@ -57,21 +57,6 @@ rprBot.once("ready", () => utilityListeners.logReady(rprBot.user.tag));
 hlBot.once("ready", () => utilityListeners.logReady(hlBot.user.tag));
 
 /***********************************
- *  Utility Bot Actions
- ************************************/
-
-utilityBot.on("message", (message: Message) =>
-  onbListeners.handleMessage(utilityBot, message)
-);
-utilityBot.on("guildMemberAdd", onbListeners.welcomeUser);
-
-/***********************************
- *  Book Club Bot Actions
- ************************************/
-
-bcBot.on("message", bcbListeners.handleMessage);
-
-/***********************************
  *  Site Listeners
  ************************************/
 
@@ -126,3 +111,18 @@ mecoFeedListener.initialize();
 ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
+
+/***********************************
+ *  Utility Bot Actions
+ ************************************/
+
+utilityBot.on("message", (message: Message) =>
+  onbListeners.handleMessage(utilityBot, message)
+);
+utilityBot.on("guildMemberAdd", onbListeners.welcomeUser);
+
+/***********************************
+ *  Book Club Bot Actions
+ ************************************/
+
+bcBot.on("message", bcbListeners.handleMessage);

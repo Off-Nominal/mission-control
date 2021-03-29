@@ -71,6 +71,7 @@ export class FeedListener extends Watcher {
   }
 
   private announceNewItem(podcastURL) {
+    console.log(`New episode in ${this.title}.\n${podcastURL}`);
     this.channel.send(
       `It's podcast release day for ${this.title}!\n${podcastURL}`
     );
