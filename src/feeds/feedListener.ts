@@ -56,6 +56,7 @@ export class FeedListener extends Watcher {
     }
 
     this.listen();
+    this.error();
   }
 
   private listen() {
@@ -70,10 +71,26 @@ export class FeedListener extends Watcher {
     });
   }
 
+  private error() {
+    this.on("error", (err) => {
+      console.error(err);
+    });
+  }
+
   private announceNewItem(podcastURL) {
     console.log(`New episode in ${this.title}.\n${podcastURL}`);
-    this.channel.send(
-      `It's podcast release day for ${this.title}!\n${podcastURL}`
-    );
+    this.channel
+      .send(`It's podcast release day for ${this.title}!\n${podcastURL}`)
+      .then(() => {
+        console.log(
+          `Discord successfully notified of new podcast episode in ${this.title}`
+        );
+      })
+      .catch((err) => {
+        console.error(
+          `Error sending message to Discord for update to ${this.title}`
+        );
+        console.error(err);
+      });
   }
 }

@@ -2,7 +2,7 @@ require("dotenv").config();
 const Discord = require("discord.js");
 
 import { Client, Message } from "discord.js";
-import onbListeners from "./onbListeners/";
+import onbListeners from "./utilityActions/";
 import utilityListeners from "./utilityListeners/";
 import bcbListeners from "./bcbListeners";
 import { createSiteChecker } from "./utilityListeners/siteChecker";
