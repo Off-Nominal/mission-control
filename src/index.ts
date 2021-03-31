@@ -5,7 +5,7 @@ import { Client, Message } from "discord.js";
 import onbListeners from "./utilityActions/";
 import utilityListeners from "./utilityListeners/";
 import bcbListeners from "./bcbListeners";
-import { createSiteChecker } from "./utilityListeners/siteChecker";
+import { SiteMonitor } from "./utilityListeners/siteMonitor";
 import { FeedListener } from "./feeds/feedListener";
 import { feedMapper } from "./feeds/feedMapper";
 
@@ -60,15 +60,14 @@ hlBot.once("ready", () => utilityListeners.logReady(hlBot.user.tag));
  *  Site Listeners
  ************************************/
 
-const starshipChecker = createSiteChecker(
-  utilityBot,
+const starshipChecker = new SiteMonitor(
   "https://www.spacex.com/vehicles/starship/",
-  BOCACHICACHANNELID
+  utilityBot,
+  BOCACHICACHANNELID,
+  { interval: 15, cooldown: 600 }
 );
 
-setInterval(() => {
-  starshipChecker();
-}, 60000);
+starshipChecker.initialize();
 
 /***********************************
  *  Feed Listeners
