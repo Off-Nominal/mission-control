@@ -8,6 +8,7 @@ import bcbListeners from "./bcbListeners";
 import { SiteMonitor } from "./utilityListeners/siteMonitor";
 import { FeedListener } from "./feeds/feedListener";
 import { feedMapper } from "./feeds/feedMapper";
+import feedActions from "./feedActions";
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
 
@@ -29,7 +30,7 @@ const RPR_TOKEN = process.env.RPR_BOT_TOKEN_ID;
 const HL_TOKEN = process.env.HL_BOT_TOKEN_ID;
 
 /***********************************
- *  Bot Initializations
+ *  Bot Setup
  ************************************/
 
 const utilityBot: Client = new Discord.Client();
@@ -40,24 +41,8 @@ const mecoBot: Client = new Discord.Client();
 const rprBot: Client = new Discord.Client();
 const hlBot: Client = new Discord.Client();
 
-utilityBot.login(UTILITY_TOKEN);
-bcBot.login(BC_TOKEN);
-wmBot.login(WM_TOKEN);
-ofnBot.login(OFN_TOKEN);
-mecoBot.login(MECO_TOKEN);
-rprBot.login(RPR_TOKEN);
-hlBot.login(HL_TOKEN);
-
-utilityBot.once("ready", () => utilityListeners.logReady(utilityBot.user.tag));
-bcBot.once("ready", () => utilityListeners.logReady(bcBot.user.tag));
-wmBot.once("ready", () => utilityListeners.logReady(wmBot.user.tag));
-ofnBot.once("ready", () => utilityListeners.logReady(ofnBot.user.tag));
-mecoBot.once("ready", () => utilityListeners.logReady(mecoBot.user.tag));
-rprBot.once("ready", () => utilityListeners.logReady(rprBot.user.tag));
-hlBot.once("ready", () => utilityListeners.logReady(hlBot.user.tag));
-
 /***********************************
- *  Site Listeners
+ *  Site Listener Setup
  ************************************/
 
 const starshipChecker = new SiteMonitor(
@@ -67,10 +52,8 @@ const starshipChecker = new SiteMonitor(
   { interval: 15, cooldown: 600 }
 );
 
-starshipChecker.initialize();
-
 /***********************************
- *  Feed Listeners
+ *  Feed Listener Setup
  ************************************/
 
 const wmFeedListener = new FeedListener(
@@ -105,11 +88,52 @@ const hlFeedListener = new FeedListener(
   CONTENTCHANNELID
 );
 
+/***********************************
+ *  ASYNC LOGINS/INITS
+ ************************************/
+
+utilityBot.login(UTILITY_TOKEN);
+bcBot.login(BC_TOKEN);
+wmBot.login(WM_TOKEN);
+ofnBot.login(OFN_TOKEN);
+mecoBot.login(MECO_TOKEN);
+rprBot.login(RPR_TOKEN);
+hlBot.login(HL_TOKEN);
+
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
 ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
+
+utilityBot.once("ready", () => {
+  utilityListeners.logReady(utilityBot.user.tag);
+});
+bcBot.once("ready", () => {
+  utilityListeners.logReady(bcBot.user.tag);
+});
+wmBot.once("ready", () => {
+  utilityListeners.logReady(wmBot.user.tag);
+  wmFeedListener.fetchChannel();
+});
+ofnBot.once("ready", () => {
+  utilityListeners.logReady(ofnBot.user.tag);
+  ofnFeedListener.fetchChannel();
+});
+mecoBot.once("ready", () => {
+  utilityListeners.logReady(mecoBot.user.tag);
+  mecoFeedListener.fetchChannel();
+});
+rprBot.once("ready", () => {
+  utilityListeners.logReady(rprBot.user.tag);
+  rprFeedListener.fetchChannel();
+});
+hlBot.once("ready", () => {
+  utilityListeners.logReady(hlBot.user.tag);
+  hlFeedListener.fetchChannel();
+});
+
+starshipChecker.initialize();
 
 /***********************************
  *  Utility Bot Actions
@@ -125,3 +149,23 @@ utilityBot.on("guildMemberAdd", onbListeners.welcomeUser);
  ************************************/
 
 bcBot.on("message", bcbListeners.handleMessage);
+
+/***********************************
+ *  Podcast Bot Actions
+ ************************************/
+
+wmBot.on("message", (message: Message) =>
+  feedActions.handleMessage(message, wmFeedListener, "!wm")
+);
+ofnBot.on("message", (message: Message) =>
+  feedActions.handleMessage(message, ofnFeedListener, "!ofn")
+);
+mecoBot.on("message", (message: Message) =>
+  feedActions.handleMessage(message, mecoFeedListener, "!meco")
+);
+rprBot.on("message", (message: Message) =>
+  feedActions.handleMessage(message, rprFeedListener, "!rpr")
+);
+hlBot.on("message", (message: Message) =>
+  feedActions.handleMessage(message, hlFeedListener, "!hl")
+);

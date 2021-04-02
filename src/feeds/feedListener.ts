@@ -30,8 +30,14 @@ export class FeedListener extends Watcher {
     this.timeout = timeout;
   }
 
-  private async fetchChannel() {
-    return (await this.client.channels.fetch(this.channelId)) as TextChannel;
+  public async fetchChannel() {
+    const channel = (await this.client.channels.fetch(
+      this.channelId
+    )) as TextChannel;
+    this.channel = channel;
+    console.log(
+      `${this.title} Bot is now connected to channel ${this.channel.name}`
+    );
   }
 
   public async initialize() {
@@ -45,13 +51,6 @@ export class FeedListener extends Watcher {
       );
     } catch (err) {
       console.error("Error loading the feed.");
-      console.error(err);
-    }
-
-    try {
-      const channel = await this.fetchChannel();
-      this.channel = channel;
-    } catch (err) {
       console.error(err);
     }
 
@@ -92,5 +91,9 @@ export class FeedListener extends Watcher {
         );
         console.error(err);
       });
+  }
+
+  public fetchRecent() {
+    return this.episodes[this.episodes.length - 1];
   }
 }
