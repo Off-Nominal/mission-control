@@ -11,9 +11,10 @@ import { feedMapper } from "./feeds/feedMapper";
 import feedActions from "./feedActions";
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
+const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
 
 const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
-const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TEST_CHANNEL;
+const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
 
 const WMFEED = process.env.WMFEED;
 const MECOFEED = process.env.MECOFEED;
@@ -124,9 +125,9 @@ mecoBot.once("ready", () => {
   utilityListeners.logReady(mecoBot.user.tag);
   mecoFeedListener.fetchChannel();
 });
-rprBot.once("ready", () => {
+rprBot.once("ready", async () => {
   utilityListeners.logReady(rprBot.user.tag);
-  rprFeedListener.fetchChannel();
+  await rprFeedListener.fetchChannel();
 });
 hlBot.once("ready", () => {
   utilityListeners.logReady(hlBot.user.tag);
