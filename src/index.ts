@@ -127,7 +127,7 @@ mecoBot.once("ready", () => {
 });
 rprBot.once("ready", async () => {
   utilityListeners.logReady(rprBot.user.tag);
-  await rprFeedListener.fetchChannel();
+  rprFeedListener.fetchChannel();
 });
 hlBot.once("ready", () => {
   utilityListeners.logReady(hlBot.user.tag);
