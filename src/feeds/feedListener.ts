@@ -1,4 +1,6 @@
 import { Client, TextChannel } from "discord.js";
+import Fuse from "fuse.js";
+const FuseJS = require("fuse.js");
 
 const Watcher = require("feed-watcher");
 
@@ -8,6 +10,16 @@ export type FeedItem = {
   url: string;
   audioUrl: string;
   image: string;
+  description: string;
+};
+
+export type FeedListenerOptions = {
+  processor?: (item: any) => FeedItem;
+  discordClient: Client;
+  channelId: string;
+  rssInterval?: number;
+  actionDelay?: number;
+  searchOptions?: Fuse.IFuseOptions<FeedItem>;
 };
 
 export class FeedListener extends Watcher {
@@ -15,19 +27,24 @@ export class FeedListener extends Watcher {
   channel: TextChannel;
   episodes: FeedItem[];
   title: string;
+  fuse: Fuse<FeedItem>;
+  searchOptions: Fuse.IFuseOptions<FeedItem> | null;
 
-  constructor(
-    feed: string,
-    processor: (item: any) => FeedItem,
-    client: Client,
-    channelId: string,
-    timeout: number = 0
-  ) {
-    super(feed, 60);
-    this.processor = processor;
-    this.client = client;
-    this.channelId = channelId;
-    this.timeout = timeout;
+  constructor(feed: string, options?: FeedListenerOptions) {
+    super(feed, options.rssInterval || 60);
+    this.processor = options.processor || null;
+    this.client = options.discordClient;
+    this.channelId = options.channelId;
+    this.timeout = options.actionDelay * 1000 || 0;
+    this.searchOptions = options.searchOptions || null;
+  }
+
+  private processRSS(entries) {
+    if (this.processor) {
+      this.episodes = entries.map(this.processor).reverse();
+    } else {
+      this.episodes = entries.reverse();
+    }
   }
 
   public async fetchChannel() {
@@ -35,25 +52,28 @@ export class FeedListener extends Watcher {
       this.channelId
     )) as TextChannel;
     this.channel = channel;
-    console.log(
-      `${this.title} Bot is now connected to channel ${this.channel.name}`
-    );
+  }
+
+  private initializeSearch() {
+    this.fuse = new FuseJS(this.episodes, this.searchOptions);
   }
 
   public async initialize() {
     try {
       const entries = await this.start();
-      this.episodes = entries.map(this.processor).reverse();
       this.title = entries[0].meta.title;
-      console.log(`${this.title} feed has been loaded.`);
+
+      this.processRSS(entries);
+
       console.log(
-        `${this.title} feed length is ${this.episodes.length} items.`
+        `${this.title} feed loaded with ${this.episodes.length} items.`
       );
     } catch (err) {
-      console.error("Error loading the feed.");
+      console.error(`Error loading ${this.feed}.`);
       console.error(err);
     }
 
+    this.initializeSearch();
     this.listen();
     this.error();
   }
@@ -95,5 +115,9 @@ export class FeedListener extends Watcher {
 
   public fetchRecent() {
     return this.episodes[this.episodes.length - 1];
+  }
+
+  public search(term: string) {
+    return this.fuse.search(term);
   }
 }

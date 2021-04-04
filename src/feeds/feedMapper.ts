@@ -1,4 +1,5 @@
 import { FeedItem } from "./feedListener";
+import { stripHtml } from "string-strip-html";
 
 export const feedMapper = (feedItem): FeedItem => {
   return {
@@ -7,5 +8,6 @@ export const feedMapper = (feedItem): FeedItem => {
     url: feedItem.link,
     audioUrl: feedItem.enclosures[0].url,
     image: feedItem.image.url,
+    description: stripHtml(feedItem.description).result,
   };
 };
