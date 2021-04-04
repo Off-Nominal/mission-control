@@ -9,6 +9,7 @@ import { SiteMonitor } from "./utilityListeners/siteMonitor";
 import { FeedListener } from "./feeds/feedListener";
 import { feedMapper } from "./feeds/feedMapper";
 import feedActions from "./feedActions";
+const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
 const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
@@ -29,6 +30,12 @@ const MECO_TOKEN = process.env.MECO_BOT_TOKEN_ID;
 const OFN_TOKEN = process.env.OFFNOM_BOT_TOKEN_ID;
 const RPR_TOKEN = process.env.RPR_BOT_TOKEN_ID;
 const HL_TOKEN = process.env.HL_BOT_TOKEN_ID;
+
+const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
+const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
+const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
+const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
+const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
 
 /***********************************
  *  Bot Setup
@@ -57,37 +64,37 @@ const starshipChecker = new SiteMonitor(
  *  Feed Listener Setup
  ************************************/
 
-const wmFeedListener = new FeedListener(
-  WMFEED,
-  feedMapper,
-  wmBot,
-  CONTENTCHANNELID,
-  600000
-);
-const mecoFeedListener = new FeedListener(
-  MECOFEED,
-  feedMapper,
-  mecoBot,
-  CONTENTCHANNELID
-);
-const ofnFeedListener = new FeedListener(
-  OFNFEED,
-  feedMapper,
-  ofnBot,
-  CONTENTCHANNELID
-);
-const rprFeedListener = new FeedListener(
-  RPRFEED,
-  feedMapper,
-  rprBot,
-  CONTENTCHANNELID
-);
-const hlFeedListener = new FeedListener(
-  HLFEED,
-  feedMapper,
-  hlBot,
-  CONTENTCHANNELID
-);
+const wmFeedListener = new FeedListener(WMFEED, {
+  processor: feedMapper,
+  discordClient: wmBot,
+  channelId: CONTENTCHANNELID,
+  actionDelay: 600,
+  searchOptions: WM_SEARCH_OPTIONS,
+});
+const mecoFeedListener = new FeedListener(MECOFEED, {
+  processor: feedMapper,
+  discordClient: mecoBot,
+  channelId: CONTENTCHANNELID,
+  searchOptions: MECO_SEARCH_OPTIONS,
+});
+const ofnFeedListener = new FeedListener(OFNFEED, {
+  processor: feedMapper,
+  discordClient: ofnBot,
+  channelId: CONTENTCHANNELID,
+  searchOptions: OFN_SEARCH_OPTIONS,
+});
+const rprFeedListener = new FeedListener(RPRFEED, {
+  processor: feedMapper,
+  discordClient: rprBot,
+  channelId: CONTENTCHANNELID,
+  searchOptions: RPR_SEARCH_OPTIONS,
+});
+const hlFeedListener = new FeedListener(HLFEED, {
+  processor: feedMapper,
+  discordClient: hlBot,
+  channelId: CONTENTCHANNELID,
+  searchOptions: HL_SEARCH_OPTIONS,
+});
 
 /***********************************
  *  ASYNC LOGINS/INITS
