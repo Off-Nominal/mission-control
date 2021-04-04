@@ -3,12 +3,12 @@ import { sub } from "date-fns";
 import { Client, MessageEmbed, TextChannel } from "discord.js";
 const Discord = require("discord.js");
 
-export type SiteMonitorOptions = {
+export type SiteListenerOptions = {
   interval?: number;
   cooldown?: number;
 };
 
-export class SiteMonitor {
+export class SiteListener {
   url: string;
   etag: string = "";
   cooldown: number = 0;
@@ -22,7 +22,7 @@ export class SiteMonitor {
     url: string,
     client: Client,
     channelId: string,
-    options: SiteMonitorOptions
+    options: SiteListenerOptions
   ) {
     this.url = url;
     this.client = client;
@@ -59,7 +59,7 @@ export class SiteMonitor {
     }
 
     if (isNewEtag) {
-      console.log(`SiteMonitor detected a change at ${this.url}`);
+      console.log(`SiteListener detected a change at ${this.url}`);
       console.log(`New ETag is: ${newEtag}`);
       this.saveChange(newEtag);
     }
@@ -74,7 +74,7 @@ export class SiteMonitor {
     if (isCoolingDown) {
       if (isNewEtag) {
         console.log(
-          `SiteMonitor is in Cooldown mode and will report all changes after cooldown period.`
+          `SiteListener is in Cooldown mode and will report all changes after cooldown period.`
         );
       }
     } else {
@@ -132,6 +132,6 @@ export class SiteMonitor {
     setInterval(() => {
       this.checkSite();
     }, this.interval);
-    console.log(`SiteMonitor now monitoring ${this.url}`);
+    console.log(`SiteListener now monitoring ${this.url}`);
   }
 }

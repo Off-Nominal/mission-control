@@ -2,13 +2,16 @@ require("dotenv").config();
 const Discord = require("discord.js");
 
 import { Client, Message } from "discord.js";
-import onbListeners from "./utilityActions/";
-import utilityListeners from "./utilityListeners/";
-import bcbListeners from "./bcbListeners";
-import { SiteMonitor } from "./utilityListeners/siteMonitor";
-import { FeedListener } from "./feeds/feedListener";
-import { feedMapper } from "./feeds/feedMapper";
-import feedActions from "./feedActions";
+import {
+  bookClubMessageHandler,
+  feedListenerMessageHandler,
+  utilityMessageHandler,
+} from "./handlers/message/";
+import { FeedListener } from "./listeners/feedListener/feedListener";
+import { feedMapper } from "./listeners/feedListener/feedMapper";
+import { SiteListener } from "./listeners/siteListener";
+import { logReady } from "./actions/global/logReady";
+import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
 const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
@@ -53,7 +56,7 @@ const hlBot: Client = new Discord.Client();
  *  Site Listener Setup
  ************************************/
 
-const starshipChecker = new SiteMonitor(
+const starshipChecker = new SiteListener(
   "https://www.spacex.com/vehicles/starship/",
   utilityBot,
   BOCACHICACHANNELID,
@@ -115,29 +118,29 @@ rprFeedListener.initialize();
 hlFeedListener.initialize();
 
 utilityBot.once("ready", () => {
-  utilityListeners.logReady(utilityBot.user.tag);
+  logReady(utilityBot.user.tag);
 });
 bcBot.once("ready", () => {
-  utilityListeners.logReady(bcBot.user.tag);
+  logReady(bcBot.user.tag);
 });
 wmBot.once("ready", () => {
-  utilityListeners.logReady(wmBot.user.tag);
+  logReady(wmBot.user.tag);
   wmFeedListener.fetchChannel();
 });
 ofnBot.once("ready", () => {
-  utilityListeners.logReady(ofnBot.user.tag);
+  logReady(ofnBot.user.tag);
   ofnFeedListener.fetchChannel();
 });
 mecoBot.once("ready", () => {
-  utilityListeners.logReady(mecoBot.user.tag);
+  logReady(mecoBot.user.tag);
   mecoFeedListener.fetchChannel();
 });
 rprBot.once("ready", () => {
-  utilityListeners.logReady(rprBot.user.tag);
+  logReady(rprBot.user.tag);
   rprFeedListener.fetchChannel();
 });
 hlBot.once("ready", () => {
-  utilityListeners.logReady(hlBot.user.tag);
+  logReady(hlBot.user.tag);
   hlFeedListener.fetchChannel();
 });
 
@@ -147,33 +150,31 @@ starshipChecker.initialize();
  *  Utility Bot Actions
  ************************************/
 
-utilityBot.on("message", (message: Message) =>
-  onbListeners.handleMessage(utilityBot, message)
-);
-utilityBot.on("guildMemberAdd", onbListeners.welcomeUser);
+utilityBot.on("message", (message: Message) => utilityMessageHandler(message));
+utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
 
 /***********************************
  *  Book Club Bot Actions
  ************************************/
 
-bcBot.on("message", bcbListeners.handleMessage);
+bcBot.on("message", bookClubMessageHandler);
 
 /***********************************
  *  Podcast Bot Actions
  ************************************/
 
 wmBot.on("message", (message: Message) =>
-  feedActions.handleMessage(message, wmFeedListener, "!wm")
+  feedListenerMessageHandler(message, wmFeedListener, "!wm")
 );
 ofnBot.on("message", (message: Message) =>
-  feedActions.handleMessage(message, ofnFeedListener, "!ofn")
+  feedListenerMessageHandler(message, ofnFeedListener, "!ofn")
 );
 mecoBot.on("message", (message: Message) =>
-  feedActions.handleMessage(message, mecoFeedListener, "!meco")
+  feedListenerMessageHandler(message, mecoFeedListener, "!meco")
 );
 rprBot.on("message", (message: Message) =>
-  feedActions.handleMessage(message, rprFeedListener, "!rpr")
+  feedListenerMessageHandler(message, rprFeedListener, "!rpr")
 );
 hlBot.on("message", (message: Message) =>
-  feedActions.handleMessage(message, hlFeedListener, "!hl")
+  feedListenerMessageHandler(message, hlFeedListener, "!hl")
 );

@@ -1,9 +1,9 @@
 import { Message } from "discord.js";
-import { FeedListener } from "../../feeds/feedListener";
 import { parseMessage } from "../../helpers/parseMessage";
-import { handleRecentCommand } from "./commands/handleRecentCommand";
-import { handleSearchCommand } from "./commands/handleSearchCommand";
-import { handleEpisodeNumberCommand } from "./commands/handleEpisodeNumberCommand";
+import { handleRecentCommand } from "../../actions/feedListener/handleRecentCommand";
+import { handleSearchCommand } from "../../actions/feedListener/handleSearchCommand";
+import { handleEpisodeNumberCommand } from "../../actions/feedListener/handleEpisodeNumberCommand";
+import { FeedListener } from "../../listeners/feedListener/feedListener";
 
 export const handleMessage = (
   message: Message,
@@ -23,3 +23,5 @@ export const handleMessage = (
     handleSearchCommand(message, feedListener, searchString);
   }
 };
+
+export default handleMessage;
