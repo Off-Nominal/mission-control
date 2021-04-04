@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { FeedListener } from "../../../feeds/feedListener";
+import { FeedListener } from "../../listeners/feedListener/feedListener";
 
 export const handleRecentCommand = (
   message: Message,

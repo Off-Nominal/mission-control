@@ -5,10 +5,17 @@ import { parseCommands } from "../../helpers/parseCommands";
 export const shunt = (message: Message) => {
   const [prefix, channelName, ...rest] = parseCommands(message);
 
-  const shunter = message.member.displayName;
-  const shuntMessage = rest.join(" ");
   const sourceChannel = message.channel as TextChannel;
   const targetChannel = getChannel(message, channelName);
+
+  if (sourceChannel.id === targetChannel.id) {
+    return sourceChannel.send(
+      "It looks like you're trying to shunt a conversation but you targeted the thread it's already in!"
+    );
+  }
+
+  const shunter = message.member.displayName;
+  const shuntMessage = rest.join(" ");
 
   const targetEmbed = new MessageEmbed();
 

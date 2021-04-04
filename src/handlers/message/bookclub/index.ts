@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
-import { handleRecommendCommand } from "../../actions/bookClub/recommend";
-import { handleHelpCommand } from "../../actions/bookClub/help";
-import { parseCommands } from "../../helpers/parseCommands";
+import { handleHelpCommand } from "../../../actions/bookClub/help";
+import { handleRecommendCommand } from "../../../actions/bookClub/recommend";
+import { parseCommands } from "../../../helpers/parseCommands";
 
 enum AllowedPrefix {
   SHUNT = "!bc",

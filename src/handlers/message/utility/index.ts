@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
-import { shunt } from "../../actions/utility/shunt";
-import { parseCommands } from "../../helpers/parseCommands";
+import { shunt } from "../../../actions/utility/shunt";
+import { parseCommands } from "../../../helpers/parseCommands";
 
 enum AllowedPrefix {
   SHUNT = "!shunt",
