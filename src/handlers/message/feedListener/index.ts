@@ -10,7 +10,12 @@ export const handleMessage = (
   feedListener: FeedListener,
   prefix: string
 ) => {
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  if (
+    !message.content.startsWith(prefix) ||
+    message.author.bot ||
+    message.content.trim().length === prefix.length
+  )
+    return;
 
   const { args, command } = parseMessage(prefix, message);
   const searchString = command + " " + args.join(" ");
