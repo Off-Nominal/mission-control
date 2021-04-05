@@ -1,7 +1,7 @@
 import { GuildMember, TextChannel, MessageEmbed } from "discord.js";
 const Discord = require("discord.js");
 
-export const welcomeUser = (member: GuildMember) => {
+export const handleGuildMemberAdd = (member: GuildMember) => {
   const channel = member.guild.channels.cache.find(
     (ch) => ch.name === "general"
   ) as TextChannel;
@@ -35,3 +35,5 @@ export const welcomeUser = (member: GuildMember) => {
 
   channel.send(`Attention <@${member.user.id}>!`, { embed });
 };
+
+export default handleGuildMemberAdd;
