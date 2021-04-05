@@ -15,8 +15,8 @@ export const handleMessage = (message: Message) => {
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
   if (command === `recommend`) {
-    const recoomendType = rest[0];
-    handleRecommendCommand(recoomendType, message);
+    const recomendType = rest[0];
+    handleRecommendCommand(recomendType, message);
   } else if (command === "help") {
     handleHelpCommand(message);
   }
