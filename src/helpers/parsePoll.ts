@@ -3,7 +3,7 @@ import { Message } from "discord.js";
 export const parsePoll = (message: Message) => {
   const text = message.content;
 
-  const options = [];
+  const options: string[] = [];
 
   const qStart = text.indexOf("{");
   const qEnd = text.indexOf("}", qStart);

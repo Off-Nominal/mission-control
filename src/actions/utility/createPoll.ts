@@ -4,6 +4,10 @@ import { parsePoll } from "../../helpers/parsePoll";
 
 export const createPoll = (message: Message) => {
   const [prefix, firstParam] = parseCommands(message, false);
+  const {
+    react,
+    channel: { send },
+  } = message;
 
   if (firstParam === "help") {
     const embed = new MessageEmbed();
@@ -22,13 +26,13 @@ export const createPoll = (message: Message) => {
         "Complex polls allow for multiple options. Call it using `!poll {question} [Option A] [Option B] [Option C] ...`. You can add up to 20 options. Example: `!poll {What bean is best?} [Kidney Bean] [Black Bean] [Pinto Bean]`."
       );
 
-    return message.channel.send(embed);
+    return send(embed);
   }
 
   if (!firstParam.startsWith("{")) {
-    message.react("👍");
-    message.react("👎");
-    message.react("🤷");
+    react("👍");
+    react("👎");
+    react("🤷");
     return;
   }
 
@@ -58,13 +62,11 @@ export const createPoll = (message: Message) => {
   const { question, options } = parsePoll(message);
 
   if (options.length > 20) {
-    return message.channel.send(
-      "Complex polls may only have up to 20 options, you monster."
-    );
+    return send("Complex polls may only have up to 20 options, you monster.");
   }
 
   if (options.length === 0) {
-    return message.channel.send(
+    return send(
       "Error with your poll options. Please add options using square brackets like `[Option A] [Option B]` and ensure you didn't miss a starting `[` or ending `]`."
     );
   }
@@ -77,8 +79,7 @@ export const createPoll = (message: Message) => {
 
   embed.setTitle("Poll: " + question).setDescription(optionsString);
 
-  message.channel
-    .send(embed)
+  send(embed)
     .then((pollMsg) => {
       const promises = [];
       for (let i = 0; i < options.length; i++) {
@@ -89,13 +90,11 @@ export const createPoll = (message: Message) => {
     .catch((err) => {
       console.error("Problem creating poll.");
       console.error(err);
-      message.channel
-        .send(
-          "Sorry, I had some trouble making that poll. Please tell Jake about this."
-        )
-        .catch((err) => {
-          console.error("Failed to send failure message back to Discord.");
-          console.error(err);
-        });
+      send(
+        "Sorry, I had some trouble making that poll. Please tell Jake about this."
+      ).catch((err) => {
+        console.error("Failed to send failure message back to Discord.");
+        console.error(err);
+      });
     });
 };
