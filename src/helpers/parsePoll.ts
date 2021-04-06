@@ -3,7 +3,6 @@ import { Message } from "discord.js";
 export const parsePoll = (message: Message) => {
   const text = message.content;
 
-  let pollQuestion: string;
   const options: string[] = [];
 
   const leftBracketCount = (text.match(/\[/g) || []).length;
@@ -12,7 +11,7 @@ export const parsePoll = (message: Message) => {
   const rightCurlyCount = (text.match(/\}/g) || []).length;
 
   const returnObj = {
-    question: pollQuestion,
+    question: "",
     options,
   };
 
@@ -28,7 +27,7 @@ export const parsePoll = (message: Message) => {
 
   const qStart = text.indexOf("{");
   const qEnd = text.indexOf("}", qStart);
-  pollQuestion = text.slice(qStart + 1, qEnd);
+  returnObj.question = text.slice(qStart + 1, qEnd);
 
   let startPoint = qEnd;
 
