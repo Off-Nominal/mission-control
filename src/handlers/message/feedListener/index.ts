@@ -2,6 +2,7 @@ import { Message } from "discord.js";
 import { handleEpisodeNumberCommand } from "../../../actions/feedListener/handleEpisodeNumberCommand";
 import { handleRecentCommand } from "../../../actions/feedListener/handleRecentCommand";
 import { handleSearchCommand } from "../../../actions/feedListener/handleSearchCommand";
+import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { parseMessage } from "../../../helpers/parseMessage";
 import { FeedListener } from "../../../listeners/feedListener/feedListener";
 
@@ -24,6 +25,8 @@ export const handleMessage = (
     handleEpisodeNumberCommand(message, feedListener, command);
   } else if (command === "recent") {
     handleRecentCommand(message, feedListener);
+  } else if (command === "help") {
+    sendPodcastHelp(message);
   } else {
     handleSearchCommand(message, feedListener, searchString);
   }
