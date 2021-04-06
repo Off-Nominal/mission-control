@@ -11,7 +11,7 @@ export const sendHelp = (message: Message) => {
     .addFields([
       { name: "Podcasts", value: "`!help podcast`", inline: true },
       { name: "Book Club", value: "`!bc help`", inline: true },
-      { name: "Nostradamus", value: "`!ndb help`", inline: true },
+      { name: "NostradamBot", value: "`!ndb help`", inline: true },
       { name: "Launch Alerts", value: "`!l help`", inline: true },
       { name: "Terminal Count", value: "`!tc help`", inline: true },
       { name: "Tracking Station", value: "`!map help`", inline: true },
@@ -19,6 +19,10 @@ export const sendHelp = (message: Message) => {
     .addField(
       "Shunt - Move a thread to a new channel",
       "`!shunt [targetChannel] [message]` - Request a conversation be moved to another channel."
+    )
+    .addField(
+      "Poll - poll the discord with a question",
+      "`!poll question` for simple polls *or* `!poll {question} [option a] [option b] [option c]` for more complex polls. Type `!poll help` for more."
     );
 
   message.channel.send(embed);

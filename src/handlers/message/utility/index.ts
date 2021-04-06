@@ -1,4 +1,5 @@
 import { Message } from "discord.js";
+import { createPoll } from "../../../actions/utility/createPoll";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { shunt } from "../../../actions/utility/shunt";
@@ -7,6 +8,7 @@ import { parseCommands } from "../../../helpers/parseCommands";
 enum AllowedPrefix {
   SHUNT = "!shunt",
   HELP = "!help",
+  POLL = "!poll",
 }
 
 export const handleMessage = (message: Message) => {
@@ -31,6 +33,10 @@ export const handleMessage = (message: Message) => {
       } else {
         sendHelp(message);
       }
+      break;
+    }
+    case AllowedPrefix.POLL: {
+      createPoll(message);
       break;
     }
   }
