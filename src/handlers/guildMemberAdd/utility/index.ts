@@ -13,7 +13,7 @@ export const handleGuildMemberAdd = (member: GuildMember) => {
   embed
     .setColor("#3e7493")
     .setTitle(`Welcome to the Off-Nominal Discord, ${member.displayName}!`)
-    .setThumbnail(member.user.avatarURL())
+    .setThumbnail(member.user.displayAvatarURL())
     .setDescription("Enjoy the flood of welcomes you are about to receive!")
     .addFields(
       { name: "\u200B", value: "We have two core rules:" },
