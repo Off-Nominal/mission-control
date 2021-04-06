@@ -5,17 +5,17 @@ export const parsePoll = (message: Message) => {
 
   const params = [];
 
-  const qStart = text.indexOf("{") + 1;
+  const qStart = text.indexOf("{");
   const qEnd = text.indexOf("}", qStart);
-  const pollQuestion = text.slice(qStart, qEnd);
+  const pollQuestion = text.slice(qStart + 1, qEnd);
   params.push(pollQuestion);
 
   let startPoint = qEnd;
 
   const optionGrabber = () => {
     const oStart = text.indexOf("[", startPoint);
-    const oEnd = text.indexOf("]", oStart) + 1;
-    const option = text.slice(oStart, oEnd);
+    const oEnd = text.indexOf("]", oStart);
+    const option = text.slice(oStart + 1, oEnd);
     params.push(option);
     startPoint = oEnd;
 

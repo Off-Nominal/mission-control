@@ -64,18 +64,33 @@ export const createPoll = (message: Message) => {
     );
   }
 
-  const embed = new MessageEmbed();
-  embed.setTitle("Poll: " + question).setDescription(
-    options
-      .map((option, index) => {
-        return `${letters[index]} - ${clip(option, 1)}`;
-      })
-      .join("\n\n")
-  );
+  const optionsString = options
+    .map((option, index) => `${letters[index]} - ${option}`)
+    .join("\n\n");
 
-  message.channel.send(embed).then((pollMsg) => {
-    for (let i = 0; i < options.length; i++) {
-      pollMsg.react(letters[i]);
-    }
-  });
+  const embed = new MessageEmbed();
+
+  embed.setTitle("Poll: " + question).setDescription(optionsString);
+
+  message.channel
+    .send(embed)
+    .then((pollMsg) => {
+      const promises = [];
+      for (let i = 0; i < options.length; i++) {
+        promises.push(pollMsg.react(letters[i]));
+      }
+      return Promise.all(promises);
+    })
+    .catch((err) => {
+      console.error("Problem creating poll.");
+      console.error(err);
+      message.channel
+        .send(
+          "Sorry, I had some trouble making that poll. Please tell Jake about this."
+        )
+        .catch((err) => {
+          console.error("Failed to send failure message back to Discord.");
+          console.error(err);
+        });
+    });
 };
