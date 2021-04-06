@@ -9,6 +9,12 @@ export const createPoll = (message: Message) => {
     return message.channel.send(text);
   };
 
+  if (!firstParam) {
+    return send(
+      "Please add a question and some answers to complete your poll."
+    );
+  }
+
   if (firstParam === "help") {
     const embed = new MessageEmbed();
 
