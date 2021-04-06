@@ -19,6 +19,10 @@ export const sendHelp = (message: Message) => {
     .addField(
       "Shunt - Move a thread to a new channel",
       "`!shunt [targetChannel] [message]` - Request a conversation be moved to another channel."
+    )
+    .addField(
+      "Poll - poll the discord with a question",
+      "`!poll question` for simple polls *or* `!poll {question} [option a] [option b] [option c]` for more complex polls. Type `!poll help` for more."
     );
 
   message.channel.send(embed);
