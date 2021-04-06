@@ -1,5 +1,4 @@
 import { Message, MessageEmbed } from "discord.js";
-import { clip } from "../../helpers/clip";
 import { parseCommands } from "../../helpers/parseCommands";
 import { parsePoll } from "../../helpers/parsePoll";
 
@@ -56,11 +55,17 @@ export const createPoll = (message: Message) => {
     "🇹",
   ];
 
-  const [question, ...options] = parsePoll(message);
+  const { question, options } = parsePoll(message);
 
   if (options.length > 20) {
     return message.channel.send(
       "Complex polls may only have up to 20 options, you monster."
+    );
+  }
+
+  if (options.length === 0) {
+    return message.channel.send(
+      "Error with your poll options. Please add options using square brackets like `[Option A] [Option B]` and ensure you didn't miss a starting `[` or ending `]`."
     );
   }
 
