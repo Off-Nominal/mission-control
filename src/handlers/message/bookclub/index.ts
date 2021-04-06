@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { handleHelpCommand } from "../../../actions/bookClub/help";
 import { handleRecommendCommand } from "../../../actions/bookClub/recommend";
+import { sendError } from "../../../actions/global/sendError";
 import { parseCommands } from "../../../helpers/parseCommands";
 
 enum AllowedPrefix {
@@ -19,6 +20,8 @@ export const handleMessage = (message: Message) => {
     handleRecommendCommand(recommendType, message);
   } else if (command === "help") {
     handleHelpCommand(message);
+  } else {
+    sendError(message, "bc");
   }
 };
 
