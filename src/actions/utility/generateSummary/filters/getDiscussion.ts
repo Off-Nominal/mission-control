@@ -6,10 +6,9 @@ export const getDiscussion = (
   messages: Collection<string, Message>
 ): Collection<string, Message> => {
   return messages.filter((msg) => {
-    if (!msg.content || msg.author.bot) {
-      return false;
-    }
+    const hasContent = !!msg.content;
+    const isNotABot = !msg.author.bot;
 
-    return true;
+    return hasContent && isNotABot;
   });
 };
