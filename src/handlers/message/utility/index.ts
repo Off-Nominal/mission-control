@@ -3,6 +3,7 @@ import { createPoll } from "../../../actions/utility/createPoll";
 import { generateSummary } from "../../../actions/utility/generateSummary";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
+import { sendSummaryHelp } from "../../../actions/utility/sendSummaryHelp";
 import { shunt } from "../../../actions/utility/shunt";
 import { parseCommands } from "../../../helpers/parseCommands";
 
@@ -47,7 +48,15 @@ export const handleMessage = (message: Message) => {
       break;
     }
     case AllowedPrefix.SUMMARY: {
-      generateSummary(message);
+      const numberfiedCommand = Number(command);
+
+      if (!isNaN(Number(command))) {
+        generateSummary(message, Number(command));
+      } else if (command === "help") {
+        sendSummaryHelp(message);
+      } else {
+        generateSummary(message);
+      }
       break;
     }
   }
