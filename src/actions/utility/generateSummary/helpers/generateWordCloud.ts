@@ -6,6 +6,8 @@ import {
 } from "cloudinary";
 const cloudinary = require("cloudinary").v2;
 
+// Word Cloud API - https://wordcloudapi.com
+
 const RAPID_API_KEY = process.env.RAPID_API_KEY;
 
 export const generateWordCloud = async (text: string) => {
@@ -14,9 +16,9 @@ export const generateWordCloud = async (text: string) => {
     method: "post",
     data: {
       text,
-      scale: 0.5,
-      width: 600,
-      height: 600,
+      scale: 1,
+      width: 800,
+      height: 800,
       colors: ["#3e7493", "#a3be5f", "#bf5e56", "#e8c04f"],
     },
     headers: {
