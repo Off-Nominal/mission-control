@@ -1,5 +1,5 @@
 import { sub } from "date-fns";
-import { Collection, Message, MessageEmbed } from "discord.js";
+import { Collection, Message } from "discord.js";
 import { fetchMessages } from "./helpers/fetchMessages";
 import { getTwitter } from "./filters/getTwitter";
 import { getNews } from "./filters/getNews";
