@@ -84,14 +84,17 @@ export const generateTwitterSummary = async (
   const handles = [];
   const hashtags = [];
   let tweetText = [];
+
   const embed = new MessageEmbed();
+  embed.setAuthor(
+    "Twitter Summary",
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822131/Discord%20Assets/twitter-icon-circle-blue-logo-preview_lqkibr.png"
+  );
 
   if (collection.size === 0) {
-    return embed
-      .setTitle("No tweets")
-      .setDescription(
-        `There were no tweets posted to this channel in the last ${hourLimit} hours`
-      );
+    return embed.setDescription(
+      `There were no tweets posted to this channel in the last ${hourLimit} hours`
+    );
   }
 
   collection.forEach((tweet) => {
@@ -132,17 +135,13 @@ export const generateTwitterSummary = async (
   ];
 
   embed
-    .setAuthor(
-      "Twitter Summary",
-      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822131/Discord%20Assets/twitter-icon-circle-blue-logo-preview_lqkibr.png"
-    )
     .setDescription(
       `Summary of Tweets posted in this channel in the last ${hourLimit} hours.`
     )
     .addFields(fields)
     .addField(
       "Word Cloud",
-      `A visualization of twitter contents. [View Externally](${wordCloudUrl})`
+      `A visualization of twitter contents. [[View Externally]](${wordCloudUrl})`
     )
     .setImage(wordCloudUrl);
 

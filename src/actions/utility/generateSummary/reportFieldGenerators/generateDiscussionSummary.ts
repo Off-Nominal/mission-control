@@ -6,40 +6,39 @@ export const generateDiscussionSummary = async (
   collection: Collection<string, Message>,
   hourLimit: number
 ) => {
-  let discussion = [];
+  let discussedWords = [];
   const embed = new MessageEmbed();
+  embed.setAuthor(
+    "Discussion Summary",
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
+  );
 
   if (collection.size < 1) {
-    return embed
-      .setAuthor("No messages")
-      .setDescription(
-        `There don't seem to be any messages posted in the last ${hourLimit} hours`
-      );
+    return embed.setDescription(
+      `There don't seem to be any messages posted in the last ${hourLimit} hours`
+    );
   }
 
   collection.forEach((message) => {
     const words = filterHttp(message.content);
     if (words.length) {
-      discussion = discussion.concat(words);
+      discussedWords = discussedWords.concat(words);
     }
   });
 
   let wordCloudUrl: null | string = null;
 
   try {
-    const response = await generateWordCloud(discussion.join(" "));
+    const response = await generateWordCloud(discussedWords.join(" "));
     wordCloudUrl = response.secure_url;
   } catch (err) {
     console.error(err);
   }
 
   embed
-    .setAuthor(
-      "Discussion Summary",
-      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
-    )
+
     .setDescription(
-      `A visualization of user discussion in the last ${hourLimit} hours. [View Externally](${wordCloudUrl})`
+      `A visualization of user discussion in the last ${hourLimit} hours. [[View Externally]](${wordCloudUrl})`
     )
     .setImage(wordCloudUrl);
 

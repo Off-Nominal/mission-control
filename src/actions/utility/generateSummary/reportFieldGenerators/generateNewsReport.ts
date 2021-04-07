@@ -12,6 +12,18 @@ export const generateNewsReport = (
 ) => {
   const counters: SummaryCounterItem[] = [];
 
+  const embed = new MessageEmbed();
+  embed.setAuthor(
+    "News Summary",
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822357/Discord%20Assets/Grin2B_icon_NEWS.png_jqpsal.webp"
+  );
+
+  if (collection.size === 0) {
+    return embed.setDescription(
+      `There were no tweets posted to this channel in the last ${hourLimit} hours`
+    );
+  }
+
   collection.forEach((newsItem) => {
     newsItem.embeds.forEach((embed) => {
       const indexOfExistingItem = counters.findIndex(
@@ -30,8 +42,6 @@ export const generateNewsReport = (
     });
   });
 
-  const embed = new MessageEmbed();
-
   counters.sort((a, b) => b.count - a.count);
 
   const fields = counters.map((field) => {
@@ -45,10 +55,6 @@ export const generateNewsReport = (
   });
 
   embed
-    .setAuthor(
-      "News from Today",
-      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822357/Discord%20Assets/Grin2B_icon_NEWS.png_jqpsal.webp"
-    )
     .setDescription(
       `News items posted in this channel in the last ${hourLimit} hours.`
     )
