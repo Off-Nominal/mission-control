@@ -29,7 +29,6 @@ const countHashtags = (text: string, hashtags) => {
     }
 
     const endIndex = text.indexOf(" ", hashIndex);
-
     const tag = text.substring(hashIndex, endIndex);
 
     const tagIndex = hashtags.findIndex((counter) => tag === counter.tag);
@@ -55,7 +54,7 @@ const countHashtags = (text: string, hashtags) => {
 
 const generateHandleString = (handles) => {
   return handles
-    .slice(0, 3)
+    .slice(0, 5)
     .map(
       (handle) =>
         `[${handle.name}](${handle.url}) [${handle.count} tweet${
@@ -67,7 +66,7 @@ const generateHandleString = (handles) => {
 
 const generateHashtagString = (hashtags) => {
   return hashtags
-    .slice(0, 3)
+    .slice(0, 5)
     .map(
       (hashtag) =>
         `[${hashtag.tag}](https://twitter.com/hashtag/${hashtag.tag.slice(
@@ -132,6 +131,10 @@ export const generateTwitterSummary = async (
       name: "Popular Twitter Hashtags",
       value: hashTagString || "No hashtags in tweets posted today.",
     },
+    {
+      name: "Word Cloud",
+      value: `A visualization of twitter content. [[View Externally]](${wordCloudUrl})`,
+    },
   ];
 
   embed
@@ -139,10 +142,6 @@ export const generateTwitterSummary = async (
       `Summary of Tweets posted in this channel in the last ${hourLimit} hours.`
     )
     .addFields(fields)
-    .addField(
-      "Word Cloud",
-      `A visualization of twitter contents. [[View Externally]](${wordCloudUrl})`
-    )
     .setImage(wordCloudUrl);
 
   return embed;
