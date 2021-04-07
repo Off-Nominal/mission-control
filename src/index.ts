@@ -1,7 +1,7 @@
 require("dotenv").config();
 const Discord = require("discord.js");
 
-import { Client, Message } from "discord.js";
+import { Client, Message, PresenceData } from "discord.js";
 import {
   bookClubMessageHandler,
   feedListenerMessageHandler,
@@ -117,31 +117,48 @@ ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
 
+const getPresenceData = (helpCommand: string): PresenceData => {
+  return {
+    status: "online",
+    activity: {
+      name: helpCommand,
+      type: "PLAYING",
+    },
+  };
+};
+
 utilityBot.once("ready", () => {
   logReady(utilityBot.user.tag);
+  utilityBot.user.setPresence(getPresenceData("!help"));
 });
 bcBot.once("ready", () => {
   logReady(bcBot.user.tag);
+  bcBot.user.setPresence(getPresenceData("!bc help"));
 });
 wmBot.once("ready", () => {
   logReady(wmBot.user.tag);
   wmFeedListener.fetchChannel();
+  wmBot.user.setPresence(getPresenceData("!wm help"));
 });
 ofnBot.once("ready", () => {
   logReady(ofnBot.user.tag);
   ofnFeedListener.fetchChannel();
+  ofnBot.user.setPresence(getPresenceData("!ofn help"));
 });
 mecoBot.once("ready", () => {
   logReady(mecoBot.user.tag);
   mecoFeedListener.fetchChannel();
+  mecoBot.user.setPresence(getPresenceData("!meco help"));
 });
 rprBot.once("ready", () => {
   logReady(rprBot.user.tag);
   rprFeedListener.fetchChannel();
+  rprBot.user.setPresence(getPresenceData("!rpr help"));
 });
 hlBot.once("ready", () => {
   logReady(hlBot.user.tag);
   hlFeedListener.fetchChannel();
+  hlBot.user.setPresence(getPresenceData("!hl help"));
 });
 
 starshipChecker.initialize();
