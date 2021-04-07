@@ -1,4 +1,5 @@
 import { Collection, Message, MessageEmbed } from "discord.js";
+import { generateWordCloud } from "../helpers/generateWordCloud";
 
 const countHandle = (embed: MessageEmbed, handles) => {
   const handleIndex = handles.findIndex(
@@ -51,24 +52,16 @@ const countHashtags = (text: string, hashtags) => {
   findTag();
 };
 
-export const generateTwitterSummary = (
-  collection: Collection<string, Message>
-) => {
-  const handles = [];
-  const hashtags = [];
-  const tweetText = [];
-
-  collection.forEach((tweet) => {
-    tweet.embeds.forEach((tweetEmbed) => {
-      countHandle(tweetEmbed, handles);
-      countHashtags(tweetEmbed.description, hashtags);
-    });
+const parseTwitterText = (text: string): string[] => {
+  const words = text.split(" ");
+  const filteredWords = words.filter((word) => {
+    return !word.startsWith("http");
   });
+  return filteredWords;
+};
 
-  handles.sort((a, b) => b.count - a.count);
-  hashtags.sort((a, b) => b.count - a.count);
-
-  const handlesString = handles
+const generateHandleString = (handles) => {
+  return handles
     .slice(0, 3)
     .map(
       (handle) =>
@@ -77,8 +70,10 @@ export const generateTwitterSummary = (
         }]`
     )
     .join("\n");
+};
 
-  const hashTagString = hashtags
+const generateHashtagString = (hashtags) => {
+  return hashtags
     .slice(0, 3)
     .map(
       (hashtag) =>
@@ -87,15 +82,74 @@ export const generateTwitterSummary = (
         )}) [${hashtag.count} hashtag${hashtag.count > 1 ? "s" : ""}]`
     )
     .join("\n");
+};
 
-  return [
+export const generateTwitterSummary = async (
+  collection: Collection<string, Message>,
+  hourLimit: number
+) => {
+  const handles = [];
+  const hashtags = [];
+  let tweetText = [];
+  const embed = new MessageEmbed();
+
+  collection.forEach((tweet) => {
+    tweet.embeds.forEach((tweetEmbed) => {
+      countHandle(tweetEmbed, handles);
+      countHashtags(tweetEmbed.description, hashtags);
+      const words = parseTwitterText(tweetEmbed.description);
+      if (words.length) {
+        tweetText = tweetText.concat(words);
+      }
+    });
+  });
+
+  if (collection.size === 0) {
+    return embed
+      .setTitle("No tweets")
+      .setDescription(
+        `There were no tweets posted to this channel in the last ${hourLimit} hours`
+      );
+  }
+
+  handles.sort((a, b) => b.count - a.count);
+  hashtags.sort((a, b) => b.count - a.count);
+
+  const handlesString = generateHandleString(handles);
+  const hashTagString = generateHashtagString(hashtags);
+
+  let wordCloudUrl: null | string = null;
+
+  console.log(tweetText);
+
+  try {
+    const response = await generateWordCloud(tweetText.join(" "));
+    wordCloudUrl = response.secure_url;
+  } catch (err) {
+    console.error(err);
+  }
+
+  const fields = [
     {
       name: "Popular Twitter Accounts",
-      value: handlesString,
+      value: handlesString || "No tweets posted today",
     },
     {
       name: "Popular Twitter Hashtags",
       value: hashTagString || "No hashtags in tweets posted today.",
     },
   ];
+
+  console.log(wordCloudUrl);
+
+  embed
+    .setTitle("Twitter Links from Today")
+    .setDescription(
+      `Summary of Tweets posted in this channel in the last ${hourLimit} hours`
+    )
+    .addFields(fields)
+    .addField("Word Cloud", "A visualization of common topics today")
+    .setImage(wordCloudUrl);
+
+  return embed;
 };

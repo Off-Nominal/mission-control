@@ -7,7 +7,7 @@ import { Collection, Message } from "discord.js";
 export const getNews = (
   messages: Collection<string, Message>
 ): Collection<string, Message> => {
-  return messages.filter((msg) => {
+  const filteredMessages = messages.filter((msg) => {
     const lcMsg = msg.content.toLowerCase();
 
     const notABot = !msg.author.bot;
@@ -26,4 +26,5 @@ export const getNews = (
 
     return isNews && hasEmbeds && notABot;
   });
+  return filteredMessages;
 };

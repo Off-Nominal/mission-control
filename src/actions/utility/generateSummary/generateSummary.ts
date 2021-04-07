@@ -42,8 +42,14 @@ export const generateSummary = async (
   const discussionCollection = getDiscussion(messages);
 
   const newsEmbed = new MessageEmbed();
-  const twitterEmbed = new MessageEmbed();
+
   const discussionEmbed = new MessageEmbed();
+
+  const newsReport = generateNewsReport(newsCollection);
+  const twitterReport = await generateTwitterSummary(
+    twitterCollection,
+    hourLimit
+  );
 
   loadingMsg?.delete();
 
@@ -52,16 +58,9 @@ export const generateSummary = async (
     .setDescription(
       `News items posted in this channel in the last ${hourLimit} hours.`
     )
-    .addFields(generateNewsReport(newsCollection));
-
-  twitterEmbed
-    .setTitle("Twitter Links from Today")
-    .setDescription(
-      `Summary of Tweets posted in this channel in the last ${hourLimit} hours`
-    )
-    .addFields(generateTwitterSummary(twitterCollection));
+    .addFields(newsReport);
 
   message.channel.send(newsEmbed);
-  message.channel.send(twitterEmbed);
+  message.channel.send(twitterReport);
   message.channel.send(discussionEmbed);
 };
