@@ -8,7 +8,8 @@ export const getDiscussion = (
   return messages.filter((msg) => {
     const hasContent = !!msg.content;
     const isNotABot = !msg.author.bot;
+    const isNotABotCall = !msg.content.startsWith("!");
 
-    return hasContent && isNotABot;
+    return hasContent && isNotABot && isNotABotCall;
   });
 };

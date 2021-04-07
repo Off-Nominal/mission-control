@@ -20,7 +20,7 @@ export const generateNewsReport = (
 
   if (collection.size === 0) {
     return embed.setDescription(
-      `There were no tweets posted to this channel in the last ${hourLimit} hours`
+      `There were no links posted to this channel in the last ${hourLimit} hours`
     );
   }
 
