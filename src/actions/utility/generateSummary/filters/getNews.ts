@@ -13,6 +13,7 @@ export const getNews = (
     const isNotNews =
       lcMsg.includes("twitter.com") || // Twitter Links are aggregated separately
       lcMsg.includes("tenor.com") || // Tenor hosts Discord gifs and should be excluded
+      lcMsg.includes("discord.com/channels/") || // Links to other Discord messages
       lcMsg.includes("wemartians.com") || // All Off-Nom content is already summarized in #content channel
       lcMsg.includes("offnom.com") ||
       lcMsg.includes("offnominal.space") ||

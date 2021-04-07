@@ -1,5 +1,5 @@
 import { Collection, Message, MessageEmbed } from "discord.js";
-import { filterHttp } from "../helpers/filterHttp";
+import { filterWords } from "../helpers/filterWords";
 import { generateWordCloud } from "../helpers/generateWordCloud";
 
 const countHandle = (embed: MessageEmbed, handles) => {
@@ -100,7 +100,8 @@ export const generateTwitterSummary = async (
     tweet.embeds.forEach((tweetEmbed) => {
       countHandle(tweetEmbed, handles);
       countHashtags(tweetEmbed.description, hashtags);
-      const words = filterHttp(tweetEmbed.description);
+      let words = tweetEmbed.description.split(" ");
+      words = filterWords(words);
       if (words.length) {
         tweetText = tweetText.concat(words);
       }
