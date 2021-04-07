@@ -1,4 +1,4 @@
-import { Collection, Message } from "discord.js";
+import { Collection, Message, MessageEmbed } from "discord.js";
 
 export type SummaryCounterItem = {
   name: string;
@@ -6,7 +6,10 @@ export type SummaryCounterItem = {
   count?: number;
 };
 
-export const generateNewsReport = (collection: Collection<string, Message>) => {
+export const generateNewsReport = (
+  collection: Collection<string, Message>,
+  hourLimit: number
+) => {
   const counters: SummaryCounterItem[] = [];
 
   collection.forEach((newsItem) => {
@@ -27,7 +30,9 @@ export const generateNewsReport = (collection: Collection<string, Message>) => {
     });
   });
 
-  return counters.map((field) => {
+  const embed = new MessageEmbed();
+
+  const fields = counters.map((field) => {
     const countedField = {
       name:
         field.name +
@@ -36,4 +41,16 @@ export const generateNewsReport = (collection: Collection<string, Message>) => {
     };
     return countedField;
   });
+
+  embed
+    .setAuthor(
+      "News from Today",
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822357/Discord%20Assets/Grin2B_icon_NEWS.png_jqpsal.webp"
+    )
+    .setDescription(
+      `News items posted in this channel in the last ${hourLimit} hours.`
+    )
+    .addFields(fields);
+
+  return embed;
 };
