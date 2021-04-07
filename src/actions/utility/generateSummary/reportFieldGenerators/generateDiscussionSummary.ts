@@ -1,5 +1,6 @@
 import { Collection, Message, MessageEmbed } from "discord.js";
-import { filterHttp } from "../helpers/filterHttp";
+import { filterNumbers } from "../helpers/filterNumbers";
+import { filterWords } from "../helpers/filterWords";
 import { generateWordCloud } from "../helpers/generateWordCloud";
 
 export const generateDiscussionSummary = async (
@@ -13,18 +14,20 @@ export const generateDiscussionSummary = async (
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
   );
 
-  if (collection.size < 1) {
-    return embed.setDescription(
-      `There don't seem to be any messages posted in the last ${hourLimit} hours`
-    );
-  }
-
   collection.forEach((message) => {
-    const words = filterHttp(message.content);
+    let words = message.content.split(" ");
+    words = filterWords(words, ["http", "@", "!"]);
+    words = filterNumbers(words);
     if (words.length) {
       discussedWords = discussedWords.concat(words);
     }
   });
+
+  if (!discussedWords.length) {
+    return embed.setDescription(
+      `There don't seem to be any messages posted in the last ${hourLimit} hours`
+    );
+  }
 
   let wordCloudUrl: null | string = null;
 

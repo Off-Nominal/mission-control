@@ -1,26 +1,36 @@
 import { Collection, Message, MessageEmbed } from "discord.js";
+import { SummaryCounterItem } from "./types";
 
-export type SummaryCounterItem = {
-  name: string;
-  value: string;
-  count?: number;
+const embedText = {
+  news: {
+    title: "News Summary",
+    icon:
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822357/Discord%20Assets/Grin2B_icon_NEWS.png_jqpsal.webp",
+  },
+  youtube: {
+    title: "YouTube Summary",
+    icon:
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617834756/Discord%20Assets/395_Youtube_logo-512_rg8qan.png",
+  },
 };
 
-export const generateNewsReport = (
+export const generateLinkSummary = (
   collection: Collection<string, Message>,
-  hourLimit: number
+  hourLimit: number,
+  options?: {
+    type?: "news" | "youtube";
+  }
 ) => {
+  const type = options.type || "news";
+  const copy = embedText[type];
   const counters: SummaryCounterItem[] = [];
 
   const embed = new MessageEmbed();
-  embed.setAuthor(
-    "News Summary",
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822357/Discord%20Assets/Grin2B_icon_NEWS.png_jqpsal.webp"
-  );
+  embed.setAuthor(copy.title, copy.icon);
 
   if (collection.size === 0) {
     return embed.setDescription(
-      `There were no tweets posted to this channel in the last ${hourLimit} hours`
+      `There were no links posted to this channel in the last ${hourLimit} hours`
     );
   }
 
@@ -56,7 +66,7 @@ export const generateNewsReport = (
 
   embed
     .setDescription(
-      `News items posted in this channel in the last ${hourLimit} hours.`
+      `Items posted in this channel in the last ${hourLimit} hours.`
     )
     .addFields(fields);
 

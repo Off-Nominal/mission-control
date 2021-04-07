@@ -1,10 +1,11 @@
 import { sub } from "date-fns";
-import { Collection, Message, MessageEmbed } from "discord.js";
+import { Collection, Message } from "discord.js";
 import { fetchMessages } from "./helpers/fetchMessages";
 import { getTwitter } from "./filters/getTwitter";
 import { getNews } from "./filters/getNews";
 import { getDiscussion } from "./filters/getDiscussion";
-import { generateNewsReport } from "./reportFieldGenerators/generateNewsReport";
+import { getYouTube } from "./filters/getYouTube";
+import { generateLinkSummary } from "./reportFieldGenerators/generateLinkSummary";
 import { generateTwitterSummary } from "./reportFieldGenerators/generateTwitterSummary";
 import { generateDiscussionSummary } from "./reportFieldGenerators/generateDiscussionSummary";
 
@@ -41,8 +42,14 @@ export const generateSummary = async (
   const twitterCollection = getTwitter(messages);
   const newsCollection = getNews(messages);
   const discussionCollection = getDiscussion(messages);
+  const youTubeCollection = getYouTube(messages);
 
-  const newsReport = generateNewsReport(newsCollection, hourLimit);
+  const newsReport = generateLinkSummary(newsCollection, hourLimit, {
+    type: "news",
+  });
+  const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
+    type: "youtube",
+  });
   const twitterReport = await generateTwitterSummary(
     twitterCollection,
     hourLimit
@@ -55,6 +62,7 @@ export const generateSummary = async (
   loadingMsg?.delete();
 
   message.channel.send(newsReport);
+  message.channel.send(youTubeReport);
   message.channel.send(twitterReport);
   message.channel.send(discussionReport);
 };
