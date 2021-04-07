@@ -18,7 +18,7 @@ export const generateNewsReport = (
         (counter) => counter.name === embed.title
       );
 
-      if (indexOfExistingItem > 0) {
+      if (indexOfExistingItem >= 0) {
         counters[indexOfExistingItem].count++;
       } else {
         counters.push({
@@ -31,6 +31,8 @@ export const generateNewsReport = (
   });
 
   const embed = new MessageEmbed();
+
+  counters.sort((a, b) => b.count - a.count);
 
   const fields = counters.map((field) => {
     const countedField = {
