@@ -1,4 +1,5 @@
 import { Collection, Message, MessageEmbed } from "discord.js";
+import { filterNumbers } from "../helpers/filterNumbers";
 import { filterWords } from "../helpers/filterWords";
 import { generateWordCloud } from "../helpers/generateWordCloud";
 
@@ -16,6 +17,7 @@ export const generateDiscussionSummary = async (
   collection.forEach((message) => {
     let words = message.content.split(" ");
     words = filterWords(words, ["http", "@", "!"]);
+    words = filterNumbers(words);
     if (words.length) {
       discussedWords = discussedWords.concat(words);
     }
