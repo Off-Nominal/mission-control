@@ -17,6 +17,7 @@ export const generateWordCloud = async (text: string) => {
       scale: 0.5,
       width: 600,
       height: 600,
+      colors: ["#3e7493", "#a3be5f", "#bf5e56", "#e8c04f"],
     },
     headers: {
       "content-type": "application/json",
