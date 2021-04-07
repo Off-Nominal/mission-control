@@ -10,8 +10,6 @@ export const getNews = (
   const filteredMessages = messages.filter((msg) => {
     const lcMsg = msg.content.toLowerCase();
 
-    const notABot = !msg.author.bot;
-
     const isNotNews =
       lcMsg.includes("twitter.com") || // Twitter Links are aggregated separately
       lcMsg.includes("wemartians.com") || // All Off-Nom content is already summarized in #content channel
@@ -21,8 +19,8 @@ export const getNews = (
       lcMsg.includes("patreon.com/posts/");
 
     const isNews = !isNotNews;
-
-    const hasEmbeds = msg.embeds.length > 0;
+    const hasEmbeds = msg.embeds.length;
+    const notABot = !msg.author.bot;
 
     return isNews && hasEmbeds && notABot;
   });
