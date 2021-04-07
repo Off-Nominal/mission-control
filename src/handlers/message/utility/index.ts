@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { createPoll } from "../../../actions/utility/createPoll";
-import { generateSummary } from "../../../actions/utility/generateSummary";
+import { generateSummary } from "../../../actions/utility/generateSummary/generateSummary";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { sendSummaryHelp } from "../../../actions/utility/sendSummaryHelp";
