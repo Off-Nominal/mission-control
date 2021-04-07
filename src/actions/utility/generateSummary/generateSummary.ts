@@ -37,6 +37,8 @@ export const generateSummary = async (
     console.error(err);
   }
 
+  console.log(messages.size);
+
   //generate collections for summary sections
   const twitterCollection = getTwitter(messages);
   const newsCollection = getNews(messages);

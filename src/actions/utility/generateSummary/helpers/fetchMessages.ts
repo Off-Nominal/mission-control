@@ -12,6 +12,7 @@ export const fetchMessages = async (message: Message, timeLimit: Date) => {
   let messages = new Collection<string, Message>();
 
   const fetcher = async () => {
+    console.log(messages.size);
     const options: ChannelLogsQueryOptions = {
       limit: DISCORD_API_LIMIT,
     };
@@ -31,7 +32,7 @@ export const fetchMessages = async (message: Message, timeLimit: Date) => {
     const timeStamp = new Date(messages.last().createdTimestamp);
 
     if (timeStamp > timeLimit) {
-      fetcher(); //recursively call fetcher until the accumulated Collection spans the designated time window.
+      await fetcher(); //recursively call fetcher until the accumulated Collection spans the designated time window.
     }
   };
 
@@ -41,8 +42,11 @@ export const fetchMessages = async (message: Message, timeLimit: Date) => {
     throw err;
   }
 
+  console.log(messages.size);
+
   //Remove items older than time limit
-  messages = messages.filter((msg) => msg.createdAt > timeLimit);
+  messages = messages && messages.filter((msg) => msg.createdAt > timeLimit);
+  console.log(messages.size);
 
   return messages;
 };
