@@ -47,6 +47,9 @@ export const generateSummary = async (
   const newsReport = generateLinkSummary(newsCollection, hourLimit, {
     type: "news",
   });
+  const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
+    type: "youtube",
+  });
   const twitterReport = await generateTwitterSummary(
     twitterCollection,
     hourLimit
@@ -55,9 +58,6 @@ export const generateSummary = async (
     discussionCollection,
     hourLimit
   );
-  const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
-    type: "youtube",
-  });
 
   loadingMsg?.delete();
 
