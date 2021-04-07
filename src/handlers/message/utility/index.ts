@@ -50,8 +50,8 @@ export const handleMessage = (message: Message) => {
     case AllowedPrefix.SUMMARY: {
       const numberfiedCommand = Number(command);
 
-      if (!isNaN(Number(command))) {
-        generateSummary(message, Number(command));
+      if (!isNaN(numberfiedCommand)) {
+        generateSummary(message, numberfiedCommand);
       } else if (command === "help") {
         sendSummaryHelp(message);
       } else {
