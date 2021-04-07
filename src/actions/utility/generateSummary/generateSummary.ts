@@ -5,6 +5,7 @@ import { getTwitter } from "./filters/getTwitter";
 import { getNews } from "./filters/getNews";
 import { getDiscussion } from "./filters/getDiscussion";
 import { generateNewsReport } from "./reportFieldGenerators/generateNewsReport";
+import { generateTwitterSummary } from "./reportFieldGenerators/generateTwitterSummary";
 
 export const generateSummary = async (
   message: Message,
@@ -40,16 +41,27 @@ export const generateSummary = async (
   const newsCollection = getNews(messages);
   const discussionCollection = getDiscussion(messages);
 
-  const embed = new MessageEmbed();
+  const newsEmbed = new MessageEmbed();
+  const twitterEmbed = new MessageEmbed();
+  const discussionEmbed = new MessageEmbed();
 
   loadingMsg?.delete();
 
-  embed
-    .setTitle("Summary of Today")
+  newsEmbed
+    .setTitle("News from Today")
     .setDescription(
       `News items posted in this channel in the last ${hourLimit} hours.`
     )
     .addFields(generateNewsReport(newsCollection));
 
-  message.channel.send(embed);
+  twitterEmbed
+    .setTitle("Twitter Links from Today")
+    .setDescription(
+      `Summary of Tweets posted in this channel in the last ${hourLimit} hours`
+    )
+    .addFields(generateTwitterSummary(twitterCollection));
+
+  message.channel.send(newsEmbed);
+  message.channel.send(twitterEmbed);
+  message.channel.send(discussionEmbed);
 };

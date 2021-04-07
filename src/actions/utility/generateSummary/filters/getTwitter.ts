@@ -10,6 +10,6 @@ export const getTwitter = (
 
     const isTwitterLink = lcMsg.includes("//twitter.com");
 
-    return !isTwitterLink;
+    return isTwitterLink;
   });
 };

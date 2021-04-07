@@ -9,7 +9,7 @@ export type SummaryCounterItem = {
 export const generateNewsReport = (collection: Collection<string, Message>) => {
   const counters: SummaryCounterItem[] = [];
 
-  collection.forEach((newsItem, index) => {
+  collection.forEach((newsItem) => {
     newsItem.embeds.forEach((embed) => {
       const indexOfExistingItem = counters.findIndex(
         (counter) => counter.name === embed.title

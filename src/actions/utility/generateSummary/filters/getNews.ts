@@ -10,6 +10,8 @@ export const getNews = (
   return messages.filter((msg) => {
     const lcMsg = msg.content.toLowerCase();
 
+    const notABot = !msg.author.bot;
+
     const isNotNews =
       lcMsg.includes("twitter.com") || // Twitter Links are aggregated separately
       lcMsg.includes("wemartians.com") || // All Off-Nom content is already summarized in #content channel
@@ -22,6 +24,6 @@ export const getNews = (
 
     const hasEmbeds = msg.embeds.length > 0;
 
-    return isNews && hasEmbeds;
+    return isNews && hasEmbeds && notABot;
   });
 };
