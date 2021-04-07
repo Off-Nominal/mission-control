@@ -62,7 +62,7 @@ export const generateSummary = async (
   loadingMsg?.delete();
 
   message.channel.send(newsReport);
+  message.channel.send(youTubeReport);
   message.channel.send(twitterReport);
   message.channel.send(discussionReport);
-  message.channel.send(youTubeReport);
 };
