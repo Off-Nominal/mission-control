@@ -1,7 +1,9 @@
 import { Message } from "discord.js";
 import { createPoll } from "../../../actions/utility/createPoll";
+import { generateSummary } from "../../../actions/utility/generateSummary/generateSummary";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
+import { sendSummaryHelp } from "../../../actions/utility/sendSummaryHelp";
 import { shunt } from "../../../actions/utility/shunt";
 import { parseCommands } from "../../../helpers/parseCommands";
 
@@ -10,6 +12,7 @@ enum AllowedPrefix {
   HELP = "!help",
   OLDPOLL = "+poll",
   POLL = "!poll",
+  SUMMARY = "!summary",
 }
 
 export const handleMessage = (message: Message) => {
@@ -42,6 +45,18 @@ export const handleMessage = (message: Message) => {
       );
     case AllowedPrefix.POLL: {
       createPoll(message);
+      break;
+    }
+    case AllowedPrefix.SUMMARY: {
+      const numberfiedCommand = Number(command);
+
+      if (!isNaN(numberfiedCommand)) {
+        generateSummary(message, numberfiedCommand);
+      } else if (command === "help") {
+        sendSummaryHelp(message);
+      } else {
+        generateSummary(message);
+      }
       break;
     }
   }
