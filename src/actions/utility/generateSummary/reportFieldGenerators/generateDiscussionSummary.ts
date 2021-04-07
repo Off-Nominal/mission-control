@@ -13,18 +13,19 @@ export const generateDiscussionSummary = async (
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
   );
 
-  if (collection.size < 1) {
-    return embed.setDescription(
-      `There don't seem to be any messages posted in the last ${hourLimit} hours`
-    );
-  }
-
   collection.forEach((message) => {
-    const words = filterWords(message.content.split(" "));
+    let words = message.content.split(" ");
+    words = filterWords(words, ["http", "@", "!"]);
     if (words.length) {
       discussedWords = discussedWords.concat(words);
     }
   });
+
+  if (!discussedWords.length) {
+    return embed.setDescription(
+      `There don't seem to be any messages posted in the last ${hourLimit} hours`
+    );
+  }
 
   let wordCloudUrl: null | string = null;
 

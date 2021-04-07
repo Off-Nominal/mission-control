@@ -4,7 +4,8 @@ import { fetchMessages } from "./helpers/fetchMessages";
 import { getTwitter } from "./filters/getTwitter";
 import { getNews } from "./filters/getNews";
 import { getDiscussion } from "./filters/getDiscussion";
-import { generateNewsReport } from "./reportFieldGenerators/generateNewsReport";
+import { getYouTube } from "./filters/getYouTube";
+import { generateLinkSummary } from "./reportFieldGenerators/generateLinkSummary";
 import { generateTwitterSummary } from "./reportFieldGenerators/generateTwitterSummary";
 import { generateDiscussionSummary } from "./reportFieldGenerators/generateDiscussionSummary";
 
@@ -41,8 +42,11 @@ export const generateSummary = async (
   const twitterCollection = getTwitter(messages);
   const newsCollection = getNews(messages);
   const discussionCollection = getDiscussion(messages);
+  const youTubeCollection = getYouTube(messages);
 
-  const newsReport = generateNewsReport(newsCollection, hourLimit);
+  const newsReport = generateLinkSummary(newsCollection, hourLimit, {
+    type: "news",
+  });
   const twitterReport = await generateTwitterSummary(
     twitterCollection,
     hourLimit
@@ -51,10 +55,14 @@ export const generateSummary = async (
     discussionCollection,
     hourLimit
   );
+  const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
+    type: "youtube",
+  });
 
   loadingMsg?.delete();
 
   message.channel.send(newsReport);
   message.channel.send(twitterReport);
   message.channel.send(discussionReport);
+  message.channel.send(youTubeReport);
 };

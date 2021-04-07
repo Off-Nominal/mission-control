@@ -1,8 +1,8 @@
-export const filterWords = (words: string[]): string[] => {
-  const filteredWordStarts = ["http", "@"]; // Any message that begins with these strings will be filtered out.
+export const filterWords = (words: string[], filters: string[]): string[] => {
+  // Any message that begins with the filter strings will be filtered out.
 
   const filteredWords = words.filter((word) => {
-    filteredWordStarts.forEach((start) => {
+    filters.forEach((start) => {
       if (word.startsWith(start)) {
         return true;
       }

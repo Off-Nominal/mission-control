@@ -101,7 +101,7 @@ export const generateTwitterSummary = async (
       countHandle(tweetEmbed, handles);
       countHashtags(tweetEmbed.description, hashtags);
       let words = tweetEmbed.description.split(" ");
-      words = filterWords(words);
+      words = filterWords(words, ["http", "@"]);
       if (words.length) {
         tweetText = tweetText.concat(words);
       }
