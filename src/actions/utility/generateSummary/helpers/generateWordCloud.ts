@@ -22,10 +22,15 @@ export const generateWordCloud = async (text: string) => {
 
   let wordCloudResponse;
 
+  const cOptions = {
+    folder: "wordclouds",
+  };
+
   try {
     wordCloudResponse = await axios.request(options);
     return cloudinary.uploader.upload(
       wordCloudResponse.data,
+      cOptions,
       (error, result) => {
         if (error) {
           console.error(error);
