@@ -19,10 +19,6 @@ export const generateSummary = async (
   }
 
   let loadingMsg: Message;
-  let messages: Collection<string, Message>;
-
-  const now = new Date();
-  const timeLimit = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
 
   try {
     loadingMsg = await message.channel.send("Generating Summary Report...");
@@ -30,10 +26,14 @@ export const generateSummary = async (
     console.error("Loading message failed to send to Discord.");
   }
 
+  let messages: Collection<string, Message>;
+  const now = new Date();
+  const timeLimit = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
+
   try {
     messages = await fetchMessages(message, timeLimit);
   } catch (err) {
-    console.error("Error fetching messages to generate summary report.");
+    console.error("Error fetching messages from Discord API.");
     console.error(err);
   }
 
