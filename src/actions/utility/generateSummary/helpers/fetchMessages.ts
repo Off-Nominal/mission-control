@@ -11,11 +11,11 @@ export const fetchMessages = async (message: Message, timeLimit: Date) => {
   let messagePoint: Snowflake;
   let messages = new Collection<string, Message>();
 
-  const fetcher = async () => {
-    const options: ChannelLogsQueryOptions = {
-      limit: DISCORD_API_LIMIT,
-    };
+  const options: ChannelLogsQueryOptions = {
+    limit: DISCORD_API_LIMIT,
+  };
 
+  const fetcher = async () => {
     if (messagePoint) {
       options.before = messagePoint;
     }
@@ -31,7 +31,7 @@ export const fetchMessages = async (message: Message, timeLimit: Date) => {
     const timeStamp = new Date(messages.last().createdTimestamp);
 
     if (timeStamp > timeLimit) {
-      await fetcher(); //recursively call fetcher until the accumulated Collection spans the designated time window.
+      await fetcher(); // recursively call fetcher until the accumulated Collection spans the designated time window.
     }
   };
 
@@ -41,7 +41,9 @@ export const fetchMessages = async (message: Message, timeLimit: Date) => {
     throw err;
   }
 
-  //Remove items older than time limit
+  // Remove items older than time limit
+  // Since the original API calls go in batches, the last batch usually fetches
+  // messages past the time limit. This removes them.
   messages = messages && messages.filter((msg) => msg.createdAt > timeLimit);
   return messages;
 };

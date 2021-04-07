@@ -1,12 +1,17 @@
-import axios, { Method } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
+import {
+  UploadApiErrorResponse,
+  UploadApiOptions,
+  UploadApiResponse,
+} from "cloudinary";
 const cloudinary = require("cloudinary").v2;
 
 const RAPID_API_KEY = process.env.RAPID_API_KEY;
 
 export const generateWordCloud = async (text: string) => {
-  const options = {
+  const options: AxiosRequestConfig = {
     url: "https://textvis-word-cloud-v1.p.rapidapi.com/v1/textToCloud",
-    method: "post" as Method,
+    method: "post",
     data: {
       text,
       scale: 0.5,
@@ -22,7 +27,7 @@ export const generateWordCloud = async (text: string) => {
 
   let wordCloudResponse;
 
-  const cOptions = {
+  const cOptions: UploadApiOptions = {
     folder: "wordclouds",
   };
 
@@ -31,7 +36,7 @@ export const generateWordCloud = async (text: string) => {
     return cloudinary.uploader.upload(
       wordCloudResponse.data,
       cOptions,
-      (error, result) => {
+      (error: UploadApiErrorResponse, result: UploadApiResponse) => {
         if (error) {
           console.error(error);
         }
