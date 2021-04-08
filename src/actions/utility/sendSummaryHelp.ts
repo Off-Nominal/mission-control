@@ -17,7 +17,7 @@ export const sendSummaryHelp = (message: Message) => {
       {
         name: "Force in channel",
         value:
-          "By default, the summary is sent via DM. You can force it to report inside the channel you call it by adding the `here` parameter after the time window. Example: `!summary 8 here` will create a report for the last 8 hours and post it in to the channel where you call it.",
+          "By default, the summary is sent via DM. You can force it to report inside the channel you call it by adding the `here` parameter after the time window. Example: `!summary 8 here` or `!summary here` will create a report for the last 8 hours and post it in to the channel where you call it.",
       },
     ]);
 
