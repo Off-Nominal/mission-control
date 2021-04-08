@@ -70,6 +70,7 @@ export const generateSummary = async (
   const youTubeCollection = getYouTube(messages);
 
   let messageDeleted = false;
+  let noContent = true;
 
   const deleteLoadingMsg = async () => {
     if (messageDeleted) {
@@ -87,6 +88,7 @@ export const generateSummary = async (
       type: "news",
     });
     deleteLoadingMsg();
+    noContent = false;
     send(newsReport);
   }
 
@@ -95,6 +97,7 @@ export const generateSummary = async (
       type: "youtube",
     });
     deleteLoadingMsg();
+    noContent = false;
     send(youTubeReport);
   }
 
@@ -104,6 +107,7 @@ export const generateSummary = async (
       hourLimit
     );
     deleteLoadingMsg();
+    noContent = false;
     send(twitterReport);
   }
 
@@ -113,6 +117,13 @@ export const generateSummary = async (
       hourLimit
     );
     deleteLoadingMsg();
+    noContent = false;
     send(discussionReport);
+  }
+
+  if (noContent) {
+    send(
+      `It's been pretty quiet in <#${message.channel.id}>, we have nothing to summarize! Try a broader time window or pick a more interesting channel I guess?`
+    );
   }
 };
