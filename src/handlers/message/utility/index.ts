@@ -56,8 +56,10 @@ export const handleMessage = (message: Message) => {
         message.channel.send(
           "My summary function doesn't work great via DM. Try calling me from a specific channel!"
         );
+      } else if (command === "here") {
+        generateSummary(message, 8, true);
       } else if (!isNaN(numberfiedCommand)) {
-        const forceChannel = secondCommand === "channel";
+        const forceChannel = secondCommand === "here";
         generateSummary(message, numberfiedCommand, forceChannel);
       } else {
         generateSummary(message);

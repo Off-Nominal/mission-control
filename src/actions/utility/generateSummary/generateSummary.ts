@@ -1,10 +1,5 @@
 import { sub } from "date-fns";
-import {
-  APIMessageContentResolvable,
-  Collection,
-  Message,
-  TextChannel,
-} from "discord.js";
+import { APIMessageContentResolvable, Collection, Message } from "discord.js";
 import { fetchMessages } from "./helpers/fetchMessages";
 import { getTwitter } from "./filters/getTwitter";
 import { getNews } from "./filters/getNews";

@@ -23,9 +23,9 @@ export const generateDiscussionSummary = async (
     }
   });
 
-  if (!discussedWords.length) {
+  if (discussedWords.length < 3) {
     return embed.setDescription(
-      `There don't seem to be any messages posted in the last ${hourLimit} hours`
+      `It's been pretty quiet in the last ${hourLimit} hours, I don't have enough to make a meaningful analysis!`
     );
   }
 
