@@ -18,7 +18,7 @@ enum AllowedPrefix {
 export const handleMessage = (message: Message) => {
   if (message.author.bot) return;
 
-  const [prefix, command, ...rest] = parseCommands(message);
+  const [prefix, command, secondCommand, ...rest] = parseCommands(message);
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
@@ -50,10 +50,11 @@ export const handleMessage = (message: Message) => {
     case AllowedPrefix.SUMMARY: {
       const numberfiedCommand = Number(command);
 
-      if (!isNaN(numberfiedCommand)) {
-        generateSummary(message, numberfiedCommand);
-      } else if (command === "help") {
+      if (command === "help") {
         sendSummaryHelp(message);
+      } else if (!isNaN(numberfiedCommand)) {
+        const forceChannel = secondCommand === "channel";
+        generateSummary(message, numberfiedCommand, forceChannel);
       } else {
         generateSummary(message);
       }

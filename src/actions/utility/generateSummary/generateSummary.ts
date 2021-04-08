@@ -1,5 +1,5 @@
 import { sub } from "date-fns";
-import { Collection, Message } from "discord.js";
+import { APIMessageContentResolvable, Collection, Message } from "discord.js";
 import { fetchMessages } from "./helpers/fetchMessages";
 import { getTwitter } from "./filters/getTwitter";
 import { getNews } from "./filters/getNews";
@@ -8,13 +8,30 @@ import { getYouTube } from "./filters/getYouTube";
 import { generateLinkSummary } from "./reportFieldGenerators/generateLinkSummary";
 import { generateTwitterSummary } from "./reportFieldGenerators/generateTwitterSummary";
 import { generateDiscussionSummary } from "./reportFieldGenerators/generateDiscussionSummary";
+import { MessageOptions } from "discord.js";
+import { MessageAdditions } from "discord.js";
 
 export const generateSummary = async (
   message: Message,
-  hourLimit: number = 8
+  hourLimit: number = 8,
+  forceChannel: boolean = false
 ) => {
+  const dmChannel = await message.author.createDM();
+  const send = (
+    contents:
+      | APIMessageContentResolvable
+      | (MessageOptions & { split?: false })
+      | MessageAdditions
+  ) => {
+    if (forceChannel) {
+      return message.channel.send(contents);
+    } else {
+      return dmChannel.send(contents);
+    }
+  };
+
   if (hourLimit > 24) {
-    return message.channel.send(
+    return send(
       "In order to maintain order, please limit summary reports to last 24 hours"
     );
   }
@@ -22,7 +39,7 @@ export const generateSummary = async (
   let loadingMsg: Message;
 
   try {
-    loadingMsg = await message.channel.send("Generating Summary Report...");
+    loadingMsg = await send("Generating Summary Report...");
   } catch (err) {
     console.error("Loading message failed to send to Discord.");
   }
@@ -59,10 +76,10 @@ export const generateSummary = async (
     hourLimit
   );
 
-  loadingMsg?.delete();
+  forceChannel && loadingMsg?.delete();
 
-  message.channel.send(newsReport);
-  message.channel.send(youTubeReport);
-  message.channel.send(twitterReport);
-  message.channel.send(discussionReport);
+  send(newsReport);
+  send(youTubeReport);
+  send(twitterReport);
+  send(discussionReport);
 };
