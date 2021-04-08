@@ -52,6 +52,10 @@ export const handleMessage = (message: Message) => {
 
       if (command === "help") {
         sendSummaryHelp(message);
+      } else if (message.guild === null) {
+        message.channel.send(
+          "My summary function doesn't work great via DM. Try calling me from a specific channel!"
+        );
       } else if (!isNaN(numberfiedCommand)) {
         const forceChannel = secondCommand === "channel";
         generateSummary(message, numberfiedCommand, forceChannel);
