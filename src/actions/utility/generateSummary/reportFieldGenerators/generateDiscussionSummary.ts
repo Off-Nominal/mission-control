@@ -40,7 +40,7 @@ export const generateDiscussionSummary = async (
 
   embed
     .setDescription(
-      `A visualization of user discussion in the last ${hourLimit} hours. [[View Externally]](${wordCloudUrl})`
+      `A visualization of user discussion in the last ${hourLimit} hours. [[View Externally]](${wordCloudUrl})\n\nThere have been ${collection.size} text messages posted by users in this time period.`
     )
     .setImage(wordCloudUrl);
 
