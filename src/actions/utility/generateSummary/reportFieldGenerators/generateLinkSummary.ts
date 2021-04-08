@@ -45,7 +45,9 @@ export const generateLinkSummary = (
       } else {
         counters.push({
           name: embed.title,
-          value: embed.description + ` [[Link]](${embed.url})`,
+          value:
+            embed.description +
+            ` [[Article]](${embed.url}) [[Discussion]](${newsItem.url})`,
           count: 1,
         });
       }

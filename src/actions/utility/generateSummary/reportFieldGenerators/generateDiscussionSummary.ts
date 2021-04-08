@@ -23,9 +23,9 @@ export const generateDiscussionSummary = async (
     }
   });
 
-  if (!discussedWords.length) {
+  if (discussedWords.length < 3) {
     return embed.setDescription(
-      `There don't seem to be any messages posted in the last ${hourLimit} hours`
+      `It's been pretty quiet in the last ${hourLimit} hours, I don't have enough to make a meaningful analysis!`
     );
   }
 
@@ -40,7 +40,7 @@ export const generateDiscussionSummary = async (
 
   embed
     .setDescription(
-      `A visualization of user discussion in the last ${hourLimit} hours. [[View Externally]](${wordCloudUrl})`
+      `A visualization of user discussion in the last ${hourLimit} hours. [[View Externally]](${wordCloudUrl})\n\nThere have been ${collection.size} text messages posted by users in this time period.`
     )
     .setImage(wordCloudUrl);
 

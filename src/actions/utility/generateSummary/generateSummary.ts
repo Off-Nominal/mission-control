@@ -1,5 +1,5 @@
 import { sub } from "date-fns";
-import { Collection, Message } from "discord.js";
+import { APIMessageContentResolvable, Collection, Message } from "discord.js";
 import { fetchMessages } from "./helpers/fetchMessages";
 import { getTwitter } from "./filters/getTwitter";
 import { getNews } from "./filters/getNews";
@@ -8,13 +8,31 @@ import { getYouTube } from "./filters/getYouTube";
 import { generateLinkSummary } from "./reportFieldGenerators/generateLinkSummary";
 import { generateTwitterSummary } from "./reportFieldGenerators/generateTwitterSummary";
 import { generateDiscussionSummary } from "./reportFieldGenerators/generateDiscussionSummary";
+import { MessageOptions } from "discord.js";
+import { MessageAdditions } from "discord.js";
 
 export const generateSummary = async (
   message: Message,
-  hourLimit: number = 8
+  hourLimit: number = 8,
+  forceChannel: boolean = false
 ) => {
+  const dmChannel = await message.author.createDM();
+
+  const send = (
+    contents:
+      | APIMessageContentResolvable
+      | (MessageOptions & { split?: false })
+      | MessageAdditions
+  ) => {
+    if (forceChannel) {
+      return message.channel.send(contents);
+    } else {
+      return dmChannel.send(contents);
+    }
+  };
+
   if (hourLimit > 24) {
-    return message.channel.send(
+    return send(
       "In order to maintain order, please limit summary reports to last 24 hours"
     );
   }
@@ -22,7 +40,9 @@ export const generateSummary = async (
   let loadingMsg: Message;
 
   try {
-    loadingMsg = await message.channel.send("Generating Summary Report...");
+    loadingMsg = await send(
+      `Generating Summary Report for channel <#${message.channel.id}>...`
+    );
   } catch (err) {
     console.error("Loading message failed to send to Discord.");
   }
@@ -44,25 +64,61 @@ export const generateSummary = async (
   const discussionCollection = getDiscussion(messages);
   const youTubeCollection = getYouTube(messages);
 
-  const newsReport = generateLinkSummary(newsCollection, hourLimit, {
-    type: "news",
-  });
-  const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
-    type: "youtube",
-  });
-  const twitterReport = await generateTwitterSummary(
-    twitterCollection,
-    hourLimit
-  );
-  const discussionReport = await generateDiscussionSummary(
-    discussionCollection,
-    hourLimit
-  );
+  let messageDeleted = false;
+  let noContent = true;
 
-  loadingMsg?.delete();
+  const deleteLoadingMsg = async () => {
+    if (messageDeleted) {
+      return;
+    }
 
-  message.channel.send(newsReport);
-  message.channel.send(youTubeReport);
-  message.channel.send(twitterReport);
-  message.channel.send(discussionReport);
+    if (forceChannel) {
+      await loadingMsg?.delete();
+      messageDeleted = true;
+    }
+  };
+
+  if (newsCollection.size > 0) {
+    const newsReport = generateLinkSummary(newsCollection, hourLimit, {
+      type: "news",
+    });
+    deleteLoadingMsg();
+    noContent = false;
+    send(newsReport);
+  }
+
+  if (youTubeCollection.size > 0) {
+    const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
+      type: "youtube",
+    });
+    deleteLoadingMsg();
+    noContent = false;
+    send(youTubeReport);
+  }
+
+  if (twitterCollection.size > 0) {
+    const twitterReport = await generateTwitterSummary(
+      twitterCollection,
+      hourLimit
+    );
+    deleteLoadingMsg();
+    noContent = false;
+    send(twitterReport);
+  }
+
+  if (discussionCollection.size > 0) {
+    const discussionReport = await generateDiscussionSummary(
+      discussionCollection,
+      hourLimit
+    );
+    deleteLoadingMsg();
+    noContent = false;
+    send(discussionReport);
+  }
+
+  if (noContent) {
+    send(
+      `It's been pretty quiet in <#${message.channel.id}>, we have nothing to summarize! Try a broader time window or pick a more interesting channel I guess?`
+    );
+  }
 };

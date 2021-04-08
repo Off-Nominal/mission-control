@@ -139,7 +139,7 @@ export const generateTwitterSummary = async (
     {
       name: "Word Cloud",
       value: wordCloudUrl
-        ? `A visualization of twitter content. [[View Externally]](${wordCloudUrl})`
+        ? `A visualization of twitter content. [[View Externally]](${wordCloudUrl})\n\nThere have been ${collection.size} tweets posted in this time period.`
         : "No useable tweet content for a word cloud.",
     },
   ];
