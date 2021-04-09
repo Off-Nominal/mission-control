@@ -15,6 +15,7 @@ export const getNews = (
       lcMsg.includes("youtube.com") || // YouTube Links are aggregated separately
       lcMsg.includes("youtu.be") ||
       lcMsg.includes("tenor.com") || // Tenor hosts Discord gifs and should be excluded
+      lcMsg.includes("i.redd.it") || // Reddit images are not articles
       lcMsg.includes("discord.com/channels/") || // Links to other Discord messages
       lcMsg.includes("wemartians.com") || // All Off-Nom content is already summarized in #content channel
       lcMsg.includes("offnom.com") ||
