@@ -73,8 +73,12 @@ export const generateSummary = async (
     }
 
     if (forceChannel) {
-      await loadingMsg?.delete();
-      messageDeleted = true;
+      try {
+        await loadingMsg?.delete();
+        messageDeleted = true;
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -82,7 +86,7 @@ export const generateSummary = async (
     const newsReport = generateLinkSummary(newsCollection, hourLimit, {
       type: "news",
     });
-    deleteLoadingMsg();
+    await deleteLoadingMsg();
     noContent = false;
     send(newsReport);
   }
@@ -91,7 +95,7 @@ export const generateSummary = async (
     const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
       type: "youtube",
     });
-    deleteLoadingMsg();
+    await deleteLoadingMsg();
     noContent = false;
     send(youTubeReport);
   }
@@ -101,7 +105,7 @@ export const generateSummary = async (
       twitterCollection,
       hourLimit
     );
-    deleteLoadingMsg();
+    await deleteLoadingMsg();
     noContent = false;
     send(twitterReport);
   }
@@ -111,7 +115,7 @@ export const generateSummary = async (
       discussionCollection,
       hourLimit
     );
-    deleteLoadingMsg();
+    await deleteLoadingMsg();
     noContent = false;
     send(discussionReport);
   }

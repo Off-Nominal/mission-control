@@ -1,4 +1,5 @@
 import { Collection, Message, MessageEmbed } from "discord.js";
+import { fetchHashtags } from "../helpers/fetchHashtags";
 import { filterNumbers } from "../helpers/filterNumbers";
 import { filterWords } from "../helpers/filterWords";
 import { generateWordCloud } from "../helpers/generateWordCloud";
@@ -17,40 +18,6 @@ const countHandle = (embed: MessageEmbed, handles) => {
       count: 1,
     });
   }
-};
-
-const countHashtags = (text: string, hashtags) => {
-  let startPoint: number = 0;
-
-  const findTag = () => {
-    const hashIndex = text.indexOf("#", startPoint);
-
-    if (hashIndex === -1) {
-      return;
-    }
-
-    const endIndex = text.indexOf(" ", hashIndex);
-    const tag = text.substring(hashIndex, endIndex);
-
-    const tagIndex = hashtags.findIndex((counter) => tag === counter.tag);
-
-    if (tagIndex >= 0) {
-      hashtags[tagIndex].count++;
-    } else {
-      hashtags.push({
-        tag,
-        count: 1,
-      });
-    }
-
-    startPoint = endIndex;
-
-    if (text.indexOf("#", startPoint) >= 0) {
-      findTag();
-    }
-  };
-
-  findTag();
 };
 
 const generateHandleString = (handles) => {
@@ -82,7 +49,7 @@ export const generateTwitterSummary = async (
   hourLimit: number
 ) => {
   const handles = [];
-  const hashtags = [];
+  let hashtags = [];
   let tweetText = [];
 
   const embed = new MessageEmbed();
@@ -100,7 +67,7 @@ export const generateTwitterSummary = async (
   collection.forEach((tweet) => {
     tweet.embeds.forEach((tweetEmbed) => {
       countHandle(tweetEmbed, handles);
-      countHashtags(tweetEmbed.description, hashtags);
+      hashtags = hashtags.concat(fetchHashtags(tweetEmbed.description));
       let words = tweetEmbed.description.split(" ");
       words = filterWords(words, ["http", "@", "#"]);
       words = filterNumbers(words);
