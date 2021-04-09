@@ -9,10 +9,14 @@ export const generateDiscussionSummary = async (
 ) => {
   let discussedWords = [];
   const embed = new MessageEmbed();
-  embed.setAuthor(
-    "Discussion Summary",
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
-  );
+  embed
+    .setAuthor(
+      "Discussion Summary",
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
+    )
+    .setDescription(
+      `It's been pretty quiet in the last ${hourLimit} hours, I don't have enough useful words to make a meaningful analysis!`
+    );
 
   collection.forEach((message) => {
     let words = message.content.split(" ");
@@ -24,9 +28,7 @@ export const generateDiscussionSummary = async (
   });
 
   if (discussedWords.length < 3) {
-    return embed.setDescription(
-      `It's been pretty quiet in the last ${hourLimit} hours, I don't have enough to make a meaningful analysis!`
-    );
+    return embed;
   }
 
   let wordCloudUrl: null | string = null;
@@ -36,6 +38,10 @@ export const generateDiscussionSummary = async (
     wordCloudUrl = response.secure_url;
   } catch (err) {
     console.error(err);
+  }
+
+  if (!wordCloudUrl) {
+    return embed;
   }
 
   embed

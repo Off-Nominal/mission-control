@@ -36,20 +36,25 @@ export const generateWordCloud = async (text: string) => {
 
   try {
     wordCloudResponse = await axios.request(options);
-    return cloudinary.uploader.upload(
-      wordCloudResponse.data,
-      cOptions,
-      (error: UploadApiErrorResponse, result: UploadApiResponse) => {
-        if (error) {
-          console.error(error);
-        }
-
-        if (result) {
-          return result.secure_url;
-        }
-      }
-    );
   } catch (err) {
-    console.error(err);
+    throw err;
   }
+
+  if (!wordCloudResponse) {
+    throw "No wordCloudURL returned";
+  }
+
+  return cloudinary.uploader.upload(
+    wordCloudResponse.data,
+    cOptions,
+    (error: UploadApiErrorResponse, result: UploadApiResponse) => {
+      if (error) {
+        throw error;
+      }
+
+      if (result) {
+        return result;
+      }
+    }
+  );
 };
