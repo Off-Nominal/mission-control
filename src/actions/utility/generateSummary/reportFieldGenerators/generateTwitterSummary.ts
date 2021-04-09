@@ -46,7 +46,8 @@ const generateHashtagString = (hashtags) => {
 
 export const generateTwitterSummary = async (
   collection: Collection<string, Message>,
-  hourLimit: number
+  hourLimit: number,
+  channelId: string
 ) => {
   const handles = [];
   let hashtags = [];
@@ -60,7 +61,7 @@ export const generateTwitterSummary = async (
 
   if (collection.size === 0) {
     return embed.setDescription(
-      `There were no tweets posted to this channel in the last ${hourLimit} hours`
+      `There were no tweets posted to <#${channelId}> in the last ${hourLimit} hours`
     );
   }
 
@@ -113,7 +114,7 @@ export const generateTwitterSummary = async (
 
   embed
     .setDescription(
-      `Summary of Tweets posted in this channel in the last ${hourLimit} hours.`
+      `Summary of Tweets posted in <#${channelId}> in the last ${hourLimit} hours.`
     )
     .addFields(fields)
     .setImage(wordCloudUrl);

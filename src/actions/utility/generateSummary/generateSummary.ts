@@ -16,6 +16,8 @@ export const generateSummary = async (
   hourLimit: number = 8,
   forceChannel: boolean = false
 ) => {
+  const channelId = message.channel.id;
+
   const dmChannel = await message.author.createDM();
 
   const send = (
@@ -41,7 +43,7 @@ export const generateSummary = async (
 
   try {
     loadingMsg = await send(
-      `Generating Summary Report for channel <#${message.channel.id}>...`
+      `Generating Summary Report for channel <#${channelId}>...`
     );
   } catch (err) {
     console.error("Loading message failed to send to Discord.");
@@ -83,18 +85,28 @@ export const generateSummary = async (
   };
 
   if (newsCollection.size > 0) {
-    const newsReport = generateLinkSummary(newsCollection, hourLimit, {
-      type: "news",
-    });
+    const newsReport = generateLinkSummary(
+      newsCollection,
+      hourLimit,
+      channelId,
+      {
+        type: "news",
+      }
+    );
     await deleteLoadingMsg();
     noContent = false;
     send(newsReport);
   }
 
   if (youTubeCollection.size > 0) {
-    const youTubeReport = generateLinkSummary(youTubeCollection, hourLimit, {
-      type: "youtube",
-    });
+    const youTubeReport = generateLinkSummary(
+      youTubeCollection,
+      hourLimit,
+      channelId,
+      {
+        type: "youtube",
+      }
+    );
     await deleteLoadingMsg();
     noContent = false;
     send(youTubeReport);
@@ -103,7 +115,8 @@ export const generateSummary = async (
   if (twitterCollection.size > 0) {
     const twitterReport = await generateTwitterSummary(
       twitterCollection,
-      hourLimit
+      hourLimit,
+      channelId
     );
     await deleteLoadingMsg();
     noContent = false;
@@ -113,7 +126,8 @@ export const generateSummary = async (
   if (discussionCollection.size > 0) {
     const discussionReport = await generateDiscussionSummary(
       discussionCollection,
-      hourLimit
+      hourLimit,
+      channelId
     );
     await deleteLoadingMsg();
     noContent = false;
