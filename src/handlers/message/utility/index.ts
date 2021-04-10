@@ -33,6 +33,7 @@ export const handleMessage = async (
       }
       break;
     }
+
     case AllowedPrefix.HELP: {
       if (command === "podcast" || command === "podcasts") {
         sendPodcastHelp(message);
@@ -41,6 +42,8 @@ export const handleMessage = async (
       }
       break;
     }
+
+    // OLDPOLL cascades into POLL to handle old syntax
     case AllowedPrefix.OLDPOLL:
       message.channel.send(
         "Please note the syntax for Polling has changed from `+poll` to `!poll` to match other bots. Type `!poll help` for more."
@@ -49,14 +52,23 @@ export const handleMessage = async (
       createPoll(message);
       break;
     }
+
     case AllowedPrefix.SUMMARY: {
       if (command === "help") {
         reportGenerator.sendHelp(message);
-      } else if (message.guild === null) {
+        break;
+      }
+
+      // This is a report request DM, which report generator does not support
+      if (message.guild === null) {
         reportGenerator.sendError(message, "dm");
-      } else {
-        const forceChannel = command === "here" || secondCommand === "here";
-        const timeLimit = Number(command) || 8;
+        break;
+      }
+
+      const forceChannel = command === "here" || secondCommand === "here";
+      const timeLimit = Number(command) || 8;
+
+      try {
         const channel = forceChannel
           ? (message.channel as TextChannel)
           : await message.author.createDM();
@@ -66,12 +78,16 @@ export const handleMessage = async (
           timeLimit,
           forceChannel
         );
-        reportGenerator.sendReport(
+
+        await reportGenerator.sendReport(
           channel,
           reportId,
           forceChannel ? "channel" : "dm"
         );
+      } catch (err) {
+        console.error(err);
       }
+
       break;
     }
   }

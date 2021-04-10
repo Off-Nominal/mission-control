@@ -1,4 +1,5 @@
 import { sub } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 import {
   APIMessageContentResolvable,
   ChannelLogsQueryOptions,
@@ -11,14 +12,17 @@ import {
   Snowflake,
   TextChannel,
 } from "discord.js";
-import { getDiscussion } from "../actions/utility/generateSummary/filters/getDiscussion";
-import { getNews } from "../actions/utility/generateSummary/filters/getNews";
-import { getTwitter } from "../actions/utility/generateSummary/filters/getTwitter";
-import { getYouTube } from "../actions/utility/generateSummary/filters/getYouTube";
-import { generateDiscussionSummary } from "../actions/utility/generateSummary/reportFieldGenerators/generateDiscussionSummary";
-import { generateLinkSummary } from "../actions/utility/generateSummary/reportFieldGenerators/generateLinkSummary";
-import { generateTwitterSummary } from "../actions/utility/generateSummary/reportFieldGenerators/generateTwitterSummary";
-import { v4 as uuidv4 } from "uuid";
+import {
+  getDiscussion,
+  getNews,
+  getTwitter,
+  getYouTube,
+} from "../actions/utility/generateSummary/filters/";
+import {
+  generateDiscussionSummary,
+  generateLinkSummary,
+  generateTwitterSummary,
+} from "../actions/utility/generateSummary/reportFieldGenerators/";
 
 export type ReportGeneratorError = {
   dm: string;
