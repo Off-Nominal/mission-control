@@ -189,7 +189,7 @@ export class ReportGenerator {
       embed
         .setTitle("Channel Summary Report")
         .setDescription(
-          `I am now generating a summary of the activity in <#${channel.id}> over the last ${hourLimit} hours. Check your DMs for the report!\n\nDo you want a copy of the report, too? Click the envelope icon below to have one sent to your DMs.`
+          `Generating a summary of activity in <#${channel.id}> over the last ${hourLimit} hours and sending to requestor via DM.\n\nDo you want a copy of the report, too? Click the envelope icon below to have one sent to your DMs.`
         );
 
       notice = await channel.send(embed);
