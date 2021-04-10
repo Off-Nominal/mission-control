@@ -12,6 +12,7 @@ import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { logReady } from "./actions/global/logReady";
 import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
+import { ReportGenerator } from "./utilities/ReportGenerator";
 const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
@@ -100,6 +101,12 @@ const hlFeedListener = new FeedListener(HLFEED, {
 });
 
 /***********************************
+ *  UTILITY SETUPS
+ ************************************/
+
+const reportGenerator = new ReportGenerator();
+
+/***********************************
  *  ASYNC LOGINS/INITS
  ************************************/
 
@@ -167,7 +174,9 @@ starshipChecker.initialize();
  *  Utility Bot Actions
  ************************************/
 
-utilityBot.on("message", (message: Message) => utilityMessageHandler(message));
+utilityBot.on("message", (message: Message) =>
+  utilityMessageHandler(message, reportGenerator)
+);
 utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
 
 /***********************************

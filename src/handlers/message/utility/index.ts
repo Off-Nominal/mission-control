@@ -1,11 +1,10 @@
 import { Message } from "discord.js";
 import { createPoll } from "../../../actions/utility/createPoll";
-import { generateSummary } from "../../../actions/utility/generateSummary/generateSummary";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
-import { sendSummaryHelp } from "../../../actions/utility/sendSummaryHelp";
 import { shunt } from "../../../actions/utility/shunt";
 import { parseCommands } from "../../../helpers/parseCommands";
+import { ReportGenerator } from "../../../utilities/ReportGenerator";
 
 enum AllowedPrefix {
   SHUNT = "!shunt",
@@ -15,7 +14,10 @@ enum AllowedPrefix {
   SUMMARY = "!summary",
 }
 
-export const handleMessage = (message: Message) => {
+export const handleMessage = async (
+  message: Message,
+  reportGenerator: ReportGenerator
+) => {
   if (message.author.bot) return;
 
   const [prefix, command, secondCommand, ...rest] = parseCommands(message);
@@ -48,21 +50,24 @@ export const handleMessage = (message: Message) => {
       break;
     }
     case AllowedPrefix.SUMMARY: {
-      const numberfiedCommand = Number(command);
-
       if (command === "help") {
-        sendSummaryHelp(message);
+        reportGenerator.sendHelp(message);
       } else if (message.guild === null) {
-        message.channel.send(
-          "My summary function doesn't work great via DM. Try calling me from a specific channel!"
-        );
-      } else if (command === "here") {
-        generateSummary(message, 8, true);
-      } else if (!isNaN(numberfiedCommand)) {
-        const forceChannel = secondCommand === "here";
-        generateSummary(message, numberfiedCommand, forceChannel);
+        reportGenerator.sendError(message, "dm");
       } else {
-        generateSummary(message);
+        const forceChannel = command === "here" || secondCommand === "here";
+        const timeLimit = Number(command) || 8;
+
+        const reportId = await reportGenerator.generateReport(
+          message,
+          timeLimit,
+          forceChannel
+        );
+        reportGenerator.sendReport(
+          message,
+          reportId,
+          forceChannel ? "channel" : "dm"
+        );
       }
       break;
     }
