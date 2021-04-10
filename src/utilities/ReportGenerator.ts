@@ -8,7 +8,6 @@ import {
   MessageAdditions,
   MessageEmbed,
   MessageOptions,
-  ReactionCollector,
   Snowflake,
   TextChannel,
 } from "discord.js";
@@ -34,26 +33,20 @@ export type Report = {
 };
 
 export class ReportGenerator {
-  collections: {
+  private collections: {
     [key: string]: Collection<string, Message>;
-  };
-  reports: {
+  } = {};
+  private reports: {
     [key: string]: Report;
-  };
-  notices: {
+  } = {};
+  private notices: {
     [key: string]: string;
-  };
+  } = {};
 
   error: {
     dm: "My summary function doesn't work great via DM. Try calling me from a channel!";
     limit: "In order to maintain order, please limit summary reports to last 24 hours";
   };
-
-  constructor() {
-    this.collections = {};
-    this.reports = {};
-    this.notices = {};
-  }
 
   public sendHelp(message: Message) {
     const embed = new MessageEmbed();
@@ -232,7 +225,7 @@ export class ReportGenerator {
         embed
           .setTitle("Channel Summary Report")
           .setDescription(
-            `I am now generating a summary of the activity in <#${channelId}> over the last ${hourLimit}. Check your DMs for the report!\n\nDo you want a copy of the report, too? Click the envelope icon below to have one sent to your DMs.`
+            `I am now generating a summary of the activity in <#${channelId}> over the last ${hourLimit} hours. Check your DMs for the report!\n\nDo you want a copy of the report, too? Click the envelope icon below to have one sent to your DMs.`
           );
 
         notice = await send(embed, "channel");
