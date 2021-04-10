@@ -47,7 +47,7 @@ const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
  ************************************/
 
 const utilityBot: Client = new Discord.Client({
-  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
 });
 const bcBot: Client = new Discord.Client();
 const wmBot: Client = new Discord.Client();

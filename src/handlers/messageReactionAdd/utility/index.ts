@@ -6,36 +6,34 @@ export const utilityReactHandler = async (
   user: User | PartialUser,
   reportGenerator: ReportGenerator
 ) => {
-  let requestor = user;
-  let react = messageReact;
+  if (user.bot) return;
 
   // When the bot restarts, old messages are partials and cached.
   // If a user requests a report from a message prior to when the bot booted,
   // it must fetch the full message to get its Id
   if (messageReact.partial) {
-    react = await messageReact.fetch();
+    try {
+      await messageReact.fetch();
+    } catch (err) {
+      console.error("Error fetching message partial");
+    }
   }
 
-  if (user.partial) {
-    requestor = await user.fetch();
-  }
-
-  // Ignore emojies that aren't the envelope or that are from bots
+  // Ignore emojies that aren't the envelope
   if (messageReact.emoji.toString() !== "📩") return;
-  if (requestor.bot) return;
 
   // Ignore requests on non-report messages
-  if (react.message.embeds[0]?.title !== "Channel Summary Report") {
+  if (messageReact.message.embeds[0]?.title !== "Channel Summary Report") {
     return;
   }
 
-  const messageId = react.message.id;
+  const messageId = messageReact.message.id;
   const reportId = reportGenerator.getReportId(messageId);
 
   let dmChannel: DMChannel;
 
   try {
-    dmChannel = await requestor.createDM();
+    dmChannel = await user.createDM();
   } catch (err) {
     console.error(err);
     return;
