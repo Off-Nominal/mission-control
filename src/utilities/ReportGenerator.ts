@@ -1,14 +1,11 @@
 import { sub } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import {
-  APIMessageContentResolvable,
   ChannelLogsQueryOptions,
   Collection,
   DMChannel,
   Message,
-  MessageAdditions,
   MessageEmbed,
-  MessageOptions,
   Snowflake,
   TextChannel,
 } from "discord.js";
