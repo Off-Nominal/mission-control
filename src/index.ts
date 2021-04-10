@@ -7,11 +7,13 @@ import {
   feedListenerMessageHandler,
   utilityMessageHandler,
 } from "./handlers/message/";
+import { utilityReactHandler } from "./handlers/messageReactionAdd";
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { logReady } from "./actions/global/logReady";
 import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
+import { ReportGenerator } from "./utilities/ReportGenerator";
 const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
@@ -44,7 +46,9 @@ const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
  *  Bot Setup
  ************************************/
 
-const utilityBot: Client = new Discord.Client();
+const utilityBot: Client = new Discord.Client({
+  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+});
 const bcBot: Client = new Discord.Client();
 const wmBot: Client = new Discord.Client();
 const ofnBot: Client = new Discord.Client();
@@ -98,6 +102,12 @@ const hlFeedListener = new FeedListener(HLFEED, {
   channelId: CONTENTCHANNELID,
   searchOptions: HL_SEARCH_OPTIONS,
 });
+
+/***********************************
+ *  UTILITY SETUPS
+ ************************************/
+
+const reportGenerator = new ReportGenerator();
 
 /***********************************
  *  ASYNC LOGINS/INITS
@@ -167,8 +177,13 @@ starshipChecker.initialize();
  *  Utility Bot Actions
  ************************************/
 
-utilityBot.on("message", (message: Message) => utilityMessageHandler(message));
+utilityBot.on("message", (message) =>
+  utilityMessageHandler(message, reportGenerator)
+);
 utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
+utilityBot.on("messageReactionAdd", (messageReact, user) =>
+  utilityReactHandler(messageReact, user, reportGenerator)
+);
 
 /***********************************
  *  Book Club Bot Actions

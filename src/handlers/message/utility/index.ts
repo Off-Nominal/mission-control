@@ -1,11 +1,10 @@
-import { Message } from "discord.js";
+import { Message, TextChannel } from "discord.js";
 import { createPoll } from "../../../actions/utility/createPoll";
-import { generateSummary } from "../../../actions/utility/generateSummary/generateSummary";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
-import { sendSummaryHelp } from "../../../actions/utility/sendSummaryHelp";
 import { shunt } from "../../../actions/utility/shunt";
 import { parseCommands } from "../../../helpers/parseCommands";
+import { ReportGenerator } from "../../../utilities/ReportGenerator";
 
 enum AllowedPrefix {
   SHUNT = "!shunt",
@@ -15,7 +14,10 @@ enum AllowedPrefix {
   SUMMARY = "!summary",
 }
 
-export const handleMessage = (message: Message) => {
+export const handleMessage = async (
+  message: Message,
+  reportGenerator: ReportGenerator
+) => {
   if (message.author.bot) return;
 
   const [prefix, command, secondCommand, ...rest] = parseCommands(message);
@@ -31,6 +33,7 @@ export const handleMessage = (message: Message) => {
       }
       break;
     }
+
     case AllowedPrefix.HELP: {
       if (command === "podcast" || command === "podcasts") {
         sendPodcastHelp(message);
@@ -39,6 +42,8 @@ export const handleMessage = (message: Message) => {
       }
       break;
     }
+
+    // OLDPOLL cascades into POLL to handle old syntax
     case AllowedPrefix.OLDPOLL:
       message.channel.send(
         "Please note the syntax for Polling has changed from `+poll` to `!poll` to match other bots. Type `!poll help` for more."
@@ -47,23 +52,38 @@ export const handleMessage = (message: Message) => {
       createPoll(message);
       break;
     }
-    case AllowedPrefix.SUMMARY: {
-      const numberfiedCommand = Number(command);
 
+    case AllowedPrefix.SUMMARY: {
       if (command === "help") {
-        sendSummaryHelp(message);
-      } else if (message.guild === null) {
-        message.channel.send(
-          "My summary function doesn't work great via DM. Try calling me from a specific channel!"
-        );
-      } else if (command === "here") {
-        generateSummary(message, 8, true);
-      } else if (!isNaN(numberfiedCommand)) {
-        const forceChannel = secondCommand === "here";
-        generateSummary(message, numberfiedCommand, forceChannel);
-      } else {
-        generateSummary(message);
+        reportGenerator.sendHelp(message);
+        break;
       }
+
+      // This is a report request DM, which report generator does not support
+      if (message.guild === null) {
+        reportGenerator.sendError(message, "dm");
+        break;
+      }
+
+      const forceChannel = command === "here" || secondCommand === "here";
+      const timeLimit = Number(command) || 8;
+
+      try {
+        const channel = forceChannel
+          ? (message.channel as TextChannel)
+          : await message.author.createDM();
+
+        const reportId = await reportGenerator.generateReport(
+          message,
+          timeLimit,
+          forceChannel
+        );
+
+        await reportGenerator.sendReport(channel, reportId);
+      } catch (err) {
+        console.error(err);
+      }
+
       break;
     }
   }

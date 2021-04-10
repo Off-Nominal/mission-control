@@ -5,7 +5,8 @@ import { generateWordCloud } from "../helpers/generateWordCloud";
 
 export const generateDiscussionSummary = async (
   collection: Collection<string, Message>,
-  hourLimit: number
+  hourLimit: number,
+  channelId: string
 ) => {
   let discussedWords = [];
   const embed = new MessageEmbed();
@@ -15,7 +16,7 @@ export const generateDiscussionSummary = async (
       "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
     )
     .setDescription(
-      `It's been pretty quiet in the last ${hourLimit} hours, I don't have enough useful words to make a meaningful analysis!`
+      `It's been pretty quiet in <#${channelId}> over the last ${hourLimit} hours, I don't have enough useful words to make a meaningful analysis!`
     );
 
   collection.forEach((message) => {
@@ -46,7 +47,7 @@ export const generateDiscussionSummary = async (
 
   embed
     .setDescription(
-      `A visualization of user discussion in the last ${hourLimit} hours. [[View Externally]](${wordCloudUrl})\n\nThere have been ${collection.size} text messages posted by users in this time period.`
+      `A visualization of user discussion in <#${channelId}> the last ${hourLimit} hours. [[View Externally]](${wordCloudUrl})\n\nThere have been ${collection.size} text messages posted by users in this time period.`
     )
     .setImage(wordCloudUrl);
 

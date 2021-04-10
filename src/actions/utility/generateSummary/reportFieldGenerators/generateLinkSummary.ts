@@ -17,6 +17,7 @@ const embedText = {
 export const generateLinkSummary = (
   collection: Collection<string, Message>,
   hourLimit: number,
+  channelId: string,
   options?: {
     type?: "news" | "youtube";
   }
@@ -30,7 +31,7 @@ export const generateLinkSummary = (
 
   if (collection.size === 0) {
     return embed.setDescription(
-      `There were no links posted to this channel in the last ${hourLimit} hours`
+      `There were no links posted to <#${channelId}> in the last ${hourLimit} hours`
     );
   }
 
@@ -68,7 +69,7 @@ export const generateLinkSummary = (
 
   embed
     .setDescription(
-      `Items posted in this channel in the last ${hourLimit} hours.`
+      `Items posted in <#${channelId}> in the last ${hourLimit} hours.`
     )
     .addFields(fields);
 
