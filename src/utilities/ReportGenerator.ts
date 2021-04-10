@@ -80,7 +80,7 @@ export class ReportGenerator {
     await message.channel.send(this.error[type]);
   }
 
-  private async fetchMessages(message: Message, timeHorizon: Date) {
+  private async fetchMessages(message: Message, hourLimit: number) {
     const DISCORD_API_LIMIT = 100; // Discord's API prevents more than 100 messages per API call
 
     let messagePoint: Snowflake;
@@ -89,6 +89,9 @@ export class ReportGenerator {
     const options: ChannelLogsQueryOptions = {
       limit: DISCORD_API_LIMIT,
     };
+
+    const now = new Date();
+    const timeHorizon = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
 
     const fetcher = async () => {
       if (messagePoint) {
@@ -128,11 +131,7 @@ export class ReportGenerator {
     return this.notices[noticeId];
   }
 
-  public async sendReport(
-    channel: DMChannel | TextChannel,
-    id: string,
-    destination: "dm" | "channel" = "dm"
-  ) {
+  public async sendReport(channel: DMChannel | TextChannel, id: string) {
     const report = this.reports[id];
 
     if (!report) {
@@ -148,15 +147,9 @@ export class ReportGenerator {
     const sender = async () => {
       const sends = [];
       try {
-        if (destination === "dm") {
-          Object.keys(report).forEach((reportType) => {
-            sends.push(channel.send(report[reportType]));
-          });
-        } else {
-          Object.keys(report).forEach((reportType) => {
-            sends.push(channel.send(report[reportType]));
-          });
-        }
+        Object.keys(report).forEach((reportType) => {
+          sends.push(channel.send(report[reportType]));
+        });
       } catch (err) {
         console.error("failed to created DM channel with user to send report.");
       }
@@ -188,6 +181,45 @@ export class ReportGenerator {
     waiter();
   }
 
+  private sendChannelReportNotice = async (
+    channel: TextChannel,
+    hourLimit: number
+  ) => {
+    let notice: Message;
+
+    try {
+      const embed = new MessageEmbed();
+      embed
+        .setTitle("Channel Summary Report")
+        .setDescription(
+          `I am now generating a summary of the activity in <#${channel.id}> over the last ${hourLimit} hours. Check your DMs for the report!\n\nDo you want a copy of the report, too? Click the envelope icon below to have one sent to your DMs.`
+        );
+
+      notice = await channel.send(embed);
+    } catch (err) {
+      console.error("Failed to create notice in channel.");
+      throw err;
+    }
+
+    try {
+      await notice.react("📩");
+    } catch (err) {
+      console.error("Failed to send reaction to notice.");
+      throw err;
+    }
+
+    return notice.id;
+  };
+
+  private sendChannelLoadingMessage = async (channel: TextChannel) => {
+    try {
+      await channel.send("Generating channel summary report...");
+    } catch (err) {
+      console.error("Loading message failed to send to channel.");
+      throw err;
+    }
+  };
+
   public async generateReport(
     message: Message,
     hourLimit: number = 8,
@@ -202,55 +234,25 @@ export class ReportGenerator {
     this.reports[reportId] = {};
     const report = this.reports[reportId];
     const channelId = message.channel.id;
-    const dmChannel = await message.author.createDM();
 
-    const send = (
-      contents:
-        | APIMessageContentResolvable
-        | (MessageOptions & { split?: false })
-        | MessageAdditions,
-      destination: "dm" | "channel" = forceChannel ? "channel" : "dm"
-    ) =>
-      destination === "dm"
-        ? dmChannel.send(contents)
-        : message.channel.send(contents);
-
-    if (forceChannel) {
-      try {
-        await send("Generating channel summary report...", "channel");
-      } catch (err) {
-        console.error("Loading message failed to send to channel.");
+    // Sends notice or loading message to user, logs notice ID for potential future report requests
+    try {
+      if (forceChannel) {
+        await this.sendChannelLoadingMessage(message.channel as TextChannel);
+      } else {
+        const noticeId = await this.sendChannelReportNotice(
+          message.channel as TextChannel,
+          hourLimit
+        );
+        this.notices[noticeId] = reportId;
       }
-    } else {
-      let notice: Message;
-
-      try {
-        const embed = new MessageEmbed();
-        embed
-          .setTitle("Channel Summary Report")
-          .setDescription(
-            `I am now generating a summary of the activity in <#${channelId}> over the last ${hourLimit} hours. Check your DMs for the report!\n\nDo you want a copy of the report, too? Click the envelope icon below to have one sent to your DMs.`
-          );
-
-        notice = await send(embed, "channel");
-        this.notices[notice.id] = reportId;
-      } catch (err) {
-        console.error("Failed to create notice in channel.");
-      }
-
-      try {
-        await notice.react("📩");
-      } catch (err) {
-        console.error("Failed to send reaction to notice.");
-        console.error(err);
-      }
+    } catch (err) {
+      console.error(err);
     }
 
-    const now = new Date();
-    const timeLimit = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
-
+    // Ensures adaquate message collection size has been fetched to generate report from
     try {
-      await this.fetchMessages(message, timeLimit);
+      await this.fetchMessages(message, hourLimit);
     } catch (err) {
       console.error("Error fetching messages from Discord API.");
       console.error(err);
@@ -258,7 +260,7 @@ export class ReportGenerator {
 
     const collection = this.collections[message.channel.id];
 
-    //generate collections for summary sections
+    // Generates sub collections from which reports can be generated
     const twitterCollection = getTwitter(collection);
     const newsCollection = getNews(collection);
     const discussionCollection = getDiscussion(collection);

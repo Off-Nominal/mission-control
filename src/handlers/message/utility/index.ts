@@ -79,11 +79,7 @@ export const handleMessage = async (
           forceChannel
         );
 
-        await reportGenerator.sendReport(
-          channel,
-          reportId,
-          forceChannel ? "channel" : "dm"
-        );
+        await reportGenerator.sendReport(channel, reportId);
       } catch (err) {
         console.error(err);
       }

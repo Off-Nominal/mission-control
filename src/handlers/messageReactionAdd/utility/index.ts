@@ -45,7 +45,7 @@ export const utilityReactHandler = async (
   }
 
   try {
-    await reportGenerator.sendReport(dmChannel, reportId, "dm");
+    await reportGenerator.sendReport(dmChannel, reportId);
   } catch (err) {
     console.error(err);
   }
