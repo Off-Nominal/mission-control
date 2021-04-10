@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { Message, TextChannel } from "discord.js";
 import { createPoll } from "../../../actions/utility/createPoll";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
@@ -57,6 +57,9 @@ export const handleMessage = async (
       } else {
         const forceChannel = command === "here" || secondCommand === "here";
         const timeLimit = Number(command) || 8;
+        const channel = forceChannel
+          ? (message.channel as TextChannel)
+          : await message.author.createDM();
 
         const reportId = await reportGenerator.generateReport(
           message,
@@ -64,7 +67,7 @@ export const handleMessage = async (
           forceChannel
         );
         reportGenerator.sendReport(
-          message,
+          channel,
           reportId,
           forceChannel ? "channel" : "dm"
         );

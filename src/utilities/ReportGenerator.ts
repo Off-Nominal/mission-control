@@ -3,11 +3,14 @@ import {
   APIMessageContentResolvable,
   ChannelLogsQueryOptions,
   Collection,
+  DMChannel,
   Message,
   MessageAdditions,
   MessageEmbed,
   MessageOptions,
+  ReactionCollector,
   Snowflake,
+  TextChannel,
 } from "discord.js";
 import { getDiscussion } from "../actions/utility/generateSummary/filters/getDiscussion";
 import { getNews } from "../actions/utility/generateSummary/filters/getNews";
@@ -124,33 +127,68 @@ export class ReportGenerator {
     this.collections[message.channel.id] = messages;
   }
 
+  public getReportId(noticeId: string) {
+    return this.notices[noticeId];
+  }
+
   public async sendReport(
-    message: Message,
+    channel: DMChannel | TextChannel,
     id: string,
     destination: "dm" | "channel" = "dm"
   ) {
     const report = this.reports[id];
 
-    const sends = [];
-
-    try {
-      if (destination === "dm") {
-        const dmChannel = await message.author.createDM();
-        Object.keys(report).forEach((reportType) => {
-          sends.push(dmChannel.send(report[reportType]));
-        });
-      } else {
-        Object.keys(report).forEach((reportType) => {
-          sends.push(message.channel.send(report[reportType]));
-        });
+    if (!report) {
+      try {
+        await channel.send(
+          `Looks like this report doesn't exist anymore (I don't keep them that long). Try generating a new report with \`!summary\`!`
+        );
+      } catch (err) {
+        console.error("Couldn't send report to user after clicking emoji.");
       }
-    } catch (err) {
-      console.error("failed to created DM channel with user to send report.");
     }
 
-    return Promise.all(sends).catch((err) => {
-      throw err;
-    });
+    const sender = async () => {
+      const sends = [];
+      try {
+        if (destination === "dm") {
+          Object.keys(report).forEach((reportType) => {
+            sends.push(channel.send(report[reportType]));
+          });
+        } else {
+          Object.keys(report).forEach((reportType) => {
+            sends.push(channel.send(report[reportType]));
+          });
+        }
+      } catch (err) {
+        console.error("failed to created DM channel with user to send report.");
+      }
+
+      return Promise.all(sends).catch((err) => {
+        throw err;
+      });
+    };
+
+    const waiter = async () => {
+      let count = 0;
+
+      if (count > 9) {
+        return await channel.send(
+          `Sorry, I tried a few times but I can't seem to find this report. Try generating a new one and let Jake know this happened!`
+        );
+      }
+
+      if (Object.keys(report).length) {
+        sender();
+      } else {
+        setTimeout(async () => {
+          count++;
+          await waiter();
+        }, 1000);
+      }
+    };
+
+    waiter();
   }
 
   public async generateReport(
@@ -164,6 +202,8 @@ export class ReportGenerator {
     }
 
     const reportId = uuidv4();
+    this.reports[reportId] = {};
+    const report = this.reports[reportId];
     const channelId = message.channel.id;
     const dmChannel = await message.author.createDM();
 
@@ -178,22 +218,35 @@ export class ReportGenerator {
         ? dmChannel.send(contents)
         : message.channel.send(contents);
 
-    try {
-      if (forceChannel) {
+    if (forceChannel) {
+      try {
         await send("Generating channel summary report...", "channel");
-      } else {
+      } catch (err) {
+        console.error("Loading message failed to send to channel.");
+      }
+    } else {
+      let notice: Message;
+
+      try {
         const embed = new MessageEmbed();
         embed
           .setTitle("Channel Summary Report")
           .setDescription(
-            `I am now generating a summary of the activity in <#${channelId}> over the last ${hourLimit}. Check your DMs for the report!`
+            `I am now generating a summary of the activity in <#${channelId}> over the last ${hourLimit}. Check your DMs for the report!\n\nDo you want a copy of the report, too? Click the envelope icon below to have one sent to your DMs.`
           );
 
-        const notice = await send(embed, "channel");
+        notice = await send(embed, "channel");
         this.notices[notice.id] = reportId;
+      } catch (err) {
+        console.error("Failed to create notice in channel.");
       }
-    } catch (err) {
-      console.error("Loading message failed to send to channel.");
+
+      try {
+        await notice.react("📩");
+      } catch (err) {
+        console.error("Failed to send reaction to notice.");
+        console.error(err);
+      }
     }
 
     const now = new Date();
@@ -213,8 +266,6 @@ export class ReportGenerator {
     const newsCollection = getNews(collection);
     const discussionCollection = getDiscussion(collection);
     const youTubeCollection = getYouTube(collection);
-
-    const report: Report = {};
 
     if (newsCollection.size > 0) {
       report.news = generateLinkSummary(newsCollection, hourLimit, channelId, {

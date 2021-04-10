@@ -7,6 +7,7 @@ import {
   feedListenerMessageHandler,
   utilityMessageHandler,
 } from "./handlers/message/";
+import { utilityReactHandler } from "./handlers/messageReactionAdd";
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
@@ -45,7 +46,9 @@ const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
  *  Bot Setup
  ************************************/
 
-const utilityBot: Client = new Discord.Client();
+const utilityBot: Client = new Discord.Client({
+  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+});
 const bcBot: Client = new Discord.Client();
 const wmBot: Client = new Discord.Client();
 const ofnBot: Client = new Discord.Client();
@@ -174,10 +177,13 @@ starshipChecker.initialize();
  *  Utility Bot Actions
  ************************************/
 
-utilityBot.on("message", (message: Message) =>
+utilityBot.on("message", (message) =>
   utilityMessageHandler(message, reportGenerator)
 );
 utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
+utilityBot.on("messageReactionAdd", (messageReact, user) =>
+  utilityReactHandler(messageReact, user, reportGenerator)
+);
 
 /***********************************
  *  Book Club Bot Actions
