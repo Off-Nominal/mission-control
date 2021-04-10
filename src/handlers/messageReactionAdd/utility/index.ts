@@ -6,10 +6,7 @@ export const utilityReactHandler = async (
   user: User | PartialUser,
   reportGenerator: ReportGenerator
 ) => {
-  // Ignore emojies that aren't the envelope or that are from bots
-  if (messageReact.emoji.toString() !== "📩") return;
-  if (user.bot) return;
-
+  let requestor = user;
   let react = messageReact;
 
   // When the bot restarts, old messages are partials and cached.
@@ -18,6 +15,14 @@ export const utilityReactHandler = async (
   if (messageReact.partial) {
     react = await messageReact.fetch();
   }
+
+  if (user.partial) {
+    requestor = await user.fetch();
+  }
+
+  // Ignore emojies that aren't the envelope or that are from bots
+  if (messageReact.emoji.toString() !== "📩") return;
+  if (requestor.bot) return;
 
   // Ignore requests on non-report messages
   if (react.message.embeds[0]?.title !== "Channel Summary Report") {
@@ -30,7 +35,7 @@ export const utilityReactHandler = async (
   let dmChannel: DMChannel;
 
   try {
-    dmChannel = await user.createDM();
+    dmChannel = await requestor.createDM();
   } catch (err) {
     console.error(err);
     return;
