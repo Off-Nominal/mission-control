@@ -1,12 +1,12 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js";
 import { getChannel } from "../../helpers/getChannel";
-import { parseCommands } from "../../helpers/parseCommands";
+import { parseMessage } from "../../helpers/parseMessage";
 
 export const shunt = (message: Message) => {
-  const [prefix, channelName, ...rest] = parseCommands(message);
+  const { command, args } = parseMessage("!shunt", message);
 
   const sourceChannel = message.channel as TextChannel;
-  const targetChannel = getChannel(message, channelName);
+  const targetChannel = getChannel(message, command);
 
   if (sourceChannel.id === targetChannel.id) {
     return sourceChannel.send(
@@ -15,14 +15,14 @@ export const shunt = (message: Message) => {
   }
 
   const shunter = message.member.displayName;
-  const shuntMessage = rest.join(" ");
+  const shuntMessage = args.join(" ");
 
   const targetEmbed = new MessageEmbed();
 
   targetEmbed
     .setTitle(`Incoming thread from #${sourceChannel.name}`)
     .setDescription(
-      `${shunter}: ${shuntMessage} - [Read the original](${message.url})`
+      `${shunter}: "${shuntMessage}" - [Read the original](${message.url})`
     )
     .setThumbnail("https://i.imgur.com/kfvmby0.png");
 
@@ -34,7 +34,7 @@ export const shunt = (message: Message) => {
       sourceEmbed
         .setTitle(`Conversation thread move request`)
         .setDescription(
-          `${shunter}: ${shuntMessage} - [Follow the thread!](${message.url})`
+          `${shunter}: "${shuntMessage}" - [Follow the thread!](${message.url})`
         )
         .setThumbnail("https://i.imgur.com/UYBbaLR.png");
 

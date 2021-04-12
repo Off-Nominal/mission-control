@@ -21,7 +21,7 @@ export const generateDiscussionSummary = async (
 
   collection.forEach((message) => {
     let words = message.content.split(" ");
-    words = filterWords(words, ["http", "@", "!"]);
+    words = filterWords(words, ["http", "!", "<#", "<@"]);
     words = filterNumbers(words);
     if (words.length) {
       discussedWords = discussedWords.concat(words);
@@ -31,6 +31,8 @@ export const generateDiscussionSummary = async (
   if (discussedWords.length < 3) {
     return embed;
   }
+
+  console.log(discussedWords);
 
   let wordCloudUrl: null | string = null;
 
