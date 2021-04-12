@@ -22,7 +22,7 @@ export const shunt = (message: Message) => {
   targetEmbed
     .setTitle(`Incoming thread from #${sourceChannel.name}`)
     .setDescription(
-      `${shunter}: ${shuntMessage} - [Read the original](${message.url})`
+      `${shunter}: "${shuntMessage}" - [Read the original](${message.url})`
     )
     .setThumbnail("https://i.imgur.com/kfvmby0.png");
 
@@ -34,7 +34,7 @@ export const shunt = (message: Message) => {
       sourceEmbed
         .setTitle(`Conversation thread move request`)
         .setDescription(
-          `${shunter}: ${shuntMessage} - [Follow the thread!](${message.url})`
+          `${shunter}: "${shuntMessage}" - [Follow the thread!](${message.url})`
         )
         .setThumbnail("https://i.imgur.com/UYBbaLR.png");
 
