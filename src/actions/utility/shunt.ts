@@ -1,12 +1,12 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js";
 import { getChannel } from "../../helpers/getChannel";
-import { parseCommands } from "../../helpers/parseCommands";
+import { parseMessage } from "../../helpers/parseMessage";
 
 export const shunt = (message: Message) => {
-  const [prefix, channelName, ...rest] = parseCommands(message);
+  const { command, args } = parseMessage("!shunt", message);
 
   const sourceChannel = message.channel as TextChannel;
-  const targetChannel = getChannel(message, channelName);
+  const targetChannel = getChannel(message, command);
 
   if (sourceChannel.id === targetChannel.id) {
     return sourceChannel.send(
@@ -15,7 +15,7 @@ export const shunt = (message: Message) => {
   }
 
   const shunter = message.member.displayName;
-  const shuntMessage = rest.join(" ");
+  const shuntMessage = args.join(" ");
 
   const targetEmbed = new MessageEmbed();
 
