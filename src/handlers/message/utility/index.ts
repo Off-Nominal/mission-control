@@ -1,5 +1,6 @@
 import { Message, TextChannel } from "discord.js";
 import { createPoll } from "../../../actions/utility/createPoll";
+import { marsTime } from "../../../actions/utility/marsTime";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { shunt } from "../../../actions/utility/shunt";
@@ -12,6 +13,7 @@ enum AllowedPrefix {
   OLDPOLL = "+poll",
   POLL = "!poll",
   SUMMARY = "!summary",
+  MARSTIME = "!marstime",
 }
 
 export const handleMessage = async (
@@ -31,6 +33,11 @@ export const handleMessage = async (
       } else {
         shunt(message);
       }
+      break;
+    }
+
+    case AllowedPrefix.MARSTIME: {
+      marsTime(message, command);
       break;
     }
 
