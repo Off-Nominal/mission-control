@@ -24,16 +24,19 @@ export const marsTime = (message: Message, command: string) => {
   const md = new MarsDate(new Date());
 
   switch (command) {
+    case "mer-a":
     case "spirit": {
       const time = md.getLMST(spacecraft.spirit.lon);
       msg = `The local mean solar time (LMST) at the Spirt rover landing site is ${time}.`;
       break;
     }
+    case "mer-b":
     case "opportunity": {
       const time = md.getLMST(spacecraft.opportunity.lon);
       msg = `The local mean solar time (LMST) at the Opportunity rover landing site is ${time}.`;
       break;
     }
+    case "msl":
     case "curiosity": {
       const time = md.getLMST(spacecraft.curiosity.lon);
       msg = `The local mean solar time (LMST) at the Curiosity rover landing site is ${time}.`;
@@ -44,6 +47,8 @@ export const marsTime = (message: Message, command: string) => {
       msg = `The local mean solar time (LMST) at the InSight lander landing site is ${time}.`;
       break;
     }
+    case "percy":
+    case "mars2020":
     case "perseverance": {
       const time = md.getLMST(spacecraft.perseverance.lon);
       msg = `The local mean solar time (LMST) at the Perseverance rover landing site is ${time}.`;
