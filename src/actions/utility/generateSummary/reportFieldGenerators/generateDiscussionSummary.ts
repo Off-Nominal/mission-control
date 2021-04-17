@@ -32,8 +32,6 @@ export const generateDiscussionSummary = async (
     return embed;
   }
 
-  console.log(discussedWords);
-
   let wordCloudUrl: null | string = null;
 
   try {
