@@ -1,6 +1,6 @@
 import { Message, TextChannel } from "discord.js";
 import { createPoll } from "../../../actions/utility/createPoll";
-import { marsTime } from "../../../actions/utility/marsTime";
+import { marsTime } from "../../../actions/utility/marstime/marsTime";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { shunt } from "../../../actions/utility/shunt";
