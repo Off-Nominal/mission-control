@@ -180,9 +180,9 @@ starshipChecker.initialize();
  *  Utility Bot Actions
  ************************************/
 
-utilityBot.on("message", (message) => {
-  utilityMessageHandler(message, reportGenerator);
-});
+utilityBot.on("message", (message) =>
+  utilityMessageHandler(message, reportGenerator)
+);
 utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
 utilityBot.on("messageReactionAdd", (messageReact, user) =>
   utilityReactHandler(messageReact, user, reportGenerator)

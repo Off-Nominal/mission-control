@@ -1,7 +1,7 @@
 import { Client, TextChannel } from "discord.js";
 import { parseCommands } from "../helpers/parseCommands";
 
-const waitPeriod = Number(process.env.LIVECHAT_TIMEOUT) || 5000;
+const waitPeriod = Number(process.env.LIVECHAT_TIMEOUT_SECS) || 5;
 
 const formatTime = (ms: number) => {
   const s = ms / 1000;
@@ -15,7 +15,7 @@ export class ChannelBabysitter {
   private _isTiming: boolean = false;
   private _client: Client;
   private _channelId: string;
-  private _waitPeriod: number = waitPeriod;
+  private _waitPeriod: number = waitPeriod * 1000;
 
   constructor(client: Client, channelId: string) {
     this._client = client;
@@ -82,10 +82,6 @@ export class ChannelBabysitter {
   }
 
   public async updateChannel(channel: TextChannel) {
-    if (channel.topic.includes("⚫")) {
-      return;
-    }
-
     await this.setTopic(
       channel,
       "⚫ Not Currently Live\n|\nWhen we're watching a live event, this is the channel we watch and interact with. If you want to listen along and participate, jump in!\n\nSet me using the command `!topic [STREAM_URL] [DESCRIPTION]` like `!topic https://youtu.be/dQw4w9WgXcQ Rocket Launch!`"
