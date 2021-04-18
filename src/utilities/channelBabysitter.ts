@@ -21,16 +21,13 @@ export class ChannelBabysitter {
     this._client = client;
     this._channelId = channelId;
 
-    this._client.on("message", async (message) => {
+    this._client.on("message", (message) => {
       const isCorrectChannel = message.channel.id === this._channelId;
 
       const [prefix, url, ...desc] = parseCommands(message, false);
 
       if (prefix === "!topic" && isCorrectChannel) {
-        await message.channel.send(
-          "Request received! If you don't see the update right away, note that Discord limits the channel update API to 2 changes per 10 minutes. Either wait it out or ask a mod to change it manually."
-        );
-        await this.setTopic(
+        this.setTopic(
           message.channel as TextChannel,
           `🔴 Live - ${desc.join(" ")}\n\n${url}`
         );
@@ -75,6 +72,9 @@ export class ChannelBabysitter {
 
   public async setTopic(channel: TextChannel, text: string) {
     try {
+      await channel.send(
+        "Request received! If you don't see the update right away, note that Discord limits the channel update API to 2 changes per 10 minutes. Either wait it out or ask a mod to change it manually."
+      );
       await channel.setTopic(text);
     } catch (err) {
       console.error(err);
