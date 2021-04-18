@@ -110,11 +110,7 @@ const hlFeedListener = new FeedListener(HLFEED, {
  ************************************/
 
 const reportGenerator = new ReportGenerator();
-const channelBabysitter = new ChannelBabysitter(
-  utilityBot,
-  LIVECHATCHANNELID,
-  5000
-);
+const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
 
 /***********************************
  *  ASYNC LOGINS/INITS
