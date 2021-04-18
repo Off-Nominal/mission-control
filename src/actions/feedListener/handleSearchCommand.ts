@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { Message, MessageEmbed } from "discord.js";
 import { FeedListener } from "../../listeners/feedListener/feedListener";
 
@@ -10,6 +11,12 @@ export const handleSearchCommand = (
 
   const embed = new MessageEmbed();
 
+  const formatDate = (dateString: string) => {
+    const timestamp = new Date(dateString);
+
+    return format(timestamp, "MMM e, yyyy");
+  };
+
   embed
     .setColor("#3e7493")
     .setTitle("Search Results")
@@ -20,9 +27,9 @@ export const handleSearchCommand = (
         return {
           name: result.item.title,
           value:
-            result.item.description.slice(0, 100) +
+            result.item.description.slice(0, 160) +
             "..." +
-            ` [[Link]](${result.item.url})`,
+            `\n[[Link]](${result.item.url}) - ${formatDate(result.item.date)}`,
         };
       })
     );
