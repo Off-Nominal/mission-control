@@ -14,6 +14,7 @@ import { SiteListener } from "./listeners/siteListener";
 import { logReady } from "./actions/global/logReady";
 import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
 import { ReportGenerator } from "./utilities/ReportGenerator";
+import { ChannelBabysitter } from "./utilities/channelBabysitter";
 const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
@@ -21,6 +22,7 @@ const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
 
 const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
 const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
+const LIVECHATCHANNELID = process.env.LIVECHATCHANNELID || TEST_CHANNEL;
 
 const WMFEED = process.env.WMFEED;
 const MECOFEED = process.env.MECOFEED;
@@ -108,6 +110,7 @@ const hlFeedListener = new FeedListener(HLFEED, {
  ************************************/
 
 const reportGenerator = new ReportGenerator();
+const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
 
 /***********************************
  *  ASYNC LOGINS/INITS
