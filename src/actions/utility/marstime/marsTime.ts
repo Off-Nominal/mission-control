@@ -130,6 +130,8 @@ export const marsTime = async (message: Message, command: string) => {
     }
     case "percy":
     case "mars2020":
+    case "m2020":
+    case "m20":
     case "perseverance": {
       const {
         perseverance,
@@ -141,7 +143,7 @@ export const marsTime = async (message: Message, command: string) => {
 
       try {
         const response = await axios.get(
-          "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints_current.json"
+          "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints_current.json"
         );
         const [
           jsonLon,
