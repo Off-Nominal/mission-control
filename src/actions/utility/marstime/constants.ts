@@ -1,13 +1,13 @@
 export const spacecraftData = {
   spirit: {
     epoch: new Date("2004-01-04T04:35:00.000Z"),
-    lat: -14.5684,
-    lon: 184.527364,
+    lat: -14.608,
+    lon: 184.473,
   },
   opportunity: {
     epoch: new Date("2004-01-25T05:05:00.000Z"),
-    lat: 1.9462,
-    lon: 5.5266,
+    lat: -2.333,
+    lon: 5.349,
   },
   curiosity: {
     epoch: new Date("2012-08-06T05:15:57.000Z"),
