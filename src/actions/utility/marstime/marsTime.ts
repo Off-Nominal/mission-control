@@ -17,7 +17,8 @@ const formatLon = (coord: number) => {
 };
 
 export const marsTime = async (message: Message, command: string) => {
-  const cd = new MarsDate(new Date());
+  const earthNow = new Date();
+  const cd = new MarsDate(earthNow);
 
   const embed = new MessageEmbed();
 
@@ -28,6 +29,7 @@ export const marsTime = async (message: Message, command: string) => {
   let sol: number;
   let ltst: string;
   let lmst: string;
+  let avatar: string;
 
   switch (command) {
     case "mer-a":
@@ -45,6 +47,8 @@ export const marsTime = async (message: Message, command: string) => {
       lmst = cd.getLMST(spirit.lon);
       ltst = cd.getLTST(spirit.lon);
       description = `Mission Sol ${sol}`;
+      avatar =
+        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764247/Discord%20Assets/Nasa_mer_marvin_y39qhz.png";
 
       break;
     }
@@ -63,6 +67,8 @@ export const marsTime = async (message: Message, command: string) => {
       lmst = cd.getLMST(opportunity.lon);
       ltst = cd.getLTST(opportunity.lon);
       description = `Mission Sol ${sol}`;
+      avatar =
+        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764272/Discord%20Assets/180px-Nasa_mer_daffy_oioilc.png";
 
       break;
     }
@@ -99,6 +105,8 @@ export const marsTime = async (message: Message, command: string) => {
       }
 
       description = `Mission Sol ${sol}`;
+      avatar =
+        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764120/Discord%20Assets/150px-Mars_Science_Laboratory_mission_logo_phaqka.png";
 
       break;
     }
@@ -116,6 +124,8 @@ export const marsTime = async (message: Message, command: string) => {
       lmst = cd.getLMST(insight.lon);
       ltst = cd.getLTST(insight.lon);
       description = `Mission Sol ${sol}`;
+      avatar =
+        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764023/Discord%20Assets/InSight_Mission_Logo_uyd5eh.png";
       break;
     }
     case "percy":
@@ -152,6 +162,8 @@ export const marsTime = async (message: Message, command: string) => {
       }
 
       description = `Mission Sol ${sol}`;
+      avatar =
+        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764374/Discord%20Assets/Mars_2020_JPL_Insignia_miw2hg.png";
       break;
     }
     default: {
@@ -161,6 +173,8 @@ export const marsTime = async (message: Message, command: string) => {
       lon = "0W";
       lmst = cd.getLMST(0);
       ltst = cd.getLTST(0);
+      avatar =
+        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764208/Discord%20Assets/Mars-800h-v2_02.width-1024_ouuahe.png";
     }
   }
 
@@ -178,7 +192,9 @@ export const marsTime = async (message: Message, command: string) => {
         value: `LMST ${lmst}\nLTST ${ltst}`,
         inline: true,
       },
-    ]);
+    ])
+    .setTimestamp(earthNow)
+    .setThumbnail(avatar);
 
   return message.channel.send(embed);
 };
