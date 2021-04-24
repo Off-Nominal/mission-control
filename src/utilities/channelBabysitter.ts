@@ -1,7 +1,7 @@
 import { Client, TextChannel } from "discord.js";
 import { parseCommands } from "../helpers/parseCommands";
 
-const waitPeriod = Number(process.env.LIVECHAT_TIMEOUT_SECS) || 5;
+const timeoutPeriod = Number(process.env.LIVECHAT_TIMEOUT_SECS) || 15;
 
 const formatTime = (ms: number) => {
   const s = ms / 1000;
@@ -10,27 +10,60 @@ const formatTime = (ms: number) => {
   return `${m} minutes`;
 };
 
+const requestNotification =
+  "Request received! If you don't see the update right away, note that Discord limits the channel update API to 2 changes per 10 minutes. Either wait it out or ask a mod to change it manually.";
+
+const generateInactivityMessage = (timeout: number) => {
+  return `It's been ${formatTime(
+    timeout
+  )} since the last message. Sounds like the live event is done, so I've cleared the channel topic.`;
+};
+
+const generateTopicMessage = (options?: { desc: string[]; url: string }) => {
+  if (options) {
+    return `🔴 Live - ${options.desc.join(" ")}\n\n${
+      options.url
+    }\n\nEvent over? Reset me with \`!topic reset\``;
+  } else {
+    return "⚫ Not Currently Live\n|\nSet me using the command `!topic [STREAM_URL] [optional_MIN_WAIT_IN_MINUTES] [DESCRIPTION]` like `!topic https://youtu.be/dQw4w9WgXcQ 45 Rocket Launch!` or `!topic https://youtu.be/dQw4w9WgXcQ Rocket Launch!`";
+  }
+};
+
 export class ChannelBabysitter {
   private _timer: NodeJS.Timer;
   private _isTiming: boolean = false;
   private _client: Client;
   private _channelId: string;
-  private _waitPeriod: number = waitPeriod * 1000;
+  private _timeoutPeriod: number = timeoutPeriod * 1000;
+  private _minWait: number | null = null;
 
   constructor(client: Client, channelId: string) {
     this._client = client;
     this._channelId = channelId;
 
-    this._client.on("message", (message) => {
+    this._client.on("message", async (message) => {
       const isCorrectChannel = message.channel.id === this._channelId;
-
-      const [prefix, url, ...desc] = parseCommands(message, false);
+      const [prefix, url, minWait, ...desc] = parseCommands(message, false);
 
       if (prefix === "!topic" && isCorrectChannel) {
-        this.setTopic(
-          message.channel as TextChannel,
-          `🔴 Live - ${desc.join(" ")}\n\n${url}`
-        );
+        await message.channel.send(requestNotification);
+
+        if (url === "reset") {
+          this.setTopic(message.channel as TextChannel, generateTopicMessage());
+        } else {
+          // if the user specified a min wait, it create a delay period here
+          const wait = Number(minWait) * 60 * 1000;
+          if (wait > this._timeoutPeriod && !isNaN(wait)) {
+            this._minWait = wait - this._timeoutPeriod;
+          }
+
+          const description = isNaN(wait) ? [minWait, ...desc] : desc;
+
+          this.setTopic(
+            message.channel as TextChannel,
+            generateTopicMessage({ desc: description, url })
+          );
+        }
       }
 
       if (this._isTiming && isCorrectChannel) {
@@ -51,18 +84,45 @@ export class ChannelBabysitter {
           eventIsHappening &&
           isCorrectChannel
         ) {
-          this.startTimer(newChannel);
+          if (this._minWait) {
+            setTimeout(() => {
+              this._minWait = null;
+              this.startTimer(newChannel);
+            }, this._minWait);
+          } else {
+            this.startTimer(newChannel);
+          }
         }
       }
     );
   }
 
+  //Initialization
+  //Used to baseline the current state of the monitored channel, incase an event is happening when the bot boots
+
+  public async initialize() {
+    const channel = (await this._client.channels.fetch(
+      this._channelId
+    )) as TextChannel;
+    const eventIsHappening = channel.topic.includes("🔴");
+    if (eventIsHappening) {
+      this.startTimer(channel);
+    }
+  }
+
+  //Timer Functions
+
   public startTimer(channel: TextChannel) {
     this._timer = setTimeout(() => {
-      this.updateChannel(channel);
-    }, this._waitPeriod);
+      this.handleInactivity(channel);
+    }, this._timeoutPeriod);
 
     this._isTiming = true;
+  }
+
+  public clearTimer() {
+    clearTimeout(this._timer);
+    this._isTiming = false;
   }
 
   public resetTimer(channel: TextChannel) {
@@ -70,30 +130,26 @@ export class ChannelBabysitter {
     this.startTimer(channel);
   }
 
+  // Topic Setting
+
   public async setTopic(channel: TextChannel, text: string) {
     try {
-      await channel.send(
-        "Request received! If you don't see the update right away, note that Discord limits the channel update API to 2 changes per 10 minutes. Either wait it out or ask a mod to change it manually."
-      );
       await channel.setTopic(text);
     } catch (err) {
       console.error(err);
     }
   }
 
-  public async updateChannel(channel: TextChannel) {
-    await this.setTopic(
-      channel,
-      "⚫ Not Currently Live\n|\nWhen we're watching a live event, this is the channel we watch and interact with. If you want to listen along and participate, jump in!\n\nSet me using the command `!topic [STREAM_URL] [DESCRIPTION]` like `!topic https://youtu.be/dQw4w9WgXcQ Rocket Launch!`"
-    );
+  //Inactivity handler
 
-    await channel.send(
-      `It's been ${formatTime(
-        this._waitPeriod
-      )} since the last message. Sounds like the live event is done, so I've cleared the channel topic.`
-    );
+  public async handleInactivity(channel: TextChannel) {
+    this.setTopic(channel, generateTopicMessage());
 
-    clearTimeout(this._timer);
-    this._isTiming = false;
+    try {
+      await channel.send(generateInactivityMessage(this._timeoutPeriod));
+      this.clearTimer();
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
