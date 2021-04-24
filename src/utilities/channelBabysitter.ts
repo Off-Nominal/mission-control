@@ -23,7 +23,7 @@ const generateTopicMessage = (options?: { desc: string[]; url: string }) => {
   if (options) {
     return `🔴 Live - ${options.desc.join(" ")}\n\n${options.url}`;
   } else {
-    return "⚫ Not Currently Live\n|\nWhen we're watching a live event, this is the channel we watch and interact with. If you want to listen along and participate, jump in!\n\nSet me using the command `!topic [STREAM_URL] [DESCRIPTION]` like `!topic https://youtu.be/dQw4w9WgXcQ Rocket Launch!`";
+    return "⚫ Not Currently Live\n|\nSet me using the command `!topic [STREAM_URL] [optional_MIN_WAIT_IN_MINUTES] [DESCRIPTION]` like `!topic https://youtu.be/dQw4w9WgXcQ 45 Rocket Launch!` or `!topic https://youtu.be/dQw4w9WgXcQ Rocket Launch!`";
   }
 };
 
@@ -33,6 +33,7 @@ export class ChannelBabysitter {
   private _client: Client;
   private _channelId: string;
   private _timeoutPeriod: number = timeoutPeriod * 1000;
+  private _minWait: number | null = null;
 
   constructor(client: Client, channelId: string) {
     this._client = client;
@@ -40,15 +41,27 @@ export class ChannelBabysitter {
 
     this._client.on("message", async (message) => {
       const isCorrectChannel = message.channel.id === this._channelId;
-      const [prefix, url, ...desc] = parseCommands(message, false);
+      const [prefix, url, minWait, ...desc] = parseCommands(message, false);
 
       if (prefix === "!topic" && isCorrectChannel) {
         await message.channel.send(requestNotification);
-        const msg =
-          url === "reset"
-            ? generateTopicMessage()
-            : generateTopicMessage({ desc, url });
-        this.setTopic(message.channel as TextChannel, msg);
+
+        if (url === "reset") {
+          this.setTopic(message.channel as TextChannel, generateTopicMessage());
+        } else {
+          // if the user specified a min wait, it create a delay period here
+          const wait = Number(minWait) * 60 * 1000;
+          if (wait > this._timeoutPeriod && !isNaN(wait)) {
+            this._minWait = wait - this._timeoutPeriod;
+          }
+
+          const description = isNaN(wait) ? [minWait, ...desc] : desc;
+
+          this.setTopic(
+            message.channel as TextChannel,
+            generateTopicMessage({ desc: description, url })
+          );
+        }
       }
 
       if (this._isTiming && isCorrectChannel) {
@@ -69,7 +82,13 @@ export class ChannelBabysitter {
           eventIsHappening &&
           isCorrectChannel
         ) {
-          this.startTimer(newChannel);
+          if (this._minWait) {
+            setTimeout(() => {
+              this.startTimer(newChannel);
+            }, this._minWait);
+          } else {
+            this.startTimer(newChannel);
+          }
         }
       }
     );
@@ -101,6 +120,7 @@ export class ChannelBabysitter {
   public clearTimer() {
     clearTimeout(this._timer);
     this._isTiming = false;
+    this._minWait = null;
   }
 
   public resetTimer(channel: TextChannel) {
