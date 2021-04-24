@@ -75,6 +75,19 @@ export class ChannelBabysitter {
     );
   }
 
+  //Initialization
+  //Used to baseline the current state of the monitored channel, incase an event is happening when the bot boots
+
+  public async initialize() {
+    const channel = (await this._client.channels.fetch(
+      this._channelId
+    )) as TextChannel;
+    const eventIsHappening = channel.topic.includes("🔴");
+    if (eventIsHappening) {
+      this.startTimer(channel);
+    }
+  }
+
   //Timer Functions
 
   public startTimer(channel: TextChannel) {

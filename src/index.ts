@@ -143,6 +143,7 @@ const getPresenceData = (helpCommand: string): PresenceData => {
 utilityBot.once("ready", () => {
   logReady(utilityBot.user.tag);
   utilityBot.user.setPresence(getPresenceData("!help"));
+  channelBabysitter.initialize();
 });
 bcBot.once("ready", () => {
   logReady(bcBot.user.tag);
