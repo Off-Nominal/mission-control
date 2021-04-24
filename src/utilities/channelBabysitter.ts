@@ -21,7 +21,9 @@ const generateInactivityMessage = (timeout: number) => {
 
 const generateTopicMessage = (options?: { desc: string[]; url: string }) => {
   if (options) {
-    return `🔴 Live - ${options.desc.join(" ")}\n\n${options.url}`;
+    return `🔴 Live - ${options.desc.join(" ")}\n\n${
+      options.url
+    }\n\nEvent over? Reset me with \`!topic reset\``;
   } else {
     return "⚫ Not Currently Live\n|\nSet me using the command `!topic [STREAM_URL] [optional_MIN_WAIT_IN_MINUTES] [DESCRIPTION]` like `!topic https://youtu.be/dQw4w9WgXcQ 45 Rocket Launch!` or `!topic https://youtu.be/dQw4w9WgXcQ Rocket Launch!`";
   }
@@ -84,6 +86,7 @@ export class ChannelBabysitter {
         ) {
           if (this._minWait) {
             setTimeout(() => {
+              this._minWait = null;
               this.startTimer(newChannel);
             }, this._minWait);
           } else {
@@ -120,7 +123,6 @@ export class ChannelBabysitter {
   public clearTimer() {
     clearTimeout(this._timer);
     this._isTiming = false;
-    this._minWait = null;
   }
 
   public resetTimer(channel: TextChannel) {
