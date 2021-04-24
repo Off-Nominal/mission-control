@@ -49,6 +49,8 @@ export class ChannelBabysitter {
         await message.channel.send(requestNotification);
 
         if (url === "reset") {
+          this.clearTimer();
+          this._minWait = null;
           this.setTopic(message.channel as TextChannel, generateTopicMessage());
         } else {
           // if the user specified a min wait, it create a delay period here
