@@ -3,6 +3,14 @@ import { Message, MessageEmbed } from "discord.js";
 import { MarsDate } from "mars-date-utils";
 import { spacecraftData } from "./constants";
 
+export type SpacecraftData = {
+  epoch: Date;
+  lat: number;
+  lon: number;
+  name: string;
+  logo: string;
+};
+
 const formatLatLon = (coord: number) => {
   return Math.round(coord * 100) / 100;
 };
@@ -16,72 +24,94 @@ const formatLon = (coord: number) => {
   return formatLatLon(coord) + "W";
 };
 
-export const marsTime = async (message: Message, command: string) => {
-  const earthNow = new Date();
-  const cd = new MarsDate(earthNow);
-
+export const marsTime = async (
+  message: Message,
+  command: string,
+  secondCommand?: string
+) => {
   const embed = new MessageEmbed();
+  let data: SpacecraftData | null = null;
 
-  let author: string;
-  let description: string;
-  let lat: string;
-  let lon: string;
-  let sol: number;
-  let ltst: string;
-  let lmst: string;
-  let avatar: string;
+  const createEmbedFields = (data: SpacecraftData | null) => {
+    const earthNow = new Date();
+    const cd = new MarsDate(earthNow);
+
+    if (!data) {
+      return {
+        avatar:
+          "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764208/Discord%20Assets/Mars-800h-v2_02.width-1024_ouuahe.png",
+        author: "Airy Mean Time",
+        lat: formatLat(0),
+        lon: formatLon(0),
+        lmst: cd.getLMST(0),
+        ltst: cd.getLTST(0),
+        description: `Time at Longitude Zero`,
+        earthNow,
+      };
+    } else {
+      const md = new MarsDate(data.epoch);
+      const sol = md.getSolOfMission(data.lon);
+
+      return {
+        avatar: data.logo,
+        author: data.name,
+        lat: formatLat(data.lat),
+        lon: formatLon(data.lon),
+        lmst: cd.getLMST(data.lon),
+        ltst: cd.getLTST(data.lon),
+        description: `Mission Sol ${sol}`,
+        earthNow,
+      };
+    }
+  };
 
   switch (command) {
+    case "mars": {
+      if (secondCommand === "polar") {
+        data = spacecraftData.polarLander;
+      } else if (secondCommand === "2") {
+        data = spacecraftData.mars2;
+      } else if (secondCommand === "3") {
+        data = spacecraftData.mars3;
+      } else if (secondCommand === "6") {
+        data = spacecraftData.mars6;
+      }
+      break;
+    }
+    case "viking": {
+      if (secondCommand === "1") {
+        data = spacecraftData.viking1;
+      } else if (secondCommand === "2") {
+        data = spacecraftData.viking2;
+      }
+      break;
+    }
+    case "sojourner":
+    case "pathfinder": {
+      data = spacecraftData.pathfinder;
+      break;
+    }
+    case "beagle":
+    case "beagle-2": {
+      data = spacecraftData.beagle2;
+      break;
+    }
     case "mer-a":
     case "spirit": {
-      const {
-        spirit,
-        spirit: { epoch },
-      } = spacecraftData;
-      const md = new MarsDate(epoch);
-
-      author = "Spirit Rover";
-      lat = formatLat(spirit.lat);
-      lon = formatLon(spirit.lon);
-      sol = md.getSolOfMission(spirit.lon);
-      lmst = cd.getLMST(spirit.lon);
-      ltst = cd.getLTST(spirit.lon);
-      description = `Mission Sol ${sol}`;
-      avatar =
-        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764247/Discord%20Assets/Nasa_mer_marvin_y39qhz.png";
-
+      data = spacecraftData.spirit;
       break;
     }
     case "mer-b":
     case "opportunity": {
-      const {
-        opportunity,
-        opportunity: { epoch },
-      } = spacecraftData;
-      const md = new MarsDate(epoch);
-
-      author = "Opportunity Rover";
-      lat = formatLat(opportunity.lat);
-      lon = formatLon(opportunity.lon);
-      sol = md.getSolOfMission(opportunity.lon);
-      lmst = cd.getLMST(opportunity.lon);
-      ltst = cd.getLTST(opportunity.lon);
-      description = `Mission Sol ${sol}`;
-      avatar =
-        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764272/Discord%20Assets/180px-Nasa_mer_daffy_oioilc.png";
-
+      data = spacecraftData.opportunity;
+      break;
+    }
+    case "phoenix": {
+      data = spacecraftData.phoenix;
       break;
     }
     case "msl":
     case "curiosity": {
-      const {
-        curiosity,
-        curiosity: { epoch },
-      } = spacecraftData;
-      const md = new MarsDate(epoch);
-
-      author = "Curiosity Rover";
-
       try {
         const response = await axios.get(
           "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints_current.json"
@@ -90,42 +120,29 @@ export const marsTime = async (message: Message, command: string) => {
           jsonLon,
           jsonLat,
         ] = response.data.features[0].geometry.coordinates;
-        lat = formatLat(jsonLat);
-        lon = formatLon(360 - jsonLon);
-        sol = md.getSolOfMission(360 - jsonLon);
-        lmst = cd.getLMST(360 - jsonLon);
-        ltst = cd.getLTST(360 - jsonLon);
+
+        const { name, logo, epoch } = spacecraftData.curiosity;
+
+        data = {
+          lat: jsonLat,
+          lon: 360 - jsonLon,
+          name,
+          logo,
+          epoch,
+        };
       } catch (err) {
         console.error(err);
-        lat = formatLat(curiosity.lat);
-        lon = formatLon(curiosity.lon);
-        sol = md.getSolOfMission(curiosity.lon);
-        lmst = cd.getLMST(curiosity.lon);
-        ltst = cd.getLTST(curiosity.lon);
+        data = spacecraftData.curiosity;
       }
-
-      description = `Mission Sol ${sol}`;
-      avatar =
-        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764120/Discord%20Assets/150px-Mars_Science_Laboratory_mission_logo_phaqka.png";
 
       break;
     }
+    case "schiaparelli": {
+      data = spacecraftData.schiaparelli;
+      break;
+    }
     case "insight": {
-      const {
-        insight,
-        insight: { epoch },
-      } = spacecraftData;
-      const md = new MarsDate(epoch);
-
-      author = "InSight Lander";
-      lat = formatLat(insight.lat);
-      lon = formatLon(insight.lon);
-      sol = md.getSolOfMission(insight.lon);
-      lmst = cd.getLMST(insight.lon);
-      ltst = cd.getLTST(insight.lon);
-      description = `Mission Sol ${sol}`;
-      avatar =
-        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764023/Discord%20Assets/InSight_Mission_Logo_uyd5eh.png";
+      data = spacecraftData.insight;
       break;
     }
     case "percy":
@@ -133,14 +150,6 @@ export const marsTime = async (message: Message, command: string) => {
     case "m2020":
     case "m20":
     case "perseverance": {
-      const {
-        perseverance,
-        perseverance: { epoch },
-      } = spacecraftData;
-      const md = new MarsDate(epoch);
-
-      author = "Perseverance Rover";
-
       try {
         const response = await axios.get(
           "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints_current.json"
@@ -149,36 +158,35 @@ export const marsTime = async (message: Message, command: string) => {
           jsonLon,
           jsonLat,
         ] = response.data.features[0].geometry.coordinates;
-        lat = formatLat(jsonLat);
-        lon = formatLon(360 - jsonLon);
-        sol = md.getSolOfMission(360 - jsonLon);
-        lmst = cd.getLMST(360 - jsonLon);
-        ltst = cd.getLTST(360 - jsonLon);
+
+        const { name, logo, epoch } = spacecraftData.perseverance;
+
+        data = {
+          lat: jsonLat,
+          lon: 360 - jsonLon,
+          name,
+          logo,
+          epoch,
+        };
       } catch (err) {
         console.error(err);
-        lat = formatLat(perseverance.lat);
-        lon = formatLon(perseverance.lon);
-        sol = md.getSolOfMission(perseverance.lon);
-        lmst = cd.getLMST(perseverance.lon);
-        ltst = cd.getLTST(perseverance.lon);
+        data = spacecraftData.perseverance;
       }
 
-      description = `Mission Sol ${sol}`;
-      avatar =
-        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764374/Discord%20Assets/Mars_2020_JPL_Insignia_miw2hg.png";
       break;
     }
-    default: {
-      author = "Airy Mean Time";
-      description = "Time at longitude zero";
-      lat = "0N";
-      lon = "0W";
-      lmst = cd.getLMST(0);
-      ltst = cd.getLTST(0);
-      avatar =
-        "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764208/Discord%20Assets/Mars-800h-v2_02.width-1024_ouuahe.png";
-    }
   }
+
+  const {
+    author,
+    description,
+    lat,
+    lon,
+    lmst,
+    ltst,
+    earthNow,
+    avatar,
+  } = createEmbedFields(data);
 
   embed
     .setAuthor(author)
