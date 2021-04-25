@@ -37,7 +37,7 @@ export const handleMessage = async (
     }
 
     case AllowedPrefix.MARSTIME: {
-      marsTime(message, command);
+      marsTime(message, command, secondCommand);
       break;
     }
 
