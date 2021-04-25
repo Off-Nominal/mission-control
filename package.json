@@ -29,7 +29,7 @@
     "dotenv": "^8.2.0",
     "feed-watcher": "^0.2.1",
     "fuse.js": "^6.4.6",
-    "mars-date-utils": "^1.0.1",
+    "mars-date-utils": "^1.0.2",
     "string-strip-html": "^8.2.9",
     "uuid": "^3.4.0"
   },
