@@ -91,6 +91,11 @@ export const marsTime = async (
       data = spacecraftData.pathfinder;
       break;
     }
+    case "beagle":
+    case "beagle-2": {
+      data = spacecraftData.beagle2;
+      break;
+    }
     case "mer-a":
     case "spirit": {
       data = spacecraftData.spirit;
@@ -99,6 +104,10 @@ export const marsTime = async (
     case "mer-b":
     case "opportunity": {
       data = spacecraftData.opportunity;
+      break;
+    }
+    case "phoenix": {
+      data = spacecraftData.phoenix;
       break;
     }
     case "msl":
@@ -126,6 +135,10 @@ export const marsTime = async (
         data = spacecraftData.curiosity;
       }
 
+      break;
+    }
+    case "schiaparelli": {
+      data = spacecraftData.schiaparelli;
       break;
     }
     case "insight": {

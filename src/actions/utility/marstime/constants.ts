@@ -57,12 +57,16 @@ export const spacecraftData = {
   },
   beagle2: {
     name: "Beagle-2",
+    logo:
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1619367796/Discord%20Assets/mars_express_RGB_transp_BB_kkwb0f.gif",
     epoch: new Date("2003-12-25T02:45:00.000Z"),
     lat: 11.5265,
     lon: 269.5705,
   },
   phoenix: {
     name: "Phoenix",
+    logo:
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1619367886/Discord%20Assets/Phoenix_mission_logo_l8cikj.png",
     epoch: new Date("2008-05-24T23:53:44.000Z"),
     lat: 68.2188,
     lon: 125.7492,
@@ -93,6 +97,8 @@ export const spacecraftData = {
   },
   schiaparelli: {
     name: "Schiaparelli Lander",
+    logo:
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1619368051/Discord%20Assets/ExoMars_2016_insignia_k9jh4d.png",
     epoch: new Date("2016-10-19T14:47:28.000Z"),
     lat: -2.05,
     lon: 6.21,
