@@ -37,6 +37,10 @@ export const generateLinkSummary = (
 
   collection.forEach((newsItem) => {
     newsItem.embeds.forEach((embed) => {
+      if (!embed.title || !embed.description || !embed.url) {
+        return;
+      }
+
       const indexOfExistingItem = counters.findIndex(
         (counter) => counter.name === embed.title
       );

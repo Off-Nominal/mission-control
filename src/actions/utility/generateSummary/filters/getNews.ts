@@ -16,7 +16,8 @@ export const getNews = (
       lcMsg.includes("youtu.be") ||
       lcMsg.includes("tenor.com") || // Tenor hosts Discord gifs and should be excluded
       lcMsg.includes("i.redd.it") || // Reddit images are not articles
-      lcMsg.includes("discord.com/channels/") || // Links to other Discord messages
+      lcMsg.includes("i.imgur.com"); // Imgur images are not articles. Albums and photo links do have embed though and are counted.
+    lcMsg.includes("discord.com/channels/") || // Links to other Discord messages
       lcMsg.includes("wemartians.com") || // All Off-Nom content is already summarized in #content channel
       lcMsg.includes("offnom.com") ||
       lcMsg.includes("offnominal.space") ||

@@ -10,10 +10,9 @@ export type SiteListenerOptions = {
 
 export class SiteListener {
   url: string;
-  etag: string = "";
   cooldown: number = 0;
   interval: number = 30000;
-  changes: string[] = [];
+  trackedTags: string[] = [];
   client: Client;
   channelId: string;
   lastUpdate: Date;
@@ -40,8 +39,8 @@ export class SiteListener {
   }
 
   private async checkSite() {
+    // Fetch the tracked site's HEAD record
     let response;
-
     try {
       response = await axios.head(this.url);
     } catch (err) {
@@ -50,35 +49,32 @@ export class SiteListener {
       throw err;
     }
 
+    // Determine if the current eTag is different from the most recent one we've tracked
     const newEtag = response.headers.etag;
-    const isNewEtag = this.compareEtag(newEtag);
+    const isNewEtag = this.isNewEtag(newEtag);
 
-    if (this.etag === "") {
-      this.etag = newEtag;
-      return console.log(`Initial ETag is ${this.etag}`);
-    }
-
-    if (isNewEtag) {
-      console.log(`SiteListener detected a change at ${this.url}`);
-      console.log(`New ETag is: ${newEtag}`);
+    // Short circuit for initial boot - sets initial etag to baseline from
+    if (!this.trackedTags.length) {
       this.saveChange(newEtag);
+      return console.log(`Initial ETag is ${newEtag}`);
     }
 
-    const unreportedChanges = !!this.changes.length;
-    const isCoolingDown = this.isCoolingDown();
-
-    if (!unreportedChanges) {
+    // No new changes, short circuit
+    if (!isNewEtag) {
       return;
     }
 
-    if (isCoolingDown) {
-      if (isNewEtag) {
-        console.log(
-          `SiteListener is in Cooldown mode and will report all changes after cooldown period.`
-        );
-      }
+    // If there are changes, the checker will either chill from the cooldown or notify the Discord
+    if (this.isCoolingDown()) {
+      console.log(
+        `SiteListener is in Cooldown mode and will report all changes after cooldown period.`
+      );
     } else {
+      console.log(`SiteListener detected a change at ${this.url}`);
+      console.log(`New ETag is: ${newEtag}`);
       this.notifyChanges();
+      this.saveChange(newEtag); // Adds tag to list of tracked tags so it doesn't notify again
+      this.lastUpdate = new Date(); // Tracks time for cooldown purposes
     }
   }
 
@@ -90,39 +86,33 @@ export class SiteListener {
     return durationSinceLastUpdate < this.cooldown;
   }
 
-  private compareEtag(newEtag) {
-    return newEtag !== this.etag;
+  private isNewEtag(newEtag) {
+    return !this.trackedTags.includes(newEtag);
   }
 
   private saveChange(etag) {
-    this.changes.push(etag);
-    this.etag = etag;
+    this.trackedTags.push(etag);
   }
 
   private async notifyChanges() {
     const embed: MessageEmbed = new Discord.MessageEmbed();
 
-    const fields = this.changes.join("\n");
-
     embed
       .setColor("#3e7493")
       .setTitle(`Alert!`)
       .setDescription(
-        `SpaceX has made ${this.changes.length} changes to the Starship section of their website since the last time I reported.`
+        `I have detected a change to [Starship's Website](${this.url}).`
       )
       .addField(
-        "Site ETag Version Number changes since last notification. These will be gibberish but might help Jake if there is another hostile bot takeover.",
-        fields
+        "New Etag Value:",
+        this.trackedTags[this.trackedTags.length - 1]
       )
-      .setTimestamp()
-      .setURL(this.url);
+      .setTimestamp();
 
     try {
       const channel = await this.client.channels.fetch(this.channelId);
       await (channel as TextChannel).send(embed);
       console.log(`Discord successfully notified of changes to ${this.url}`);
-      this.changes = [];
-      this.lastUpdate = new Date();
     } catch (err) {
       console.error(err);
     }
