@@ -72,7 +72,7 @@ export class SiteListener {
     } else {
       console.log(`SiteListener detected a change at ${this.url}`);
       console.log(`New ETag is: ${newEtag}`);
-      this.notifyChanges();
+      this.notifyChanges(newEtag);
       this.saveChange(newEtag); // Adds tag to list of tracked tags so it doesn't notify again
       this.lastUpdate = new Date(); // Tracks time for cooldown purposes
     }
@@ -94,7 +94,7 @@ export class SiteListener {
     this.trackedTags.push(etag);
   }
 
-  private async notifyChanges() {
+  private async notifyChanges(etag: string) {
     const embed: MessageEmbed = new Discord.MessageEmbed();
 
     embed
@@ -103,10 +103,7 @@ export class SiteListener {
       .setDescription(
         `I have detected a change to [Starship's Website](${this.url}).`
       )
-      .addField(
-        "New Etag Value:",
-        this.trackedTags[this.trackedTags.length - 1]
-      )
+      .addField("New Etag Value:", etag)
       .setTimestamp();
 
     try {
