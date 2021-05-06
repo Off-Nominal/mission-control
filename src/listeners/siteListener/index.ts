@@ -1,6 +1,7 @@
 import axios from "axios";
 import { sub } from "date-fns";
 import { Client, MessageEmbed, TextChannel } from "discord.js";
+import { getHead } from "./github";
 const Discord = require("discord.js");
 
 export type SiteListenerOptions = {
@@ -116,9 +117,19 @@ export class SiteListener {
   }
 
   public initialize() {
+    this.initializeRepo();
     setInterval(() => {
       this.checkSite();
     }, this.interval);
     console.log(`SiteListener now monitoring ${this.url}`);
+  }
+
+  private async initializeRepo() {
+    try {
+      const { sha, url } = await getHead();
+      console.log(sha, url);
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
