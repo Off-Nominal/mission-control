@@ -1,9 +1,8 @@
 import axios from "axios";
 import { sub } from "date-fns";
 import { Client, MessageEmbed, TextChannel } from "discord.js";
-import { getHead, getHeadCommit, postFile } from "./github";
+import { GitHubAgent } from "./github";
 const Discord = require("discord.js");
-const { createAppAuth } = require("@octokit/auth-app");
 
 export type SiteListenerOptions = {
   interval?: number;
@@ -19,6 +18,7 @@ export class SiteListener {
   channelId: string;
   lastUpdate: Date;
   gitHubToken: string;
+  agent: GitHubAgent;
 
   constructor(
     url: string,
@@ -119,50 +119,12 @@ export class SiteListener {
   }
 
   public initialize() {
-    this.initializeRepo();
+    this.agent = new GitHubAgent();
+    this.agent.initialize();
+
     setInterval(() => {
       this.checkSite();
     }, this.interval);
     console.log(`SiteListener now monitoring ${this.url}`);
-  }
-
-  private async autheticateGithubApp() {
-    const auth = createAppAuth({
-      appId: process.env.GITHUB_APP_ID,
-      privateKey: process.env.GITHUB_PRIVATE_KEY,
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    });
-
-    const { token } = await auth({
-      type: "installation",
-      installationId: process.env.BOT_INSTALL_ID,
-    });
-    return token;
-  }
-
-  private async initializeRepo() {
-    try {
-      const token = await this.autheticateGithubApp();
-      this.gitHubToken = token;
-      console.log(this.gitHubToken);
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-
-    let commitSha: string;
-    let commitUrl: string;
-
-    try {
-      const response = await getHead();
-      commitSha = response.sha;
-      commitUrl = response.url;
-      const { sha, url } = await getHeadCommit(commitUrl);
-
-      await postFile(this.gitHubToken);
-    } catch (err) {
-      console.error(err);
-    }
   }
 }

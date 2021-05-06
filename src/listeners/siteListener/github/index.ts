@@ -1,4 +1,6 @@
+const { createAppAuth } = require("@octokit/auth-app");
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { version } from "string-strip-html";
 
 const BASEURL = "https://api.github.com";
 const OWNER = "mendahu";
@@ -11,57 +13,79 @@ const config: AxiosRequestConfig = {
   },
 };
 
-export const getHead = async () => {
-  const apiUrl = `${BASEURL}/repos/${OWNER}/${REPO}/git/matching-refs/heads/${BRANCH}`;
-
-  let response: AxiosResponse<any>;
-
-  try {
-    response = await axios.get(apiUrl, config);
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-
-  const {
-    object: { sha, url },
-  } = response.data[0];
-
-  return { sha, url };
+export type VersionData = {
+  sha: string;
+  rawUrl: string;
 };
 
-export const getHeadCommit = async (apiUrl: string) => {
-  let response: AxiosResponse<any>;
+export class GitHubAgent {
+  private token: string;
+  private metadata: { [key: string]: VersionData } = {};
+  private currentEtag: string;
 
-  try {
-    response = await axios.get(apiUrl, config);
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
+  constructor() {}
 
-  const {
-    tree: { sha, url },
-  } = response.data;
-
-  return { sha, url };
-};
-
-export const postFile = async (token: string) => {
-  const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents/`;
-
-  const body = {
-    message: "test commit",
-    content: "test content",
-    branch: BRANCH,
-  };
-  try {
-    const response = await axios.put(url, body, {
-      ...config,
-      headers: { ...config.headers, Authorization: `Bearer ${token}` },
+  private async authenticate() {
+    const auth = createAppAuth({
+      appId: process.env.GITHUB_APP_ID,
+      privateKey: process.env.GITHUB_PRIVATE_KEY,
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
     });
-    console.log(response);
-  } catch (err) {
-    throw err;
+
+    try {
+      const { token } = await auth({
+        type: "installation",
+        installationId: process.env.BOT_INSTALL_ID,
+      });
+      this.token;
+    } catch (err) {
+      throw err;
+    }
   }
-};
+
+  private extractMetadata(response, filename: string) {
+    const file = response.find((content) => content.name === filename);
+    this.metadata[filename] = {
+      sha: file.sha,
+      rawUrl: file.download_url,
+    };
+  }
+
+  private async fetchFiles() {
+    try {
+      const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents`;
+      const { data } = await axios.get(url, config);
+
+      this.extractMetadata(data, "version.json");
+      this.extractMetadata(data, "contents.html");
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async getCurrentEtag() {
+    try {
+      const response = await axios.get(this.metadata["version.json"].rawUrl);
+      const { data } = response;
+      this.currentEtag = data.etag;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async updateFiles() {}
+
+  public async initialize() {
+    try {
+      await this.authenticate();
+      console.log("GitHubAgent authorized and ready.");
+      await this.fetchFiles();
+      console.log("Github Repo Files logged.");
+      await this.getCurrentEtag();
+      console.log(`Tracking from etag ${this.currentEtag}`);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
