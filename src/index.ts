@@ -175,7 +175,7 @@ hlBot.once("ready", () => {
   hlBot.user.setPresence(getPresenceData("!hl help"));
 });
 
-starshipChecker.initialize();
+// starshipChecker.initialize();
 
 /***********************************
  *  Utility Bot Actions
