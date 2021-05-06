@@ -116,11 +116,13 @@ export class ReportGenerator {
       throw err;
     }
 
-    // Remove items older than time limit
+    // Remove items older than time limit and deleted messages
     // Since the original API calls go in batches, the last batch usually fetches
     // messages past the time limit. This removes them.
     messages =
-      messages && messages.filter((msg) => msg.createdAt > timeHorizon);
+      messages &&
+      messages.filter((msg) => msg.createdAt > timeHorizon && !msg.deleted);
+
     this.collections[message.channel.id] = messages;
   }
 

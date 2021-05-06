@@ -66,8 +66,8 @@ export const generateTwitterSummary = async (
   }
 
   collection.forEach((tweet) => {
-    console.log(tweet);
     tweet.embeds.forEach((tweetEmbed) => {
+      console.log(tweetEmbed);
       countHandle(tweetEmbed, handles);
       hashtags = hashtags.concat(fetchHashtags(tweetEmbed.description));
       let words = tweetEmbed.description.split(" ");
