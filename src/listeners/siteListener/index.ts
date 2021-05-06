@@ -1,8 +1,9 @@
 import axios from "axios";
 import { sub } from "date-fns";
 import { Client, MessageEmbed, TextChannel } from "discord.js";
-import { getHead } from "./github";
+import { getHead, getHeadCommit, postFile } from "./github";
 const Discord = require("discord.js");
+const { createAppAuth } = require("@octokit/auth-app");
 
 export type SiteListenerOptions = {
   interval?: number;
@@ -17,6 +18,7 @@ export class SiteListener {
   client: Client;
   channelId: string;
   lastUpdate: Date;
+  gitHubToken: string;
 
   constructor(
     url: string,
@@ -124,10 +126,41 @@ export class SiteListener {
     console.log(`SiteListener now monitoring ${this.url}`);
   }
 
+  private async autheticateGithubApp() {
+    const auth = createAppAuth({
+      appId: process.env.GITHUB_APP_ID,
+      privateKey: process.env.GITHUB_PRIVATE_KEY,
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    });
+
+    const { token } = await auth({
+      type: "installation",
+      installationId: process.env.BOT_INSTALL_ID,
+    });
+    return token;
+  }
+
   private async initializeRepo() {
     try {
-      const { sha, url } = await getHead();
-      console.log(sha, url);
+      const token = await this.autheticateGithubApp();
+      this.gitHubToken = token;
+      console.log(this.gitHubToken);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+
+    let commitSha: string;
+    let commitUrl: string;
+
+    try {
+      const response = await getHead();
+      commitSha = response.sha;
+      commitUrl = response.url;
+      const { sha, url } = await getHeadCommit(commitUrl);
+
+      await postFile(this.gitHubToken);
     } catch (err) {
       console.error(err);
     }
