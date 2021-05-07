@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/mendahu/book-club-discord-bot#readme",
   "dependencies": {
+    "@octokit/auth-app": "^3.4.0",
     "axios": "^0.21.1",
     "cloudinary": "^1.25.1",
     "date-fns": "^2.19.0",
