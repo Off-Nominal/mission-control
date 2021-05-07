@@ -4,6 +4,10 @@ import { Client, MessageEmbed, TextChannel } from "discord.js";
 import { GitHubAgent } from "./github";
 const Discord = require("discord.js");
 
+const OWNER = "mendahu";
+const REPO = "starship-site-tracking";
+const BRANCH = process.env.STARSHIP_SITE_TRACKER_BRANCH;
+
 export type SiteListenerOptions = {
   interval?: number;
   cooldown?: number;
@@ -16,8 +20,7 @@ export type VersionData = {
 
 export type ChangeLog = {
   etag: string;
-  date: string;
-  commit: string;
+  date: Date;
 };
 
 export class SiteListener {
@@ -73,12 +76,25 @@ export class SiteListener {
     }
 
     // Determine if the current eTag is different from the most recent one we've tracked
-    const newEtag = response.headers.etag;
+    const newEtag = response.headers.etag.replace(/"/gi, "");
     const isNewEtag = this.isNewEtag(newEtag);
 
     // No new changes, short circuit
     if (!isNewEtag) {
       return;
+    }
+
+    //Log Change
+    console.log(`SiteListener detected a change at ${this.url}`);
+    console.log(`New ETag is: ${newEtag}`);
+
+    // Saves change information to Github
+    let diffUrl: string;
+    try {
+      diffUrl = await this.saveChange(newEtag);
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
 
     // If there are changes, the checker will either chill from the cooldown or notify the Discord
@@ -87,11 +103,12 @@ export class SiteListener {
         `SiteListener is in Cooldown mode and will report all changes after cooldown period.`
       );
     } else {
-      console.log(`SiteListener detected a change at ${this.url}`);
-      console.log(`New ETag is: ${newEtag}`);
-      // this.notifyChanges(newEtag);
-      this.saveChange(newEtag);
-      this.lastMessage = new Date(); // Tracks time for cooldown purposes
+      try {
+        this.notifyChanges(diffUrl, response.headers["last-modified"]);
+        this.lastMessage = new Date(); // Tracks time for cooldown purposes
+      } catch (err) {
+        console.error(err);
+      }
     }
   }
 
@@ -112,47 +129,111 @@ export class SiteListener {
     // Fetch the HTML in the new update
     let html: string;
     let etagCheck: string;
+    let lastUpdate: string;
 
     try {
       const response = await axios.get(this.url);
       html = response.data;
-      etagCheck = response.headers.etag;
+      etagCheck = response.headers.etag.replace(/"/gi, "");
+      lastUpdate = response.headers["last-modified"];
     } catch (err) {
       console.error(err);
     }
 
     // Check that the GET request's Etag is consistent to the HEAD request we made
     if (etagCheck !== etag) {
-      return console.log(
+      console.log(
         "Etag Mismatch, the GET request and HEAD request are different. Ignoring this change for now."
       );
+      throw "Etag mismatch";
     }
 
     // upload html to contents
+    let diffUrl = "";
+
+    try {
+      const filename = "contents.html";
+      const response = await this.gitHubAgent.updateFile(
+        filename,
+        this.metadata[filename].sha,
+        html
+      );
+      diffUrl = response.data.commit.html_url;
+    } catch (err) {
+      console.error(err);
+    }
+
     // add to log file
+    try {
+      const newLogs = [...this.logs];
+      newLogs.push({
+        etag,
+        date: new Date(),
+      });
+
+      const filename = "log.json";
+      const response = await this.gitHubAgent.updateFile(
+        filename,
+        this.metadata[filename].sha,
+        JSON.stringify(newLogs)
+      );
+      this.logs = newLogs;
+    } catch (err) {
+      console.error(err);
+    }
+
     // update version file
+    try {
+      const newVersion = {
+        etag,
+        lastUpdate,
+      };
+      const filename = "version.json";
+      const response = await this.gitHubAgent.updateFile(
+        filename,
+        this.metadata[filename].sha,
+        JSON.stringify(newVersion)
+      );
+    } catch (err) {
+      console.error(err);
+    }
+
+    return diffUrl;
   }
 
-  // private async notifyChanges(etag: string) {
-  //   const embed: MessageEmbed = new Discord.MessageEmbed();
+  private async notifyChanges(diffUrl: string, date: string) {
+    const embed: MessageEmbed = new Discord.MessageEmbed();
 
-  //   embed
-  //     .setColor("#3e7493")
-  //     .setTitle(`Alert!`)
-  //     .setDescription(
-  //       `I have detected a change to [Starship's Website](${this.url}).`
-  //     )
-  //     .addField("New Etag Value:", etag)
-  //     .setTimestamp();
+    embed
+      .setColor("#3e7493")
+      .setTitle(`Change detected on Starship's Website`)
+      .setDescription(
+        `Change occured at ${date}. View the Starship site [here](${this.url}) and compares the differences [here](${diffUrl}).`
+      )
+      .addFields([
+        {
+          name: "View",
+          value: `[Starship Site](${this.url})`,
+        },
+        {
+          name: "Compare",
+          value: `[Differences](${diffUrl})`,
+        },
+        {
+          name: "History",
+          value: `[Recent Changes](https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/log.json)`,
+        },
+      ])
+      .setTimestamp();
 
-  //   try {
-  //     const channel = await this.client.channels.fetch(this.channelId);
-  //     await (channel as TextChannel).send(embed);
-  //     console.log(`Discord successfully notified of changes to ${this.url}`);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // }
+    try {
+      const channel = await this.discordClient.channels.fetch(this.channelId);
+      await (channel as TextChannel).send(embed);
+      console.log(`Discord successfully notified of changes to ${this.url}`);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   private extractMetadata(response, filename: string) {
     const file = response.find((content) => content.name === filename);

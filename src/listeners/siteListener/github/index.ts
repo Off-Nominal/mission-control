@@ -1,6 +1,5 @@
 const { createAppAuth } = require("@octokit/auth-app");
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { version } from "string-strip-html";
+import axios, { AxiosRequestConfig } from "axios";
 
 const BASEURL = "https://api.github.com";
 const OWNER = "mendahu";
@@ -15,6 +14,7 @@ const config: AxiosRequestConfig = {
 
 export class GitHubAgent {
   private token: string;
+  private authConfig: AxiosRequestConfig;
 
   constructor() {}
 
@@ -31,7 +31,11 @@ export class GitHubAgent {
         type: "installation",
         installationId: process.env.BOT_INSTALL_ID,
       });
-      this.token;
+      this.token = token;
+      this.authConfig = {
+        ...config,
+        headers: { ...config.headers, Authorization: `Bearer ${this.token}` },
+      };
     } catch (err) {
       throw err;
     }
@@ -46,7 +50,7 @@ export class GitHubAgent {
   }
 
   public async getContents() {
-    const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents`;
+    const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents/?ref=${BRANCH}`;
     try {
       const { data } = await axios.get(url, config);
       return data;
@@ -55,11 +59,22 @@ export class GitHubAgent {
     }
   }
 
-  public async updateFile() {
-    const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents`;
+  public async updateFile(filename: string, sha: string, contents: string) {
+    const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents/${filename}`;
 
     try {
-      const response = await axios.put(url, config);
+      const file = Buffer.from(contents).toString("base64");
+
+      const body = {
+        message: `update ${filename}`,
+        content: file,
+        branch: BRANCH,
+        sha,
+      };
+
+      const response = await axios.put(url, body, this.authConfig);
+
+      return response;
     } catch (err) {
       throw err;
     }
