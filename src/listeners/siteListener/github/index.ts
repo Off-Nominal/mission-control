@@ -59,14 +59,19 @@ export class GitHubAgent {
     }
   }
 
-  public async updateFile(filename: string, sha: string, contents: string) {
+  public async updateFile(
+    filename: string,
+    sha: string,
+    contents: string,
+    etag: string
+  ) {
     const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents/${filename}`;
 
     try {
       const file = Buffer.from(contents).toString("base64");
 
       const body = {
-        message: `update ${filename}`,
+        message: `update ${filename} - ETag ${etag}`,
         content: file,
         branch: BRANCH,
         sha,
