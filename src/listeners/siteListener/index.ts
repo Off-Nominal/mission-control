@@ -36,8 +36,6 @@ export class SiteListener {
 
   //data
   private metadata: { [key: string]: VersionData } = {};
-  private currentEtag: string;
-  private lastUpdate: string;
   private logs: ChangeLog[];
 
   //cooldown
@@ -196,6 +194,9 @@ export class SiteListener {
       console.error(err);
     }
 
+    const contents = await this.gitHubAgent.getContents();
+    this.updateMetadata(contents);
+
     return diffUrl;
   }
 
@@ -242,6 +243,12 @@ export class SiteListener {
     };
   }
 
+  private async updateMetadata(contents) {
+    this.extractMetadata(contents, "version.json");
+    this.extractMetadata(contents, "contents.html");
+    this.extractMetadata(contents, "log.json");
+  }
+
   private async initializeAgent() {
     this.gitHubAgent = new GitHubAgent();
 
@@ -251,16 +258,7 @@ export class SiteListener {
 
       //Fetches metadata for all the files we need to work with
       const contents = await this.gitHubAgent.getContents();
-      this.extractMetadata(contents, "version.json");
-      this.extractMetadata(contents, "contents.html");
-      this.extractMetadata(contents, "log.json");
-
-      //Fetches most recently tracked etag from GitHub
-      const versionResponse = await axios.get(
-        this.metadata["version.json"].rawUrl
-      );
-      this.currentEtag = versionResponse.data.etag;
-      this.lastUpdate = versionResponse.data.lastUpdate;
+      this.updateMetadata(contents);
 
       //Loads log files into memory
       const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
