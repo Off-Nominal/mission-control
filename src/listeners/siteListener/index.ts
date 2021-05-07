@@ -99,9 +99,7 @@ export class SiteListener {
 
     // If there are changes, the checker will either chill from the cooldown or notify the Discord
     if (this.isCoolingDown()) {
-      console.log(
-        `SiteListener is in Cooldown mode and will report all changes after cooldown period.`
-      );
+      console.log(`SiteListener is in Cooldown mode.`);
     } else {
       try {
         this.notifyChanges(diffUrl, response.headers["last-modified"]);
@@ -175,7 +173,7 @@ export class SiteListener {
       const response = await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
-        JSON.stringify(newLogs)
+        JSON.stringify(newLogs, null, 2)
       );
       this.logs = newLogs;
     } catch (err) {
@@ -192,7 +190,7 @@ export class SiteListener {
       const response = await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
-        JSON.stringify(newVersion)
+        JSON.stringify(newVersion, null, 2)
       );
     } catch (err) {
       console.error(err);
@@ -207,21 +205,22 @@ export class SiteListener {
     embed
       .setColor("#3e7493")
       .setTitle(`Change detected on Starship's Website`)
-      .setDescription(
-        `Change occured at ${date}. View the Starship site [here](${this.url}) and compares the differences [here](${diffUrl}).`
-      )
+      .setDescription(`Change occured at ${date}.`)
       .addFields([
         {
           name: "View",
           value: `[Starship Site](${this.url})`,
+          inline: true,
         },
         {
           name: "Compare",
           value: `[Differences](${diffUrl})`,
+          inline: true,
         },
         {
           name: "History",
           value: `[Recent Changes](https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/log.json)`,
+          inline: true,
         },
       ])
       .setTimestamp();
@@ -249,14 +248,12 @@ export class SiteListener {
     try {
       //Authorize Agent with GitHub
       await this.gitHubAgent.initialize();
-      console.log("GitHubAgent authorized and ready.");
 
       //Fetches metadata for all the files we need to work with
       const contents = await this.gitHubAgent.getContents();
       this.extractMetadata(contents, "version.json");
       this.extractMetadata(contents, "contents.html");
       this.extractMetadata(contents, "log.json");
-      console.log("Github Repo Files logged.");
 
       //Fetches most recently tracked etag from GitHub
       const versionResponse = await axios.get(
@@ -264,12 +261,12 @@ export class SiteListener {
       );
       this.currentEtag = versionResponse.data.etag;
       this.lastUpdate = versionResponse.data.lastUpdate;
-      console.log(`Tracking from etag ${this.currentEtag}`);
 
       //Loads log files into memory
       const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
       this.logs = logsResponse.data;
-      console.log("Logs loaded into memory");
+
+      console.log("GitHubAgent authorized and ready.");
     } catch (err) {
       throw err;
     }
