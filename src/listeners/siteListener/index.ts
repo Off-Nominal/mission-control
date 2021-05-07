@@ -152,7 +152,8 @@ export class SiteListener {
       const response = await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
-        html
+        html,
+        etag
       );
       diffUrl = response.data.commit.html_url;
     } catch (err) {
@@ -171,7 +172,8 @@ export class SiteListener {
       const response = await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
-        JSON.stringify(newLogs, null, 2)
+        JSON.stringify(newLogs, null, 2),
+        etag
       );
       this.logs = newLogs;
     } catch (err) {
@@ -188,7 +190,8 @@ export class SiteListener {
       const response = await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
-        JSON.stringify(newVersion, null, 2)
+        JSON.stringify(newVersion, null, 2),
+        etag
       );
     } catch (err) {
       console.error(err);
