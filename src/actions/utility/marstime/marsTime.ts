@@ -91,6 +91,14 @@ export const marsTime = async (
       data = spacecraftData.pathfinder;
       break;
     }
+    case "zhurong":
+    case "zhu":
+    case "tianwen":
+    case "tianwen1":
+    case "tianwen-1": {
+      data = spacecraftData.zhurong;
+      break;
+    }
     case "beagle":
     case "beagle-2": {
       data = spacecraftData.beagle2;
@@ -116,10 +124,8 @@ export const marsTime = async (
         const response = await axios.get(
           "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints_current.json"
         );
-        const [
-          jsonLon,
-          jsonLat,
-        ] = response.data.features[0].geometry.coordinates;
+        const [jsonLon, jsonLat] =
+          response.data.features[0].geometry.coordinates;
 
         const { name, logo, epoch } = spacecraftData.curiosity;
 
@@ -154,10 +160,8 @@ export const marsTime = async (
         const response = await axios.get(
           "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints_current.json"
         );
-        const [
-          jsonLon,
-          jsonLat,
-        ] = response.data.features[0].geometry.coordinates;
+        const [jsonLon, jsonLat] =
+          response.data.features[0].geometry.coordinates;
 
         const { name, logo, epoch } = spacecraftData.perseverance;
 
@@ -177,16 +181,8 @@ export const marsTime = async (
     }
   }
 
-  const {
-    author,
-    description,
-    lat,
-    lon,
-    lmst,
-    ltst,
-    earthNow,
-    avatar,
-  } = createEmbedFields(data);
+  const { author, description, lat, lon, lmst, ltst, earthNow, avatar } =
+    createEmbedFields(data);
 
   embed
     .setAuthor(author)
