@@ -186,7 +186,10 @@ utilityBot.on("message", (message) =>
 );
 utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
 utilityBot.on("messageReactionAdd", (messageReact, user) =>
-  utilityReactHandler(messageReact, user, reportGenerator)
+  utilityReactHandler(messageReact, user, {
+    reportGenerator,
+    channelBabysitter,
+  })
 );
 
 /***********************************

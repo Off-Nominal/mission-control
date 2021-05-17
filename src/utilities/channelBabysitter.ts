@@ -1,4 +1,4 @@
-import { Client, TextChannel } from "discord.js";
+import { Client, MessageEmbed, TextChannel } from "discord.js";
 import { parseCommands } from "../helpers/parseCommands";
 
 const timeoutPeriod = Number(process.env.LIVECHAT_TIMEOUT_SECS) || 15;
@@ -13,10 +13,19 @@ const formatTime = (ms: number) => {
 const requestNotification =
   "Request received! If you don't see the update right away, note that Discord limits the channel update API to 2 changes per 10 minutes. Either wait it out or ask a mod to change it manually.";
 
-const generateInactivityMessage = (timeout: number) => {
-  return `It's been ${formatTime(
-    timeout
-  )} since the last message. Sounds like the live event is done, so I've cleared the channel topic.`;
+const generateInactivityEmbed = (timeout: number) => {
+  const embed = new MessageEmbed();
+
+  embed
+    .setTitle("Channel Inactive")
+    .setDescription(
+      `It's been ${formatTime(
+        timeout
+      )} since the last message. Sounds like the live event is done, so I've cleared the channel topic.`
+    )
+    .addField("Event still happening?", "Tap the 🔄 emoji to set it back.");
+
+  return embed;
 };
 
 const generateTopicMessage = (options?: { desc: string[]; url: string }) => {
@@ -36,6 +45,11 @@ export class ChannelBabysitter {
   private _channelId: string;
   private _timeoutPeriod: number = timeoutPeriod * 1000;
   private _minWait: number | null = null;
+  private _lastTopic: {
+    minWait: number;
+    desc: string[];
+    url: string;
+  };
 
   constructor(client: Client, channelId: string) {
     this._client = client;
@@ -53,13 +67,20 @@ export class ChannelBabysitter {
           this._minWait = null;
           this.setTopic(message.channel as TextChannel, generateTopicMessage());
         } else {
-          // if the user specified a min wait, it create a delay period here
+          // if the user specified a min wait, it creates a delay period here
           const wait = Number(minWait) * 60 * 1000;
           if (wait > this._timeoutPeriod && !isNaN(wait)) {
             this._minWait = wait - this._timeoutPeriod;
           }
 
           const description = isNaN(wait) ? [minWait, ...desc] : desc;
+
+          // saves the topic in case user reuses it later
+          this._lastTopic = {
+            minWait: this._minWait,
+            desc: description,
+            url,
+          };
 
           this.setTopic(
             message.channel as TextChannel,
@@ -148,10 +169,21 @@ export class ChannelBabysitter {
     this.setTopic(channel, generateTopicMessage());
 
     try {
-      await channel.send(generateInactivityMessage(this._timeoutPeriod));
+      const message = await channel.send(
+        generateInactivityEmbed(this._timeoutPeriod)
+      );
+      await message.react("🔄");
       this.clearTimer();
     } catch (err) {
       console.error(err);
     }
+  }
+
+  // Topic Recycler
+
+  public async recycleTopic(channel: TextChannel) {
+    this._minWait = this._lastTopic.minWait;
+    this.setTopic(channel, generateTopicMessage(this._lastTopic));
+    await channel.send(requestNotification);
   }
 }
