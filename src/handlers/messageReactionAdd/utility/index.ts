@@ -12,8 +12,8 @@ export const utilityReactHandler = async (
   messageReact: MessageReaction,
   user: User | PartialUser,
   utilities: {
-    reportGenerator?: ReportGenerator;
-    channelBabysitter?: ChannelBabysitter;
+    reportGenerator: ReportGenerator;
+    channelBabysitter: ChannelBabysitter;
   }
 ) => {
   const { reportGenerator, channelBabysitter } = utilities;

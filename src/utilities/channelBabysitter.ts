@@ -49,7 +49,7 @@ export class ChannelBabysitter {
     minWait: number;
     desc: string[];
     url: string;
-  };
+  } | null = null;
 
   constructor(client: Client, channelId: string) {
     this._client = client;
@@ -182,8 +182,23 @@ export class ChannelBabysitter {
   // Topic Recycler
 
   public async recycleTopic(channel: TextChannel) {
+    if (this._lastTopic === null) {
+      try {
+        return await channel.send(
+          "That event has been cleared from my memory already. You'll need to set it again using the `!topic` command."
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     this._minWait = this._lastTopic.minWait;
     this.setTopic(channel, generateTopicMessage(this._lastTopic));
-    await channel.send(requestNotification);
+
+    try {
+      await channel.send(requestNotification);
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
