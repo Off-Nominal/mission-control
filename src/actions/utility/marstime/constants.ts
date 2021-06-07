@@ -108,7 +108,7 @@ export const spacecraftData = {
     name: "Zhurong Rover & Tianwen-1 Landing Platform",
     logo: "https://res.cloudinary.com/dj5enq03a/image/upload/v1621038991/Discord%20Assets/China_Mars_Exploration_Mission_Logo-2_hzzglj.png",
     epoch: new Date("2021-05-14T23:18:00.000Z"),
-    lat: 25.1,
-    lon: 250.1,
+    lat: 25.066,
+    lon: 250.074,
   },
 };
