@@ -1,7 +1,7 @@
 import { Message, MessageEmbed } from "discord.js";
 import { parseCommands } from "../../helpers/parseCommands";
 
-export type Unit = "c" | "f" | "C" | "F";
+export type Unit = "C" | "F";
 
 export type Temperature = {
   value: number;
@@ -72,7 +72,6 @@ const isJoinedUnit = (
 
 const trimPunctuation = (word: string): string => {
   const endsWithPunc = !!word.match(/[.,:!?"]$/);
-  console.log(endsWithPunc);
 
   if (endsWithPunc) {
     return word.slice(0, word.length - 1);
