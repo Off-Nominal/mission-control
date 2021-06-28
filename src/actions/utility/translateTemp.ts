@@ -1,113 +1,25 @@
 import { Message, MessageEmbed } from "discord.js";
-import { parseCommands } from "../../helpers/parseCommands";
 
-export type Unit = "C" | "F";
+type Unit = "C" | "F";
 
-export type Temperature = {
+type Temperature = {
   value: number;
   unit: Unit;
 };
 
-const isSplitUnit = (
-  words: string[],
-  index: number
-): [number, Unit, boolean] => {
-  const word = words[index];
-  let value;
-  let startingUnit;
-  let error = true;
-
-  if (index === 0) {
-    return [value, startingUnit, error];
-  }
-
-  // Set Starting Unit if the unit is orphaned word
-  if (word === "c") {
-    startingUnit = "C";
-  } else if (word === "f") {
-    startingUnit = "F";
-  }
-
-  // Set value if number
-  const previousWord = words[index - 1];
-  const numberfiedWord = Number(previousWord);
-  if (!isNaN(numberfiedWord)) {
-    value = numberfiedWord;
-    error = false;
-  }
-  return [value, startingUnit, error];
-};
-
-const isJoinedUnit = (
-  words: string[],
-  index: number
-): [number, Unit, boolean] => {
-  const word = words[index];
-  let value;
-  let startingUnit;
-  let error = true;
-
-  if (word.length < 2) {
-    return [value, startingUnit, error];
-  }
-
-  if (word.endsWith("c")) {
-    startingUnit = "C";
-  } else if (word.endsWith("f")) {
-    startingUnit = "F";
-  }
-
-  if (startingUnit) {
-    const temperature = word.slice(0, word.length - 1);
-    const numberfiedTemp = Number(temperature);
-
-    if (!isNaN(numberfiedTemp)) {
-      value = numberfiedTemp;
-      error = false;
-    }
-  }
-
-  return [value, startingUnit, error];
-};
-
-const trimPunctuation = (word: string): string => {
-  const endsWithPunc = !!word.match(/[.,:!?"]$/);
-
-  if (endsWithPunc) {
-    return word.slice(0, word.length - 1);
-  } else {
-    return word;
-  }
-};
-
 export const findTempsToConvert = (message: Message) => {
-  const words = parseCommands(message, true);
-  const trimmedWords = words.map(trimPunctuation);
+  const regex = new RegExp(/(?<temp>\d{1,4}).{0,3}(?<unit>[F,C])/gi);
+  const matches = message.content.matchAll(regex);
 
   const tempsToConvert: Temperature[] = [];
 
-  for (let i = 0; i < trimmedWords.length; i++) {
-    // Block to check for Split Units in message (like "it was 46.1 C outside")
-    {
-      const [value, unit, error] = isSplitUnit(trimmedWords, i);
-      if (!error) {
-        tempsToConvert.push({
-          value,
-          unit,
-        });
-      }
-    }
+  for (const match of matches) {
+    const temp: Temperature = {
+      value: Number(match[1]),
+      unit: match[2] as Unit,
+    };
 
-    // Block to check for Joined Units in message (like "it was 46.1C outside")
-    {
-      const [value, unit, error] = isJoinedUnit(trimmedWords, i);
-      if (!error) {
-        tempsToConvert.push({
-          value,
-          unit,
-        });
-      }
-    }
+    tempsToConvert.push(temp);
   }
 
   return tempsToConvert;
