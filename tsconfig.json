@@ -3,7 +3,9 @@
     "target": "es5",
     "module": "commonjs",
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "lib": ["es2020.string"],
+    "downlevelIteration": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
