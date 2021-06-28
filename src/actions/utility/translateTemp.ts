@@ -8,7 +8,7 @@ type Temperature = {
 };
 
 export const findTempsToConvert = (message: Message) => {
-  const regex = new RegExp(/(?<temp>-?\d{1,4}).{0,3}(?<unit>[F,C])/gi);
+  const regex = new RegExp(/(?<temp>-?\d{1,4}).{0,3}(?<unit>[FC])/gi);
   const matches = message.content.matchAll(regex);
 
   const tempsToConvert: Temperature[] = [];
