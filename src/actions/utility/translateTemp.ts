@@ -22,7 +22,7 @@ export const findTempsToConvert = (message: Message) => {
 
     const temp: Temperature = {
       value,
-      unit: unit as Unit,
+      unit: unit.toUpperCase() as Unit,
     };
 
     tempsToConvert.push(temp);
@@ -32,7 +32,7 @@ export const findTempsToConvert = (message: Message) => {
 
       const temp: Temperature = {
         value,
-        unit: unit as Unit,
+        unit: unit.toUpperCase() as Unit,
       };
 
       tempsToConvert.push(temp);
@@ -74,7 +74,7 @@ export const sendTemperatureConversions = async (
 
     const translation = translateTemp(temp);
 
-    const newTemp = translation.value.toString().concat("°", translation.unit);
+    const newTemp = translation?.value.toString().concat("°", translation.unit);
 
     description = description.concat(`${initialTemp} is ${newTemp}\n`);
   });
