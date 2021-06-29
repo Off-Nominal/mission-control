@@ -9,7 +9,7 @@ type Temperature = {
 
 export const findTempsToConvert = (message: Message) => {
   const regex = new RegExp(
-    /(?<=^|\s)(?<sign>[-+]?)(?<temp1>\d+\.?\d*)-?(?<temp2>\d+\.?\d*)?°?\s?(?<unit>[FC])/gi
+    /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>\d+,?\d{0,3}\.?\d*)-?(?<temp2>\d+,?\d{0,3}\.?\d*)?\s?°?(?<unit>[FC]|celsius|fahrenheit)\b/gi
   );
   const matches = message.content.matchAll(regex);
 
