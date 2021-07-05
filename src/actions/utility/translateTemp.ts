@@ -22,7 +22,7 @@ export const findTempsToConvert = (message: Message) => {
 
     const temp: Temperature = {
       value,
-      unit: unit.toUpperCase() as Unit,
+      unit: unit.toUpperCase().slice(0, 1) as Unit,
     };
 
     tempsToConvert.push(temp);
