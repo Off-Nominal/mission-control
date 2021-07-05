@@ -22,7 +22,7 @@ export const findTempsToConvert = (message: Message) => {
 
     const temp: Temperature = {
       value,
-      unit: unit.toUpperCase() as Unit,
+      unit: unit.toUpperCase().slice(0, 1) as Unit,
     };
 
     tempsToConvert.push(temp);
@@ -43,21 +43,21 @@ export const findTempsToConvert = (message: Message) => {
 };
 
 const translateTemp = (temp: Temperature): Temperature => {
-  if (temp.unit === "C") {
-    const basis = (temp.value * 1.8 + 32) * 10;
-    const value = Math.round(basis) / 10;
-    return {
-      value,
-      unit: "F",
-    };
-  } else if (temp.unit === "F") {
-    const basis = ((temp.value - 32) / 1.8) * 10;
-    const value = Math.round(basis) / 10;
-    return {
-      value,
-      unit: "C",
-    };
+  const { unit } = temp;
+  const oppositeUnit = unit === "C" ? "F" : "C";
+  let basis: number;
+
+  if (unit === "C") {
+    basis = (temp.value * 1.8 + 32) * 10;
+  } else if (unit === "F") {
+    basis = ((temp.value - 32) / 1.8) * 10;
   }
+
+  const value = Math.round(basis) / 10;
+  return {
+    value,
+    unit: oppositeUnit,
+  };
 };
 
 export const sendTemperatureConversions = async (
