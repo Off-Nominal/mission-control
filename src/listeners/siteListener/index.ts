@@ -70,7 +70,7 @@ export class SiteListener {
     } catch (err) {
       console.error(`Request to monitor ${this.url} failed.`);
       console.error(err);
-      throw err;
+      return;
     }
 
     // Determine if the current eTag is different from the most recent one we've tracked
@@ -91,8 +91,7 @@ export class SiteListener {
     try {
       diffUrl = await this.saveChange(newEtag);
     } catch (err) {
-      console.log(err);
-      throw err;
+      return console.log(err);
     }
 
     // If there are changes, the checker will either chill from the cooldown or notify the Discord
@@ -138,10 +137,7 @@ export class SiteListener {
 
     // Check that the GET request's Etag is consistent to the HEAD request we made
     if (etagCheck !== etag) {
-      console.log(
-        "Etag Mismatch, the GET request and HEAD request are different. Ignoring this change for now."
-      );
-      throw "Etag mismatch";
+      throw "Etag Mismatch, the GET request and HEAD request are different. Ignoring this change for now.";
     }
 
     // upload html to contents
@@ -157,7 +153,7 @@ export class SiteListener {
       );
       diffUrl = response.data.commit.html_url;
     } catch (err) {
-      console.error(err);
+      throw err;
     }
 
     // add to log file
@@ -177,7 +173,7 @@ export class SiteListener {
       );
       this.logs = newLogs;
     } catch (err) {
-      console.error(err);
+      throw err;
     }
 
     // update version file
@@ -194,7 +190,7 @@ export class SiteListener {
         etag
       );
     } catch (err) {
-      console.error(err);
+      throw err;
     }
 
     const contents = await this.gitHubAgent.getContents();
