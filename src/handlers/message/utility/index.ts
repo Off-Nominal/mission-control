@@ -79,7 +79,10 @@ export const handleMessage = async (
 
       // This is a report request DM, which report generator does not support
       if (message.guild === null) {
-        reportGenerator.sendError(message, "dm");
+        reportGenerator.sendError(
+          message,
+          "My summary function doesn't work great via DM. Try calling me from a channel!"
+        );
         break;
       }
 

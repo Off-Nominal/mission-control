@@ -1,5 +1,4 @@
 require("dotenv").config();
-const Discord = require("discord.js");
 
 import { Client, Intents, Message, PresenceData } from "discord.js";
 import {
@@ -48,33 +47,44 @@ const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
  *  Bot Setup
  ************************************/
 
-const utilityBot: Client = new Discord.Client({
+const simpleIntents = new Intents();
+const utilityIntents = new Intents();
+
+simpleIntents.add(
+  Intents.FLAGS.GUILDS,
+  Intents.FLAGS.GUILD_MESSAGES,
+  Intents.FLAGS.DIRECT_MESSAGES
+);
+
+utilityIntents.add(
+  Intents.FLAGS.GUILD_MESSAGES,
+  Intents.FLAGS.GUILDS,
+  Intents.FLAGS.GUILD_MEMBERS,
+  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  Intents.FLAGS.DIRECT_MESSAGES
+);
+
+const utilityBot = new Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
-  intents: [
-    Intents.FLAGS.GUILD_MESSAGES,
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MEMBERS,
-    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-    Intents.FLAGS.DIRECT_MESSAGES,
-  ],
+  intents: utilityIntents,
 });
-const bcBot: Client = new Discord.Client({
-  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+const bcBot = new Client({
+  intents: simpleIntents,
 });
-const wmBot: Client = new Discord.Client({
-  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+const wmBot = new Client({
+  intents: simpleIntents,
 });
-const ofnBot: Client = new Discord.Client({
-  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+const ofnBot = new Client({
+  intents: simpleIntents,
 });
-const mecoBot: Client = new Discord.Client({
-  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+const mecoBot = new Client({
+  intents: simpleIntents,
 });
-const rprBot: Client = new Discord.Client({
-  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+const rprBot = new Client({
+  intents: simpleIntents,
 });
-const hlBot: Client = new Discord.Client({
-  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+const hlBot = new Client({
+  intents: simpleIntents,
 });
 
 /***********************************

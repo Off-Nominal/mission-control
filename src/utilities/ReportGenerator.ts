@@ -44,11 +44,6 @@ export class ReportGenerator {
     [key: string]: string;
   } = {};
 
-  error: {
-    dm: "My summary function doesn't work great via DM. Try calling me from a channel!";
-    limit: "In order to maintain order, please limit summary reports to last 24 hours";
-  };
-
   public sendHelp(message: Message) {
     const embed = new MessageEmbed();
 
@@ -73,8 +68,8 @@ export class ReportGenerator {
     message.channel.send({ embeds: [embed] });
   }
 
-  public async sendError(message: Message, type: string) {
-    await message.channel.send({ content: this.error[type] });
+  public async sendError(message: Message, content: string) {
+    await message.channel.send({ content });
   }
 
   private async fetchMessages(message: Message, hourLimit: number) {
@@ -135,27 +130,26 @@ export class ReportGenerator {
 
     if (!report) {
       try {
-        await channel.send(
-          `Looks like this report doesn't exist anymore (I don't keep them that long). Try generating a new report with \`!summary\`!`
-        );
+        await channel.send({
+          content:
+            "Looks like this report doesn't exist anymore (I don't keep them that long). Try generating a new report with `!summary`!",
+        });
       } catch (err) {
         console.error("Couldn't send report to user after clicking emoji.");
       }
     }
 
     const sender = async () => {
-      const sends = [];
       try {
+        const embeds = [];
         Object.keys(report).forEach((reportType) => {
-          sends.push(channel.send({ content: report[reportType] }));
+          embeds.push(report[reportType]);
         });
+        return channel.send({ embeds });
       } catch (err) {
         console.error("failed to created DM channel with user to send report.");
-      }
-
-      return Promise.all(sends).catch((err) => {
         throw err;
-      });
+      }
     };
 
     const waiter = async () => {
@@ -225,7 +219,10 @@ export class ReportGenerator {
     forceChannel: boolean = false
   ): Promise<string> {
     if (hourLimit > 24) {
-      await this.sendError(message, "hourLimit");
+      await this.sendError(
+        message,
+        "In order to maintain order, please limit summary reports to last 24 hours"
+      );
       throw "24 hours is the limit.";
     }
 
