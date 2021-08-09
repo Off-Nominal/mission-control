@@ -5,12 +5,16 @@ import { parsePoll } from "../../helpers/parsePoll";
 export const createPoll = (message: Message) => {
   const [prefix, firstParam] = parseCommands(message, false);
 
-  const send = (text: string | MessageEmbed) => {
-    if (typeof text === "string") {
-      return message.channel.send({ content: text });
+  const send = (content: string | MessageEmbed) => {
+    let message;
+
+    if (typeof content === "string") {
+      message = { content };
     } else {
-      return message.channel.send({ embeds: [text] });
+      message = { embeds: [content] };
     }
+
+    return message.channel.send(message);
   };
 
   if (!firstParam) {
