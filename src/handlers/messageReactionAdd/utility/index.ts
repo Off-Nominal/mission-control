@@ -1,6 +1,7 @@
 import {
   DMChannel,
   MessageReaction,
+  PartialMessageReaction,
   PartialUser,
   TextChannel,
   User,
@@ -9,7 +10,7 @@ import { ChannelBabysitter } from "../../../utilities/channelBabysitter";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
 
 export const utilityReactHandler = async (
-  messageReact: MessageReaction,
+  messageReact: MessageReaction | PartialMessageReaction,
   user: User | PartialUser,
   utilities: {
     reportGenerator: ReportGenerator;

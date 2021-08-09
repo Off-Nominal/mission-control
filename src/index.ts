@@ -1,7 +1,7 @@
 require("dotenv").config();
 const Discord = require("discord.js");
 
-import { Client, Message, PresenceData } from "discord.js";
+import { Client, Intents, Message, PresenceData } from "discord.js";
 import {
   bookClubMessageHandler,
   feedListenerMessageHandler,
@@ -50,13 +50,32 @@ const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
 
 const utilityBot: Client = new Discord.Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
+  intents: [
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MEMBERS,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Intents.FLAGS.DIRECT_MESSAGES,
+  ],
 });
-const bcBot: Client = new Discord.Client();
-const wmBot: Client = new Discord.Client();
-const ofnBot: Client = new Discord.Client();
-const mecoBot: Client = new Discord.Client();
-const rprBot: Client = new Discord.Client();
-const hlBot: Client = new Discord.Client();
+const bcBot: Client = new Discord.Client({
+  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+});
+const wmBot: Client = new Discord.Client({
+  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+});
+const ofnBot: Client = new Discord.Client({
+  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+});
+const mecoBot: Client = new Discord.Client({
+  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+});
+const rprBot: Client = new Discord.Client({
+  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+});
+const hlBot: Client = new Discord.Client({
+  intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES],
+});
 
 /***********************************
  *  Site Listener Setup
@@ -183,16 +202,16 @@ starshipChecker.initialize();
  *  Utility Bot Actions
  ************************************/
 
-utilityBot.on("message", (message) =>
+utilityBot.on("messageCreate", (message) =>
   utilityMessageHandler(message, reportGenerator)
 );
 utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
-utilityBot.on("messageReactionAdd", (messageReact, user) =>
+utilityBot.on("messageReactionAdd", (messageReact, user) => {
   utilityReactHandler(messageReact, user, {
     reportGenerator,
     channelBabysitter,
-  })
-);
+  });
+});
 utilityBot.on("threadCreate", () => {
   console.log("test");
 });
@@ -201,24 +220,24 @@ utilityBot.on("threadCreate", () => {
  *  Book Club Bot Actions
  ************************************/
 
-bcBot.on("message", bookClubMessageHandler);
+bcBot.on("messageCreate", bookClubMessageHandler);
 
 /***********************************
  *  Podcast Bot Actions
  ************************************/
 
-wmBot.on("message", (message: Message) =>
+wmBot.on("messageCreate", (message: Message) =>
   feedListenerMessageHandler(message, wmFeedListener, "!wm")
 );
-ofnBot.on("message", (message: Message) =>
+ofnBot.on("messageCreate", (message: Message) =>
   feedListenerMessageHandler(message, ofnFeedListener, "!ofn")
 );
-mecoBot.on("message", (message: Message) =>
+mecoBot.on("messageCreate", (message: Message) =>
   feedListenerMessageHandler(message, mecoFeedListener, "!meco")
 );
-rprBot.on("message", (message: Message) =>
+rprBot.on("messageCreate", (message: Message) =>
   feedListenerMessageHandler(message, rprFeedListener, "!rpr")
 );
-hlBot.on("message", (message: Message) =>
+hlBot.on("messageCreate", (message: Message) =>
   feedListenerMessageHandler(message, hlFeedListener, "!hl")
 );

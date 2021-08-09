@@ -55,7 +55,7 @@ export class ChannelBabysitter {
     this._client = client;
     this._channelId = channelId;
 
-    this._client.on("message", async (message) => {
+    this._client.on("messageCreate", async (message) => {
       const isCorrectChannel = message.channel.id === this._channelId;
       const [prefix, url, minWait, ...desc] = parseCommands(message, false);
 
