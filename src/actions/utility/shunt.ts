@@ -9,9 +9,10 @@ export const shunt = (message: Message) => {
   const targetChannel = getChannel(message, command);
 
   if (sourceChannel.id === targetChannel.id) {
-    return sourceChannel.send(
-      "It looks like you're trying to shunt a conversation but you targeted the thread it's already in!"
-    );
+    return sourceChannel.send({
+      content:
+        "It looks like you're trying to shunt a conversation but you targeted the thread it's already in!",
+    });
   }
 
   const shunter = message.member.displayName;
@@ -27,7 +28,7 @@ export const shunt = (message: Message) => {
     .setThumbnail("https://i.imgur.com/kfvmby0.png");
 
   targetChannel
-    .send(targetEmbed)
+    .send({ embeds: [targetEmbed] })
     .then((message) => {
       const sourceEmbed = new MessageEmbed();
 
@@ -38,7 +39,7 @@ export const shunt = (message: Message) => {
         )
         .setThumbnail("https://i.imgur.com/UYBbaLR.png");
 
-      sourceChannel.send(sourceEmbed);
+      sourceChannel.send({ embeds: [sourceEmbed] });
     })
     .catch((err) => {
       console.error(err);

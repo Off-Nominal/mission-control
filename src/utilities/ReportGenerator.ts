@@ -70,11 +70,11 @@ export class ReportGenerator {
         },
       ]);
 
-    message.channel.send(embed);
+    message.channel.send({ embeds: [embed] });
   }
 
   public async sendError(message: Message, type: string) {
-    await message.channel.send(this.error[type]);
+    await message.channel.send({ content: this.error[type] });
   }
 
   private async fetchMessages(message: Message, hourLimit: number) {
@@ -147,7 +147,7 @@ export class ReportGenerator {
       const sends = [];
       try {
         Object.keys(report).forEach((reportType) => {
-          sends.push(channel.send(report[reportType]));
+          sends.push(channel.send({ content: report[reportType] }));
         });
       } catch (err) {
         console.error("failed to created DM channel with user to send report.");
@@ -162,9 +162,9 @@ export class ReportGenerator {
       let count = 0;
 
       if (count > 9) {
-        return await channel.send(
-          `Sorry, I tried a few times but I can't seem to find this report. Try generating a new one and let Jake know this happened!`
-        );
+        return await channel.send({
+          content: `Sorry, I tried a few times but I can't seem to find this report. Try generating a new one and let Jake know this happened!`,
+        });
       }
 
       if (Object.keys(report).length) {
@@ -194,7 +194,7 @@ export class ReportGenerator {
           `Generating a summary of activity in <#${channel.id}> over the last ${hourLimit} hours and sending to requestor via DM (this make take 5-10 seconds).\n\nWant a copy of this report, too? Click the 📩  below to have one sent to your DMs.`
         );
 
-      notice = await channel.send(embed);
+      notice = await channel.send({ embeds: [embed] });
     } catch (err) {
       console.error("Failed to create notice in channel.");
       throw err;
@@ -212,7 +212,7 @@ export class ReportGenerator {
 
   private sendChannelLoadingMessage = async (channel: TextChannel) => {
     try {
-      await channel.send("Generating channel summary report...");
+      await channel.send({ content: "Generating channel summary report..." });
     } catch (err) {
       console.error("Loading message failed to send to channel.");
       throw err;

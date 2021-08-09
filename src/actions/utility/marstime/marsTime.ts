@@ -202,5 +202,5 @@ export const marsTime = async (
     .setTimestamp(earthNow)
     .setThumbnail(avatar);
 
-  return message.channel.send(embed);
+  return message.channel.send({ embeds: [embed] });
 };

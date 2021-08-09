@@ -133,10 +133,12 @@ hlFeedListener.initialize();
 const getPresenceData = (helpCommand: string): PresenceData => {
   return {
     status: "online",
-    activity: {
-      name: helpCommand,
-      type: "PLAYING",
-    },
+    activities: [
+      {
+        name: helpCommand,
+        type: "PLAYING",
+      },
+    ],
   };
 };
 
@@ -191,6 +193,9 @@ utilityBot.on("messageReactionAdd", (messageReact, user) =>
     channelBabysitter,
   })
 );
+utilityBot.on("threadCreate", () => {
+  console.log("test");
+});
 
 /***********************************
  *  Book Club Bot Actions

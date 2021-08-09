@@ -25,5 +25,5 @@ export const sendHelp = (message: Message) => {
       "`!poll question` for simple polls *or* `!poll {question} [option a] [option b] [option c]` for more complex polls. Type `!poll help` for more."
     );
 
-  message.channel.send(embed);
+  message.channel.send({ embeds: [embed] });
 };

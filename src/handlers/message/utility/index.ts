@@ -62,9 +62,10 @@ export const handleMessage = async (
 
     // OLDPOLL cascades into POLL to handle old syntax
     case AllowedPrefix.OLDPOLL:
-      message.channel.send(
-        "Please note the syntax for Polling has changed from `+poll` to `!poll` to match other bots. Type `!poll help` for more."
-      );
+      message.channel.send({
+        content:
+          "Please note the syntax for Polling has changed from `+poll` to `!poll` to match other bots. Type `!poll help` for more.",
+      });
     case AllowedPrefix.POLL: {
       createPoll(message);
       break;

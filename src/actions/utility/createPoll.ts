@@ -6,7 +6,11 @@ export const createPoll = (message: Message) => {
   const [prefix, firstParam] = parseCommands(message, false);
 
   const send = (text: string | MessageEmbed) => {
-    return message.channel.send(text);
+    if (typeof text === "string") {
+      return message.channel.send({ content: text });
+    } else {
+      return message.channel.send({ embeds: [text] });
+    }
   };
 
   if (!firstParam) {

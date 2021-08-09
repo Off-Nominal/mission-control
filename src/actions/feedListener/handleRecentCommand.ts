@@ -6,5 +6,5 @@ export const handleRecentCommand = (
   feedListener: FeedListener
 ) => {
   const episode = feedListener.fetchRecent();
-  message.channel.send(episode.url);
+  message.channel.send({ content: episode.url });
 };
