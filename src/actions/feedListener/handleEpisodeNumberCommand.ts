@@ -7,5 +7,5 @@ export const handleEpisodeNumberCommand = (
   episodeNumber: string
 ) => {
   const results = feedListener.search(episodeNumber);
-  message.channel.send(results[0].item.url);
+  message.channel.send({ content: results[0].item.url });
 };

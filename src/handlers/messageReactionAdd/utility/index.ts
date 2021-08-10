@@ -1,6 +1,7 @@
 import {
   DMChannel,
   MessageReaction,
+  PartialMessageReaction,
   PartialUser,
   TextChannel,
   User,
@@ -9,7 +10,7 @@ import { ChannelBabysitter } from "../../../utilities/channelBabysitter";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
 
 export const utilityReactHandler = async (
-  messageReact: MessageReaction,
+  messageReact: MessageReaction | PartialMessageReaction,
   user: User | PartialUser,
   utilities: {
     reportGenerator: ReportGenerator;
@@ -54,9 +55,10 @@ export const utilityReactHandler = async (
       // When the bot restarts, previous reports are cleared.
       // Also works as a catch all error in case there is another problem fetching
       if (!reportId) {
-        return dmChannel.send(
-          "Sorry - I don't keep these reports forever and this one seems to already be gone. Try generating another one using `!summary`!"
-        );
+        return dmChannel.send({
+          content:
+            "Sorry - I don't keep these reports forever and this one seems to already be gone. Try generating another one using `!summary`!",
+        });
       }
 
       try {

@@ -33,7 +33,7 @@ export const handleGuildMemberAdd = (member: GuildMember) => {
       }
     );
 
-  channel.send(`Attention <@${member.user.id}>!`, { embed });
+  channel.send({ content: `Attention <@${member.user.id}>!`, embeds: [embed] });
 };
 
 export default handleGuildMemberAdd;

@@ -5,14 +5,10 @@ import { parsePoll } from "../../helpers/parsePoll";
 export const createPoll = (message: Message) => {
   const [prefix, firstParam] = parseCommands(message, false);
 
-  const send = (text: string | MessageEmbed) => {
-    return message.channel.send(text);
-  };
-
   if (!firstParam) {
-    return send(
-      "Please add a question and some answers to complete your poll."
-    );
+    return message.channel.send({
+      content: "Please add a question and some answers to complete your poll.",
+    });
   }
 
   if (firstParam === "help") {
@@ -32,7 +28,7 @@ export const createPoll = (message: Message) => {
         "Complex polls allow for multiple options. Call it using `!poll {question} [Option A] [Option B] [Option C] ...`. You can add up to 20 options. Example: `!poll {What bean is best?} [Kidney Bean] [Black Bean] [Pinto Bean]`."
       );
 
-    return send(embed);
+    return message.channel.send({ embeds: [embed] });
   }
 
   if (!firstParam.startsWith("{")) {
@@ -68,13 +64,16 @@ export const createPoll = (message: Message) => {
   const { question, options } = parsePoll(message);
 
   if (options.length > 20) {
-    return send("Complex polls may only have up to 20 options, you monster.");
+    return message.channel.send({
+      content: "Complex polls may only have up to 20 options, you monster.",
+    });
   }
 
   if (options.length === 0) {
-    return send(
-      "Error with your poll question or options. Check for missing `{`, `}`, `[`, `]` or enter `!poll help` for more assitance."
-    );
+    return message.channel.send({
+      content:
+        "Error with your poll question or options. Check for missing `{`, `}`, `[`, `]` or enter `!poll help` for more assitance.",
+    });
   }
 
   const optionsString = options
@@ -85,7 +84,8 @@ export const createPoll = (message: Message) => {
 
   embed.setTitle("Poll: " + question).setDescription(optionsString);
 
-  send(embed)
+  message.channel
+    .send({ embeds: [embed] })
     .then((pollMsg) => {
       const promises = [];
 
@@ -98,8 +98,9 @@ export const createPoll = (message: Message) => {
     .catch((err) => {
       console.error("Problem creating poll.");
       console.error(err);
-      send(
-        "Sorry, I had some trouble making that poll. Please tell Jake about this."
-      );
+      message.channel.send({
+        content:
+          "Sorry, I had some trouble making that poll. Please tell Jake about this.",
+      });
     });
 };

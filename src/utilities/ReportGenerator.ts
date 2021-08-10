@@ -44,11 +44,6 @@ export class ReportGenerator {
     [key: string]: string;
   } = {};
 
-  error: {
-    dm: "My summary function doesn't work great via DM. Try calling me from a channel!";
-    limit: "In order to maintain order, please limit summary reports to last 24 hours";
-  };
-
   public sendHelp(message: Message) {
     const embed = new MessageEmbed();
 
@@ -70,11 +65,11 @@ export class ReportGenerator {
         },
       ]);
 
-    message.channel.send(embed);
+    message.channel.send({ embeds: [embed] });
   }
 
-  public async sendError(message: Message, type: string) {
-    await message.channel.send(this.error[type]);
+  public async sendError(message: Message, content: string) {
+    await message.channel.send({ content });
   }
 
   private async fetchMessages(message: Message, hourLimit: number) {
@@ -135,36 +130,35 @@ export class ReportGenerator {
 
     if (!report) {
       try {
-        await channel.send(
-          `Looks like this report doesn't exist anymore (I don't keep them that long). Try generating a new report with \`!summary\`!`
-        );
+        await channel.send({
+          content:
+            "Looks like this report doesn't exist anymore (I don't keep them that long). Try generating a new report with `!summary`!",
+        });
       } catch (err) {
         console.error("Couldn't send report to user after clicking emoji.");
       }
     }
 
     const sender = async () => {
-      const sends = [];
       try {
+        const embeds = [];
         Object.keys(report).forEach((reportType) => {
-          sends.push(channel.send(report[reportType]));
+          embeds.push(report[reportType]);
         });
+        return channel.send({ embeds });
       } catch (err) {
         console.error("failed to created DM channel with user to send report.");
-      }
-
-      return Promise.all(sends).catch((err) => {
         throw err;
-      });
+      }
     };
 
     const waiter = async () => {
       let count = 0;
 
       if (count > 9) {
-        return await channel.send(
-          `Sorry, I tried a few times but I can't seem to find this report. Try generating a new one and let Jake know this happened!`
-        );
+        return await channel.send({
+          content: `Sorry, I tried a few times but I can't seem to find this report. Try generating a new one and let Jake know this happened!`,
+        });
       }
 
       if (Object.keys(report).length) {
@@ -194,7 +188,7 @@ export class ReportGenerator {
           `Generating a summary of activity in <#${channel.id}> over the last ${hourLimit} hours and sending to requestor via DM (this make take 5-10 seconds).\n\nWant a copy of this report, too? Click the 📩  below to have one sent to your DMs.`
         );
 
-      notice = await channel.send(embed);
+      notice = await channel.send({ embeds: [embed] });
     } catch (err) {
       console.error("Failed to create notice in channel.");
       throw err;
@@ -212,7 +206,7 @@ export class ReportGenerator {
 
   private sendChannelLoadingMessage = async (channel: TextChannel) => {
     try {
-      await channel.send("Generating channel summary report...");
+      await channel.send({ content: "Generating channel summary report..." });
     } catch (err) {
       console.error("Loading message failed to send to channel.");
       throw err;
@@ -225,7 +219,10 @@ export class ReportGenerator {
     forceChannel: boolean = false
   ): Promise<string> {
     if (hourLimit > 24) {
-      await this.sendError(message, "hourLimit");
+      await this.sendError(
+        message,
+        "In order to maintain order, please limit summary reports to last 24 hours"
+      );
       throw "24 hours is the limit.";
     }
 

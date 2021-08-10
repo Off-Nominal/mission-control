@@ -55,12 +55,12 @@ export class ChannelBabysitter {
     this._client = client;
     this._channelId = channelId;
 
-    this._client.on("message", async (message) => {
+    this._client.on("messageCreate", async (message) => {
       const isCorrectChannel = message.channel.id === this._channelId;
       const [prefix, url, minWait, ...desc] = parseCommands(message, false);
 
       if (prefix === "!topic" && isCorrectChannel) {
-        await message.channel.send(requestNotification);
+        await message.channel.send({ content: requestNotification });
 
         if (url === "reset") {
           this.clearTimer();
@@ -169,9 +169,9 @@ export class ChannelBabysitter {
     this.setTopic(channel, generateTopicMessage());
 
     try {
-      const message = await channel.send(
-        generateInactivityEmbed(this._timeoutPeriod)
-      );
+      const message = await channel.send({
+        embeds: [generateInactivityEmbed(this._timeoutPeriod)],
+      });
       await message.react("🔄");
       this.clearTimer();
     } catch (err) {
@@ -184,9 +184,10 @@ export class ChannelBabysitter {
   public async recycleTopic(channel: TextChannel) {
     if (this._lastTopic === null) {
       try {
-        return await channel.send(
-          "That event has been cleared from my memory already. You'll need to set it again using the `!topic` command."
-        );
+        return await channel.send({
+          content:
+            "That event has been cleared from my memory already. You'll need to set it again using the `!topic` command.",
+        });
       } catch (err) {
         console.error(err);
       }
@@ -196,7 +197,7 @@ export class ChannelBabysitter {
     this.setTopic(channel, generateTopicMessage(this._lastTopic));
 
     try {
-      await channel.send(requestNotification);
+      await channel.send({ content: requestNotification });
     } catch (err) {
       console.error(err);
     }

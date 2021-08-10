@@ -5,7 +5,7 @@ import { sendError } from "../../../actions/global/sendError";
 import { parseCommands } from "../../../helpers/parseCommands";
 
 enum AllowedPrefix {
-  SHUNT = "!bc",
+  BC = "!bc",
 }
 
 export const handleMessage = (message: Message) => {

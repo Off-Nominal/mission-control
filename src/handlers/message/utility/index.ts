@@ -62,9 +62,10 @@ export const handleMessage = async (
 
     // OLDPOLL cascades into POLL to handle old syntax
     case AllowedPrefix.OLDPOLL:
-      message.channel.send(
-        "Please note the syntax for Polling has changed from `+poll` to `!poll` to match other bots. Type `!poll help` for more."
-      );
+      message.channel.send({
+        content:
+          "Please note the syntax for Polling has changed from `+poll` to `!poll` to match other bots. Type `!poll help` for more.",
+      });
     case AllowedPrefix.POLL: {
       createPoll(message);
       break;
@@ -78,7 +79,10 @@ export const handleMessage = async (
 
       // This is a report request DM, which report generator does not support
       if (message.guild === null) {
-        reportGenerator.sendError(message, "dm");
+        reportGenerator.sendError(
+          message,
+          "My summary function doesn't work great via DM. Try calling me from a channel!"
+        );
         break;
       }
 

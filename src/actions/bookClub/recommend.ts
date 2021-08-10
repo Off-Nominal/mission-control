@@ -1,34 +1,34 @@
-import { Message } from 'discord.js';
-const axios = require('axios');
+import { Message } from "discord.js";
+const axios = require("axios");
 
 const BASEURL = process.env.BASEURL;
 
 enum RecommendCommand {
-  random = 'random',
-  highestrated = 'highestrate',
-  favourite = 'favourite',
+  random = "random",
+  highestrated = "highestrate",
+  favourite = "favourite",
 }
 
 enum ErrorType {
-  api = 'api',
-  badCommand = 'bad-command',
+  api = "api",
+  badCommand = "bad-command",
 }
 
 export const handleRecommendCommand = (arg: string, message: Message) => {
   const sendError = (type: ErrorType, incorrectArg?: string) => {
     let errorMessage;
     switch (type) {
-      case 'api':
-        errorMessage = 'Oh no, something seems to have gone wrong.';
+      case "api":
+        errorMessage = "Oh no, something seems to have gone wrong.";
         break;
-      case 'bad-command':
+      case "bad-command":
         errorMessage = `That recommend type (${incorrectArg}) is not supported`;
     }
-    message.channel.send(errorMessage);
+    message.channel.send({ content: errorMessage });
   };
 
   const sendRecommendation = (slug) => {
-    message.channel.send(`${BASEURL}/books/${slug}`);
+    message.channel.send({ content: `${BASEURL}/books/${slug}` });
   };
 
   const handleCommand = (type: RecommendCommand) => {
@@ -42,14 +42,14 @@ export const handleRecommendCommand = (arg: string, message: Message) => {
   };
 
   switch (arg) {
-    case 'random':
+    case "random":
       handleCommand(RecommendCommand.random);
       break;
-    case 'best':
+    case "best":
       axios;
       handleCommand(RecommendCommand.highestrated);
       break;
-    case 'favourite':
+    case "favourite":
       handleCommand(RecommendCommand.favourite);
       break;
     default:

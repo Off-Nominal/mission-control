@@ -25,5 +25,5 @@ export const sendPodcastHelp = (message: Message) => {
       "Both the Red Planet Review and MECO Headlines feeds are not well-optimized for Search Engines. Results may vary when searching those feeds."
     );
 
-  message.channel.send(embed);
+  message.channel.send({ embeds: [embed] });
 };

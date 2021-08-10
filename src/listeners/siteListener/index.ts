@@ -227,7 +227,7 @@ export class SiteListener {
 
     try {
       const channel = await this.discordClient.channels.fetch(this.channelId);
-      await (channel as TextChannel).send(embed);
+      await (channel as TextChannel).send({ embeds: [embed] });
       console.log(`Discord successfully notified of changes to ${this.url}`);
     } catch (err) {
       console.error(err);
