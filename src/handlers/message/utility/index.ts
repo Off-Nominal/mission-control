@@ -4,6 +4,7 @@ import { marsTime } from "../../../actions/utility/marstime/marsTime";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { shunt } from "../../../actions/utility/shunt";
+import { thread } from "../../../actions/utility/thread";
 import {
   findTempsToConvert,
   sendTemperatureConversions,
@@ -18,6 +19,7 @@ enum AllowedPrefix {
   POLL = "!poll",
   SUMMARY = "!summary",
   MARSTIME = "!marstime",
+  THREAD = "!thread",
 }
 
 export const handleMessage = async (
@@ -105,6 +107,15 @@ export const handleMessage = async (
         console.error(err);
       }
 
+      break;
+    }
+
+    case AllowedPrefix.THREAD: {
+      if (command === "help") {
+        sendHelp(message);
+      } else {
+        thread(message);
+      }
       break;
     }
   }
