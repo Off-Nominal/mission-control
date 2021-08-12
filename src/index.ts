@@ -222,8 +222,8 @@ utilityBot.on("messageReactionAdd", (messageReact, user) => {
     channelBabysitter,
   });
 });
-utilityBot.on("threadCreate", () => {
-  console.log("test");
+utilityBot.on("threadCreate", async (thread) => {
+  if (thread.joinable) await thread.join();
 });
 
 /***********************************
@@ -231,23 +231,50 @@ utilityBot.on("threadCreate", () => {
  ************************************/
 
 bcBot.on("messageCreate", bookClubMessageHandler);
+bcBot.on("threadCreate", async (thread) => {
+  if (thread.joinable) await thread.join();
+});
 
 /***********************************
  *  Podcast Bot Actions
  ************************************/
 
-wmBot.on("messageCreate", (message: Message) =>
+// WeMartians
+wmBot.on("messageCreate", (message) =>
   feedListenerMessageHandler(message, wmFeedListener, "!wm")
 );
-ofnBot.on("messageCreate", (message: Message) =>
+wmBot.on("threadCreate", async (thread) => {
+  if (thread.joinable) await thread.join();
+});
+
+// Off-Nominal
+ofnBot.on("messageCreate", (message) =>
   feedListenerMessageHandler(message, ofnFeedListener, "!ofn")
 );
-mecoBot.on("messageCreate", (message: Message) =>
+ofnBot.on("threadCreate", async (thread) => {
+  if (thread.joinable) await thread.join();
+});
+
+// MECO
+mecoBot.on("messageCreate", (message) =>
   feedListenerMessageHandler(message, mecoFeedListener, "!meco")
 );
-rprBot.on("messageCreate", (message: Message) =>
+mecoBot.on("threadCreate", async (thread) => {
+  if (thread.joinable) await thread.join();
+});
+
+// RPR
+rprBot.on("messageCreate", (message) =>
   feedListenerMessageHandler(message, rprFeedListener, "!rpr")
 );
-hlBot.on("messageCreate", (message: Message) =>
+rprBot.on("threadCreate", async (thread) => {
+  if (thread.joinable) await thread.join();
+});
+
+// Headlines
+hlBot.on("messageCreate", (message) =>
   feedListenerMessageHandler(message, hlFeedListener, "!hl")
 );
+hlBot.on("threadCreate", async (thread) => {
+  if (thread.joinable) await thread.join();
+});
