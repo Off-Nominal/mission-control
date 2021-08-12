@@ -1,6 +1,11 @@
 require("dotenv").config();
 
-import { Client, Intents, Message, PresenceData } from "discord.js";
+import {
+  Client,
+  Intents,
+  PermissionResolvable,
+  PresenceData,
+} from "discord.js";
 import {
   bookClubMessageHandler,
   feedListenerMessageHandler,
@@ -15,6 +20,8 @@ import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
 const searchOptions = require("../config/searchOptions.json");
+
+const MODS_ROLE_ID = process.env.MODS_ROLE_ID as PermissionResolvable;
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
 const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
@@ -223,7 +230,17 @@ utilityBot.on("messageReactionAdd", (messageReact, user) => {
   });
 });
 utilityBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
+  if (thread.joinable) {
+    await thread.join();
+
+    // Auto-adds moderators to all threads
+    const mods = thread.guild.members.cache.filter((member) =>
+      member.permissions.has(MODS_ROLE_ID)
+    );
+    mods.forEach((mod) => {
+      thread.members.add(mod.id);
+    });
+  }
 });
 
 /***********************************

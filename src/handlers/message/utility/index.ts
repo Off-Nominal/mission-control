@@ -4,7 +4,6 @@ import { marsTime } from "../../../actions/utility/marstime/marsTime";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { shunt } from "../../../actions/utility/shunt";
-import { thread } from "../../../actions/utility/thread";
 import {
   findTempsToConvert,
   sendTemperatureConversions,
@@ -12,7 +11,7 @@ import {
 import { parseCommands } from "../../../helpers/parseCommands";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
 
-enum AllowedPrefix {
+export enum AllowedPrefix {
   SHUNT = "!shunt",
   HELP = "!help",
   OLDPOLL = "+poll",
@@ -39,11 +38,12 @@ export const handleMessage = async (
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
   switch (prefix) {
+    case AllowedPrefix.THREAD:
     case AllowedPrefix.SHUNT: {
       if (command === "help") {
         sendHelp(message);
       } else {
-        shunt(message);
+        shunt(message, prefix);
       }
       break;
     }
@@ -107,15 +107,6 @@ export const handleMessage = async (
         console.error(err);
       }
 
-      break;
-    }
-
-    case AllowedPrefix.THREAD: {
-      if (command === "help") {
-        sendHelp(message);
-      } else {
-        thread(message);
-      }
       break;
     }
   }
