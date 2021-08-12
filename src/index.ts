@@ -22,6 +22,7 @@ import { ChannelBabysitter } from "./utilities/channelBabysitter";
 const searchOptions = require("../config/searchOptions.json");
 
 const MODS_ROLE_ID = process.env.MODS_ROLE_ID as PermissionResolvable;
+const GUILD_ID = process.env.GUILD_ID;
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
 const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
@@ -233,10 +234,14 @@ utilityBot.on("threadCreate", async (thread) => {
   if (thread.joinable) {
     await thread.join();
 
+    const guild = utilityBot.guilds.cache.find(
+      (guild) => guild.id === GUILD_ID
+    );
+
     // Auto-adds moderators to all threads
     console.log("Mods Role ID is", MODS_ROLE_ID);
-    const mods = thread.guild.members.cache.filter((member) =>
-      member.permissions.has(MODS_ROLE_ID)
+    const mods = guild.members.cache.filter((member) =>
+      member.roles.cache.some((role) => role.id === MODS_ROLE_ID)
     );
     console.log("Mods", mods);
     mods.forEach((mod) => {
