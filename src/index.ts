@@ -234,11 +234,13 @@ utilityBot.on("threadCreate", async (thread) => {
     await thread.join();
 
     // Auto-adds moderators to all threads
+    console.log("Mods Role ID is", MODS_ROLE_ID);
     const mods = thread.guild.members.cache.filter((member) =>
       member.permissions.has(MODS_ROLE_ID)
     );
+    console.log("Mods", mods);
     mods.forEach((mod) => {
-      thread.members.add(mod.id);
+      thread.members.add(mod.id).then((modId) => console.log(`Added ${modId}`));
     });
   }
 });
