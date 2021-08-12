@@ -21,7 +21,7 @@ export const shunt = async (message: Message, prefix: AllowedPrefix) => {
         console.error(
           "Could not send error message about shunting in same channel."
         );
-        return;
+        return console.error(err);
       });
   }
 
@@ -83,7 +83,6 @@ export const shunt = async (message: Message, prefix: AllowedPrefix) => {
       })
       .catch((err) => {
         console.error(err);
-        throw err;
       });
   }
 };
