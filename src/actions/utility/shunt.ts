@@ -12,10 +12,17 @@ export const shunt = async (message: Message, prefix: AllowedPrefix) => {
 
   // Prevent shunting to same channel
   if (isSameChannel && prefix === AllowedPrefix.SHUNT) {
-    return sourceChannel.send({
-      content:
-        "It looks like you're trying to shunt a conversation but you targeted the thread it's already in!",
-    });
+    return sourceChannel
+      .send({
+        content:
+          "It looks like you're trying to shunt a conversation but you targeted the thread it's already in!",
+      })
+      .catch((err) => {
+        console.error(
+          "Could not send error message about shunting in same channel."
+        );
+        return;
+      });
   }
 
   const shunter = message.member;
@@ -45,24 +52,38 @@ export const shunt = async (message: Message, prefix: AllowedPrefix) => {
       })
       .then((thread) => {
         return thread.send({ embeds: [targetEmbed] });
+      })
+      .catch((err) => {
+        console.error("Could not create thread and send target Embed");
+        throw err;
       });
   }
 
   if (prefix === AllowedPrefix.SHUNT) {
-    targetMessage = targetChannel.send({ embeds: [targetEmbed] });
+    targetMessage = targetChannel
+      .send({ embeds: [targetEmbed] })
+      .catch((err) => {
+        console.error("Could not send target Embed");
+        throw err;
+      });
   }
 
   // Sends a source message back to the original thread, if it's different
   if (!isSameChannel) {
-    targetMessage.then((message) => {
-      const sourceEmbed = new MessageEmbed()
-        .setTitle(`Conversation move request`)
-        .setDescription(
-          `${shunterName}: "${shuntMessage}" - [Follow the conversation!](${message.url})`
-        )
-        .setThumbnail("https://i.imgur.com/UYBbaLR.png");
+    targetMessage
+      .then((message) => {
+        const sourceEmbed = new MessageEmbed()
+          .setTitle(`Conversation move request`)
+          .setDescription(
+            `${shunterName}: "${shuntMessage}" - [Follow the conversation!](${message.url})`
+          )
+          .setThumbnail("https://i.imgur.com/UYBbaLR.png");
 
-      sourceChannel.send({ embeds: [sourceEmbed] });
-    });
+        sourceChannel.send({ embeds: [sourceEmbed] });
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err;
+      });
   }
 };
