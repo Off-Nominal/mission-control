@@ -17,8 +17,12 @@ export const sendHelp = (message: Message) => {
       { name: "Tracking Station", value: "`!map help`", inline: true },
     ])
     .addField(
-      "Shunt - Move a thread to a new channel",
+      "Shunt - Move a conversation to a new channel",
       "`!shunt [targetChannel] [message]` - Request a conversation be moved to another channel."
+    )
+    .addField(
+      "Thread - Move a conversation to a new thread",
+      "`!thread [targetChannel] [message]` - Request a conversation be moved to a new thread in target channel. Can be used in the same channel."
     )
     .addField(
       "Poll - poll the discord with a question",
