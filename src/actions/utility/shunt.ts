@@ -18,13 +18,14 @@ export const shunt = async (message: Message, prefix: AllowedPrefix) => {
     });
   }
 
-  const shunter = message.member.displayName;
+  const shunter = message.member;
+  const shunterName = shunter.displayName;
   const shuntMessage = args.join(" ");
 
   const targetEmbed = new MessageEmbed()
     .setTitle(`Incoming conversation from #${sourceChannel.name}`)
     .setDescription(
-      `${shunter}: "${shuntMessage}" - [Read the original](${message.url})`
+      `${shunterName}: "${shuntMessage}" - [Read the original](${message.url})`
     )
     .setThumbnail("https://i.imgur.com/kfvmby0.png");
 
@@ -36,6 +37,11 @@ export const shunt = async (message: Message, prefix: AllowedPrefix) => {
       .create({
         name: shuntMessage,
         autoArchiveDuration: 1440, // One Day
+      })
+      .then((thread) => {
+        // Auto adds shunter to the thread
+        thread.members.add(shunter.id);
+        return thread;
       })
       .then((thread) => {
         return thread.send({ embeds: [targetEmbed] });
@@ -52,7 +58,7 @@ export const shunt = async (message: Message, prefix: AllowedPrefix) => {
       const sourceEmbed = new MessageEmbed()
         .setTitle(`Conversation move request`)
         .setDescription(
-          `${shunter}: "${shuntMessage}" - [Follow the conversation!](${message.url})`
+          `${shunterName}: "${shuntMessage}" - [Follow the conversation!](${message.url})`
         )
         .setThumbnail("https://i.imgur.com/UYBbaLR.png");
 
