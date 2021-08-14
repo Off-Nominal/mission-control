@@ -183,6 +183,14 @@ utilityBot.once("ready", () => {
   logReady(utilityBot.user.tag);
   utilityBot.user.setPresence(getPresenceData("!help"));
   channelBabysitter.initialize();
+
+  // Find Off-Nominal Discord Guild, fetch members to prevent partials
+  const guild = utilityBot.guilds.cache.find((guild) => guild.id === GUILD_ID);
+  guild.members
+    .fetch()
+    .catch((err) =>
+      console.error("Error fetching partials for Guild Members", err)
+    );
 });
 bcBot.once("ready", () => {
   logReady(bcBot.user.tag);
@@ -230,7 +238,7 @@ utilityBot.on("messageReactionAdd", (messageReact, user) => {
     channelBabysitter,
   });
 });
-utilityBot.on("threadCreate", (thread) => {
+utilityBot.on("threadCreate", async (thread) => {
   if (thread.joinable) {
     thread
       .join()
@@ -241,7 +249,6 @@ utilityBot.on("threadCreate", (thread) => {
     );
 
     // Auto-adds moderators to all threads
-
     const mods = guild.members.cache.filter((member) =>
       member.roles.cache.some((role) => role.id === MODS_ROLE_ID)
     );
