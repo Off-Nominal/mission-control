@@ -230,22 +230,33 @@ utilityBot.on("messageReactionAdd", (messageReact, user) => {
     channelBabysitter,
   });
 });
-utilityBot.on("threadCreate", async (thread) => {
+utilityBot.on("threadCreate", (thread) => {
   if (thread.joinable) {
-    await thread.join();
+    thread
+      .join()
+      .catch((err) => console.error("Error joining Utility Bot to thread"));
 
     const guild = utilityBot.guilds.cache.find(
       (guild) => guild.id === GUILD_ID
     );
 
     // Auto-adds moderators to all threads
-    console.log("Mods Role ID is", MODS_ROLE_ID);
+
     const mods = guild.members.cache.filter((member) =>
       member.roles.cache.some((role) => role.id === MODS_ROLE_ID)
     );
-    console.log("Mods", mods);
+
+    console.log(`Found ${mods.size} mods.`);
+    console.log("Adding mods to Thread");
+
     mods.forEach((mod) => {
-      thread.members.add(mod.id).then((modId) => console.log(`Added ${modId}`));
+      thread.members
+        .add(mod.id)
+        .then(() => console.log(`Added ${mod.displayName}`))
+        .catch((err) => {
+          console.error(`Failed to add ${mod.displayName} to Thread`);
+          console.error(err);
+        });
     });
   }
 });
