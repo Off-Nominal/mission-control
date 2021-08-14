@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Client, TextChannel } from "discord.js";
 import Fuse from "fuse.js";
 const FuseJS = require("fuse.js");
@@ -20,6 +21,7 @@ export type FeedListenerOptions = {
   rssInterval?: number;
   actionDelay?: number;
   searchOptions?: Fuse.IFuseOptions<FeedItem>;
+  deployUrl?: string;
 };
 
 export class FeedListener extends Watcher {
@@ -29,6 +31,7 @@ export class FeedListener extends Watcher {
   title: string;
   fuse: Fuse<FeedItem>;
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
+  deployUrl: string;
 
   constructor(feed: string, options?: FeedListenerOptions) {
     super(feed, options.rssInterval || 60);
@@ -37,6 +40,7 @@ export class FeedListener extends Watcher {
     this.channelId = options.channelId;
     this.timeout = options.actionDelay * 1000 || 0;
     this.searchOptions = options.searchOptions || null;
+    this.deployUrl = options.deployUrl;
   }
 
   private processRSS(entries) {
@@ -83,6 +87,13 @@ export class FeedListener extends Watcher {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode);
         this.episodes.push(mappedEpisode);
+
+        if (this.deployUrl) {
+          axios
+            .post(this.deployUrl)
+            .catch((err) => console.error("Failed to deploy site.", err));
+        }
+
         setTimeout(() => {
           this.announceNewItem(mappedEpisode.url);
         }, this.timeout);
@@ -99,7 +110,9 @@ export class FeedListener extends Watcher {
   private announceNewItem(podcastURL) {
     console.log(`New episode in ${this.title}.\n${podcastURL}`);
     this.channel
-      .send(`It's podcast release day for ${this.title}!\n${podcastURL}`)
+      .send({
+        content: `It's podcast release day for ${this.title}!\n${podcastURL}`,
+      })
       .then(() => {
         console.log(
           `Discord successfully notified of new podcast episode in ${this.title}`

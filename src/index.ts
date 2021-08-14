@@ -51,6 +51,8 @@ const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
 const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
 const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
 
+const WM_DEPLOY_URL = process.env.WM_DEPLOY_URL;
+
 /***********************************
  *  Bot Setup
  ************************************/
@@ -116,6 +118,7 @@ const wmFeedListener = new FeedListener(WMFEED, {
   channelId: CONTENTCHANNELID,
   actionDelay: 600,
   searchOptions: WM_SEARCH_OPTIONS,
+  deployUrl: WM_DEPLOY_URL,
 });
 const mecoFeedListener = new FeedListener(MECOFEED, {
   processor: feedMapper,
