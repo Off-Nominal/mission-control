@@ -23,22 +23,22 @@
   "homepage": "https://github.com/mendahu/book-club-discord-bot#readme",
   "dependencies": {
     "@octokit/auth-app": "^3.4.0",
-    "axios": "^0.21.1",
-    "cloudinary": "^1.25.1",
-    "date-fns": "^2.19.0",
-    "discord.js": "^13.0.1",
+    "axios": "^0.22.0",
+    "cloudinary": "^1.27.0",
+    "date-fns": "^2.25.0",
+    "discord.js": "^13.2.0",
     "dotenv": "^8.2.0",
     "feed-watcher": "^0.2.1",
     "fuse.js": "^6.4.6",
     "mars-date-utils": "^1.0.2",
     "string-strip-html": "^8.2.9",
-    "uuid": "^3.4.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/node": "^16.4.13",
-    "nodemon": "^2.0.12",
-    "ts-node": "^10.2.0",
-    "typescript": "^4.3.5"
+    "@types/node": "^16.10.3",
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
   },
   "engines": {
     "node": "16.x"

@@ -11,6 +11,47 @@ export type SpacecraftData = {
   logo: string;
 };
 
+type JPLFeature = {
+  type: string;
+  properties: {
+    RMC?: string;
+    site?: string;
+    drive?: string;
+    sol: string | number;
+    easting?: number;
+    northing?: number;
+    elev_geoid?: number;
+    elev_radii?: number;
+    radius?: number;
+    lon?: number;
+    lat?: number;
+    roll?: number;
+    pitch?: number;
+    yaw?: number;
+    yaw_rad: number;
+    tilt?: number;
+    dist_m?: number;
+    dist_total?: number;
+    yaw_deg: string;
+    site_pos: string;
+    dist_km: string | number;
+    dist_mi: string | number;
+    final?: string;
+    Note?: string;
+    drivetype?: string;
+  };
+  geometry: {
+    type: string;
+    coordinates: number[];
+  };
+};
+
+type WaypointsResponse = {
+  type: string;
+  name: string;
+  features: JPLFeature[];
+};
+
 const formatLatLon = (coord: number) => {
   return Math.round(coord * 100) / 100;
 };
@@ -121,7 +162,7 @@ export const marsTime = async (
     case "msl":
     case "curiosity": {
       try {
-        const response = await axios.get(
+        const response = await axios.get<WaypointsResponse>(
           "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints_current.json"
         );
         const [jsonLon, jsonLat] =
@@ -157,7 +198,7 @@ export const marsTime = async (
     case "m20":
     case "perseverance": {
       try {
-        const response = await axios.get(
+        const response = await axios.get<WaypointsResponse>(
           "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints_current.json"
         );
         const [jsonLon, jsonLat] =
