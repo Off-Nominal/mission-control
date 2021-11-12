@@ -81,7 +81,7 @@ export const marsTime = async (
       return {
         avatar:
           "https://res.cloudinary.com/dj5enq03a/image/upload/v1618764208/Discord%20Assets/Mars-800h-v2_02.width-1024_ouuahe.png",
-        author: "Airy Mean Time",
+        author: "Mars Coordinated Time (MTC)",
         lat: formatLat(0),
         lon: formatLon(0),
         lmst: cd.getLMST(0),
@@ -151,6 +151,7 @@ export const marsTime = async (
       break;
     }
     case "mer-b":
+    case "oppy":
     case "opportunity": {
       data = spacecraftData.opportunity;
       break;
