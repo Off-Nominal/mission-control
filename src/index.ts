@@ -1,11 +1,6 @@
 require("dotenv").config();
 
-import {
-  Client,
-  Intents,
-  PermissionResolvable,
-  PresenceData,
-} from "discord.js";
+import { Client, Intents, PresenceData } from "discord.js";
 import {
   bookClubMessageHandler,
   feedListenerMessageHandler,
@@ -19,39 +14,7 @@ import { logReady } from "./actions/global/logReady";
 import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
-const searchOptions = require("../config/searchOptions.json");
-
-const MODS_ROLE_ID = process.env.MODS_ROLE_ID as PermissionResolvable;
-const GUILD_ID = process.env.GUILD_ID;
-
-const TEST_CHANNEL = process.env.TESTCHANNEL;
-const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
-
-const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
-const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
-const LIVECHATCHANNELID = process.env.LIVECHATCHANNELID || TEST_CHANNEL;
-
-const WMFEED = process.env.WMFEED;
-const MECOFEED = process.env.MECOFEED;
-const OFNFEED = process.env.OFNFEED;
-const RPRFEED = process.env.RPRFEED;
-const HLFEED = process.env.HLFEED;
-
-const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
-const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
-const WM_TOKEN = process.env.WEMARTIANS_BOT_TOKEN_ID;
-const MECO_TOKEN = process.env.MECO_BOT_TOKEN_ID;
-const OFN_TOKEN = process.env.OFFNOM_BOT_TOKEN_ID;
-const RPR_TOKEN = process.env.RPR_BOT_TOKEN_ID;
-const HL_TOKEN = process.env.HL_BOT_TOKEN_ID;
-
-const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
-const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
-const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
-const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
-const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
-
-const WM_DEPLOY_URL = process.env.WM_DEPLOY_URL;
+import config from "../config/";
 
 /***********************************
  *  Bot Setup
@@ -104,7 +67,7 @@ const hlBot = new Client({
 const starshipChecker = new SiteListener(
   "https://www.spacex.com/vehicles/starship/",
   utilityBot,
-  BOCACHICACHANNELID,
+  config.discordIds.bocaChannel,
   { interval: 15, cooldown: 600 }
 );
 
@@ -112,37 +75,39 @@ const starshipChecker = new SiteListener(
  *  Feed Listener Setup
  ************************************/
 
-const wmFeedListener = new FeedListener(WMFEED, {
+const { feeds, searchOptions, deployUrls } = config;
+
+const wmFeedListener = new FeedListener(feeds.wm, {
   processor: feedMapper,
   discordClient: wmBot,
-  channelId: CONTENTCHANNELID,
+  channelId: config.discordIds.contentChannel,
   actionDelay: 600,
-  searchOptions: WM_SEARCH_OPTIONS,
-  deployUrl: WM_DEPLOY_URL,
+  searchOptions: searchOptions.wm,
+  deployUrl: deployUrls.wm,
 });
-const mecoFeedListener = new FeedListener(MECOFEED, {
+const mecoFeedListener = new FeedListener(feeds.meco, {
   processor: feedMapper,
   discordClient: mecoBot,
-  channelId: CONTENTCHANNELID,
-  searchOptions: MECO_SEARCH_OPTIONS,
+  channelId: config.discordIds.contentChannel,
+  searchOptions: searchOptions.meco,
 });
-const ofnFeedListener = new FeedListener(OFNFEED, {
+const ofnFeedListener = new FeedListener(feeds.ofn, {
   processor: feedMapper,
   discordClient: ofnBot,
-  channelId: CONTENTCHANNELID,
-  searchOptions: OFN_SEARCH_OPTIONS,
+  channelId: config.discordIds.contentChannel,
+  searchOptions: searchOptions.ofn,
 });
-const rprFeedListener = new FeedListener(RPRFEED, {
+const rprFeedListener = new FeedListener(feeds.rpr, {
   processor: feedMapper,
   discordClient: rprBot,
-  channelId: CONTENTCHANNELID,
-  searchOptions: RPR_SEARCH_OPTIONS,
+  channelId: config.discordIds.contentChannel,
+  searchOptions: searchOptions.rpr,
 });
-const hlFeedListener = new FeedListener(HLFEED, {
+const hlFeedListener = new FeedListener(feeds.hl, {
   processor: feedMapper,
   discordClient: hlBot,
-  channelId: CONTENTCHANNELID,
-  searchOptions: HL_SEARCH_OPTIONS,
+  channelId: config.discordIds.contentChannel,
+  searchOptions: searchOptions.hl,
 });
 
 /***********************************
@@ -150,19 +115,24 @@ const hlFeedListener = new FeedListener(HLFEED, {
  ************************************/
 
 const reportGenerator = new ReportGenerator();
-const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
+const channelBabysitter = new ChannelBabysitter(
+  utilityBot,
+  config.discordIds.liveChatChannel
+);
 
 /***********************************
  *  ASYNC LOGINS/INITS
  ************************************/
 
-utilityBot.login(UTILITY_TOKEN);
-bcBot.login(BC_TOKEN);
-wmBot.login(WM_TOKEN);
-ofnBot.login(OFN_TOKEN);
-mecoBot.login(MECO_TOKEN);
-rprBot.login(RPR_TOKEN);
-hlBot.login(HL_TOKEN);
+const { tokens } = config;
+
+utilityBot.login(tokens.utility);
+bcBot.login(tokens.bc);
+wmBot.login(tokens.wm);
+ofnBot.login(tokens.ofn);
+mecoBot.login(tokens.meco);
+rprBot.login(tokens.rpr);
+hlBot.login(tokens.hl);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
@@ -188,7 +158,9 @@ utilityBot.once("ready", () => {
   channelBabysitter.initialize();
 
   // Find Off-Nominal Discord Guild, fetch members to prevent partials
-  const guild = utilityBot.guilds.cache.find((guild) => guild.id === GUILD_ID);
+  const guild = utilityBot.guilds.cache.find(
+    (guild) => guild.id === config.discordIds.guildId
+  );
   guild.members
     .fetch()
     .catch((err) =>
@@ -248,12 +220,14 @@ utilityBot.on("threadCreate", async (thread) => {
       .catch((err) => console.error("Error joining Utility Bot to thread"));
 
     const guild = utilityBot.guilds.cache.find(
-      (guild) => guild.id === GUILD_ID
+      (guild) => guild.id === config.discordIds.guildId
     );
 
     // Auto-adds moderators to all threads
     const mods = guild.members.cache.filter((member) =>
-      member.roles.cache.some((role) => role.id === MODS_ROLE_ID)
+      member.roles.cache.some(
+        (role) => role.id === config.discordIds.moderatorRoleId
+      )
     );
 
     console.log(`Found ${mods.size} mods.`);
