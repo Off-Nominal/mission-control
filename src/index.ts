@@ -20,45 +20,22 @@ import config from "../config/";
  *  Bot Setup
  ************************************/
 
-const simpleIntents = new Intents();
-const utilityIntents = new Intents();
-
-simpleIntents.add(
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.DIRECT_MESSAGES
-);
-
-utilityIntents.add(
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MEMBERS,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-  Intents.FLAGS.DIRECT_MESSAGES
-);
+const { intents } = config;
+const simpleOptions = {
+  intents: intents.simple,
+};
 
 const utilityBot = new Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
-  intents: utilityIntents,
+  intents: intents.utility,
 });
-const bcBot = new Client({
-  intents: simpleIntents,
-});
-const wmBot = new Client({
-  intents: simpleIntents,
-});
-const ofnBot = new Client({
-  intents: simpleIntents,
-});
-const mecoBot = new Client({
-  intents: simpleIntents,
-});
-const rprBot = new Client({
-  intents: simpleIntents,
-});
-const hlBot = new Client({
-  intents: simpleIntents,
-});
+
+const bcBot = new Client(simpleOptions);
+const wmBot = new Client(simpleOptions);
+const ofnBot = new Client(simpleOptions);
+const mecoBot = new Client(simpleOptions);
+const rprBot = new Client(simpleOptions);
+const hlBot = new Client(simpleOptions);
 
 /***********************************
  *  Site Listener Setup

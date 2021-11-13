@@ -1,4 +1,4 @@
-import { PermissionResolvable } from "discord.js";
+import { Intents, PermissionResolvable } from "discord.js";
 
 // Fuse.js search Options
 const defaultSearchOptions = {
@@ -10,6 +10,24 @@ const defaultSearchOptions = {
     { name: "description", weight: 3 },
   ],
 };
+
+// bot intents
+const simpleIntents = new Intents();
+const utilityIntents = new Intents();
+
+simpleIntents.add(
+  Intents.FLAGS.GUILDS,
+  Intents.FLAGS.GUILD_MESSAGES,
+  Intents.FLAGS.DIRECT_MESSAGES
+);
+
+utilityIntents.add(
+  Intents.FLAGS.GUILD_MESSAGES,
+  Intents.FLAGS.GUILDS,
+  Intents.FLAGS.GUILD_MEMBERS,
+  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  Intents.FLAGS.DIRECT_MESSAGES
+);
 
 const config = {
   // id constants from your guild
@@ -53,6 +71,11 @@ const config = {
   // deployment urls for websites
   deployUrls: {
     wm: process.env.WM_DEPLOY_URL,
+  },
+
+  intents: {
+    simple: simpleIntents,
+    utility: utilityIntents,
   },
 };
 
