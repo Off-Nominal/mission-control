@@ -42,7 +42,7 @@ const hlBot = new Client(simpleOptions);
  ************************************/
 
 const starshipChecker = new SiteListener(
-  "https://www.spacex.com/vehicles/starship/",
+  config.siteTracking.starship,
   utilityBot,
   config.discordIds.bocaChannel,
   { interval: 15, cooldown: 600 }
@@ -71,6 +71,7 @@ const mecoFeedListener = new FeedListener(feeds.meco, {
 const ofnFeedListener = new FeedListener(feeds.ofn, {
   processor: feedMapper,
   discordClient: ofnBot,
+  actionDelay: 60,
   channelId: config.discordIds.contentChannel,
   searchOptions: searchOptions.ofn,
 });
@@ -78,6 +79,7 @@ const rprFeedListener = new FeedListener(feeds.rpr, {
   processor: feedMapper,
   discordClient: rprBot,
   channelId: config.discordIds.contentChannel,
+  actionDelay: 600,
   searchOptions: searchOptions.rpr,
 });
 const hlFeedListener = new FeedListener(feeds.hl, {

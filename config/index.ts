@@ -73,9 +73,15 @@ const config = {
     wm: process.env.WM_DEPLOY_URL,
   },
 
+  // Discord client intents
   intents: {
     simple: simpleIntents,
     utility: utilityIntents,
+  },
+
+  // Starship site URL
+  siteTracking: {
+    starship: "https://www.spacex.com/vehicles/starship/",
   },
 };
 
