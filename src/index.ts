@@ -20,16 +20,9 @@ import config from "../config/";
  *  Bot Setup
  ************************************/
 
-const { intents } = config;
-const simpleOptions = {
-  intents: intents.simple,
-};
+const { simpleOptions, utilityOptions } = config.intents;
 
-const utilityBot = new Client({
-  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
-  intents: intents.utility,
-});
-
+const utilityBot = new Client(utilityOptions);
 const bcBot = new Client(simpleOptions);
 const wmBot = new Client(simpleOptions);
 const ofnBot = new Client(simpleOptions);
