@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-import { Client, Intents, PresenceData } from "discord.js";
+import { PresenceData } from "discord.js";
 import {
   bookClubMessageHandler,
   feedListenerMessageHandler,
@@ -16,19 +16,15 @@ import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
 import config from "../config/";
 
-/***********************************
- *  Bot Setup
- ************************************/
-
-const { simpleOptions, utilityOptions } = config.intents;
-
-const utilityBot = new Client(utilityOptions);
-const bcBot = new Client(simpleOptions);
-const wmBot = new Client(simpleOptions);
-const ofnBot = new Client(simpleOptions);
-const mecoBot = new Client(simpleOptions);
-const rprBot = new Client(simpleOptions);
-const hlBot = new Client(simpleOptions);
+import {
+  utilityBot,
+  bcBot,
+  wmBot,
+  ofnBot,
+  mecoBot,
+  rprBot,
+  hlBot,
+} from "./discordClients";
 
 /***********************************
  *  Site Listener Setup

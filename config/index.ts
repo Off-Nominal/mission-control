@@ -1,4 +1,4 @@
-import { ClientOptions, Intents, PermissionResolvable } from "discord.js";
+import { PermissionResolvable } from "discord.js";
 
 // Fuse.js search Options
 const defaultSearchOptions = {
@@ -9,32 +9,6 @@ const defaultSearchOptions = {
     { name: "title", weight: 2 },
     { name: "description", weight: 3 },
   ],
-};
-
-// bot intents
-const simpleIntents = new Intents();
-const utilityIntents = new Intents();
-
-simpleIntents.add(
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.DIRECT_MESSAGES
-);
-
-utilityIntents.add(
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MEMBERS,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-  Intents.FLAGS.DIRECT_MESSAGES
-);
-
-const simpleOptions: ClientOptions = {
-  intents: simpleIntents,
-};
-const utilityOptions: ClientOptions = {
-  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
-  intents: utilityIntents,
 };
 
 const config = {
@@ -79,12 +53,6 @@ const config = {
   // deployment urls for websites
   deployUrls: {
     wm: process.env.WM_DEPLOY_URL,
-  },
-
-  // Discord client intents
-  intents: {
-    simpleOptions,
-    utilityOptions,
   },
 
   // Starship site URL
