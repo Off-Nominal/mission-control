@@ -1,4 +1,4 @@
-import { Intents, PermissionResolvable } from "discord.js";
+import { ClientOptions, Intents, PermissionResolvable } from "discord.js";
 
 // Fuse.js search Options
 const defaultSearchOptions = {
@@ -28,6 +28,14 @@ utilityIntents.add(
   Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
   Intents.FLAGS.DIRECT_MESSAGES
 );
+
+const simpleOptions: ClientOptions = {
+  intents: simpleIntents,
+};
+const utilityOptions: ClientOptions = {
+  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
+  intents: utilityIntents,
+};
 
 const config = {
   // id constants from your guild
@@ -75,8 +83,8 @@ const config = {
 
   // Discord client intents
   intents: {
-    simple: simpleIntents,
-    utility: utilityIntents,
+    simpleOptions,
+    utilityOptions,
   },
 
   // Starship site URL

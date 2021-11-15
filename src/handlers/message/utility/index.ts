@@ -4,10 +4,6 @@ import { marsTime } from "../../../actions/utility/marstime/marsTime";
 import { sendHelp } from "../../../actions/utility/sendHelp";
 import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { shunt } from "../../../actions/utility/shunt";
-import {
-  findTempsToConvert,
-  sendTemperatureConversions,
-} from "../../../actions/utility/translateTemp";
 import { parseCommands } from "../../../helpers/parseCommands";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
 
@@ -25,12 +21,6 @@ export const handleMessage = async (
   message: Message,
   reportGenerator: ReportGenerator
 ) => {
-  //Checks for Temperatures to Convert
-  const temperaturesToConvert = findTempsToConvert(message);
-  if (temperaturesToConvert.length) {
-    await sendTemperatureConversions(message, temperaturesToConvert);
-  }
-
   if (message.author.bot) return;
 
   const [prefix, command, secondCommand, ...rest] = parseCommands(message);
