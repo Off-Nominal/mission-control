@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-import { Client, ClientOptions, PresenceData } from "discord.js";
+import { Client, Intents, PresenceData } from "discord.js";
 import {
   bookClubMessageHandler,
   feedListenerMessageHandler,
@@ -15,18 +15,21 @@ import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
 import config from "../config/";
-import FlightComputer from "./flightComputer";
-import { sendTemperatureConversions } from "./events/tempConvert/doer";
 
 /***********************************
- *  Discord Client Setup
+ *  Bot Setup
  ************************************/
 
-const {
-  intents: { simpleOptions, utilityOptions },
-} = config;
+const { intents } = config;
+const simpleOptions = {
+  intents: intents.simple,
+};
 
-const utilityBot = new Client(utilityOptions);
+const utilityBot = new Client({
+  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
+  intents: intents.utility,
+});
+
 const bcBot = new Client(simpleOptions);
 const wmBot = new Client(simpleOptions);
 const ofnBot = new Client(simpleOptions);
@@ -85,14 +88,6 @@ const hlFeedListener = new FeedListener(feeds.hl, {
   channelId: config.discordIds.contentChannel,
   searchOptions: searchOptions.hl,
 });
-
-/***********************************
- * Flight Computer Setup
- ************************************/
-
-const flightComputer = new FlightComputer();
-
-flightComputer.on("tempConvert", sendTemperatureConversions);
 
 /***********************************
  *  UTILITY SETUPS
@@ -187,9 +182,9 @@ starshipChecker.initialize();
  *  Utility Bot Actions
  ************************************/
 
-utilityBot.on("messageCreate", (message) => {
-  utilityMessageHandler(message, reportGenerator);
-});
+utilityBot.on("messageCreate", (message) =>
+  utilityMessageHandler(message, reportGenerator)
+);
 utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
 utilityBot.on("messageReactionAdd", (messageReact, user) => {
   utilityReactHandler(messageReact, user, {
@@ -233,9 +228,7 @@ utilityBot.on("threadCreate", async (thread) => {
  *  Book Club Bot Actions
  ************************************/
 
-bcBot.on("messageCreate", (message) => {
-  flightComputer.handleMessageCreate(message);
-});
+bcBot.on("messageCreate", bookClubMessageHandler);
 bcBot.on("threadCreate", async (thread) => {
   if (thread.joinable) await thread.join();
 });
