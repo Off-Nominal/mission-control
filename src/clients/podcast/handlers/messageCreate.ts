@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
-import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
 import { parseMessage } from "../../../helpers/parseMessage";
 import { FeedListener } from "../../../listeners/feedListener/feedListener";
+import { sendPodcastHelp } from "../../actions/sendPodcastHelp";
 import { handleEpisodeNumberCommand } from "../actions/handleEpisodeNumberCommand";
 import { handleRecentCommand } from "../actions/handleRecentCommand";
 import { handleSearchCommand } from "../actions/handleSearchCommand";

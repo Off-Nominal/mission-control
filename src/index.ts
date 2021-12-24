@@ -1,16 +1,11 @@
 require("dotenv").config();
 
-import {
-  Client,
-  Intents,
-  PermissionResolvable,
-  PresenceData,
-} from "discord.js";
+import { Client, Intents, PresenceData } from "discord.js";
 
 import bcBotHandlers from "./clients/bookclub/handlers";
 import podcastBotHandlers from "./clients/podcast/handlers";
+import mainBotHandlers from "./clients/main/handlers";
 
-import { utilityMessageHandler } from "./handlers/message/";
 import { utilityReactHandler } from "./handlers/messageReactionAdd";
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
@@ -21,7 +16,6 @@ import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
 const searchOptions = require("../config/searchOptions.json");
 
-const MODS_ROLE_ID = process.env.MODS_ROLE_ID as PermissionResolvable;
 const GUILD_ID = process.env.GUILD_ID;
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
@@ -232,44 +226,16 @@ starshipChecker.initialize();
  ************************************/
 
 utilityBot.on("messageCreate", (message) =>
-  utilityMessageHandler(message, reportGenerator)
+  mainBotHandlers.handleMessageCreate(message, reportGenerator)
 );
-utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
+utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", (messageReact, user) => {
   utilityReactHandler(messageReact, user, {
     reportGenerator,
     channelBabysitter,
   });
 });
-utilityBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) {
-    thread
-      .join()
-      .catch((err) => console.error("Error joining Utility Bot to thread"));
-
-    const guild = utilityBot.guilds.cache.find(
-      (guild) => guild.id === GUILD_ID
-    );
-
-    // Auto-adds moderators to all threads
-    const mods = guild.members.cache.filter((member) =>
-      member.roles.cache.some((role) => role.id === MODS_ROLE_ID)
-    );
-
-    console.log(`Found ${mods.size} mods.`);
-    console.log("Adding mods to Thread");
-
-    mods.forEach((mod) => {
-      thread.members
-        .add(mod.id)
-        .then(() => console.log(`Added ${mod.displayName}`))
-        .catch((err) => {
-          console.error(`Failed to add ${mod.displayName} to Thread`);
-          console.error(err);
-        });
-    });
-  }
-});
+utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 
 /***********************************
  *  Book Club Bot Actions

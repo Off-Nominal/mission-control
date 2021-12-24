@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
-import { parseCommands } from "../../helpers/parseCommands";
-import { parsePoll } from "../../helpers/parsePoll";
+import { parseCommands } from "../../../helpers/parseCommands";
+import { parsePoll } from "../../../helpers/parsePoll";
 
 export const createPoll = (message: Message) => {
   const [prefix, firstParam] = parseCommands(message, false);

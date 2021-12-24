@@ -1,7 +1,7 @@
 import { Message, MessageEmbed, TextChannel } from "discord.js";
-import { AllowedPrefix } from "../../handlers/message/utility";
-import { getChannel } from "../../helpers/getChannel";
-import { parseMessage } from "../../helpers/parseMessage";
+import { getChannel } from "../../../helpers/getChannel";
+import { parseMessage } from "../../../helpers/parseMessage";
+import { AllowedPrefix } from "../handlers/messageCreate";
 
 export const shunt = async (message: Message, prefix: AllowedPrefix) => {
   const { command, args } = parseMessage(prefix, message);

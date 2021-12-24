@@ -1,15 +1,15 @@
 import { Message, TextChannel } from "discord.js";
-import { createPoll } from "../../../actions/utility/createPoll";
-import { marsTime } from "../../../actions/utility/marstime/marsTime";
-import { sendHelp } from "../../../actions/utility/sendHelp";
-import { sendPodcastHelp } from "../../../actions/utility/sendPodcastHelp";
-import { shunt } from "../../../actions/utility/shunt";
+import { parseCommands } from "../../../helpers/parseCommands";
+import { ReportGenerator } from "../../../utilities/ReportGenerator";
+import { sendPodcastHelp } from "../../actions/sendPodcastHelp";
+import { createPoll } from "../actions/createPoll";
+import { marsTime } from "../actions/marstime/marsTime";
+import { sendHelp } from "../actions/sendHelp";
+import { shunt } from "../actions/shunt";
 import {
   findTempsToConvert,
   sendTemperatureConversions,
-} from "../../../actions/utility/translateTemp";
-import { parseCommands } from "../../../helpers/parseCommands";
-import { ReportGenerator } from "../../../utilities/ReportGenerator";
+} from "../actions/translateTemp";
 
 export enum AllowedPrefix {
   SHUNT = "!shunt",
@@ -21,10 +21,10 @@ export enum AllowedPrefix {
   THREAD = "!thread",
 }
 
-export const handleMessage = async (
+export default async function handleMessageCreate(
   message: Message,
   reportGenerator: ReportGenerator
-) => {
+) {
   //Checks for Temperatures to Convert
   const temperaturesToConvert = findTempsToConvert(message);
   if (temperaturesToConvert.length) {
@@ -110,6 +110,4 @@ export const handleMessage = async (
       break;
     }
   }
-};
-
-export default handleMessage;
+}
