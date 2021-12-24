@@ -14,12 +14,12 @@ import {
   getNews,
   getTwitter,
   getYouTube,
-} from "../actions/utility/generateSummary/filters/";
+} from "../clients/main/actions/generateSummary/filters";
 import {
   generateDiscussionSummary,
   generateLinkSummary,
   generateTwitterSummary,
-} from "../actions/utility/generateSummary/reportFieldGenerators/";
+} from "../clients/main/actions/generateSummary/reportFieldGenerators";
 
 export type ReportGeneratorError = {
   dm: string;

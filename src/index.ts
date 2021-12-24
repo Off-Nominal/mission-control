@@ -1,28 +1,18 @@
 require("dotenv").config();
 
-import {
-  Client,
-  Intents,
-  PermissionResolvable,
-  PresenceData,
-} from "discord.js";
-import {
-  bookClubMessageHandler,
-  feedListenerMessageHandler,
-  utilityMessageHandler,
-} from "./handlers/message/";
-import { utilityReactHandler } from "./handlers/messageReactionAdd";
+import { Client, Intents } from "discord.js";
+
+import bcBotHandlers from "./clients/bookclub/handlers";
+import podcastBotHandlers from "./clients/podcast/handlers";
+import mainBotHandlers from "./clients/main/handlers";
+
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
-import { logReady } from "./actions/global/logReady";
-import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
-const searchOptions = require("../config/searchOptions.json");
 
-const MODS_ROLE_ID = process.env.MODS_ROLE_ID as PermissionResolvable;
-const GUILD_ID = process.env.GUILD_ID;
+const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
 const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
@@ -170,156 +160,86 @@ ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
 
-const getPresenceData = (helpCommand: string): PresenceData => {
-  return {
-    status: "online",
-    activities: [
-      {
-        name: helpCommand,
-        type: "PLAYING",
-      },
-    ],
-  };
-};
-
-utilityBot.once("ready", () => {
-  logReady(utilityBot.user.tag);
-  utilityBot.user.setPresence(getPresenceData("!help"));
-  channelBabysitter.initialize();
-
-  // Find Off-Nominal Discord Guild, fetch members to prevent partials
-  const guild = utilityBot.guilds.cache.find((guild) => guild.id === GUILD_ID);
-  guild.members
-    .fetch()
-    .catch((err) =>
-      console.error("Error fetching partials for Guild Members", err)
-    );
-});
-bcBot.once("ready", () => {
-  logReady(bcBot.user.tag);
-  bcBot.user.setPresence(getPresenceData("!bc help"));
-});
-wmBot.once("ready", () => {
-  logReady(wmBot.user.tag);
-  wmFeedListener.fetchChannel();
-  wmBot.user.setPresence(getPresenceData("!wm help"));
-});
-ofnBot.once("ready", () => {
-  logReady(ofnBot.user.tag);
-  ofnFeedListener.fetchChannel();
-  ofnBot.user.setPresence(getPresenceData("!ofn help"));
-});
-mecoBot.once("ready", () => {
-  logReady(mecoBot.user.tag);
-  mecoFeedListener.fetchChannel();
-  mecoBot.user.setPresence(getPresenceData("!meco help"));
-});
-rprBot.once("ready", () => {
-  logReady(rprBot.user.tag);
-  rprFeedListener.fetchChannel();
-  rprBot.user.setPresence(getPresenceData("!rpr help"));
-});
-hlBot.once("ready", () => {
-  logReady(hlBot.user.tag);
-  hlFeedListener.fetchChannel();
-  hlBot.user.setPresence(getPresenceData("!hl help"));
-});
-
 starshipChecker.initialize();
 
 /***********************************
- *  Utility Bot Actions
+ *  Utility Bot Event Handlers
  ************************************/
 
+utilityBot.once("ready", (client) => {
+  mainBotHandlers.handleReady(client);
+  channelBabysitter.initialize();
+});
 utilityBot.on("messageCreate", (message) =>
-  utilityMessageHandler(message, reportGenerator)
+  mainBotHandlers.handleMessageCreate(message, reportGenerator)
 );
-utilityBot.on("guildMemberAdd", utilityGuildMemberAddHandler);
+utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", (messageReact, user) => {
-  utilityReactHandler(messageReact, user, {
+  mainBotHandlers.handleMessageReactionAdd(messageReact, user, {
     reportGenerator,
     channelBabysitter,
   });
 });
-utilityBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) {
-    thread
-      .join()
-      .catch((err) => console.error("Error joining Utility Bot to thread"));
-
-    const guild = utilityBot.guilds.cache.find(
-      (guild) => guild.id === GUILD_ID
-    );
-
-    // Auto-adds moderators to all threads
-    const mods = guild.members.cache.filter((member) =>
-      member.roles.cache.some((role) => role.id === MODS_ROLE_ID)
-    );
-
-    console.log(`Found ${mods.size} mods.`);
-    console.log("Adding mods to Thread");
-
-    mods.forEach((mod) => {
-      thread.members
-        .add(mod.id)
-        .then(() => console.log(`Added ${mod.displayName}`))
-        .catch((err) => {
-          console.error(`Failed to add ${mod.displayName} to Thread`);
-          console.error(err);
-        });
-    });
-  }
-});
+utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 
 /***********************************
- *  Book Club Bot Actions
+ *  Book Club Bot Event Handlers
  ************************************/
 
-bcBot.on("messageCreate", bookClubMessageHandler);
-bcBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
-});
+bcBot.once("ready", bcBotHandlers.handleReady);
+bcBot.on("messageCreate", bcBotHandlers.handleMessageCreate);
+bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 
 /***********************************
- *  Podcast Bot Actions
+ *  Podcast Bot Event Handlers
  ************************************/
 
 // WeMartians
-wmBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, wmFeedListener, "!wm")
-);
-wmBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
+wmBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "wm");
+  wmFeedListener.fetchChannel();
 });
+wmBot.on("messageCreate", (message) =>
+  podcastBotHandlers.handleMessageCreate(message, wmFeedListener, "!wm")
+);
+wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // Off-Nominal
-ofnBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, ofnFeedListener, "!ofn")
-);
-ofnBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
+ofnBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "ofn");
+  ofnFeedListener.fetchChannel();
 });
+ofnBot.on("messageCreate", (message) =>
+  podcastBotHandlers.handleMessageCreate(message, ofnFeedListener, "!ofn")
+);
+ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // MECO
-mecoBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, mecoFeedListener, "!meco")
-);
-mecoBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
+mecoBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "meco");
+  mecoFeedListener.fetchChannel();
 });
+mecoBot.on("messageCreate", (message) =>
+  podcastBotHandlers.handleMessageCreate(message, mecoFeedListener, "!meco")
+);
+mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // RPR
-rprBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, rprFeedListener, "!rpr")
-);
-rprBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
+rprBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "rpr");
+  rprFeedListener.fetchChannel();
 });
+rprBot.on("messageCreate", (message) =>
+  podcastBotHandlers.handleMessageCreate(message, rprFeedListener, "!rpr")
+);
+rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // Headlines
-hlBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, hlFeedListener, "!hl")
-);
-hlBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
+hlBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "hl");
+  hlFeedListener.fetchChannel();
 });
+hlBot.on("messageCreate", (message) =>
+  podcastBotHandlers.handleMessageCreate(message, hlFeedListener, "!hl")
+);
+hlBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
