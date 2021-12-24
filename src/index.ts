@@ -11,9 +11,8 @@ import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
-const searchOptions = require("../config/searchOptions.json");
 
-const GUILD_ID = process.env.GUILD_ID;
+const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
 const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
