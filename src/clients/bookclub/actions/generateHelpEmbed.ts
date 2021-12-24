@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 import { Message, MessageEmbed } from "discord.js";
 
-export const handleHelpCommand = (message: Message) => {
+export const generateHelpEmbed = () => {
   const embed: MessageEmbed = new Discord.MessageEmbed();
 
   embed
@@ -25,5 +25,5 @@ export const handleHelpCommand = (message: Message) => {
         value: `Gives you the book with the most community favourites in the last 60 days. And yes, that's favourite with a "u". :flag_ca:`,
       }
     );
-  message.channel.send({ embeds: [embed] });
+  return embed;
 };

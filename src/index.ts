@@ -181,6 +181,7 @@ utilityBot.on("messageReactionAdd", (messageReact, user) => {
   });
 });
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
+utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 
 /***********************************
  *  Book Club Bot Event Handlers
@@ -189,6 +190,7 @@ utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 bcBot.once("ready", bcBotHandlers.handleReady);
 bcBot.on("messageCreate", bcBotHandlers.handleMessageCreate);
 bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
+bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
 
 /***********************************
  *  Podcast Bot Event Handlers

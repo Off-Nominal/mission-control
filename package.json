@@ -9,7 +9,8 @@
     "build": "tsc",
     "compile": "tsc && node ./dist/index.js",
     "start": "node ./dist/index.js",
-    "log": "heroku logs -a onbc-bot --tail"
+    "log": "heroku logs -a onbc-bot --tail",
+    "register-commands": "tsc && node ./dist/commands/register.js"
   },
   "repository": {
     "type": "git",
@@ -22,10 +23,13 @@
   },
   "homepage": "https://github.com/mendahu/book-club-discord-bot#readme",
   "dependencies": {
+    "@discordjs/builders": "^0.10.0",
+    "@discordjs/rest": "^0.2.0-canary.0",
     "@octokit/auth-app": "^3.4.0",
     "axios": "^0.22.0",
     "cloudinary": "^1.27.0",
     "date-fns": "^2.25.0",
+    "discord-api-types": "^0.26.0",
     "discord.js": "^13.4.0",
     "dotenv": "^8.2.0",
     "feed-watcher": "^0.2.1",
