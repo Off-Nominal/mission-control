@@ -9,9 +9,9 @@ import mainBotHandlers from "./clients/main/handlers";
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
-import { logReady } from "./actions/logReady";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
+import { logReady } from "./clients/actions/logReady";
 const searchOptions = require("../config/searchOptions.json");
 
 const GUILD_ID = process.env.GUILD_ID;
