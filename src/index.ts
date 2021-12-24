@@ -6,12 +6,10 @@ import bcBotHandlers from "./clients/bookclub/handlers";
 import podcastBotHandlers from "./clients/podcast/handlers";
 import mainBotHandlers from "./clients/main/handlers";
 
-import { utilityReactHandler } from "./handlers/messageReactionAdd";
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
-import { logReady } from "./actions/global/logReady";
-import { utilityGuildMemberAddHandler } from "./handlers/guildMemberAdd";
+import { logReady } from "./actions/logReady";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
 const searchOptions = require("../config/searchOptions.json");
@@ -230,7 +228,7 @@ utilityBot.on("messageCreate", (message) =>
 );
 utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", (messageReact, user) => {
-  utilityReactHandler(messageReact, user, {
+  mainBotHandlers.handleMessageReactionAdd(messageReact, user, {
     reportGenerator,
     channelBabysitter,
   });

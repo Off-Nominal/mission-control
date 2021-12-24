@@ -9,14 +9,14 @@ import {
 import { ChannelBabysitter } from "../../../utilities/channelBabysitter";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
 
-export const utilityReactHandler = async (
+export default async function handleMessageReactionAdd(
   messageReact: MessageReaction | PartialMessageReaction,
   user: User | PartialUser,
   utilities: {
     reportGenerator: ReportGenerator;
     channelBabysitter: ChannelBabysitter;
   }
-) => {
+) {
   const { reportGenerator, channelBabysitter } = utilities;
 
   if (user.bot) return;
@@ -84,4 +84,4 @@ export const utilityReactHandler = async (
     default:
       return;
   }
-};
+}

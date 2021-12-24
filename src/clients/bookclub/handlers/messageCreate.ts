@@ -1,7 +1,6 @@
 import { Message } from "discord.js";
 import { handleHelpCommand } from "../actions/help";
 import { handleRecommendCommand } from "../actions/recommend";
-import { sendError } from "../../../actions/global/sendError";
 import { parseCommands } from "../../../helpers/parseCommands";
 
 enum AllowedPrefix {
@@ -21,6 +20,8 @@ export default function handleMessageCreate(message: Message) {
   } else if (command === "help") {
     handleHelpCommand(message);
   } else {
-    sendError(message, "bc");
+    message.channel.send({
+      content: `Command not recognized. If you're stuck, try \`!bc help\` to find your way.`,
+    });
   }
 }
