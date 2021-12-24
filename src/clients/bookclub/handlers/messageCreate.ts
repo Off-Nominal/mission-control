@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
-import { handleHelpCommand } from "../../../actions/bookClub/help";
-import { handleRecommendCommand } from "../../../actions/bookClub/recommend";
+import { handleHelpCommand } from "../actions/help";
+import { handleRecommendCommand } from "../actions/recommend";
 import { sendError } from "../../../actions/global/sendError";
 import { parseCommands } from "../../../helpers/parseCommands";
 
@@ -8,7 +8,7 @@ enum AllowedPrefix {
   BC = "!bc",
 }
 
-export const handleMessage = (message: Message) => {
+export default function handleMessageCreate(message: Message) {
   if (message.author.bot) return;
 
   const [prefix, command, ...rest] = parseCommands(message);
@@ -23,6 +23,4 @@ export const handleMessage = (message: Message) => {
   } else {
     sendError(message, "bc");
   }
-};
-
-export default handleMessage;
+}
