@@ -8,11 +8,9 @@ import {
 } from "discord.js";
 
 import bcBotHandlers from "./clients/bookclub/handlers";
+import podcastBotHandlers from "./clients/podcast/handlers";
 
-import {
-  feedListenerMessageHandler,
-  utilityMessageHandler,
-} from "./handlers/message/";
+import { utilityMessageHandler } from "./handlers/message/";
 import { utilityReactHandler } from "./handlers/messageReactionAdd";
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
@@ -286,40 +284,30 @@ bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 
 // WeMartians
 wmBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, wmFeedListener, "!wm")
+  podcastBotHandlers.handleMessageCreate(message, wmFeedListener, "!wm")
 );
-wmBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
-});
+wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // Off-Nominal
 ofnBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, ofnFeedListener, "!ofn")
+  podcastBotHandlers.handleMessageCreate(message, ofnFeedListener, "!ofn")
 );
-ofnBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
-});
+ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // MECO
 mecoBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, mecoFeedListener, "!meco")
+  podcastBotHandlers.handleMessageCreate(message, mecoFeedListener, "!meco")
 );
-mecoBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
-});
+mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // RPR
 rprBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, rprFeedListener, "!rpr")
+  podcastBotHandlers.handleMessageCreate(message, rprFeedListener, "!rpr")
 );
-rprBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
-});
+rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // Headlines
 hlBot.on("messageCreate", (message) =>
-  feedListenerMessageHandler(message, hlFeedListener, "!hl")
+  podcastBotHandlers.handleMessageCreate(message, hlFeedListener, "!hl")
 );
-hlBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
-});
+hlBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
