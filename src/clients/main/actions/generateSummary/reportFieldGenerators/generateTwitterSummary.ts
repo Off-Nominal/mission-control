@@ -54,10 +54,11 @@ export const generateTwitterSummary = async (
   let tweetText = [];
 
   const embed = new MessageEmbed();
-  embed.setAuthor(
-    "Twitter Summary",
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822131/Discord%20Assets/twitter-icon-circle-blue-logo-preview_lqkibr.png"
-  );
+  embed.setAuthor({
+    name: "Twitter Summary",
+    iconURL:
+      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822131/Discord%20Assets/twitter-icon-circle-blue-logo-preview_lqkibr.png",
+  });
 
   if (collection.size === 0) {
     return embed.setDescription(

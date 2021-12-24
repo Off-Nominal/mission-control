@@ -11,10 +11,11 @@ export const generateDiscussionSummary = async (
   let discussedWords = [];
   const embed = new MessageEmbed();
   embed
-    .setAuthor(
-      "Discussion Summary",
-      "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg"
-    )
+    .setAuthor({
+      name: "Discussion Summary",
+      iconURL:
+        "https://res.cloudinary.com/dj5enq03a/image/upload/v1617822909/Discord%20Assets/ETC-discussion-icon-P-201812041059_t4f5no.jpg",
+    })
     .setDescription(
       `It's been pretty quiet in <#${channelId}> over the last ${hourLimit} hours, I don't have enough useful words to make a meaningful analysis!`
     );
