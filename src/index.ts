@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-import { Client, Intents, PresenceData } from "discord.js";
+import { Client, Intents } from "discord.js";
 
 import bcBotHandlers from "./clients/bookclub/handlers";
 import podcastBotHandlers from "./clients/podcast/handlers";
@@ -11,7 +11,6 @@ import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
-import { logReady } from "./clients/actions/logReady";
 const searchOptions = require("../config/searchOptions.json");
 
 const GUILD_ID = process.env.GUILD_ID;
@@ -162,67 +161,16 @@ ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
 
-const getPresenceData = (helpCommand: string): PresenceData => {
-  return {
-    status: "online",
-    activities: [
-      {
-        name: helpCommand,
-        type: "PLAYING",
-      },
-    ],
-  };
-};
-
-utilityBot.once("ready", () => {
-  logReady(utilityBot.user.tag);
-  utilityBot.user.setPresence(getPresenceData("!help"));
-  channelBabysitter.initialize();
-
-  // Find Off-Nominal Discord Guild, fetch members to prevent partials
-  const guild = utilityBot.guilds.cache.find((guild) => guild.id === GUILD_ID);
-  guild.members
-    .fetch()
-    .catch((err) =>
-      console.error("Error fetching partials for Guild Members", err)
-    );
-});
-bcBot.once("ready", () => {
-  logReady(bcBot.user.tag);
-  bcBot.user.setPresence(getPresenceData("!bc help"));
-});
-wmBot.once("ready", () => {
-  logReady(wmBot.user.tag);
-  wmFeedListener.fetchChannel();
-  wmBot.user.setPresence(getPresenceData("!wm help"));
-});
-ofnBot.once("ready", () => {
-  logReady(ofnBot.user.tag);
-  ofnFeedListener.fetchChannel();
-  ofnBot.user.setPresence(getPresenceData("!ofn help"));
-});
-mecoBot.once("ready", () => {
-  logReady(mecoBot.user.tag);
-  mecoFeedListener.fetchChannel();
-  mecoBot.user.setPresence(getPresenceData("!meco help"));
-});
-rprBot.once("ready", () => {
-  logReady(rprBot.user.tag);
-  rprFeedListener.fetchChannel();
-  rprBot.user.setPresence(getPresenceData("!rpr help"));
-});
-hlBot.once("ready", () => {
-  logReady(hlBot.user.tag);
-  hlFeedListener.fetchChannel();
-  hlBot.user.setPresence(getPresenceData("!hl help"));
-});
-
 starshipChecker.initialize();
 
 /***********************************
- *  Utility Bot Actions
+ *  Utility Bot Event Handlers
  ************************************/
 
+utilityBot.once("ready", (client) => {
+  mainBotHandlers.handleReady(client);
+  channelBabysitter.initialize();
+});
 utilityBot.on("messageCreate", (message) =>
   mainBotHandlers.handleMessageCreate(message, reportGenerator)
 );
@@ -236,41 +184,62 @@ utilityBot.on("messageReactionAdd", (messageReact, user) => {
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 
 /***********************************
- *  Book Club Bot Actions
+ *  Book Club Bot Event Handlers
  ************************************/
 
+bcBot.once("ready", bcBotHandlers.handleReady);
 bcBot.on("messageCreate", bcBotHandlers.handleMessageCreate);
 bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 
 /***********************************
- *  Podcast Bot Actions
+ *  Podcast Bot Event Handlers
  ************************************/
 
 // WeMartians
+wmBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "wm");
+  wmFeedListener.fetchChannel();
+});
 wmBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, wmFeedListener, "!wm")
 );
 wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // Off-Nominal
+ofnBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "ofn");
+  ofnFeedListener.fetchChannel();
+});
 ofnBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, ofnFeedListener, "!ofn")
 );
 ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // MECO
+mecoBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "meco");
+  mecoFeedListener.fetchChannel();
+});
 mecoBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, mecoFeedListener, "!meco")
 );
 mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // RPR
+rprBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "rpr");
+  rprFeedListener.fetchChannel();
+});
 rprBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, rprFeedListener, "!rpr")
 );
 rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 
 // Headlines
+hlBot.once("ready", (client) => {
+  podcastBotHandlers.handleReady(client, "hl");
+  hlFeedListener.fetchChannel();
+});
 hlBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, hlFeedListener, "!hl")
 );
