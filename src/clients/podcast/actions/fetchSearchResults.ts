@@ -2,8 +2,7 @@ import { format } from "date-fns";
 import { Message, MessageEmbed } from "discord.js";
 import { FeedListener } from "../../../listeners/feedListener/feedListener";
 
-export const handleSearchCommand = (
-  message: Message,
+export const fetchSearchResults = (
   feedListener: FeedListener,
   searchTerm: string
 ) => {
@@ -34,5 +33,5 @@ export const handleSearchCommand = (
       })
     );
 
-  message.channel.send({ embeds: [embed] });
+  return embed;
 };

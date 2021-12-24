@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
 
-export const sendPodcastHelp = (message: Message) => {
+export const createPodcastHelpEmbed = () => {
   const embed = new MessageEmbed();
 
   embed
@@ -25,5 +25,5 @@ export const sendPodcastHelp = (message: Message) => {
       "Both the Red Planet Review and MECO Headlines feeds are not well-optimized for Search Engines. Results may vary when searching those feeds."
     );
 
-  message.channel.send({ embeds: [embed] });
+  return embed;
 };

@@ -1,7 +1,7 @@
 import { Message, TextChannel } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
-import { sendPodcastHelp } from "../../actions/sendPodcastHelp";
+import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
 import { createPoll } from "../actions/createPoll";
 import { marsTime } from "../actions/marstime/marsTime";
 import { sendHelp } from "../actions/sendHelp";
@@ -55,7 +55,7 @@ export default async function handleMessageCreate(
 
     case AllowedPrefix.HELP: {
       if (command === "podcast" || command === "podcasts") {
-        sendPodcastHelp(message);
+        message.channel.send({ embeds: [createPodcastHelpEmbed()] });
       } else {
         sendHelp(message);
       }

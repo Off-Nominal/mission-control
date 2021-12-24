@@ -1,10 +1,8 @@
-import { Message } from "discord.js";
+import { Message, MessageOptions } from "discord.js";
 import { parseMessage } from "../../../helpers/parseMessage";
 import { FeedListener } from "../../../listeners/feedListener/feedListener";
-import { sendPodcastHelp } from "../../actions/sendPodcastHelp";
-import { handleEpisodeNumberCommand } from "../actions/handleEpisodeNumberCommand";
-import { handleRecentCommand } from "../actions/handleRecentCommand";
-import { handleSearchCommand } from "../actions/handleSearchCommand";
+import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
+import { fetchSearchResults } from "../actions/fetchSearchResults";
 
 export default function handleMessageCreate(
   message: Message,
@@ -22,13 +20,19 @@ export default function handleMessageCreate(
   const { args, command } = parseMessage(prefix, message);
   const searchString = command + " " + args.join(" ");
 
+  let returnMessage: MessageOptions = {
+    embeds: [],
+  };
+
   if (!isNaN(Number(command))) {
-    handleEpisodeNumberCommand(message, feedListener, command);
+    returnMessage.content = feedListener.search(command)[0].item.url;
   } else if (command === "recent") {
-    handleRecentCommand(message, feedListener);
+    returnMessage.content = feedListener.fetchRecent().url;
   } else if (command === "help") {
-    sendPodcastHelp(message);
+    returnMessage.embeds.push(createPodcastHelpEmbed());
   } else {
-    handleSearchCommand(message, feedListener, searchString);
+    returnMessage.embeds.push(fetchSearchResults(feedListener, searchString));
   }
+
+  message.channel.send(returnMessage);
 }
