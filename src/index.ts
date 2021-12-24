@@ -6,8 +6,10 @@ import {
   PermissionResolvable,
   PresenceData,
 } from "discord.js";
+
+import bcBotHandlers from "./clients/bookclub/handlers";
+
 import {
-  bookClubMessageHandler,
   feedListenerMessageHandler,
   utilityMessageHandler,
 } from "./handlers/message/";
@@ -275,10 +277,8 @@ utilityBot.on("threadCreate", async (thread) => {
  *  Book Club Bot Actions
  ************************************/
 
-bcBot.on("messageCreate", bookClubMessageHandler);
-bcBot.on("threadCreate", async (thread) => {
-  if (thread.joinable) await thread.join();
-});
+bcBot.on("messageCreate", bcBotHandlers.handleMessageCreate);
+bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 
 /***********************************
  *  Podcast Bot Actions
