@@ -10,12 +10,9 @@ export default function handleInteractionCreate(
 
   const { options } = interaction;
 
-  const group = options.getSubcommandGroup();
   const subCommand = options.getSubcommand();
   const searchString = options.getString("search-term", false);
   const episodeNumber = options.getInteger("ep-number", false);
-
-  console.log(group, subCommand, searchString);
 
   let returnMessage: MessageOptions = {
     embeds: [],
