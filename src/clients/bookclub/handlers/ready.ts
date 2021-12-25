@@ -4,5 +4,5 @@ import { logReady } from "../../actions/logReady";
 
 export default function handleReady(client: Client) {
   logReady(client.user.tag);
-  client.user.setPresence(generatePresenceData("!bc help"));
+  client.user.setPresence(generatePresenceData("/bookclub help"));
 }

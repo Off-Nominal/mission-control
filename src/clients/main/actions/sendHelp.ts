@@ -10,7 +10,7 @@ export const sendHelp = (message: Message) => {
     )
     .addFields([
       { name: "Podcasts", value: "`!help podcast`", inline: true },
-      { name: "Book Club", value: "`!bc help`", inline: true },
+      { name: "Book Club", value: "`/bookclub help`", inline: true },
       { name: "NostradamBot", value: "`!ndb help`", inline: true },
       { name: "Launch Alerts", value: "`!l help`", inline: true },
       { name: "Terminal Count", value: "`!tc help`", inline: true },
