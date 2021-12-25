@@ -202,7 +202,7 @@ wmBot.once("ready", (client) => {
   wmFeedListener.fetchChannel();
 });
 wmBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, wmFeedListener, "!wm")
+  podcastBotHandlers.handleMessageCreate(message, "!wm")
 );
 wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 wmBot.on("interactionCreate", (interaction) =>
@@ -215,7 +215,7 @@ ofnBot.once("ready", (client) => {
   ofnFeedListener.fetchChannel();
 });
 ofnBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, ofnFeedListener, "!ofn")
+  podcastBotHandlers.handleMessageCreate(message, "!ofn")
 );
 ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 ofnBot.on("interactionCreate", (interaction) =>
@@ -228,7 +228,7 @@ mecoBot.once("ready", (client) => {
   mecoFeedListener.fetchChannel();
 });
 mecoBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, mecoFeedListener, "!meco")
+  podcastBotHandlers.handleMessageCreate(message, "!meco")
 );
 mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 mecoBot.on("interactionCreate", (interaction) =>
@@ -241,7 +241,7 @@ rprBot.once("ready", (client) => {
   rprFeedListener.fetchChannel();
 });
 rprBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, rprFeedListener, "!rpr")
+  podcastBotHandlers.handleMessageCreate(message, "!rpr")
 );
 rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 rprBot.on("interactionCreate", (interaction) =>
@@ -254,7 +254,7 @@ hlBot.once("ready", (client) => {
   hlFeedListener.fetchChannel();
 });
 hlBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, hlFeedListener, "!hl")
+  podcastBotHandlers.handleMessageCreate(message, "!hl")
 );
 hlBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 hlBot.on("interactionCreate", (interaction) =>

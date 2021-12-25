@@ -10,6 +10,7 @@ import rprCommands from "./rpr";
 import mecoCommands from "./meco";
 import wmCommands from "./wm";
 import ofnCommands from "./ofn";
+import mainCommands from "./main";
 
 const UTILITY_APP_ID = process.env.UTILITY_BOT_APP_ID;
 const BC_APP_ID = process.env.BOOK_CLUB_BOT_APP_ID;
@@ -38,7 +39,7 @@ const register = (appId, token, commands) => {
 };
 
 Promise.all([
-  // register(UTILITY_APP_ID, UTILITY_TOKEN),
+  register(UTILITY_APP_ID, UTILITY_TOKEN, mainCommands),
   register(BC_APP_ID, BC_TOKEN, bookclubCommands),
   register(WM_APP_ID, WM_TOKEN, wmCommands),
   register(MECO_APP_ID, MECO_TOKEN, mecoCommands),
