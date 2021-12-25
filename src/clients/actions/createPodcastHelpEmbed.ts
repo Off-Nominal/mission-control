@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 
 export const createPodcastHelpEmbed = () => {
   const embed = new MessageEmbed();
