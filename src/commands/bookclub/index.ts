@@ -11,21 +11,29 @@ const commands = [
         .addSubcommand((option) =>
           option
             .setName("random")
-            .setDescription("Get a random book from the app")
+            .setDescription(
+              "Get a random book recommendation from the Space Book Club"
+            )
         )
         .addSubcommand((option) =>
           option
             .setName("best")
-            .setDescription("Get the highest ranked book from the app")
+            .setDescription(
+              "Get the highest ranked book recommendation from the Space Book Club"
+            )
         )
         .addSubcommand((option) =>
           option
             .setName("favourite")
-            .setDescription("Get the community's favourite book from the app")
+            .setDescription(
+              "Get the community's favourite book recommendation from the Space Book Club"
+            )
         )
     )
     .addSubcommand((option) =>
-      option.setName("help").setDescription("Get help with the Book Club bot")
+      option
+        .setName("help")
+        .setDescription("Get help with the Space Book Club bot")
     ),
 ].map((command) => command.toJSON());
 

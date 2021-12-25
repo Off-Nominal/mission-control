@@ -27,7 +27,10 @@ export default async function handleInteractionCreate(
   if (group === "recommend") {
     try {
       const slug = await getRecommendation(recommendMap[subCommand]);
-      interaction.reply({ content: `${BASEURL}/books/${slug}` });
+      const content = slug
+        ? `${BASEURL}/books/${slug}`
+        : "Not enough data for recommendation. If the app hasn't been used in a while, there isn't any recent data to make an informed recommendation.";
+      interaction.reply({ content });
     } catch (err) {
       console.error(err);
       interaction.reply({

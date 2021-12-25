@@ -13,7 +13,7 @@ export const getRecommendation = async (arg: RecommendCommand) => {
   const fetchRecommend = (type: RecommendCommand) => {
     return axios
       .get(`${BASEURL}/api/recommendations?type=${type}`)
-      .then((response) => response.data[0].slug);
+      .then((response) => response.data[0]?.slug || null);
   };
 
   return await fetchRecommend(arg);
