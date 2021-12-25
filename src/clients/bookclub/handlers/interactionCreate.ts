@@ -29,6 +29,7 @@ export default async function handleInteractionCreate(
       const slug = await getRecommendation(recommendMap[subCommand]);
       interaction.reply({ content: `${BASEURL}/books/${slug}` });
     } catch (err) {
+      console.error(err);
       interaction.reply({
         content: "There was an error contacting the Space Book Club API.",
       });
