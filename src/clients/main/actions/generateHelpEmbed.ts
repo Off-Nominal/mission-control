@@ -21,5 +21,9 @@ export const generateHelpEmbed = () => {
     .addField(
       "Poll - poll the discord with a question",
       "`!poll question` for simple polls *or* `!poll {question} [option a] [option b] [option c]` for more complex polls. Type `!poll help` for more."
+    )
+    .addField(
+      "Mars Time - Get the local time for any spacecraft on Mars",
+      "`/marstime` to get Mars Coordinated Time, or add `spacecraft` option and select a vehicle from the list."
     );
 };
