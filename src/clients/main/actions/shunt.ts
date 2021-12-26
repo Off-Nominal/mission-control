@@ -5,12 +5,12 @@ import {
   TextChannel,
 } from "discord.js";
 
-export const shunt = async (
+export default async function shunt(
   interaction: CommandInteraction,
   targetChannel: TextChannel,
   topic: string,
   thread: boolean
-) => {
+) {
   const sourceChannel = interaction.channel;
 
   // Only accept shunts/threads from a text channel
@@ -115,4 +115,4 @@ export const shunt = async (
     console.error("Could send destintation embed or edit source message");
     console.error(err);
   }
-};
+}
