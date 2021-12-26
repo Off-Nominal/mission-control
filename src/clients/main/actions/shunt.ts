@@ -1,88 +1,124 @@
-import { Message, MessageEmbed, TextChannel } from "discord.js";
-import { getChannel } from "../../../helpers/getChannel";
-import { parseMessage } from "../../../helpers/parseMessage";
-import { AllowedPrefix } from "../handlers/messageCreate";
+import {
+  CommandInteraction,
+  Message,
+  MessageEmbed,
+  TextChannel,
+  ThreadChannel,
+} from "discord.js";
 
-export const shunt = async (message: Message, prefix: AllowedPrefix) => {
-  const { command, args } = parseMessage(prefix, message);
+export default async function shunt(
+  interaction: CommandInteraction,
+  targetChannel: TextChannel,
+  topic: string,
+  thread: boolean
+) {
+  const sourceChannel = interaction.channel;
 
-  const sourceChannel = message.channel as TextChannel;
-  const targetChannel = getChannel(message, command);
-  const isSameChannel = sourceChannel.id === targetChannel.id;
+  // Only accept shunts/threads from a text channel
+  if (sourceChannel.type !== "GUILD_TEXT") {
+    return interaction.reply({
+      content:
+        "The Shunt command only works from a Text Channel. It won't work via DM or other sources.",
+    });
+  }
 
   // Prevent shunting to same channel
-  if (isSameChannel && prefix === AllowedPrefix.SHUNT) {
-    return sourceChannel
-      .send({
-        content:
-          "It looks like you're trying to shunt a conversation but you targeted the thread it's already in!",
-      })
-      .catch((err) => {
-        console.error(
-          "Could not send error message about shunting in same channel."
-        );
-        return console.error(err);
-      });
+  if (sourceChannel.id === targetChannel.id) {
+    return interaction.reply({
+      content: "Cannot shunt to the same channel.",
+    });
   }
 
-  const shunter = message.member;
-  const shunterName = shunter.displayName;
-  const shuntMessage = args.join(" ");
+  const shunter = interaction.member.user;
+  const shunterName = shunter.username;
 
-  const targetEmbed = new MessageEmbed()
-    .setTitle(`Incoming conversation from #${sourceChannel.name}`)
-    .setDescription(
-      `${shunterName}: "${shuntMessage}" - [Read the original](${message.url})`
-    )
-    .setThumbnail("https://i.imgur.com/kfvmby0.png");
+  // Embed Generator
+  const generateEmbed = (options: {
+    direction: "inbound" | "outbound";
+    url?: string;
+  }) => {
+    const { url, direction } = options;
 
-  let targetMessage: Promise<Message>;
+    const copy = {
+      inbound: {
+        title: `Incoming conversation from #${sourceChannel.name}`,
+        description: `${shunterName}: "${topic}"${
+          url ? `- [Read the original](${url})` : ""
+        }`,
+        thumbnail: "https://i.imgur.com/kfvmby0.png",
+      },
+      outbound: {
+        title: `Conversation moving to #${targetChannel.name}`,
+        description: `${shunterName}: "${topic}"${
+          url ? `- [Follow the conversation!](${url})` : ""
+        }`,
+        thumbnail: "https://i.imgur.com/UYBbaLR.png",
+      },
+    };
 
-  // Creates thread if necessary then sends targetEmbed there
-  if (prefix === AllowedPrefix.THREAD) {
-    targetMessage = targetChannel.threads
-      .create({
-        name: shuntMessage,
+    const { title, description, thumbnail } = copy[direction];
+
+    return new MessageEmbed()
+      .setTitle(title)
+      .setDescription(description)
+      .setThumbnail(thumbnail);
+  };
+
+  // Source Message
+  let sourceReply: Message<boolean> | null = null;
+
+  try {
+    await interaction.reply({
+      embeds: [
+        generateEmbed({
+          direction: "outbound",
+        }),
+      ],
+    });
+    sourceReply = (await interaction.fetchReply()) as Message;
+  } catch (err) {
+    console.error("Unable to send Shunt/Thread Source Message");
+    console.error(err);
+  }
+
+  let inboundDestination: ThreadChannel | TextChannel;
+
+  // Create Thread
+  if (thread) {
+    try {
+      inboundDestination = await targetChannel.threads.create({
+        name: topic,
         autoArchiveDuration: 1440, // One Day
-      })
-      .then((thread) => {
-        // Auto adds shunter to the thread
-        thread.members.add(shunter.id);
-        return thread;
-      })
-      .then((thread) => {
-        return thread.send({ embeds: [targetEmbed] });
-      })
-      .catch((err) => {
-        console.error("Could not create thread and send target Embed");
-        throw err;
       });
+      await inboundDestination.members.add(shunter.id);
+    } catch (err) {
+      console.error("Could not create thread");
+      console.error(err);
+    }
+  } else {
+    inboundDestination = targetChannel;
   }
 
-  if (prefix === AllowedPrefix.SHUNT) {
-    targetMessage = targetChannel
-      .send({ embeds: [targetEmbed] })
-      .catch((err) => {
-        console.error("Could not send target Embed");
-        throw err;
-      });
+  // Destination Message
+  try {
+    const destinationMessage = await inboundDestination.send({
+      embeds: [
+        generateEmbed({
+          url: sourceReply.url,
+          direction: "inbound",
+        }),
+      ],
+    });
+    await interaction.editReply({
+      embeds: [
+        generateEmbed({
+          url: destinationMessage.url,
+          direction: "outbound",
+        }),
+      ],
+    });
+  } catch (err) {
+    console.error("Could send destintation embed or edit source message");
+    console.error(err);
   }
-
-  // Sends a source message back to the original thread, if it's different
-  if (!isSameChannel) {
-    targetMessage
-      .then((message) => {
-        const sourceEmbed = new MessageEmbed()
-          .setTitle(`Conversation move request`)
-          .setDescription(
-            `${shunterName}: "${shuntMessage}" - [Follow the conversation!](${message.url})`
-          )
-          .setThumbnail("https://i.imgur.com/UYBbaLR.png");
-
-        sourceChannel.send({ embeds: [sourceEmbed] });
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }
-};
+}

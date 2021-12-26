@@ -4,8 +4,7 @@ import { ReportGenerator } from "../../../utilities/ReportGenerator";
 import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
 import { createPoll } from "../actions/createPoll";
 import { marsTime } from "../actions/marstime/marsTime";
-import { sendHelp } from "../actions/sendHelp";
-import { shunt } from "../actions/shunt";
+import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import {
   findTempsToConvert,
   sendTemperatureConversions,
@@ -33,18 +32,21 @@ export default async function handleMessageCreate(
 
   if (message.author.bot) return;
 
-  const [prefix, command, secondCommand, ...rest] = parseCommands(message);
+  const [prefix, command, secondCommand] = parseCommands(message);
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
   switch (prefix) {
-    case AllowedPrefix.THREAD:
+    case AllowedPrefix.THREAD: {
+      message.channel.send(
+        "The `!thread` command is deprecated. You can use Discord's built in `/thread` command to make a thread right here in the same channel, or use the `/shunt` command to go to another channel (just add `thread: true` at the end of your command)."
+      );
+      break;
+    }
     case AllowedPrefix.SHUNT: {
-      if (command === "help") {
-        sendHelp(message);
-      } else {
-        shunt(message, prefix);
-      }
+      message.channel.send(
+        "Shunt no longer accepts text initiated commands. Use the new slash commands by typing `/shunt` and following the auto complete prompts."
+      );
       break;
     }
 
@@ -54,11 +56,7 @@ export default async function handleMessageCreate(
     }
 
     case AllowedPrefix.HELP: {
-      if (command === "podcast" || command === "podcasts") {
-        message.channel.send({ embeds: [createPodcastHelpEmbed()] });
-      } else {
-        sendHelp(message);
-      }
+      message.channel.send("The `!help` command has been moved to `/help`.");
       break;
     }
 
