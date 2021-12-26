@@ -13,11 +13,10 @@ export default async function handleMessageReactionAdd(
   messageReact: MessageReaction | PartialMessageReaction,
   user: User | PartialUser,
   utilities: {
-    reportGenerator: ReportGenerator;
     channelBabysitter: ChannelBabysitter;
   }
 ) {
-  const { reportGenerator, channelBabysitter } = utilities;
+  const { channelBabysitter } = utilities;
 
   if (user.bot) return;
 
@@ -40,32 +39,11 @@ export default async function handleMessageReactionAdd(
         break;
       }
 
-      const messageId = messageReact.message.id;
-      const reportId = reportGenerator.getReportId(messageId);
-
-      let dmChannel: DMChannel;
-
-      try {
-        dmChannel = await user.createDM();
-      } catch (err) {
-        console.error(err);
-        return;
-      }
-
-      // When the bot restarts, previous reports are cleared.
-      // Also works as a catch all error in case there is another problem fetching
-      if (!reportId) {
-        return dmChannel.send({
-          content:
-            "Sorry - I don't keep these reports forever and this one seems to already be gone. Try generating another one using `!summary`!",
-        });
-      }
-
-      try {
-        await reportGenerator.sendReport(dmChannel, reportId);
-      } catch (err) {
-        console.error(err);
-      }
+      messageReact.client.emit(
+        "summaryReportSend",
+        user,
+        messageReact.message.id
+      );
       break;
     }
     case "🔄": {

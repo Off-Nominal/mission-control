@@ -32,4 +32,8 @@ export default async function handleInteractionCreate(
     const embed = await marsTime(spacecraft);
     interaction.reply({ embeds: [embed] });
   }
+
+  if (commandName === "summary") {
+    interaction.client.emit("summaryReportCreate", interaction);
+  }
 }
