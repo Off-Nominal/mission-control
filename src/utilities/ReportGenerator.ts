@@ -4,7 +4,6 @@ import {
   ChannelLogsQueryOptions,
   Collection,
   CommandInteraction,
-  InteractionReplyOptions,
   Message,
   MessageEmbed,
   Snowflake,
@@ -71,8 +70,7 @@ export class ReportGenerator {
   };
 
   public async handleReportRequest(interaction: CommandInteraction) {
-    const { options } = interaction;
-    const hourLimit = options.getInteger("duration", true);
+    const hourLimit = interaction.options.getInteger("duration", true);
 
     if (hourLimit > 24) {
       return await interaction.reply({
@@ -89,9 +87,11 @@ export class ReportGenerator {
       });
     }
 
-    const noticeId = await this.sendChannelReportNotice(interaction, hourLimit);
-
     try {
+      const noticeId = await this.sendChannelReportNotice(
+        interaction,
+        hourLimit
+      );
       const reportId = await this.generateReport(
         interaction.channel,
         hourLimit,
@@ -100,7 +100,7 @@ export class ReportGenerator {
 
       this.sendReport(interaction.user, reportId);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
@@ -110,15 +110,24 @@ export class ReportGenerator {
   }
 
   public async sendReport(user: User, reportId: string) {
+    const report = this.reports[reportId];
+    const dmChannel = await user.createDM();
+
+    if (!report) {
+      return dmChannel.send({
+        content:
+          "No report by that ID. We don't store them forever, so try generating a new one in the channel!",
+      });
+    }
+
     try {
-      const dmChannel = await user.createDM();
-      const reply = this.buildReportEmbeds(reportId);
-      dmChannel.send(
-        reply || {
-          content:
-            "No report with that id. We don't store them forever, so try generating a new one from the channel.",
-        }
-      );
+      const embeds = Object.values(report);
+      dmChannel.send({
+        embeds,
+        content: embeds.length
+          ? null
+          : "Looks like there hasn't been any activity in this channel over your time period. Try broadening the time limit or picking a channel with some activity.",
+      });
     } catch (err) {
       console.error(err);
     }
@@ -174,11 +183,6 @@ export class ReportGenerator {
 
   public getReportId(noticeId: string) {
     return this.notices[noticeId];
-  }
-
-  public buildReportEmbeds(id: string) {
-    const report = this.reports[id];
-    return report ? { embeds: Object.values(report) } : null;
   }
 
   public async generateReport(
