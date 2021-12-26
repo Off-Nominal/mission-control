@@ -1,6 +1,7 @@
 import { Interaction, TextChannel } from "discord.js";
 import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
 import { generateHelpEmbed } from "../actions/generateHelpEmbed";
+import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
 import { marsTime } from "../actions/marstime/marsTime";
 import shunt from "../actions/shunt";
 
@@ -31,5 +32,13 @@ export default async function handleInteractionCreate(
     const spacecraft = options.getString("spacecraft");
     const embed = await marsTime(spacecraft);
     interaction.reply({ embeds: [embed] });
+  }
+
+  if (commandName === "summary") {
+    if (subCommand === "help") {
+      interaction.reply({ embeds: [generateSummaryHelpEmbed()] });
+    } else {
+      interaction.client.emit("summaryReportCreate", interaction);
+    }
   }
 }

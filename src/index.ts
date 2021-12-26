@@ -170,18 +170,17 @@ utilityBot.once("ready", (client) => {
   mainBotHandlers.handleReady(client);
   channelBabysitter.initialize();
 });
-utilityBot.on("messageCreate", (message) =>
-  mainBotHandlers.handleMessageCreate(message, reportGenerator)
-);
+utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
 utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", (messageReact, user) => {
   mainBotHandlers.handleMessageReactionAdd(messageReact, user, {
-    reportGenerator,
     channelBabysitter,
   });
 });
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
+utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
+utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 
 /***********************************
  *  Book Club Bot Event Handlers

@@ -2,7 +2,6 @@ import { Message, TextChannel } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
 import { createPoll } from "../actions/createPoll";
-import { marsTime } from "../actions/marstime/marsTime";
 import {
   findTempsToConvert,
   sendTemperatureConversions,
@@ -18,10 +17,7 @@ export enum AllowedPrefix {
   THREAD = "!thread",
 }
 
-export default async function handleMessageCreate(
-  message: Message,
-  reportGenerator: ReportGenerator
-) {
+export default async function handleMessageCreate(message: Message) {
   //Checks for Temperatures to Convert
   const temperaturesToConvert = findTempsToConvert(message);
   if (temperaturesToConvert.length) {
@@ -72,39 +68,9 @@ export default async function handleMessageCreate(
     }
 
     case AllowedPrefix.SUMMARY: {
-      if (command === "help") {
-        reportGenerator.sendHelp(message);
-        break;
-      }
-
-      // This is a report request DM, which report generator does not support
-      if (message.guild === null) {
-        reportGenerator.sendError(
-          message,
-          "My summary function doesn't work great via DM. Try calling me from a channel!"
-        );
-        break;
-      }
-
-      const forceChannel = command === "here" || secondCommand === "here";
-      const timeLimit = Number(command) || 8;
-
-      try {
-        const channel = forceChannel
-          ? (message.channel as TextChannel)
-          : await message.author.createDM();
-
-        const reportId = await reportGenerator.generateReport(
-          message,
-          timeLimit,
-          forceChannel
-        );
-
-        await reportGenerator.sendReport(channel, reportId);
-      } catch (err) {
-        console.error(err);
-      }
-
+      message.channel.send(
+        "`!summary` no longer accepts text initiated commands. Use the new slash commands by typing `/summary` and selecting your time window."
+      );
       break;
     }
   }

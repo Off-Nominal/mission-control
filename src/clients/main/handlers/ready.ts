@@ -7,7 +7,7 @@ const GUILD_ID = process.env.GUILD_ID;
 export default function handleReady(client: Client) {
   logReady(client.user.tag);
 
-  client.user.setPresence(generatePresenceData("!help"));
+  client.user.setPresence(generatePresenceData("/help"));
 
   // Find Off-Nominal Discord Guild, fetch members to prevent partials
   const guild = client.guilds.cache.find((guild) => guild.id === GUILD_ID);

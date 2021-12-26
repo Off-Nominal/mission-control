@@ -25,5 +25,9 @@ export const generateHelpEmbed = () => {
     .addField(
       "Mars Time - Get the local time for any spacecraft on Mars",
       "`/marstime` to get Mars Coordinated Time, or add `spacecraft` option and select a vehicle from the list."
+    )
+    .addField(
+      "Summary Bot - get a bot-interpreted summary of channel activity",
+      "`/summary` with a `duration` integer in hours. Type `/summary help` for more info."
     );
 };
