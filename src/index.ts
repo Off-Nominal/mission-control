@@ -198,50 +198,65 @@ bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
 
 // WeMartians
 wmBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client, "wm");
+  podcastBotHandlers.handleReady(client);
   wmFeedListener.fetchChannel();
 });
 wmBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, wmFeedListener, "!wm")
+  podcastBotHandlers.handleMessageCreate(message, "!wm")
 );
 wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
+wmBot.on("interactionCreate", (interaction) =>
+  podcastBotHandlers.handleInteractionCreate(interaction, wmFeedListener)
+);
 
 // Off-Nominal
 ofnBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client, "ofn");
+  podcastBotHandlers.handleReady(client);
   ofnFeedListener.fetchChannel();
 });
 ofnBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, ofnFeedListener, "!ofn")
+  podcastBotHandlers.handleMessageCreate(message, "!ofn")
 );
 ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
+ofnBot.on("interactionCreate", (interaction) =>
+  podcastBotHandlers.handleInteractionCreate(interaction, ofnFeedListener)
+);
 
 // MECO
 mecoBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client, "meco");
+  podcastBotHandlers.handleReady(client);
   mecoFeedListener.fetchChannel();
 });
 mecoBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, mecoFeedListener, "!meco")
+  podcastBotHandlers.handleMessageCreate(message, "!meco")
 );
 mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
+mecoBot.on("interactionCreate", (interaction) =>
+  podcastBotHandlers.handleInteractionCreate(interaction, mecoFeedListener)
+);
 
 // RPR
 rprBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client, "rpr");
+  podcastBotHandlers.handleReady(client);
   rprFeedListener.fetchChannel();
 });
 rprBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, rprFeedListener, "!rpr")
+  podcastBotHandlers.handleMessageCreate(message, "!rpr")
 );
 rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
+rprBot.on("interactionCreate", (interaction) =>
+  podcastBotHandlers.handleInteractionCreate(interaction, rprFeedListener)
+);
 
 // Headlines
 hlBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client, "hl");
+  podcastBotHandlers.handleReady(client);
   hlFeedListener.fetchChannel();
 });
 hlBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, hlFeedListener, "!hl")
+  podcastBotHandlers.handleMessageCreate(message, "!hl")
 );
 hlBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
+hlBot.on("interactionCreate", (interaction) =>
+  podcastBotHandlers.handleInteractionCreate(interaction, hlFeedListener)
+);

@@ -5,6 +5,8 @@ const FuseJS = require("fuse.js");
 
 const Watcher = require("feed-watcher");
 
+const defaultProcessor = (item) => item;
+
 export type FeedItem = {
   title: string;
   date: string;
@@ -32,10 +34,11 @@ export class FeedListener extends Watcher {
   fuse: Fuse<FeedItem>;
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
   deployUrl: string;
+  processor: (item: any) => FeedItem;
 
   constructor(feed: string, options?: FeedListenerOptions) {
     super(feed, options.rssInterval || 60);
-    this.processor = options.processor || null;
+    this.processor = options.processor || defaultProcessor;
     this.client = options.discordClient;
     this.channelId = options.channelId;
     this.timeout = options.actionDelay * 1000 || 0;
@@ -44,18 +47,13 @@ export class FeedListener extends Watcher {
   }
 
   private processRSS(entries) {
-    if (this.processor) {
-      this.episodes = entries.map(this.processor).reverse();
-    } else {
-      this.episodes = entries.reverse();
-    }
+    this.episodes = entries.map(this.processor).reverse();
   }
 
   public async fetchChannel() {
-    const channel = (await this.client.channels.fetch(
+    this.channel = (await this.client.channels.fetch(
       this.channelId
     )) as TextChannel;
-    this.channel = channel;
   }
 
   private initializeSearch() {
@@ -102,9 +100,7 @@ export class FeedListener extends Watcher {
   }
 
   private error() {
-    this.on("error", (err) => {
-      console.error(err);
-    });
+    this.on("error", console.error);
   }
 
   private announceNewItem(podcastURL) {
@@ -132,5 +128,12 @@ export class FeedListener extends Watcher {
 
   public search(term: string) {
     return this.fuse.search(term);
+  }
+
+  public getEpisodeByNumber(ep: number) {
+    return this.episodes.find((episode) => {
+      const epString = episode.title.split(" ")[0].replace(/\D/g, "");
+      return Number(epString) === ep;
+    });
   }
 }
