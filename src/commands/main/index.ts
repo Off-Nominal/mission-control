@@ -1,6 +1,4 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ChannelType } from "discord-api-types";
-import { ChannelTypes } from "discord.js/typings/enums";
 
 const commands = [
   new SlashCommandBuilder()
@@ -24,6 +22,11 @@ const commands = [
         .setName("topic")
         .setDescription("The conversation topic you're shunting")
         .setRequired(true)
+    )
+    .addBooleanOption((option) =>
+      option
+        .setName("thread")
+        .setDescription("Target your shunt to a new Thread")
     ),
 ].map((command) => command.toJSON());
 

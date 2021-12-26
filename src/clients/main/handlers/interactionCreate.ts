@@ -17,6 +17,7 @@ export default function handleInteractionCreate(interaction: Interaction) {
   if (commandName === "shunt") {
     const channel = options.getChannel("channel", true) as TextChannel;
     const topic = options.getString("topic", true);
-    shunt(interaction, channel, topic);
+    const thread = options.getBoolean("thread");
+    shunt(interaction, channel, topic, thread);
   }
 }

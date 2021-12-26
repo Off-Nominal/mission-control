@@ -4,20 +4,20 @@ import {
   MessageEmbed,
   TextChannel,
 } from "discord.js";
-import { APIMessage } from "discord.js/node_modules/discord-api-types";
 
 export const shunt = async (
   interaction: CommandInteraction,
   targetChannel: TextChannel,
-  topic: string
+  topic: string,
+  thread: boolean
 ) => {
   const sourceChannel = interaction.channel;
 
-  // Only accept shunts from a text channel
+  // Only accept shunts/threads from a text channel
   if (sourceChannel.type !== "GUILD_TEXT") {
     return interaction.reply({
       content:
-        "Shunt only works from a Text Channel. It won't work via DM or other sources.",
+        "The Shunt command only works from a Text Channel. It won't work via DM or other sources.",
     });
   }
 
@@ -28,103 +28,106 @@ export const shunt = async (
     });
   }
 
-  const shunterName = interaction.member.user.username;
+  const shunter = interaction.member.user;
+  const shunterName = shunter.username;
+
+  const generateEmbed = (options: {
+    direction: "inbound" | "outbound";
+    url?: string;
+  }) => {
+    const { url, direction } = options;
+
+    const copy = {
+      inbound: {
+        title: `Incoming conversation from #${sourceChannel.name}`,
+        description: `${shunterName}: "${topic}"${
+          url ? `- [Read the original](${url})` : ""
+        }`,
+        thumbnail: "https://i.imgur.com/kfvmby0.png",
+      },
+      outbound: {
+        title: `Conversation moving to #${targetChannel.name}`,
+        description: `${shunterName}: "${topic}"${
+          url ? `- [Follow the conversation!](${url})` : ""
+        }`,
+        thumbnail: "https://i.imgur.com/UYBbaLR.png",
+      },
+    };
+
+    const { title, description, thumbnail } = copy[direction];
+
+    return new MessageEmbed()
+      .setTitle(title)
+      .setDescription(description)
+      .setThumbnail(thumbnail);
+  };
 
   // Source Message
-  const generateSourceEmbed = (url?: string) => {
-    return new MessageEmbed()
-      .setTitle(`Conversation moving to ${targetChannel.name}`)
-      .setDescription(
-        `${shunterName}: "${topic}" - [Follow the conversation!](${url})`
-      )
-      .setThumbnail("https://i.imgur.com/UYBbaLR.png");
-  };
+  let sourceReply: Message<boolean> | null = null;
 
   try {
     await interaction.reply({
-      embeds: [generateSourceEmbed()],
+      embeds: [
+        generateEmbed({
+          direction: "outbound",
+        }),
+      ],
     });
+    sourceReply = (await interaction.fetchReply()) as Message;
   } catch (err) {
-    console.error("Unable to send Shunt Source Message");
+    console.error("Unable to send Shunt/Thread Source Message");
     console.error(err);
   }
 
   // Destination Message
-  let sourceReply: Message<boolean>;
-
-  try {
-    sourceReply = (await interaction.fetchReply()) as Message;
-  } catch (err) {
-    console.error("Could not fetch initial reply for Shunt");
-    console.error(err);
-  }
-
-  const targetEmbed = new MessageEmbed()
-    .setTitle(`Incoming conversation from #${sourceChannel.name}`)
-    .setDescription(
-      `${shunterName}: "${topic}" - [Read the original](${sourceReply.url})`
-    )
-    .setThumbnail("https://i.imgur.com/kfvmby0.png");
-
   let destinationMessage: Message;
 
-  try {
-    destinationMessage = await targetChannel.send({ embeds: [targetEmbed] });
-    await interaction.editReply({
-      embeds: [generateSourceEmbed(destinationMessage.url)],
-    });
-  } catch (err) {
-    console.error(
-      "Could not send target embed for shunt or could not edit source message"
-    );
-    console.error(err);
+  if (thread) {
+    try {
+      const thread = await targetChannel.threads.create({
+        name: topic,
+        autoArchiveDuration: 1440, // One Day
+      });
+      thread.members.add(shunter.id);
+      destinationMessage = await thread.send({
+        embeds: [
+          generateEmbed({
+            url: sourceReply?.url,
+            direction: "inbound",
+          }),
+        ],
+      });
+    } catch (err) {
+      console.error("Could not create thread and send target Embed");
+      console.error(err);
+    }
+  } else {
+    try {
+      destinationMessage = await targetChannel.send({
+        embeds: [
+          generateEmbed({
+            url: sourceReply.url,
+            direction: "inbound",
+          }),
+        ],
+      });
+    } catch (err) {
+      console.error("Could not send target embed for shunt.");
+      console.error(err);
+    }
   }
 
-  // // Creates thread if necessary then sends targetEmbed there
-  // if (prefix === AllowedPrefix.THREAD) {
-  //   targetMessage = targetChannel.threads
-  //     .create({
-  //       name: shuntMessage,
-  //       autoArchiveDuration: 1440, // One Day
-  //     })
-  //     .then((thread) => {
-  //       // Auto adds shunter to the thread
-  //       thread.members.add(shunter.id);
-  //       return thread;
-  //     })
-  //     .then((thread) => {
-  //       return thread.send({ embeds: [targetEmbed] });
-  //     })
-  //     .catch((err) => {
-  //       console.error("Could not create thread and send target Embed");
-  //       throw err;
-  //     });
-  // }
-
-  // if (prefix === AllowedPrefix.SHUNT) {
-  //   targetMessage = targetChannel
-  //     .send({ embeds: [targetEmbed] })
-  //     .catch((err) => {
-  //       console.error("Could not send target Embed");
-  //       throw err;
-  //     });
-  // }
-
-  // // Sends a source message back to the original thread, if it's different
-  // if (!isSameChannel) {
-  //   targetMessage
-  //     .then((message) => {
-  //       const sourceEmbed = new MessageEmbed()
-  //         .setTitle(`Conversation move request`)
-  //         .setDescription(
-  //           `${shunterName}: "${shuntMessage}" - [Follow the conversation!](${message.url})`
-  //         )
-  //         .setThumbnail("https://i.imgur.com/UYBbaLR.png");
-
-  //       sourceChannel.send({ embeds: [sourceEmbed] });
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //     });
-  // }
+  try {
+    await interaction.editReply({
+      embeds: [
+        generateEmbed({
+          url: destinationMessage.url,
+          direction: "outbound",
+        }),
+      ],
+    });
+  } catch (err) {
+    console.error("Could not edit source message");
+    console.error(err);
+  }
 };
