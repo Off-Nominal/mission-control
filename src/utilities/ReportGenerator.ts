@@ -124,9 +124,6 @@ export class ReportGenerator {
       const embeds = Object.values(report);
       dmChannel.send({
         embeds,
-        content: embeds.length
-          ? null
-          : "Looks like there hasn't been any activity in this channel over your time period. Try broadening the time limit or picking a channel with some activity.",
       });
     } catch (err) {
       console.error(err);

@@ -17,10 +17,7 @@ export enum AllowedPrefix {
   THREAD = "!thread",
 }
 
-export default async function handleMessageCreate(
-  message: Message,
-  reportGenerator: ReportGenerator
-) {
+export default async function handleMessageCreate(message: Message) {
   //Checks for Temperatures to Convert
   const temperaturesToConvert = findTempsToConvert(message);
   if (temperaturesToConvert.length) {
