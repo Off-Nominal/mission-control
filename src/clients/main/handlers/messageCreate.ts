@@ -49,7 +49,9 @@ export default async function handleMessageCreate(
     }
 
     case AllowedPrefix.MARSTIME: {
-      marsTime(message, command, secondCommand);
+      message.channel.send(
+        "`!marstime` no longer accepts text initiated commands. Use the new slash commands by typing `/marstime` and selecting your spacecraft."
+      );
       break;
     }
 

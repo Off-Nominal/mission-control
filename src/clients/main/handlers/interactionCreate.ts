@@ -1,9 +1,12 @@
 import { Interaction, TextChannel } from "discord.js";
 import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
 import { generateHelpEmbed } from "../actions/generateHelpEmbed";
+import { marsTime } from "../actions/marstime/marsTime";
 import shunt from "../actions/shunt";
 
-export default function handleInteractionCreate(interaction: Interaction) {
+export default async function handleInteractionCreate(
+  interaction: Interaction
+) {
   if (!interaction.isCommand()) return;
 
   const { options, commandName } = interaction;
@@ -22,5 +25,11 @@ export default function handleInteractionCreate(interaction: Interaction) {
 
   if (commandName === "help") {
     interaction.reply({ embeds: [generateHelpEmbed()] });
+  }
+
+  if (commandName === "marstime") {
+    const spacecraft = options.getString("spacecraft");
+    const embed = await marsTime(spacecraft);
+    interaction.reply({ embeds: [embed] });
   }
 }
