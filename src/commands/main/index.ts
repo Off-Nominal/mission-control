@@ -46,6 +46,15 @@ const commands = [
           ])
         )
     ),
+  new SlashCommandBuilder()
+    .setName("summary")
+    .setDescription("Summarize activity in the channel over a set time period")
+    .addIntegerOption((option) =>
+      option
+        .setName("duration")
+        .setDescription("Number of hours to summarize back from now (max 24).")
+        .setRequired(true)
+    ),
 ].map((command) => command.toJSON());
 
 export default commands;
