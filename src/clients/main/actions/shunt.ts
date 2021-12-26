@@ -12,27 +12,28 @@ export const shunt = async (
   topic: string
 ) => {
   const sourceChannel = interaction.channel;
-  const isSameChannel = sourceChannel.id === targetChannel.id;
 
   // Only accept shunts from a text channel
   if (sourceChannel.type !== "GUILD_TEXT") {
-    return;
+    return interaction.reply({
+      content:
+        "Shunt only works from a Text Channel. It won't work via DM or other sources.",
+    });
   }
 
   // Prevent shunting to same channel
-  if (isSameChannel) {
+  if (sourceChannel.id === targetChannel.id) {
     return interaction.reply({
       content: "Cannot shunt to the same channel.",
     });
   }
 
-  const shunter = interaction.member;
-  const shunterName = shunter.user.username;
+  const shunterName = interaction.member.user.username;
 
   // Source Message
   const generateSourceEmbed = (url?: string) => {
     return new MessageEmbed()
-      .setTitle(`Conversation move request`)
+      .setTitle(`Conversation moving to ${targetChannel.name}`)
       .setDescription(
         `${shunterName}: "${topic}" - [Follow the conversation!](${url})`
       )
@@ -40,7 +41,7 @@ export const shunt = async (
   };
 
   try {
-    interaction.reply({
+    await interaction.reply({
       embeds: [generateSourceEmbed()],
     });
   } catch (err) {
