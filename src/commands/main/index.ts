@@ -49,11 +49,23 @@ const commands = [
   new SlashCommandBuilder()
     .setName("summary")
     .setDescription("Summarize activity in the channel over a set time period")
-    .addIntegerOption((option) =>
-      option
+    .addSubcommand((command) =>
+      command
         .setName("duration")
-        .setDescription("Number of hours to summarize back from now (max 24).")
-        .setRequired(true)
+        .setDescription(
+          "Summarize activity in the channel over a set time period"
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("duration")
+            .setDescription(
+              "Number of hours to summarize back from now (max 24)."
+            )
+            .setRequired(true)
+        )
+    )
+    .addSubcommand((group) =>
+      group.setName("help").setDescription("Help with Summary Bot")
     ),
 ].map((command) => command.toJSON());
 
