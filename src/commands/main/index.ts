@@ -8,6 +8,9 @@ const commands = [
       command.setName("help").setDescription("Get help searching for podcasts")
     ),
   new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("Get help with Discord Bots"),
+  new SlashCommandBuilder()
     .setName("shunt")
     .setDescription("Move a conversation to a new channel")
     .addChannelOption((option) =>

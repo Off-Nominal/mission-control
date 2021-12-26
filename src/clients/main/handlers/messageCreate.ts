@@ -4,8 +4,7 @@ import { ReportGenerator } from "../../../utilities/ReportGenerator";
 import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
 import { createPoll } from "../actions/createPoll";
 import { marsTime } from "../actions/marstime/marsTime";
-import { sendHelp } from "../actions/sendHelp";
-import { shunt } from "../actions/shunt";
+import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import {
   findTempsToConvert,
   sendTemperatureConversions,
@@ -60,7 +59,7 @@ export default async function handleMessageCreate(
       if (command === "podcast" || command === "podcasts") {
         message.channel.send({ embeds: [createPodcastHelpEmbed()] });
       } else {
-        sendHelp(message);
+        message.channel.send({ embeds: [generateHelpEmbed()] });
       }
       break;
     }

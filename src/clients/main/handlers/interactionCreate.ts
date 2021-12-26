@@ -1,5 +1,6 @@
 import { Interaction, TextChannel } from "discord.js";
 import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
+import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import { shunt } from "../actions/shunt";
 
 export default function handleInteractionCreate(interaction: Interaction) {
@@ -19,5 +20,9 @@ export default function handleInteractionCreate(interaction: Interaction) {
     const topic = options.getString("topic", true);
     const thread = options.getBoolean("thread");
     shunt(interaction, channel, topic, thread);
+  }
+
+  if (commandName === "help") {
+    interaction.reply({ embeds: [generateHelpEmbed()] });
   }
 }
