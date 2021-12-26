@@ -69,18 +69,13 @@ export const shunt = async (
 
   try {
     destinationMessage = await targetChannel.send({ embeds: [targetEmbed] });
-  } catch (err) {
-    console.error("Could not send target embed for shunt");
-    console.error(err);
-  }
-
-  // Update Original Message
-  try {
-    interaction.editReply({
+    await interaction.editReply({
       embeds: [generateSourceEmbed(destinationMessage.url)],
     });
   } catch (err) {
-    console.error("Unable to edit Shunt Source Message");
+    console.error(
+      "Could not send target embed for shunt or could not edit source message"
+    );
     console.error(err);
   }
 
