@@ -27,9 +27,7 @@ export default function handleInteractionCreate(
   }
 
   if (subCommand === "episode-number") {
-    returnMessage.content = feedListener.search(
-      episodeNumber.toString()
-    )[0].item.url;
+    returnMessage.content = feedListener.getEpisodeByNumber(episodeNumber).url;
   }
 
   interaction.reply(returnMessage);
