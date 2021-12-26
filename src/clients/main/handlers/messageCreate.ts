@@ -12,13 +12,13 @@ import {
 } from "../actions/translateTemp";
 
 export enum AllowedPrefix {
-  // SHUNT = "!shunt",
+  SHUNT = "!shunt",
   HELP = "!help",
   OLDPOLL = "+poll",
   POLL = "!poll",
   SUMMARY = "!summary",
   MARSTIME = "!marstime",
-  // THREAD = "!thread",
+  THREAD = "!thread",
 }
 
 export default async function handleMessageCreate(
@@ -38,6 +38,13 @@ export default async function handleMessageCreate(
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
   switch (prefix) {
+    case AllowedPrefix.THREAD:
+    case AllowedPrefix.SHUNT: {
+      message.channel.send(
+        "Shunt and Thread no longer accept text initiated commands. Use the new slash commands by typing `/shunt` or `/thread` and following the auto complete prompts."
+      );
+    }
+
     case AllowedPrefix.MARSTIME: {
       marsTime(message, command, secondCommand);
       break;
