@@ -1,10 +1,8 @@
 import { Message, TextChannel } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
 import { ReportGenerator } from "../../../utilities/ReportGenerator";
-import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
 import { createPoll } from "../actions/createPoll";
 import { marsTime } from "../actions/marstime/marsTime";
-import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import {
   findTempsToConvert,
   sendTemperatureConversions,

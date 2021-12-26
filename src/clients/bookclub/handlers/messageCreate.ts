@@ -3,6 +3,7 @@ import { parseCommands } from "../../../helpers/parseCommands";
 
 enum AllowedPrefix {
   BC = "!bc",
+  Bookclub = "!bookclub",
 }
 
 export default async function handleMessageCreate(message: Message) {
