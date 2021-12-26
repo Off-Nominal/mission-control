@@ -32,7 +32,7 @@ export default async function handleMessageCreate(
 
   if (message.author.bot) return;
 
-  const [prefix, command, secondCommand, ...rest] = parseCommands(message);
+  const [prefix, command, secondCommand] = parseCommands(message);
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
@@ -56,11 +56,7 @@ export default async function handleMessageCreate(
     }
 
     case AllowedPrefix.HELP: {
-      if (command === "podcast" || command === "podcasts") {
-        message.channel.send({ embeds: [createPodcastHelpEmbed()] });
-      } else {
-        message.channel.send({ embeds: [generateHelpEmbed()] });
-      }
+      message.channel.send("The `!help` command has been moved to `/help`.");
       break;
     }
 
