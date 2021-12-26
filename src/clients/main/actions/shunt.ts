@@ -31,6 +31,7 @@ export default async function shunt(
   const shunter = interaction.member.user;
   const shunterName = shunter.username;
 
+  // Embed Generator
   const generateEmbed = (options: {
     direction: "inbound" | "outbound";
     url?: string;
