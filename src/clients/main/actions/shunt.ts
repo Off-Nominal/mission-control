@@ -3,6 +3,7 @@ import {
   Message,
   MessageEmbed,
   TextChannel,
+  ThreadChannel,
 } from "discord.js";
 
 export default async function shunt(
@@ -80,23 +81,27 @@ export default async function shunt(
     console.error(err);
   }
 
+  let inboundDestination: ThreadChannel | TextChannel;
+
   // Create Thread
   if (thread) {
     try {
-      const thread = await targetChannel.threads.create({
+      inboundDestination = await targetChannel.threads.create({
         name: topic,
         autoArchiveDuration: 1440, // One Day
       });
-      thread.members.add(shunter.id);
+      await inboundDestination.members.add(shunter.id);
     } catch (err) {
       console.error("Could not create thread");
       console.error(err);
     }
+  } else {
+    inboundDestination = targetChannel;
   }
 
   // Destination Message
   try {
-    const destinationMessage = await targetChannel.send({
+    const destinationMessage = await inboundDestination.send({
       embeds: [
         generateEmbed({
           url: sourceReply.url,
