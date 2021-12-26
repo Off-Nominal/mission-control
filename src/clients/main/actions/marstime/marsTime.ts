@@ -1,15 +1,7 @@
 import axios from "axios";
 import { Message, MessageEmbed } from "discord.js";
 import { MarsDate } from "mars-date-utils";
-import { spacecraftData } from "./constants";
-
-export type SpacecraftData = {
-  epoch: Date;
-  lat: number;
-  lon: number;
-  name: string;
-  logo: string;
-};
+import { Spacecraft, spacecraftData } from "./constants";
 
 type JPLFeature = {
   type: string;
@@ -65,15 +57,8 @@ const formatLon = (coord: number) => {
   return formatLatLon(coord) + "W";
 };
 
-export const marsTime = async (
-  message: Message,
-  command: string,
-  secondCommand?: string
-) => {
-  const embed = new MessageEmbed();
-  let data: SpacecraftData | null = null;
-
-  const createEmbedFields = (data: SpacecraftData | null) => {
+export const marsTime = async (spacecraft: string) => {
+  const createEmbedFields = (data: Spacecraft | null) => {
     const earthNow = new Date();
     const cd = new MarsDate(earthNow);
 
@@ -106,61 +91,9 @@ export const marsTime = async (
     }
   };
 
-  switch (command) {
-    case "mars": {
-      if (secondCommand === "polar") {
-        data = spacecraftData.polarLander;
-      } else if (secondCommand === "2") {
-        data = spacecraftData.mars2;
-      } else if (secondCommand === "3") {
-        data = spacecraftData.mars3;
-      } else if (secondCommand === "6") {
-        data = spacecraftData.mars6;
-      }
-      break;
-    }
-    case "viking": {
-      if (secondCommand === "1") {
-        data = spacecraftData.viking1;
-      } else if (secondCommand === "2") {
-        data = spacecraftData.viking2;
-      }
-      break;
-    }
-    case "sojourner":
-    case "pathfinder": {
-      data = spacecraftData.pathfinder;
-      break;
-    }
-    case "zhurong":
-    case "zhu":
-    case "tianwen":
-    case "tianwen1":
-    case "tianwen-1": {
-      data = spacecraftData.zhurong;
-      break;
-    }
-    case "beagle":
-    case "beagle-2": {
-      data = spacecraftData.beagle2;
-      break;
-    }
-    case "mer-a":
-    case "spirit": {
-      data = spacecraftData.spirit;
-      break;
-    }
-    case "mer-b":
-    case "oppy":
-    case "opportunity": {
-      data = spacecraftData.opportunity;
-      break;
-    }
-    case "phoenix": {
-      data = spacecraftData.phoenix;
-      break;
-    }
-    case "msl":
+  const data = spacecraftData[spacecraft];
+
+  switch (spacecraft) {
     case "curiosity": {
       try {
         const response = await axios.get<WaypointsResponse>(
@@ -169,34 +102,13 @@ export const marsTime = async (
         const [jsonLon, jsonLat] =
           response.data.features[0].geometry.coordinates;
 
-        const { name, logo, epoch } = spacecraftData.curiosity;
-
-        data = {
-          lat: jsonLat,
-          lon: 360 - jsonLon,
-          name,
-          logo,
-          epoch,
-        };
+        data.lat = jsonLat;
+        data.lon = 360 - jsonLon;
       } catch (err) {
         console.error(err);
-        data = spacecraftData.curiosity;
       }
-
       break;
     }
-    case "schiaparelli": {
-      data = spacecraftData.schiaparelli;
-      break;
-    }
-    case "insight": {
-      data = spacecraftData.insight;
-      break;
-    }
-    case "percy":
-    case "mars2020":
-    case "m2020":
-    case "m20":
     case "perseverance": {
       try {
         const response = await axios.get<WaypointsResponse>(
@@ -205,20 +117,11 @@ export const marsTime = async (
         const [jsonLon, jsonLat] =
           response.data.features[0].geometry.coordinates;
 
-        const { name, logo, epoch } = spacecraftData.perseverance;
-
-        data = {
-          lat: jsonLat,
-          lon: 360 - jsonLon,
-          name,
-          logo,
-          epoch,
-        };
+        data.lat = jsonLat;
+        data.lon = 360 - jsonLon;
       } catch (err) {
         console.error(err);
-        data = spacecraftData.perseverance;
       }
-
       break;
     }
   }
@@ -226,7 +129,7 @@ export const marsTime = async (
   const { author, description, lat, lon, lmst, ltst, earthNow, avatar } =
     createEmbedFields(data);
 
-  embed
+  return new MessageEmbed()
     .setAuthor(author)
     .setDescription(description)
     .addFields([
@@ -243,6 +146,4 @@ export const marsTime = async (
     ])
     .setTimestamp(earthNow)
     .setThumbnail(avatar);
-
-  return message.channel.send({ embeds: [embed] });
 };

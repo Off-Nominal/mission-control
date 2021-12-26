@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { spacecraftData } from "../../clients/main/actions/marstime/constants";
 
 const commands = [
   new SlashCommandBuilder()
@@ -30,6 +31,20 @@ const commands = [
       option
         .setName("thread")
         .setDescription("Target your shunt to a new Thread")
+    ),
+  new SlashCommandBuilder()
+    .setName("marstime")
+    .setDescription("Get the current time on Mars")
+    .addStringOption((option) =>
+      option
+        .setName("spacecraft")
+        .setDescription("Select a specific spacecraft")
+        .addChoices(
+          Object.keys(spacecraftData).map<[string, string]>((spacecraft) => [
+            spacecraftData[spacecraft].name,
+            spacecraft,
+          ])
+        )
     ),
 ].map((command) => command.toJSON());
 

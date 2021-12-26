@@ -1,4 +1,16 @@
-export const spacecraftData = {
+export type Spacecraft = {
+  name: string;
+  logo: string;
+  epoch: Date;
+  lat: number;
+  lon: number;
+};
+
+type Spacecrafts = {
+  [key: string]: Spacecraft;
+};
+
+export const spacecraftData: Spacecrafts = {
   mars2: {
     name: "Mars-2",
     logo: "https://res.cloudinary.com/dj5enq03a/image/upload/v1619309348/Discord%20Assets/soviet_union_PNG46_gzcuqj.png",
