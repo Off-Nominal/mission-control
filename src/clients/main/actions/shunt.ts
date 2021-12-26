@@ -79,9 +79,7 @@ export const shunt = async (
     console.error(err);
   }
 
-  // Destination Message
-  let destinationMessage: Message;
-
+  // Create Thread
   if (thread) {
     try {
       const thread = await targetChannel.threads.create({
@@ -89,35 +87,22 @@ export const shunt = async (
         autoArchiveDuration: 1440, // One Day
       });
       thread.members.add(shunter.id);
-      destinationMessage = await thread.send({
-        embeds: [
-          generateEmbed({
-            url: sourceReply?.url,
-            direction: "inbound",
-          }),
-        ],
-      });
     } catch (err) {
-      console.error("Could not create thread and send target Embed");
-      console.error(err);
-    }
-  } else {
-    try {
-      destinationMessage = await targetChannel.send({
-        embeds: [
-          generateEmbed({
-            url: sourceReply.url,
-            direction: "inbound",
-          }),
-        ],
-      });
-    } catch (err) {
-      console.error("Could not send target embed for shunt.");
+      console.error("Could not create thread");
       console.error(err);
     }
   }
 
+  // Destination Message
   try {
+    const destinationMessage = await targetChannel.send({
+      embeds: [
+        generateEmbed({
+          url: sourceReply.url,
+          direction: "inbound",
+        }),
+      ],
+    });
     await interaction.editReply({
       embeds: [
         generateEmbed({
@@ -127,7 +112,7 @@ export const shunt = async (
       ],
     });
   } catch (err) {
-    console.error("Could not edit source message");
+    console.error("Could send destintation embed or edit source message");
     console.error(err);
   }
 };
