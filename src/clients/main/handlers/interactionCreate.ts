@@ -1,9 +1,12 @@
-import { Interaction, TextChannel } from "discord.js";
+import { Interaction, Message, TextChannel } from "discord.js";
 import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
+import createPollEmbed from "../actions/poll/createPollEmbed";
 import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
 import { marsTime } from "../actions/marstime/marsTime";
 import shunt from "../actions/shunt";
+import letters from "../actions/poll/pollOptions";
+import createPollHelpEmbed from "../actions/poll/createPollHelpEmbed";
 
 export default async function handleInteractionCreate(
   interaction: Interaction
@@ -36,9 +39,30 @@ export default async function handleInteractionCreate(
 
   if (commandName === "summary") {
     if (subCommand === "help") {
-      interaction.reply({ embeds: [generateSummaryHelpEmbed()] });
-    } else {
-      interaction.client.emit("summaryReportCreate", interaction);
+      return interaction.reply({ embeds: [generateSummaryHelpEmbed()] });
+    }
+
+    interaction.client.emit("summaryReportCreate", interaction);
+  }
+
+  if (commandName === "poll") {
+    if (subCommand === "help") {
+      const embed = createPollHelpEmbed();
+      return await interaction.reply({ embeds: [embed] });
+    }
+
+    const question = options.getString("question");
+    const answers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      .map((num) => options.getString(`choice-${num.toString()}`))
+      .filter((answer) => !!answer);
+    const poll = createPollEmbed(question, answers);
+
+    try {
+      await interaction.reply({ embeds: [poll] });
+      const reply = (await interaction.fetchReply()) as Message<boolean>;
+      await Promise.all(answers.map((answer, i) => reply.react(letters[i])));
+    } catch (err) {
+      console.error(err);
     }
   }
 }
