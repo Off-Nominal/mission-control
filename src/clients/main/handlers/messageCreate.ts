@@ -1,7 +1,5 @@
-import { Message, TextChannel } from "discord.js";
+import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
-import { ReportGenerator } from "../../../utilities/ReportGenerator";
-import { createPoll } from "../actions/createPoll";
 import {
   findTempsToConvert,
   sendTemperatureConversions,
@@ -26,7 +24,7 @@ export default async function handleMessageCreate(message: Message) {
 
   if (message.author.bot) return;
 
-  const [prefix, command, secondCommand] = parseCommands(message);
+  const [prefix] = parseCommands(message);
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
@@ -58,12 +56,12 @@ export default async function handleMessageCreate(message: Message) {
 
     // OLDPOLL cascades into POLL to handle old syntax
     case AllowedPrefix.OLDPOLL:
+
+    case AllowedPrefix.POLL: {
       message.channel.send({
         content:
-          "Please note the syntax for Polling has changed from `+poll` to `!poll` to match other bots. Type `!poll help` for more.",
+          "Both `+poll` and `!poll` have moved to the new slash command format. Try calling one with `/poll ask` or call `/poll help` for more infor.",
       });
-    case AllowedPrefix.POLL: {
-      createPoll(message);
       break;
     }
 
