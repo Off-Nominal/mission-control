@@ -56,7 +56,6 @@ export default async function handleMessageCreate(message: Message) {
 
     // OLDPOLL cascades into POLL to handle old syntax
     case AllowedPrefix.OLDPOLL:
-
     case AllowedPrefix.POLL: {
       message.channel.send({
         content:
