@@ -13,6 +13,11 @@ export enum AllowedPrefix {
   SUMMARY = "!summary",
   MARSTIME = "!marstime",
   THREAD = "!thread",
+  OLD_WM = "!wm",
+  OLD_MECO = "!meco",
+  OLD_OFN = "!ofn",
+  OLD_HL = "!hl",
+  OLD_RPR = "!rpr",
 }
 
 export default async function handleMessageCreate(message: Message) {
@@ -67,6 +72,17 @@ export default async function handleMessageCreate(message: Message) {
     case AllowedPrefix.SUMMARY: {
       message.channel.send(
         "`!summary` no longer accepts text initiated commands. Use the new slash commands by typing `/summary` and selecting your time window."
+      );
+      break;
+    }
+
+    case AllowedPrefix.OLD_WM:
+    case AllowedPrefix.OLD_HL:
+    case AllowedPrefix.OLD_RPR:
+    case AllowedPrefix.OLD_MECO:
+    case AllowedPrefix.OLD_OFN: {
+      message.channel.send(
+        "The podcast bots no longer reply to text-initiated message. Type `/podcasts` to access the new slash commands and use `/podcast help` for more info."
       );
       break;
     }

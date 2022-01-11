@@ -212,9 +212,6 @@ contentBot.once("ready", contentBotHandlers.handleReady);
 
 // WeMartians
 wmBot.once("ready", podcastBotHandlers.handleReady);
-wmBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!wm")
-);
 wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 wmBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, wmFeedListener)
@@ -222,9 +219,6 @@ wmBot.on("interactionCreate", (interaction) =>
 
 // Off-Nominal
 ofnBot.once("ready", podcastBotHandlers.handleReady);
-ofnBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!ofn")
-);
 ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 ofnBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, ofnFeedListener)
@@ -232,9 +226,6 @@ ofnBot.on("interactionCreate", (interaction) =>
 
 // MECO
 mecoBot.once("ready", podcastBotHandlers.handleReady);
-mecoBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!meco")
-);
 mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 mecoBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, mecoFeedListener)
@@ -242,9 +233,6 @@ mecoBot.on("interactionCreate", (interaction) =>
 
 // RPR
 rprBot.once("ready", podcastBotHandlers.handleReady);
-rprBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!rpr")
-);
 rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 rprBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, rprFeedListener)
@@ -252,9 +240,6 @@ rprBot.on("interactionCreate", (interaction) =>
 
 // Headlines
 hlBot.once("ready", podcastBotHandlers.handleReady);
-hlBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!hl")
-);
 hlBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 hlBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, hlFeedListener)
