@@ -12,6 +12,7 @@ import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
+import deployWeMartians from "./clients/actions/deployWeMartians";
 
 const searchOptions = require("../config/searchOptions.json");
 
@@ -42,8 +43,6 @@ const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
 const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
 const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
 const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
-
-const WM_DEPLOY_URL = process.env.WM_DEPLOY_URL;
 
 /***********************************
  *  Bot Setup
@@ -189,6 +188,20 @@ bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
  *  Podcast Bot Event Handlers
  ************************************/
 
+wmFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent);
+  deployWeMartians();
+});
+mecoFeedListener.on("newContent", contentBotHandlers.handleNewContent);
+ofnFeedListener.on("newContent", contentBotHandlers.handleNewContent);
+rprFeedListener.on("newContent", contentBotHandlers.handleNewContent);
+hlFeedListener.on("newContent", contentBotHandlers.handleNewContent);
+
+/***********************************
+ *  Podcast Bot Event Handlers
+ ************************************/
+
+// Content
 contentBot.once("ready", contentBotHandlers.handleReady);
 
 // WeMartians
