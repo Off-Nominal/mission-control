@@ -17,10 +17,8 @@ import deployWeMartians from "./clients/actions/deployWeMartians";
 const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
-const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
 
 const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
-const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
 const LIVECHATCHANNELID = process.env.LIVECHATCHANNELID || TEST_CHANNEL;
 
 const WMFEED = process.env.WMFEED;
@@ -185,17 +183,25 @@ bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
 
 /***********************************
- *  Podcast Bot Event Handlers
+ *  Feed Listeners Event Handlers
  ************************************/
 
 wmFeedListener.on("newContent", (newContent) => {
-  contentBotHandlers.handleNewContent(newContent);
   deployWeMartians();
+  contentBotHandlers.handleNewContent(newContent, contentBot, 600);
 });
-mecoFeedListener.on("newContent", contentBotHandlers.handleNewContent);
-ofnFeedListener.on("newContent", contentBotHandlers.handleNewContent);
-rprFeedListener.on("newContent", contentBotHandlers.handleNewContent);
-hlFeedListener.on("newContent", contentBotHandlers.handleNewContent);
+mecoFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
+ofnFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
+rprFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
+hlFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
 
 /***********************************
  *  Podcast Bot Event Handlers

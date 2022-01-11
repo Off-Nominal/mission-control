@@ -1,4 +1,3 @@
-import axios from "axios";
 import { TextChannel } from "discord.js";
 import Fuse from "fuse.js";
 const FuseJS = require("fuse.js");
@@ -33,17 +32,7 @@ export class FeedListener extends Watcher {
   constructor(feed: string, options?: FeedListenerOptions) {
     super(feed, options.rssInterval || 60);
     this.processor = options.processor || defaultProcessor;
-    // this.client = options.discordClient;
-    // this.channelId = options.channelId;
-    // this.timeout = options.actionDelay * 1000 || 0;
     this.searchOptions = options.searchOptions || null;
-    // this.deployUrl = options.deployUrl;
-  }
-
-  public async fetchChannel() {
-    this.channel = (await this.client.channels.fetch(
-      this.channelId
-    )) as TextChannel;
   }
 
   public async initialize() {
@@ -71,38 +60,9 @@ export class FeedListener extends Watcher {
         const mappedEpisode = this.processor(episode);
         this.episodes.push(mappedEpisode);
         this.emit("newContent", { feed: this.title, content: mappedEpisode });
-
-        // if (this.deployUrl) {
-        //   axios
-        //     .post(this.deployUrl)
-        //     .catch((err) => console.error("Failed to deploy site.", err));
-        // }
-
-        // setTimeout(() => {
-        //   this.announceNewItem(mappedEpisode.url);
-        // }, this.timeout);
       });
     });
   }
-
-  // private announceNewItem(podcastURL) {
-  //   console.log(`New episode in ${this.title}.\n${podcastURL}`);
-  //   this.channel
-  //     .send({
-  //       content: `It's podcast release day for ${this.title}!\n${podcastURL}`,
-  //     })
-  //     .then(() => {
-  //       console.log(
-  //         `Discord successfully notified of new podcast episode in ${this.title}`
-  //       );
-  //     })
-  //     .catch((err) => {
-  //       console.error(
-  //         `Error sending message to Discord for update to ${this.title}`
-  //       );
-  //       console.error(err);
-  //     });
-  // }
 
   public fetchRecent() {
     return this.episodes[this.episodes.length - 1];
