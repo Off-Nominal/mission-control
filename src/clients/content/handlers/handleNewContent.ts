@@ -1,5 +1,6 @@
 import { Client, TextChannel } from "discord.js";
 import { FeedItem } from "../../../listeners/feedListener/feedListener";
+import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 
 const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
 const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
@@ -18,11 +19,11 @@ export default async function handleNewContent(
     CONTENTCHANNELID
   )) as TextChannel;
 
-  function announceNewItem(podcastURL) {
-    console.log(`New episode in ${feed}.\n${podcastURL}`);
+  function announceNewItem() {
     channel
       .send({
-        content: `It's podcast release day for ${feed}!\n${podcastURL}`,
+        content: `It's podcast release day for ${feed}!`,
+        embeds: [createUniqueResultEmbed(feed, content)],
       })
       .then(() => {
         console.log(
@@ -35,9 +36,7 @@ export default async function handleNewContent(
       });
   }
 
-  console.log(newContent.content);
-
   setTimeout(() => {
-    announceNewItem(content.url);
+    announceNewItem();
   }, timeout * 1000);
 }
