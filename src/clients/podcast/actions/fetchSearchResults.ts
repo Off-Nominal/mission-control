@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { FeedListener } from "../../../listeners/feedListener/feedListener";
 
 export const fetchSearchResults = (
