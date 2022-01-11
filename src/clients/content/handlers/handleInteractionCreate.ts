@@ -43,7 +43,10 @@ export default function handleInteractionCreate(
 
   if (subCommand === "episode-number") {
     const epNum = options.getInteger("episode-number");
-    returnMessage.content = feedListener.getEpisodeByNumber(epNum).url;
+    const episode = feedListener.getEpisodeByNumber(epNum);
+    returnMessage.content = episode
+      ? episode.url
+      : "No episode with that number.";
   }
 
   interaction.reply(returnMessage);
