@@ -2,6 +2,7 @@ import { Interaction, MessageOptions } from "discord.js";
 import { FeedListener } from "../../../listeners/feedListener/feedListener";
 import { createPodcastHelpEmbed } from "../actions/createPodcastHelpEmbed";
 import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
+import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 
 export default function handleInteractionCreate(
   interaction: Interaction,
@@ -23,7 +24,7 @@ export default function handleInteractionCreate(
   }
 
   const show = options.getString("show", true);
-  const feedListener = listeners[show];
+  const feedListener = listeners[show] as FeedListener;
 
   let returnMessage: MessageOptions = {
     embeds: [],
@@ -38,15 +39,22 @@ export default function handleInteractionCreate(
   }
 
   if (subCommand === "recent") {
-    returnMessage.content = feedListener.fetchRecent().url;
+    const episode = feedListener.fetchRecent();
+    returnMessage.embeds.push(
+      createUniqueResultEmbed(feedListener.title, episode)
+    );
   }
 
   if (subCommand === "episode-number") {
     const epNum = options.getInteger("episode-number");
     const episode = feedListener.getEpisodeByNumber(epNum);
-    returnMessage.content = episode
-      ? episode.url
-      : "No episode with that number.";
+    if (episode) {
+      returnMessage.embeds.push(
+        createUniqueResultEmbed(feedListener.title, episode)
+      );
+    } else {
+      returnMessage.content = "No episode with that number.";
+    }
   }
 
   interaction.reply(returnMessage);

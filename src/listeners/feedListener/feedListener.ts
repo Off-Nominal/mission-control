@@ -8,11 +8,12 @@ const defaultProcessor = (item) => item;
 
 export type FeedItem = {
   title: string;
-  date: string;
+  date: Date;
   url: string;
   audioUrl: string;
   image: string;
   description: string;
+  summary: string;
 };
 
 export type FeedListenerOptions = {
