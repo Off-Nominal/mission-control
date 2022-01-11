@@ -11,7 +11,7 @@ import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
-import deployWeMartians from "./clients/actions/deployWeMartians";
+import deployWeMartians from "./utilities/deployWeMartians";
 
 const searchOptions = require("../config/searchOptions.json");
 
