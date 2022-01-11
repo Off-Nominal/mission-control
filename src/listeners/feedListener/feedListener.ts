@@ -26,6 +26,7 @@ export class FeedListener extends Watcher {
   channel: TextChannel;
   episodes: FeedItem[];
   title: string;
+  albumArt: string;
   fuse: Fuse<FeedItem>;
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
   processor: (item: any) => FeedItem;
@@ -40,6 +41,7 @@ export class FeedListener extends Watcher {
     try {
       const entries = await this.start(); // fetch data from RSS
       this.title = entries[0].meta.title; // extract Feed program title
+      this.albumArt = entries[0].meta.image.url;
       this.episodes = entries.map(this.processor).reverse(); // map entries from RSS feed to episode format using processor
 
       console.log(

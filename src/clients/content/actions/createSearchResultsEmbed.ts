@@ -5,12 +5,14 @@ import { FeedItem } from "../../../listeners/feedListener/feedListener";
 export const createSearchResultsEmbed = (
   results: Fuse.default.FuseResult<FeedItem>[],
   title: string,
+  image: string,
   searchTerm: string
 ) => {
   return new MessageEmbed()
     .setColor("#3e7493")
     .setTitle("Search Results")
     .setAuthor(title)
+    .setThumbnail(image)
     .setDescription(`Top three results for your search \`${searchTerm}\``)
     .addFields(
       results.map((result) => {
@@ -20,8 +22,8 @@ export const createSearchResultsEmbed = (
             result.item.description.slice(0, 160) +
             "..." +
             `\n[[Link]](${result.item.url}) - ${format(
-              new Date(result.item.date),
-              "MMM e, yyyy"
+              result.item.date,
+              "PPP"
             )}`,
         };
       })

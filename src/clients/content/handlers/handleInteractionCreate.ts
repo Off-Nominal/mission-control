@@ -34,7 +34,12 @@ export default function handleInteractionCreate(
     const term = options.getString("term");
     const results = feedListener.search(term).slice(0, 3);
     returnMessage.embeds.push(
-      createSearchResultsEmbed(results, feedListener.title, term)
+      createSearchResultsEmbed(
+        results,
+        feedListener.title,
+        feedListener.albumArt,
+        term
+      )
     );
   }
 
