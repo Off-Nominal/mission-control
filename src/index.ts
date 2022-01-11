@@ -211,10 +211,7 @@ hlFeedListener.on("newContent", (newContent) => {
 contentBot.once("ready", contentBotHandlers.handleReady);
 
 // WeMartians
-wmBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  wmFeedListener.fetchChannel();
-});
+wmBot.once("ready", podcastBotHandlers.handleReady);
 wmBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, "!wm")
 );
@@ -224,10 +221,7 @@ wmBot.on("interactionCreate", (interaction) =>
 );
 
 // Off-Nominal
-ofnBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  ofnFeedListener.fetchChannel();
-});
+ofnBot.once("ready", podcastBotHandlers.handleReady);
 ofnBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, "!ofn")
 );
@@ -237,10 +231,7 @@ ofnBot.on("interactionCreate", (interaction) =>
 );
 
 // MECO
-mecoBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  mecoFeedListener.fetchChannel();
-});
+mecoBot.once("ready", podcastBotHandlers.handleReady);
 mecoBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, "!meco")
 );
@@ -250,10 +241,7 @@ mecoBot.on("interactionCreate", (interaction) =>
 );
 
 // RPR
-rprBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  rprFeedListener.fetchChannel();
-});
+rprBot.once("ready", podcastBotHandlers.handleReady);
 rprBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, "!rpr")
 );
@@ -263,10 +251,7 @@ rprBot.on("interactionCreate", (interaction) =>
 );
 
 // Headlines
-hlBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  hlFeedListener.fetchChannel();
-});
+hlBot.once("ready", podcastBotHandlers.handleReady);
 hlBot.on("messageCreate", (message) =>
   podcastBotHandlers.handleMessageCreate(message, "!hl")
 );
