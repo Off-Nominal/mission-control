@@ -181,15 +181,15 @@ hlFeedListener.on("newContent", (newContent) => {
  *  Podcast Bot Event Handlers
  ************************************/
 
-// Content
+const feeds = {
+  wm: wmFeedListener,
+  meco: mecoFeedListener,
+  ofn: ofnFeedListener,
+  rpr: rprFeedListener,
+  hl: hlFeedListener,
+};
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
 contentBot.on("interactionCreate", (interaction) =>
-  contentBotHandlers.handleInteractionCreate(interaction, {
-    wm: wmFeedListener,
-    meco: mecoFeedListener,
-    ofn: ofnFeedListener,
-    rpr: rprFeedListener,
-    hl: hlFeedListener,
-  })
+  contentBotHandlers.handleInteractionCreate(interaction, feeds)
 );

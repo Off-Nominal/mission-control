@@ -1,9 +1,8 @@
-import { TextChannel } from "discord.js";
 import Fuse from "fuse.js";
 const FuseJS = require("fuse.js");
-
 const Watcher = require("feed-watcher");
 
+const FEED_CHECK_TIME_IN_SECONDS = 60;
 const defaultProcessor = (item) => item;
 
 export type FeedItem = {
@@ -23,7 +22,6 @@ export type FeedListenerOptions = {
 };
 
 export class FeedListener extends Watcher {
-  channel: TextChannel;
   episodes: FeedItem[];
   title: string;
   albumArt: string;
@@ -32,7 +30,7 @@ export class FeedListener extends Watcher {
   processor: (item: any) => FeedItem;
 
   constructor(feed: string, options?: FeedListenerOptions) {
-    super(feed, options.rssInterval || 60);
+    super(feed, options.rssInterval || FEED_CHECK_TIME_IN_SECONDS);
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;
   }
