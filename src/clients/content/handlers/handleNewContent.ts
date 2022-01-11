@@ -35,6 +35,8 @@ export default async function handleNewContent(
       });
   }
 
+  console.log(newContent.content);
+
   setTimeout(() => {
     announceNewItem(content.url);
   }, timeout * 1000);
