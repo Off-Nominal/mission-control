@@ -209,6 +209,7 @@ hlFeedListener.on("newContent", (newContent) => {
 
 // Content
 contentBot.once("ready", contentBotHandlers.handleReady);
+contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
 
 // WeMartians
 wmBot.once("ready", podcastBotHandlers.handleReady);
