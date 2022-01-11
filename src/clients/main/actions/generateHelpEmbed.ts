@@ -7,7 +7,7 @@ export const generateHelpEmbed = () => {
       "Many bots have their own help commands. Here's a list to call them up. Consider sending them a direct message with this command in order to keep the channel free of clutter."
     )
     .addFields([
-      { name: "Podcasts", value: "`/podcasts help`", inline: true },
+      { name: "Content", value: "`/content help`", inline: true },
       { name: "Book Club", value: "`/bookclub help`", inline: true },
       { name: "NostradamBot", value: "`!ndb help`", inline: true },
       { name: "Launch Alerts", value: "`!l help`", inline: true },
