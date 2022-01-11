@@ -18,6 +18,7 @@ export enum AllowedPrefix {
   OLD_OFN = "!ofn",
   OLD_HL = "!hl",
   OLD_RPR = "!rpr",
+  OLD_PODCASTS = "!podcasts",
 }
 
 export default async function handleMessageCreate(message: Message) {
@@ -76,13 +77,14 @@ export default async function handleMessageCreate(message: Message) {
       break;
     }
 
+    case AllowedPrefix.OLD_PODCASTS:
     case AllowedPrefix.OLD_WM:
     case AllowedPrefix.OLD_HL:
     case AllowedPrefix.OLD_RPR:
     case AllowedPrefix.OLD_MECO:
     case AllowedPrefix.OLD_OFN: {
       message.channel.send(
-        "The podcast bots no longer reply to text-initiated message. Type `/podcasts` to access the new slash commands and use `/podcast help` for more info."
+        "The podcast bots have been replaced by one Content Bot to rule them all. Type `/content` to access the new slash commands and use `/content help` for more info."
       );
       break;
     }
