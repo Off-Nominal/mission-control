@@ -212,35 +212,30 @@ contentBot.once("ready", contentBotHandlers.handleReady);
 
 // WeMartians
 wmBot.once("ready", podcastBotHandlers.handleReady);
-wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 wmBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, wmFeedListener)
 );
 
 // Off-Nominal
 ofnBot.once("ready", podcastBotHandlers.handleReady);
-ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 ofnBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, ofnFeedListener)
 );
 
 // MECO
 mecoBot.once("ready", podcastBotHandlers.handleReady);
-mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 mecoBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, mecoFeedListener)
 );
 
 // RPR
 rprBot.once("ready", podcastBotHandlers.handleReady);
-rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 rprBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, rprFeedListener)
 );
 
 // Headlines
 hlBot.once("ready", podcastBotHandlers.handleReady);
-hlBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
 hlBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, hlFeedListener)
 );
