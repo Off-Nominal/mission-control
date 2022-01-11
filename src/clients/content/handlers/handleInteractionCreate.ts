@@ -1,7 +1,7 @@
 import { Interaction, MessageOptions } from "discord.js";
 import { FeedListener } from "../../../listeners/feedListener/feedListener";
 import { createPodcastHelpEmbed } from "../actions/createPodcastHelpEmbed";
-import { fetchSearchResults } from "../actions/fetchSearchResults";
+import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 
 export default function handleInteractionCreate(
   interaction: Interaction,
@@ -23,25 +23,27 @@ export default function handleInteractionCreate(
   }
 
   const show = options.getString("show", true);
-  const type = options.getString("type", true);
-  const term = options.getString("term", true);
-
   const feedListener = listeners[show];
 
   let returnMessage: MessageOptions = {
     embeds: [],
   };
 
-  if (type === "search") {
-    returnMessage.embeds.push(fetchSearchResults(feedListener, term));
+  if (subCommand === "search") {
+    const term = options.getString("term");
+    const results = feedListener.search(term).slice(0, 3);
+    returnMessage.embeds.push(
+      createSearchResultsEmbed(results, feedListener.title, term)
+    );
   }
 
-  if (type === "recent") {
+  if (subCommand === "recent") {
     returnMessage.content = feedListener.fetchRecent().url;
   }
 
-  if (type === "episode") {
-    returnMessage.content = feedListener.getEpisodeByNumber(Number(term)).url;
+  if (subCommand === "episode-number") {
+    const epNum = options.getInteger("episode-number");
+    returnMessage.content = feedListener.getEpisodeByNumber(epNum).url;
   }
 
   interaction.reply(returnMessage);
