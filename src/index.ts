@@ -3,7 +3,6 @@ require("dotenv").config();
 import { Client, Intents } from "discord.js";
 
 import bcBotHandlers from "./clients/bookclub/handlers";
-import podcastBotHandlers from "./clients/podcast/handlers";
 import mainBotHandlers from "./clients/main/handlers";
 import contentBotHandlers from "./clients/content/handlers";
 
@@ -210,28 +209,12 @@ hlFeedListener.on("newContent", (newContent) => {
 // Content
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
-
-// WeMartians
-wmBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, wmFeedListener)
-);
-
-// Off-Nominal
-ofnBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, ofnFeedListener)
-);
-
-// MECO
-mecoBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, mecoFeedListener)
-);
-
-// RPR
-rprBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, rprFeedListener)
-);
-
-// Headlines
-hlBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, hlFeedListener)
+contentBot.on("interactionCreate", (interaction) =>
+  contentBotHandlers.handleInteractionCreate(interaction, {
+    wm: wmFeedListener,
+    meco: mecoFeedListener,
+    ofn: ofnFeedListener,
+    rpr: rprFeedListener,
+    hl: hlFeedListener,
+  })
 );
