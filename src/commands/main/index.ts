@@ -1,14 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { spacecraftData } from "../../clients/main/actions/marstime/constants";
 
-// Podcast Search
-const podcastsCommand = new SlashCommandBuilder()
-  .setName("podcasts")
-  .setDescription("Search through the podcasts")
-  .addSubcommand((command) =>
-    command.setName("help").setDescription("Get help searching for podcasts")
-  );
-
 // Help
 const helpCommand = new SlashCommandBuilder()
   .setName("help")
@@ -130,7 +122,6 @@ const pollCommand = new SlashCommandBuilder()
   );
 
 const commands = [
-  podcastsCommand,
   helpCommand,
   shuntCommand,
   marstimeCommand,

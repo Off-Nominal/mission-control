@@ -1,71 +1,46 @@
-import axios from "axios";
-import { Client, TextChannel } from "discord.js";
 import Fuse from "fuse.js";
 const FuseJS = require("fuse.js");
-
 const Watcher = require("feed-watcher");
 
+const FEED_CHECK_TIME_IN_SECONDS = 60;
 const defaultProcessor = (item) => item;
 
 export type FeedItem = {
   title: string;
-  date: string;
+  date: Date;
   url: string;
   audioUrl: string;
   image: string;
   description: string;
+  summary: string;
 };
 
 export type FeedListenerOptions = {
   processor?: (item: any) => FeedItem;
-  discordClient: Client;
-  channelId: string;
   rssInterval?: number;
-  actionDelay?: number;
   searchOptions?: Fuse.IFuseOptions<FeedItem>;
-  deployUrl?: string;
 };
 
 export class FeedListener extends Watcher {
-  client: Client;
-  channel: TextChannel;
   episodes: FeedItem[];
   title: string;
+  albumArt: string;
   fuse: Fuse<FeedItem>;
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
-  deployUrl: string;
   processor: (item: any) => FeedItem;
 
   constructor(feed: string, options?: FeedListenerOptions) {
-    super(feed, options.rssInterval || 60);
+    super(feed, options.rssInterval || FEED_CHECK_TIME_IN_SECONDS);
     this.processor = options.processor || defaultProcessor;
-    this.client = options.discordClient;
-    this.channelId = options.channelId;
-    this.timeout = options.actionDelay * 1000 || 0;
     this.searchOptions = options.searchOptions || null;
-    this.deployUrl = options.deployUrl;
-  }
-
-  private processRSS(entries) {
-    this.episodes = entries.map(this.processor).reverse();
-  }
-
-  public async fetchChannel() {
-    this.channel = (await this.client.channels.fetch(
-      this.channelId
-    )) as TextChannel;
-  }
-
-  private initializeSearch() {
-    this.fuse = new FuseJS(this.episodes, this.searchOptions);
   }
 
   public async initialize() {
     try {
-      const entries = await this.start();
-      this.title = entries[0].meta.title;
-
-      this.processRSS(entries);
+      const entries = await this.start(); // fetch data from RSS
+      this.title = entries[0].meta.title; // extract Feed program title
+      this.albumArt = entries[0].meta.image.url;
+      this.episodes = entries.map(this.processor).reverse(); // map entries from RSS feed to episode format using processor
 
       console.log(
         `${this.title} feed loaded with ${this.episodes.length} items.`
@@ -75,9 +50,9 @@ export class FeedListener extends Watcher {
       console.error(err);
     }
 
-    this.initializeSearch();
-    this.listen();
-    this.error();
+    this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client
+    this.listen(); // listen for new entries on RSS
+    this.on("error", console.error);
   }
 
   private listen() {
@@ -85,41 +60,9 @@ export class FeedListener extends Watcher {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode);
         this.episodes.push(mappedEpisode);
-
-        if (this.deployUrl) {
-          axios
-            .post(this.deployUrl)
-            .catch((err) => console.error("Failed to deploy site.", err));
-        }
-
-        setTimeout(() => {
-          this.announceNewItem(mappedEpisode.url);
-        }, this.timeout);
+        this.emit("newContent", { feed: this.title, content: mappedEpisode });
       });
     });
-  }
-
-  private error() {
-    this.on("error", console.error);
-  }
-
-  private announceNewItem(podcastURL) {
-    console.log(`New episode in ${this.title}.\n${podcastURL}`);
-    this.channel
-      .send({
-        content: `It's podcast release day for ${this.title}!\n${podcastURL}`,
-      })
-      .then(() => {
-        console.log(
-          `Discord successfully notified of new podcast episode in ${this.title}`
-        );
-      })
-      .catch((err) => {
-        console.error(
-          `Error sending message to Discord for update to ${this.title}`
-        );
-        console.error(err);
-      });
   }
 
   public fetchRecent() {

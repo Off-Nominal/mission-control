@@ -1,5 +1,4 @@
 import { Interaction, Message, TextChannel } from "discord.js";
-import { createPodcastHelpEmbed } from "../../actions/createPodcastHelpEmbed";
 import createPollEmbed from "../actions/poll/createPollEmbed";
 import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
@@ -15,10 +14,6 @@ export default async function handleInteractionCreate(
 
   const { options, commandName } = interaction;
   const subCommand = options.getSubcommand(false);
-
-  if (commandName === "podcasts" && subCommand === "help") {
-    return interaction.reply({ embeds: [createPodcastHelpEmbed()] });
-  }
 
   if (commandName === "shunt") {
     const channel = options.getChannel("channel", true) as TextChannel;

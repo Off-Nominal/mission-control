@@ -3,22 +3,21 @@ require("dotenv").config();
 import { Client, Intents } from "discord.js";
 
 import bcBotHandlers from "./clients/bookclub/handlers";
-import podcastBotHandlers from "./clients/podcast/handlers";
 import mainBotHandlers from "./clients/main/handlers";
+import contentBotHandlers from "./clients/content/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
+import deployWeMartians from "./utilities/deployWeMartians";
 
 const searchOptions = require("../config/searchOptions.json");
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
-const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
 
 const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
-const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
 const LIVECHATCHANNELID = process.env.LIVECHATCHANNELID || TEST_CHANNEL;
 
 const WMFEED = process.env.WMFEED;
@@ -29,19 +28,13 @@ const HLFEED = process.env.HLFEED;
 
 const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
 const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
-const WM_TOKEN = process.env.WEMARTIANS_BOT_TOKEN_ID;
-const MECO_TOKEN = process.env.MECO_BOT_TOKEN_ID;
-const OFN_TOKEN = process.env.OFFNOM_BOT_TOKEN_ID;
-const RPR_TOKEN = process.env.RPR_BOT_TOKEN_ID;
-const HL_TOKEN = process.env.HL_BOT_TOKEN_ID;
+const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
 
 const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
 const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
 const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
 const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
 const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
-
-const WM_DEPLOY_URL = process.env.WM_DEPLOY_URL;
 
 /***********************************
  *  Bot Setup
@@ -71,19 +64,7 @@ const utilityBot = new Client({
 const bcBot = new Client({
   intents: simpleIntents,
 });
-const wmBot = new Client({
-  intents: simpleIntents,
-});
-const ofnBot = new Client({
-  intents: simpleIntents,
-});
-const mecoBot = new Client({
-  intents: simpleIntents,
-});
-const rprBot = new Client({
-  intents: simpleIntents,
-});
-const hlBot = new Client({
+const contentBot = new Client({
   intents: simpleIntents,
 });
 
@@ -104,34 +85,22 @@ const starshipChecker = new SiteListener(
 
 const wmFeedListener = new FeedListener(WMFEED, {
   processor: feedMapper,
-  discordClient: wmBot,
-  channelId: CONTENTCHANNELID,
-  actionDelay: 600,
   searchOptions: WM_SEARCH_OPTIONS,
-  deployUrl: WM_DEPLOY_URL,
 });
 const mecoFeedListener = new FeedListener(MECOFEED, {
   processor: feedMapper,
-  discordClient: mecoBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: MECO_SEARCH_OPTIONS,
 });
 const ofnFeedListener = new FeedListener(OFNFEED, {
   processor: feedMapper,
-  discordClient: ofnBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: OFN_SEARCH_OPTIONS,
 });
 const rprFeedListener = new FeedListener(RPRFEED, {
   processor: feedMapper,
-  discordClient: rprBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: RPR_SEARCH_OPTIONS,
 });
 const hlFeedListener = new FeedListener(HLFEED, {
   processor: feedMapper,
-  discordClient: hlBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: HL_SEARCH_OPTIONS,
 });
 
@@ -148,11 +117,7 @@ const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
 
 utilityBot.login(UTILITY_TOKEN);
 bcBot.login(BC_TOKEN);
-wmBot.login(WM_TOKEN);
-ofnBot.login(OFN_TOKEN);
-mecoBot.login(MECO_TOKEN);
-rprBot.login(RPR_TOKEN);
-hlBot.login(HL_TOKEN);
+contentBot.login(CONTENT_TOKEN);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
@@ -192,70 +157,39 @@ bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
 
 /***********************************
+ *  Feed Listeners Event Handlers
+ ************************************/
+
+wmFeedListener.on("newContent", (newContent) => {
+  deployWeMartians();
+  contentBotHandlers.handleNewContent(newContent, contentBot, 600);
+});
+mecoFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
+ofnFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
+rprFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
+hlFeedListener.on("newContent", (newContent) => {
+  contentBotHandlers.handleNewContent(newContent, contentBot);
+});
+
+/***********************************
  *  Podcast Bot Event Handlers
  ************************************/
 
-// WeMartians
-wmBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  wmFeedListener.fetchChannel();
-});
-wmBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!wm")
-);
-wmBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
-wmBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, wmFeedListener)
-);
-
-// Off-Nominal
-ofnBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  ofnFeedListener.fetchChannel();
-});
-ofnBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!ofn")
-);
-ofnBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
-ofnBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, ofnFeedListener)
-);
-
-// MECO
-mecoBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  mecoFeedListener.fetchChannel();
-});
-mecoBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!meco")
-);
-mecoBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
-mecoBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, mecoFeedListener)
-);
-
-// RPR
-rprBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  rprFeedListener.fetchChannel();
-});
-rprBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!rpr")
-);
-rprBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
-rprBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, rprFeedListener)
-);
-
-// Headlines
-hlBot.once("ready", (client) => {
-  podcastBotHandlers.handleReady(client);
-  hlFeedListener.fetchChannel();
-});
-hlBot.on("messageCreate", (message) =>
-  podcastBotHandlers.handleMessageCreate(message, "!hl")
-);
-hlBot.on("threadCreate", podcastBotHandlers.handleThreadCreate);
-hlBot.on("interactionCreate", (interaction) =>
-  podcastBotHandlers.handleInteractionCreate(interaction, hlFeedListener)
+const feeds = {
+  wm: wmFeedListener,
+  meco: mecoFeedListener,
+  ofn: ofnFeedListener,
+  rpr: rprFeedListener,
+  hl: hlFeedListener,
+};
+contentBot.once("ready", contentBotHandlers.handleReady);
+contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
+contentBot.on("interactionCreate", (interaction) =>
+  contentBotHandlers.handleInteractionCreate(interaction, feeds)
 );
