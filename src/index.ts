@@ -212,31 +212,26 @@ contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
 
 // WeMartians
-wmBot.once("ready", podcastBotHandlers.handleReady);
 wmBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, wmFeedListener)
 );
 
 // Off-Nominal
-ofnBot.once("ready", podcastBotHandlers.handleReady);
 ofnBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, ofnFeedListener)
 );
 
 // MECO
-mecoBot.once("ready", podcastBotHandlers.handleReady);
 mecoBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, mecoFeedListener)
 );
 
 // RPR
-rprBot.once("ready", podcastBotHandlers.handleReady);
 rprBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, rprFeedListener)
 );
 
 // Headlines
-hlBot.once("ready", podcastBotHandlers.handleReady);
 hlBot.on("interactionCreate", (interaction) =>
   podcastBotHandlers.handleInteractionCreate(interaction, hlFeedListener)
 );
