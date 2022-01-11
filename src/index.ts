@@ -5,6 +5,7 @@ import { Client, Intents } from "discord.js";
 import bcBotHandlers from "./clients/bookclub/handlers";
 import podcastBotHandlers from "./clients/podcast/handlers";
 import mainBotHandlers from "./clients/main/handlers";
+import contentBotHandlers from "./clients/content/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { feedMapper } from "./listeners/feedListener/feedMapper";
@@ -108,34 +109,22 @@ const starshipChecker = new SiteListener(
 
 const wmFeedListener = new FeedListener(WMFEED, {
   processor: feedMapper,
-  discordClient: wmBot,
-  channelId: CONTENTCHANNELID,
-  actionDelay: 600,
   searchOptions: WM_SEARCH_OPTIONS,
-  deployUrl: WM_DEPLOY_URL,
 });
 const mecoFeedListener = new FeedListener(MECOFEED, {
   processor: feedMapper,
-  discordClient: mecoBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: MECO_SEARCH_OPTIONS,
 });
 const ofnFeedListener = new FeedListener(OFNFEED, {
   processor: feedMapper,
-  discordClient: ofnBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: OFN_SEARCH_OPTIONS,
 });
 const rprFeedListener = new FeedListener(RPRFEED, {
   processor: feedMapper,
-  discordClient: rprBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: RPR_SEARCH_OPTIONS,
 });
 const hlFeedListener = new FeedListener(HLFEED, {
   processor: feedMapper,
-  discordClient: hlBot,
-  channelId: CONTENTCHANNELID,
   searchOptions: HL_SEARCH_OPTIONS,
 });
 
@@ -199,6 +188,8 @@ bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
 /***********************************
  *  Podcast Bot Event Handlers
  ************************************/
+
+contentBot.once("ready", contentBotHandlers.handleReady);
 
 // WeMartians
 wmBot.once("ready", (client) => {
