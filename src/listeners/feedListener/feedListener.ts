@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Client, TextChannel } from "discord.js";
+import { TextChannel } from "discord.js";
 import Fuse from "fuse.js";
 const FuseJS = require("fuse.js");
 
@@ -18,36 +18,26 @@ export type FeedItem = {
 
 export type FeedListenerOptions = {
   processor?: (item: any) => FeedItem;
-  discordClient: Client;
-  channelId: string;
   rssInterval?: number;
-  actionDelay?: number;
   searchOptions?: Fuse.IFuseOptions<FeedItem>;
-  deployUrl?: string;
 };
 
 export class FeedListener extends Watcher {
-  client: Client;
   channel: TextChannel;
   episodes: FeedItem[];
   title: string;
   fuse: Fuse<FeedItem>;
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
-  deployUrl: string;
   processor: (item: any) => FeedItem;
 
   constructor(feed: string, options?: FeedListenerOptions) {
     super(feed, options.rssInterval || 60);
     this.processor = options.processor || defaultProcessor;
-    this.client = options.discordClient;
-    this.channelId = options.channelId;
-    this.timeout = options.actionDelay * 1000 || 0;
+    // this.client = options.discordClient;
+    // this.channelId = options.channelId;
+    // this.timeout = options.actionDelay * 1000 || 0;
     this.searchOptions = options.searchOptions || null;
-    this.deployUrl = options.deployUrl;
-  }
-
-  private processRSS(entries) {
-    this.episodes = entries.map(this.processor).reverse();
+    // this.deployUrl = options.deployUrl;
   }
 
   public async fetchChannel() {
@@ -56,16 +46,11 @@ export class FeedListener extends Watcher {
     )) as TextChannel;
   }
 
-  private initializeSearch() {
-    this.fuse = new FuseJS(this.episodes, this.searchOptions);
-  }
-
   public async initialize() {
     try {
-      const entries = await this.start();
-      this.title = entries[0].meta.title;
-
-      this.processRSS(entries);
+      const entries = await this.start(); // fetch data from RSS
+      this.title = entries[0].meta.title; // extract Feed program title
+      this.episodes = entries.map(this.processor).reverse(); // map entries from RSS feed to episode format using processor
 
       console.log(
         `${this.title} feed loaded with ${this.episodes.length} items.`
@@ -75,9 +60,9 @@ export class FeedListener extends Watcher {
       console.error(err);
     }
 
-    this.initializeSearch();
-    this.listen();
-    this.error();
+    this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client
+    this.listen(); // listen for new entries on RSS
+    this.on("error", console.error);
   }
 
   private listen() {
@@ -85,42 +70,39 @@ export class FeedListener extends Watcher {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode);
         this.episodes.push(mappedEpisode);
+        this.emit("newContent", { feed: this.title, content: mappedEpisode });
 
-        if (this.deployUrl) {
-          axios
-            .post(this.deployUrl)
-            .catch((err) => console.error("Failed to deploy site.", err));
-        }
+        // if (this.deployUrl) {
+        //   axios
+        //     .post(this.deployUrl)
+        //     .catch((err) => console.error("Failed to deploy site.", err));
+        // }
 
-        setTimeout(() => {
-          this.announceNewItem(mappedEpisode.url);
-        }, this.timeout);
+        // setTimeout(() => {
+        //   this.announceNewItem(mappedEpisode.url);
+        // }, this.timeout);
       });
     });
   }
 
-  private error() {
-    this.on("error", console.error);
-  }
-
-  private announceNewItem(podcastURL) {
-    console.log(`New episode in ${this.title}.\n${podcastURL}`);
-    this.channel
-      .send({
-        content: `It's podcast release day for ${this.title}!\n${podcastURL}`,
-      })
-      .then(() => {
-        console.log(
-          `Discord successfully notified of new podcast episode in ${this.title}`
-        );
-      })
-      .catch((err) => {
-        console.error(
-          `Error sending message to Discord for update to ${this.title}`
-        );
-        console.error(err);
-      });
-  }
+  // private announceNewItem(podcastURL) {
+  //   console.log(`New episode in ${this.title}.\n${podcastURL}`);
+  //   this.channel
+  //     .send({
+  //       content: `It's podcast release day for ${this.title}!\n${podcastURL}`,
+  //     })
+  //     .then(() => {
+  //       console.log(
+  //         `Discord successfully notified of new podcast episode in ${this.title}`
+  //       );
+  //     })
+  //     .catch((err) => {
+  //       console.error(
+  //         `Error sending message to Discord for update to ${this.title}`
+  //       );
+  //       console.error(err);
+  //     });
+  // }
 
   public fetchRecent() {
     return this.episodes[this.episodes.length - 1];
