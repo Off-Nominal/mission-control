@@ -34,6 +34,7 @@ const MECO_TOKEN = process.env.MECO_BOT_TOKEN_ID;
 const OFN_TOKEN = process.env.OFFNOM_BOT_TOKEN_ID;
 const RPR_TOKEN = process.env.RPR_BOT_TOKEN_ID;
 const HL_TOKEN = process.env.HL_BOT_TOKEN_ID;
+const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
 
 const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
 const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
@@ -84,6 +85,9 @@ const rprBot = new Client({
   intents: simpleIntents,
 });
 const hlBot = new Client({
+  intents: simpleIntents,
+});
+const contentBot = new Client({
   intents: simpleIntents,
 });
 
@@ -153,6 +157,7 @@ ofnBot.login(OFN_TOKEN);
 mecoBot.login(MECO_TOKEN);
 rprBot.login(RPR_TOKEN);
 hlBot.login(HL_TOKEN);
+contentBot.login(CONTENT_TOKEN);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
