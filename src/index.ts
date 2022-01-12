@@ -225,3 +225,6 @@ rprFeedListener.on("newContent", (newContent) => {
 hlFeedListener.on("newContent", (newContent) => {
   contentBotHandlers.handleNewContent(newContent, contentBot);
 });
+hhFeedListener.on("newContent", (newContent) => {
+  eventBotHandlers.handleNewContent(newContent, eventBot);
+});

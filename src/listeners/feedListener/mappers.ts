@@ -8,6 +8,7 @@ export const youtubeFeedMapper = (feedItem): FeedItem => {
     url: feedItem.link,
     image: feedItem.image.url,
     summary: feedItem["media:group"]["media:description"]["#"],
+    id: feedItem["yt:videoid"]["#"],
   };
 };
 

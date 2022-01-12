@@ -13,6 +13,7 @@ export type FeedItem = {
   image: string;
   description?: string;
   summary: string;
+  id?: string;
 };
 
 export type FeedListenerOptions = {
