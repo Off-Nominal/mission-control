@@ -18,6 +18,15 @@ export default async function handleNewContent(
   try {
     const response = await fetchYouTubeVideo(youtubeVideoId);
     video = response[0];
+
+    // do nothing if this video is not a livestream or if the livestream has ended
+    if (
+      !video.liveStreamingDetails ||
+      video.liveStreamingDetails.actualEndTime
+    ) {
+      return;
+    }
+
     await createDiscordEvent(video, client);
   } catch (err) {
     console.error(err);
