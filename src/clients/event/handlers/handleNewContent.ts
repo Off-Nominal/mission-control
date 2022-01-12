@@ -1,3 +1,4 @@
+import { add } from "date-fns";
 import { Client } from "discord.js";
 import { FeedItem } from "../../../listeners/feedListener/feedListener";
 import fetchGuild from "../../actions/fetchGuild";
@@ -26,11 +27,18 @@ export default async function handleNewContent(
     return;
   }
 
+  // Find the new Discord Event start time
+  // If the stream has started, sets it for 30 seconds from now
+  // Otherwise uses scheduled time from YouTube.
+  const startTime = video.liveStreamingDetails.actualStartTime
+    ? add(new Date(), { seconds: 30 })
+    : video.liveStreamingDetails.scheduledStartTime;
+
   const guild = fetchGuild(client);
   const eventManager = guild.scheduledEvents;
   const event = await eventManager.create({
     name: video.snippet.title,
-    scheduledStartTime: video.liveStreamingDetails.scheduledStartTime,
+    scheduledStartTime: startTime,
     privacyLevel: "GUILD_ONLY",
     entityType: "EXTERNAL",
     description: video.snipper.description,
