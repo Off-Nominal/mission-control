@@ -7,5 +7,14 @@
       { "name": "title", "weight": 2 },
       { "name": "description", "weight": 3 }
     ]
+  },
+  "youtube": {
+    "distance": 350,
+    "threshold": 0.7,
+    "includeScore": true,
+    "keys": [
+      { "name": "title", "weight": 2 },
+      { "name": "summary", "weight": 3 }
+    ]
   }
 }

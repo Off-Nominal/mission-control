@@ -1,5 +1,15 @@
-import { FeedItem } from "./feedListener";
 import { stripHtml } from "string-strip-html";
+import { FeedItem } from "./feedListener";
+
+export const youtubeFeedMapper = (feedItem): FeedItem => {
+  return {
+    title: feedItem.title,
+    date: new Date(feedItem.date),
+    url: feedItem.link,
+    image: feedItem.image.url,
+    summary: feedItem["media:group"]["media:description"]["#"],
+  };
+};
 
 export const simpleCastFeedMapper = (feedItem): FeedItem => {
   const description = stripHtml(feedItem.description).result;
@@ -15,3 +25,10 @@ export const simpleCastFeedMapper = (feedItem): FeedItem => {
       description.slice(0, 99).concat("..."),
   };
 };
+
+const mappers = {
+  simpleCastFeedMapper,
+  youtubeFeedMapper,
+};
+
+export default mappers;

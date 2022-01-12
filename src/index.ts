@@ -7,10 +7,13 @@ import mainBotHandlers from "./clients/main/handlers";
 import contentBotHandlers from "./clients/content/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
-import { simpleCastFeedMapper } from "./listeners/feedListener/simpleCastFeedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
+import {
+  youtubeFeedMapper,
+  simpleCastFeedMapper,
+} from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
 
 const searchOptions = require("../config/searchOptions.json");
@@ -37,8 +40,8 @@ const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
 const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
 const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
 const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
-const HH_SEARCH_OPTIONS = searchOptions.hh || searchOptions.default;
-const YT_SEARCH_OPTIONS = searchOptions.yt || searchOptions.default;
+const HH_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
+const YT_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
 
 /***********************************
  *  Bot Setup
@@ -108,11 +111,11 @@ const hlFeedListener = new FeedListener(HLFEED, {
   searchOptions: HL_SEARCH_OPTIONS,
 });
 const hhFeedListener = new FeedListener(HHFEED, {
-  processor: simpleCastFeedMapper,
+  processor: youtubeFeedMapper,
   searchOptions: HH_SEARCH_OPTIONS,
 });
 const ytFeedListener = new FeedListener(OFN_YT_FEED, {
-  processor: simpleCastFeedMapper,
+  processor: youtubeFeedMapper,
   searchOptions: YT_SEARCH_OPTIONS,
 });
 
@@ -136,6 +139,8 @@ mecoFeedListener.initialize();
 ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
+hhFeedListener.initialize();
+ytFeedListener.initialize();
 
 starshipChecker.initialize();
 

@@ -9,9 +9,9 @@ export type FeedItem = {
   title: string;
   date: Date;
   url: string;
-  audioUrl: string;
+  audioUrl?: string;
   image: string;
-  description: string;
+  description?: string;
   summary: string;
 };
 
