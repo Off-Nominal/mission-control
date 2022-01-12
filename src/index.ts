@@ -5,6 +5,7 @@ import { Client, Intents } from "discord.js";
 import bcBotHandlers from "./clients/bookclub/handlers";
 import mainBotHandlers from "./clients/main/handlers";
 import contentBotHandlers from "./clients/content/handlers";
+import eventBotHandlers from "./clients/event/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { SiteListener } from "./listeners/siteListener";
@@ -15,6 +16,7 @@ import {
   simpleCastFeedMapper,
 } from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
+import { EventManager } from "./utilities/EventManager";
 
 const searchOptions = require("../config/searchOptions.json");
 
@@ -34,6 +36,7 @@ const HHFEED = process.env.HHFEED;
 const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
 const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
 const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
+const EVENT_TOKEN = process.env.EVENT_BOT_TOKEN_ID;
 
 const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
 const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
@@ -72,6 +75,9 @@ const bcBot = new Client({
   intents: simpleIntents,
 });
 const contentBot = new Client({
+  intents: simpleIntents,
+});
+const eventBot = new Client({
   intents: simpleIntents,
 });
 
@@ -125,6 +131,7 @@ const ytFeedListener = new FeedListener(OFN_YT_FEED, {
 
 const reportGenerator = new ReportGenerator();
 const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
+const eventManager = new EventManager();
 
 /***********************************
  *  ASYNC LOGINS/INITS
@@ -133,6 +140,7 @@ const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
 utilityBot.login(UTILITY_TOKEN);
 bcBot.login(BC_TOKEN);
 contentBot.login(CONTENT_TOKEN);
+eventBot.login(EVENT_TOKEN);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
@@ -143,6 +151,7 @@ hhFeedListener.initialize();
 ytFeedListener.initialize();
 
 starshipChecker.initialize();
+eventManager.initialize();
 
 /***********************************
  *  Utility Bot Event Handlers
@@ -174,6 +183,29 @@ bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
 
 /***********************************
+ *  Content Bot Event Handlers
+ ************************************/
+
+const feeds = {
+  wm: wmFeedListener,
+  meco: mecoFeedListener,
+  ofn: ofnFeedListener,
+  rpr: rprFeedListener,
+  hl: hlFeedListener,
+};
+contentBot.once("ready", contentBotHandlers.handleReady);
+contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
+contentBot.on("interactionCreate", (interaction) =>
+  contentBotHandlers.handleInteractionCreate(interaction, feeds)
+);
+
+/***********************************
+ *  Event Bot Event Handlers
+ ************************************/
+
+eventBot.once("ready", eventBotHandlers.handleReady);
+
+/***********************************
  *  Feed Listeners Event Handlers
  ************************************/
 
@@ -193,20 +225,3 @@ rprFeedListener.on("newContent", (newContent) => {
 hlFeedListener.on("newContent", (newContent) => {
   contentBotHandlers.handleNewContent(newContent, contentBot);
 });
-
-/***********************************
- *  Podcast Bot Event Handlers
- ************************************/
-
-const feeds = {
-  wm: wmFeedListener,
-  meco: mecoFeedListener,
-  ofn: ofnFeedListener,
-  rpr: rprFeedListener,
-  hl: hlFeedListener,
-};
-contentBot.once("ready", contentBotHandlers.handleReady);
-contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
-contentBot.on("interactionCreate", (interaction) =>
-  contentBotHandlers.handleInteractionCreate(interaction, feeds)
-);
