@@ -7,7 +7,7 @@ import mainBotHandlers from "./clients/main/handlers";
 import contentBotHandlers from "./clients/content/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
-import { feedMapper } from "./listeners/feedListener/feedMapper";
+import { simpleCastFeedMapper } from "./listeners/feedListener/simpleCastFeedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
@@ -25,6 +25,8 @@ const MECOFEED = process.env.MECOFEED;
 const OFNFEED = process.env.OFNFEED;
 const RPRFEED = process.env.RPRFEED;
 const HLFEED = process.env.HLFEED;
+const OFN_YT_FEED = process.env.OFN_YT_FEED;
+const HHFEED = process.env.HHFEED;
 
 const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
 const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
@@ -35,6 +37,8 @@ const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
 const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
 const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
 const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
+const HH_SEARCH_OPTIONS = searchOptions.hh || searchOptions.default;
+const YT_SEARCH_OPTIONS = searchOptions.yt || searchOptions.default;
 
 /***********************************
  *  Bot Setup
@@ -84,24 +88,32 @@ const starshipChecker = new SiteListener(
  ************************************/
 
 const wmFeedListener = new FeedListener(WMFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: WM_SEARCH_OPTIONS,
 });
 const mecoFeedListener = new FeedListener(MECOFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: MECO_SEARCH_OPTIONS,
 });
 const ofnFeedListener = new FeedListener(OFNFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: OFN_SEARCH_OPTIONS,
 });
 const rprFeedListener = new FeedListener(RPRFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: RPR_SEARCH_OPTIONS,
 });
 const hlFeedListener = new FeedListener(HLFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: HL_SEARCH_OPTIONS,
+});
+const hhFeedListener = new FeedListener(HHFEED, {
+  processor: simpleCastFeedMapper,
+  searchOptions: HH_SEARCH_OPTIONS,
+});
+const ytFeedListener = new FeedListener(OFN_YT_FEED, {
+  processor: simpleCastFeedMapper,
+  searchOptions: YT_SEARCH_OPTIONS,
 });
 
 /***********************************

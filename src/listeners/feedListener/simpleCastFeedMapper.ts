@@ -1,7 +1,7 @@
 import { FeedItem } from "./feedListener";
 import { stripHtml } from "string-strip-html";
 
-export const feedMapper = (feedItem): FeedItem => {
+export const simpleCastFeedMapper = (feedItem): FeedItem => {
   const description = stripHtml(feedItem.description).result;
   return {
     title: feedItem.title,
