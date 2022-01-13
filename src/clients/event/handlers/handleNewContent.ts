@@ -28,7 +28,7 @@ export default async function handleNewContent(
     const event = await createDiscordEvent(video, client);
     const embed = createEventAnnouncementEmbed(event, offnomThumb);
     const channel = await fetchTextChannel(client, ANNOUNCEMENTS_CHANNEL_ID);
-    channel.send({ embeds: [embed] });
+    await channel.send({ embeds: [embed] });
   } catch (err) {
     console.error(err);
   }
