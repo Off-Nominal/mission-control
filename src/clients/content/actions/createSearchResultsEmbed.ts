@@ -16,15 +16,13 @@ export const createSearchResultsEmbed = (
     .setDescription(`Top three results for your search \`${searchTerm}\``)
     .addFields(
       results.map((result) => {
+        const { description, summary, title, url, date } = result.item;
+        const desc =
+          description?.slice(0, 160) + "..." || summary.split("\n")[0];
+
         return {
-          name: result.item.title,
-          value:
-            result.item.description.slice(0, 160) +
-            "..." +
-            `\n[[Link]](${result.item.url}) - ${format(
-              result.item.date,
-              "PPP"
-            )}`,
+          name: title,
+          value: desc + `\n[[Link]](${url}) - ${format(date, "PPP")}`,
         };
       })
     );

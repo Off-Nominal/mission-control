@@ -192,6 +192,7 @@ const feeds = {
   ofn: ofnFeedListener,
   rpr: rprFeedListener,
   hl: hlFeedListener,
+  hh: hhFeedListener,
 };
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
