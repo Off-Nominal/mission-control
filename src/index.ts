@@ -195,6 +195,7 @@ const feeds = {
   rpr: rprFeedListener,
   hl: hlFeedListener,
   hh: hhFeedListener,
+  yt: ytFeedListener,
 };
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
