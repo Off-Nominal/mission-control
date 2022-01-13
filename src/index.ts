@@ -5,12 +5,17 @@ import { Client, Intents } from "discord.js";
 import bcBotHandlers from "./clients/bookclub/handlers";
 import mainBotHandlers from "./clients/main/handlers";
 import contentBotHandlers from "./clients/content/handlers";
+import eventBotHandlers from "./clients/event/handlers";
+import devHandlers from "./clients/dev/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
-import { feedMapper } from "./listeners/feedListener/feedMapper";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import { ChannelBabysitter } from "./utilities/channelBabysitter";
+import {
+  youtubeFeedMapper,
+  simpleCastFeedMapper,
+} from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
 
 const searchOptions = require("../config/searchOptions.json");
@@ -25,16 +30,21 @@ const MECOFEED = process.env.MECOFEED;
 const OFNFEED = process.env.OFNFEED;
 const RPRFEED = process.env.RPRFEED;
 const HLFEED = process.env.HLFEED;
+const OFN_YT_FEED = process.env.OFN_YT_FEED;
+const HHFEED = process.env.HHFEED;
 
 const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
 const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
 const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
+const EVENT_TOKEN = process.env.EVENT_BOT_TOKEN_ID;
 
 const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
 const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
 const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
 const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
 const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
+const HH_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
+const YT_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
 
 /***********************************
  *  Bot Setup
@@ -67,6 +77,9 @@ const bcBot = new Client({
 const contentBot = new Client({
   intents: simpleIntents,
 });
+const eventBot = new Client({
+  intents: simpleIntents,
+});
 
 /***********************************
  *  Site Listener Setup
@@ -84,24 +97,32 @@ const starshipChecker = new SiteListener(
  ************************************/
 
 const wmFeedListener = new FeedListener(WMFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: WM_SEARCH_OPTIONS,
 });
 const mecoFeedListener = new FeedListener(MECOFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: MECO_SEARCH_OPTIONS,
 });
 const ofnFeedListener = new FeedListener(OFNFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: OFN_SEARCH_OPTIONS,
 });
 const rprFeedListener = new FeedListener(RPRFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: RPR_SEARCH_OPTIONS,
 });
 const hlFeedListener = new FeedListener(HLFEED, {
-  processor: feedMapper,
+  processor: simpleCastFeedMapper,
   searchOptions: HL_SEARCH_OPTIONS,
+});
+const hhFeedListener = new FeedListener(HHFEED, {
+  processor: youtubeFeedMapper,
+  searchOptions: HH_SEARCH_OPTIONS,
+});
+const ytFeedListener = new FeedListener(OFN_YT_FEED, {
+  processor: youtubeFeedMapper,
+  searchOptions: YT_SEARCH_OPTIONS,
 });
 
 /***********************************
@@ -118,12 +139,15 @@ const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
 utilityBot.login(UTILITY_TOKEN);
 bcBot.login(BC_TOKEN);
 contentBot.login(CONTENT_TOKEN);
+eventBot.login(EVENT_TOKEN);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
 ofnFeedListener.initialize();
 rprFeedListener.initialize();
 hlFeedListener.initialize();
+hhFeedListener.initialize();
+ytFeedListener.initialize();
 
 starshipChecker.initialize();
 
@@ -147,6 +171,10 @@ utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 
+if (process.env.NODE_ENV === "dev") {
+  utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
+}
+
 /***********************************
  *  Book Club Bot Event Handlers
  ************************************/
@@ -155,6 +183,30 @@ bcBot.once("ready", bcBotHandlers.handleReady);
 bcBot.on("messageCreate", bcBotHandlers.handleMessageCreate);
 bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
 bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
+
+/***********************************
+ *  Content Bot Event Handlers
+ ************************************/
+
+const feeds = {
+  wm: wmFeedListener,
+  meco: mecoFeedListener,
+  ofn: ofnFeedListener,
+  rpr: rprFeedListener,
+  hl: hlFeedListener,
+  hh: hhFeedListener,
+};
+contentBot.once("ready", contentBotHandlers.handleReady);
+contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
+contentBot.on("interactionCreate", (interaction) =>
+  contentBotHandlers.handleInteractionCreate(interaction, feeds)
+);
+
+/***********************************
+ *  Event Bot Event Handlers
+ ************************************/
+
+eventBot.once("ready", eventBotHandlers.handleReady);
 
 /***********************************
  *  Feed Listeners Event Handlers
@@ -176,20 +228,21 @@ rprFeedListener.on("newContent", (newContent) => {
 hlFeedListener.on("newContent", (newContent) => {
   contentBotHandlers.handleNewContent(newContent, contentBot);
 });
+hhFeedListener.on("newContent", (newContent) => {
+  eventBotHandlers.handleNewContent(newContent, eventBot);
+});
 
 /***********************************
- *  Podcast Bot Event Handlers
+ *  Dev Test Event Handlers
+ *  Only runs in Dev environment
+ *  to enable simulated events
  ************************************/
 
-const feeds = {
-  wm: wmFeedListener,
-  meco: mecoFeedListener,
-  ofn: ofnFeedListener,
-  rpr: rprFeedListener,
-  hl: hlFeedListener,
-};
-contentBot.once("ready", contentBotHandlers.handleReady);
-contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
-contentBot.on("interactionCreate", (interaction) =>
-  contentBotHandlers.handleInteractionCreate(interaction, feeds)
-);
+if (process.env.NODE_ENV === "dev") {
+  utilityBot.on("dev_new entries", (show) => {
+    const feed = feeds[show] as FeedListener;
+    const content = feed.fetchRecent();
+    const title = feed.title;
+    feed.emit("newContent", { feed: title, content });
+  });
+}

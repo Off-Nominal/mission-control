@@ -1,15 +1,13 @@
 import { PermissionResolvable, ThreadChannel } from "discord.js";
+import fetchGuild from "../../actions/fetchGuild";
 import joinThread from "../../actions/joinThread";
 
 const MODS_ROLE_ID = process.env.MODS_ROLE_ID as PermissionResolvable;
-const GUILD_ID = process.env.GUILD_ID;
 
 export default async function handleThreadCreate(thread: ThreadChannel) {
   await joinThread(thread);
 
-  const guild = thread.client.guilds.cache.find(
-    (guild) => guild.id === GUILD_ID
-  );
+  const guild = fetchGuild(thread.client);
 
   // Auto-adds moderators to all threads
   const mods = guild.members.cache.filter((member) =>

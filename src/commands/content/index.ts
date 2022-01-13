@@ -9,6 +9,7 @@ const allShows: Array<[string, string]> = [
   ["Off-Nominal Podcast", "ofn"],
   ["Red Planet Review", "rpr"],
   ["MECO Headlines", "hl"],
+  ["Off-Nominal Happy Hour", "hh"],
 ];
 
 const mainShows: Array<[string, string]> = [

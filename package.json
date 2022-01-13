@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ./dist/index.js -e ts --exec \"npm run compile\"",
+    "dev": "NODE_ENV=dev nodemon ./dist/index.js -e ts --exec \"npm run compile\"",
     "build": "tsc && node ./dist/commands/register.js",
     "compile": "tsc && node ./dist/index.js",
     "start": "node ./dist/index.js",
@@ -33,6 +33,7 @@
     "dotenv": "^8.2.0",
     "feed-watcher": "^0.2.1",
     "fuse.js": "^6.4.6",
+    "googleapis": "^92.0.0",
     "mars-date-utils": "^1.1.1",
     "string-strip-html": "^8.2.9",
     "uuid": "^8.3.2"
