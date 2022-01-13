@@ -1,5 +1,6 @@
-import { Client, TextChannel } from "discord.js";
+import { Client } from "discord.js";
 import { FeedItem } from "../../../listeners/feedListener/feedListener";
+import fetchTextChannel from "../../actions/fetchChannel";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 
 const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
@@ -15,9 +16,7 @@ export default async function handleNewContent(
 ) {
   const { feed, content } = newContent;
 
-  const channel = (await client.channels.fetch(
-    CONTENTCHANNELID
-  )) as TextChannel;
+  const channel = await fetchTextChannel(client, CONTENTCHANNELID);
 
   function announceNewItem() {
     channel

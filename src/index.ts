@@ -231,6 +231,9 @@ hlFeedListener.on("newContent", (newContent) => {
 hhFeedListener.on("newContent", (newContent) => {
   eventBotHandlers.handleNewContent(newContent, eventBot);
 });
+ytFeedListener.on("newContent", (newContent) => {
+  eventBotHandlers.handleNewContent(newContent, eventBot);
+});
 
 /***********************************
  *  Dev Test Event Handlers
