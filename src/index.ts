@@ -17,7 +17,6 @@ import {
   simpleCastFeedMapper,
 } from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
-import { EventManager } from "./utilities/EventManager";
 
 const searchOptions = require("../config/searchOptions.json");
 
@@ -132,7 +131,6 @@ const ytFeedListener = new FeedListener(OFN_YT_FEED, {
 
 const reportGenerator = new ReportGenerator();
 const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
-const eventManager = new EventManager();
 
 /***********************************
  *  ASYNC LOGINS/INITS
@@ -152,7 +150,6 @@ hhFeedListener.initialize();
 ytFeedListener.initialize();
 
 starshipChecker.initialize();
-eventManager.initialize();
 
 /***********************************
  *  Utility Bot Event Handlers
@@ -174,7 +171,7 @@ utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 
-if (process.env.NODE_ENV !== "dev") {
+if (process.env.NODE_ENV === "dev") {
   utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
 }
 
@@ -241,7 +238,7 @@ hhFeedListener.on("newContent", (newContent) => {
  *  to enable simulated events
  ************************************/
 
-if (process.env.NODE_ENV !== "dev") {
+if (process.env.NODE_ENV === "dev") {
   utilityBot.on("dev_new entries", (show) => {
     const feed = feeds[show] as FeedListener;
     const content = feed.fetchRecent();

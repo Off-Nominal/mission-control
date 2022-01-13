@@ -7,7 +7,7 @@ export default async function fetchYouTubeVideo(id: string) {
   });
 
   const results = await youtube.videos.list({
-    part: ["snippet,liveStreamingDetails,status"],
+    part: ["snippet,liveStreamingDetails"],
     id: [id],
   });
   return await results.data.items;
