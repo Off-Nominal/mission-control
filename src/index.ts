@@ -6,6 +6,7 @@ import bcBotHandlers from "./clients/bookclub/handlers";
 import mainBotHandlers from "./clients/main/handlers";
 import contentBotHandlers from "./clients/content/handlers";
 import eventBotHandlers from "./clients/event/handlers";
+import devHandlers from "./clients/dev/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { SiteListener } from "./listeners/siteListener";
@@ -173,6 +174,10 @@ utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 
+if (process.env.NODE_ENV !== "dev") {
+  utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
+}
+
 /***********************************
  *  Book Club Bot Event Handlers
  ************************************/
@@ -229,3 +234,18 @@ hlFeedListener.on("newContent", (newContent) => {
 hhFeedListener.on("newContent", (newContent) => {
   eventBotHandlers.handleNewContent(newContent, eventBot);
 });
+
+/***********************************
+ *  Dev Test Event Handlers
+ *  Only runs in Dev environment
+ *  to enable simulated events
+ ************************************/
+
+if (process.env.NODE_ENV !== "dev") {
+  utilityBot.on("dev_new entries", (show) => {
+    const feed = feeds[show] as FeedListener;
+    const content = feed.fetchRecent();
+    const title = feed.title;
+    feed.emit("newContent", { feed: title, content });
+  });
+}

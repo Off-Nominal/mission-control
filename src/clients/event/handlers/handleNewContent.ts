@@ -1,4 +1,5 @@
 import { Client } from "discord.js";
+import { youtube_v3 } from "googleapis";
 import { FeedItem } from "../../../listeners/feedListener/feedListener";
 import createDiscordEvent from "../actions/createDiscordEvent";
 
@@ -13,7 +14,7 @@ export default async function handleNewContent(
   timeout: number = 0
 ) {
   const youtubeVideoId = newContent.content.id;
-  let video;
+  let video: youtube_v3.Schema$Video;
 
   try {
     const response = await fetchYouTubeVideo(youtubeVideoId);
