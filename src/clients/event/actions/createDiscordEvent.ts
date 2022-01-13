@@ -15,7 +15,8 @@ export default async function createDiscordEvent(
 
   const guild = fetchGuild(client);
   const eventManager = guild.scheduledEvents;
-  const event = await eventManager.create({
+
+  return await eventManager.create({
     name: video.snippet.title,
     scheduledStartTime: startTime,
     scheduledEndTime: add(startTime, { minutes: 60 }),

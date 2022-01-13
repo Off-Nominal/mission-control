@@ -195,6 +195,7 @@ const feeds = {
   rpr: rprFeedListener,
   hl: hlFeedListener,
   hh: hhFeedListener,
+  yt: ytFeedListener,
 };
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
@@ -229,6 +230,9 @@ hlFeedListener.on("newContent", (newContent) => {
   contentBotHandlers.handleNewContent(newContent, contentBot);
 });
 hhFeedListener.on("newContent", (newContent) => {
+  eventBotHandlers.handleNewContent(newContent, eventBot);
+});
+ytFeedListener.on("newContent", (newContent) => {
   eventBotHandlers.handleNewContent(newContent, eventBot);
 });
 
