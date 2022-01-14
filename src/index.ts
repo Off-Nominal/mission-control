@@ -208,6 +208,11 @@ contentBot.on("interactionCreate", (interaction) =>
  ************************************/
 
 eventBot.once("ready", eventBotHandlers.handleReady);
+eventBot.on(
+  "guildScheduledEventUpdate",
+  eventBotHandlers.handleGuildScheduledEventUpdate
+);
+// eventBot.on("eventEnded", contentBot.handleEventEnded)
 
 /***********************************
  *  Feed Listeners Event Handlers
