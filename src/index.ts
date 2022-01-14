@@ -46,6 +46,26 @@ const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
 const HH_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
 const YT_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
 
+export enum Feed {
+  WEMARTIANS = "wm",
+  MAIN_ENGINE_CUT_OFF = "meco",
+  OFF_NOMINAL_PODCAST = "ofn",
+  RED_PLANET_REVIEW = "rpr",
+  MECO_HEADLINES = "hl",
+  OFF_NOMINAL_YOUTUBE = "yt",
+  HAPPY_HOUR = "hh",
+}
+
+export type FeedList = {
+  [Feed.WEMARTIANS]: FeedListener;
+  [Feed.MAIN_ENGINE_CUT_OFF]: FeedListener;
+  [Feed.OFF_NOMINAL_PODCAST]: FeedListener;
+  [Feed.RED_PLANET_REVIEW]: FeedListener;
+  [Feed.HAPPY_HOUR]: FeedListener;
+  [Feed.MECO_HEADLINES]: FeedListener;
+  [Feed.OFF_NOMINAL_YOUTUBE]: FeedListener;
+};
+
 /***********************************
  *  Bot Setup
  ************************************/
@@ -188,7 +208,7 @@ bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
  *  Content Bot Event Handlers
  ************************************/
 
-const feeds = {
+const feeds: FeedList = {
   wm: wmFeedListener,
   meco: mecoFeedListener,
   ofn: ofnFeedListener,
@@ -212,7 +232,9 @@ eventBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
-eventBot.on("eventEnded", contentBotHandlers.handleEventEnded);
+eventBot.on("eventEnded", (event) =>
+  contentBotHandlers.handleEventEnded(event, feeds)
+);
 
 /***********************************
  *  Feed Listeners Event Handlers
