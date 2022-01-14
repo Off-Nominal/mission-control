@@ -42,7 +42,9 @@ export class FeedListener extends Watcher {
       const entries = await this.start(); // fetch data from RSS
       this.title = entries[0].meta.title; // extract Feed program title
       this.albumArt = entries[0].meta.image.url;
-      this.episodes = entries.map(this.processor).reverse(); // map entries from RSS feed to episode format using processor
+      this.episodes = entries
+        .map((entry) => this.processor(entry, this.title))
+        .reverse(); // map entries from RSS feed to episode format using processor
 
       console.log(
         `${this.title} feed loaded with ${this.episodes.length} items.`
@@ -62,7 +64,7 @@ export class FeedListener extends Watcher {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode, this.title);
         this.episodes.push(mappedEpisode);
-        this.emit("newContent", { feed: this.title, content: mappedEpisode });
+        this.emit("newContent", mappedEpisode);
       });
     });
   }

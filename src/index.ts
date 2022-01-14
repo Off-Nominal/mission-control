@@ -72,6 +72,7 @@ export type FeedList = {
 
 const simpleIntents = new Intents();
 const utilityIntents = new Intents();
+const eventIntents = new Intents();
 
 simpleIntents.add(
   Intents.FLAGS.GUILDS,
@@ -80,16 +81,15 @@ simpleIntents.add(
 );
 
 utilityIntents.add(
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.GUILDS,
   Intents.FLAGS.GUILD_MEMBERS,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-  Intents.FLAGS.DIRECT_MESSAGES
+  Intents.FLAGS.GUILD_MESSAGE_REACTIONS
 );
+
+eventIntents.add(Intents.FLAGS.GUILD_SCHEDULED_EVENTS);
 
 const utilityBot = new Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
-  intents: utilityIntents,
+  intents: [simpleIntents, utilityIntents],
 });
 const bcBot = new Client({
   intents: simpleIntents,
@@ -98,7 +98,7 @@ const contentBot = new Client({
   intents: simpleIntents,
 });
 const eventBot = new Client({
-  intents: simpleIntents,
+  intents: [simpleIntents, eventIntents],
 });
 
 /***********************************
@@ -233,34 +233,34 @@ eventBot.on(
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
 eventBot.on("eventEnded", (event) =>
-  contentBotHandlers.handleEventEnded(event, feeds)
+  contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
 
 /***********************************
  *  Feed Listeners Event Handlers
  ************************************/
 
-wmFeedListener.on("newContent", (newContent) => {
+wmFeedListener.on("newContent", (content) => {
   deployWeMartians();
-  contentBotHandlers.handleNewContent(newContent, contentBot, 600);
+  contentBotHandlers.handleNewContent(content, contentBot, 600);
 });
-mecoFeedListener.on("newContent", (newContent) => {
-  contentBotHandlers.handleNewContent(newContent, contentBot);
+mecoFeedListener.on("newContent", (content) => {
+  contentBotHandlers.handleNewContent(content, contentBot);
 });
-ofnFeedListener.on("newContent", (newContent) => {
-  contentBotHandlers.handleNewContent(newContent, contentBot);
+ofnFeedListener.on("newContent", (content) => {
+  contentBotHandlers.handleNewContent(content, contentBot);
 });
-rprFeedListener.on("newContent", (newContent) => {
-  contentBotHandlers.handleNewContent(newContent, contentBot);
+rprFeedListener.on("newContent", (content) => {
+  contentBotHandlers.handleNewContent(content, contentBot);
 });
-hlFeedListener.on("newContent", (newContent) => {
-  contentBotHandlers.handleNewContent(newContent, contentBot);
+hlFeedListener.on("newContent", (content) => {
+  contentBotHandlers.handleNewContent(content, contentBot);
 });
-hhFeedListener.on("newContent", (newContent) => {
-  eventBotHandlers.handleNewContent(newContent, eventBot);
+hhFeedListener.on("newContent", (content) => {
+  eventBotHandlers.handleNewContent(content, eventBot);
 });
-ytFeedListener.on("newContent", (newContent) => {
-  eventBotHandlers.handleNewContent(newContent, eventBot);
+ytFeedListener.on("newContent", (content) => {
+  eventBotHandlers.handleNewContent(content, eventBot);
 });
 
 /***********************************
@@ -272,8 +272,6 @@ ytFeedListener.on("newContent", (newContent) => {
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("dev_new entries", (show) => {
     const feed = feeds[show] as FeedListener;
-    const content = feed.fetchRecent();
-    const title = feed.title;
-    feed.emit("newContent", { feed: title, content });
+    feed.emit("newContent", feed.fetchRecent());
   });
 }

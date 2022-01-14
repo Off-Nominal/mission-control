@@ -1,4 +1,4 @@
-import { GuildScheduledEvent } from "discord.js";
+import { Client, GuildScheduledEvent } from "discord.js";
 import { Feed, FeedList } from "../../..";
 import fetchTextChannel from "../../actions/fetchChannel";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
@@ -7,12 +7,15 @@ const contentChannelId = process.env.CONTENTCHANNELID;
 
 export default async function handleEventEnded(
   event: GuildScheduledEvent,
+  client: Client,
   feeds: FeedList
 ) {
   const offNomEpisode = feeds[Feed.OFF_NOMINAL_YOUTUBE].getEpisodeByUrl(
-    event.url
+    event.entityMetadata.location
   );
-  const happyHourEpisode = feeds[Feed.HAPPY_HOUR].getEpisodeByUrl(event.url);
+  const happyHourEpisode = feeds[Feed.HAPPY_HOUR].getEpisodeByUrl(
+    event.entityMetadata.location
+  );
 
   const episode = offNomEpisode || happyHourEpisode;
 
@@ -22,7 +25,7 @@ export default async function handleEventEnded(
 
   const embed = createUniqueResultEmbed(episode);
   try {
-    const channel = await fetchTextChannel(event.client, contentChannelId);
+    const channel = await fetchTextChannel(client, contentChannelId);
     await channel.send({ embeds: [embed] });
   } catch (err) {
     console.error(err);

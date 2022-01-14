@@ -5,7 +5,6 @@ export default function handleGuildScheduledEventUpdate(
   newEvent: GuildScheduledEvent
 ) {
   const newStatus = newEvent.status;
-
   if (newStatus === "ACTIVE") {
     // event has started
   }
