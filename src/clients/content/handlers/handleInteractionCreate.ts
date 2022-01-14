@@ -45,18 +45,14 @@ export default function handleInteractionCreate(
 
   if (subCommand === "recent") {
     const episode = feedListener.fetchRecent();
-    returnMessage.embeds.push(
-      createUniqueResultEmbed(feedListener.title, episode)
-    );
+    returnMessage.embeds.push(createUniqueResultEmbed(episode));
   }
 
   if (subCommand === "episode-number") {
     const epNum = options.getInteger("episode-number");
     const episode = feedListener.getEpisodeByNumber(epNum);
     if (episode) {
-      returnMessage.embeds.push(
-        createUniqueResultEmbed(feedListener.title, episode)
-      );
+      returnMessage.embeds.push(createUniqueResultEmbed(episode));
     } else {
       returnMessage.content = "No episode with that number.";
     }

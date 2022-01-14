@@ -10,14 +10,11 @@ const offnomThumb =
   "https://res.cloudinary.com/dj5enq03a/image/upload/v1642095232/Discord%20Assets/offnominal_2021-01_w4buun.png";
 
 export default async function handleNewContent(
-  newContent: {
-    feed: string;
-    content: FeedItem;
-  },
+  content: FeedItem,
   client: Client
 ) {
   try {
-    const [video] = await fetchYouTubeVideo(newContent.content.id);
+    const [video] = await fetchYouTubeVideo(content.id);
     const { liveStreamingDetails } = video;
 
     // do nothing if this video is not a livestream or if the livestream has ended
