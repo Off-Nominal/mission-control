@@ -3,9 +3,10 @@ const FuseJS = require("fuse.js");
 const Watcher = require("feed-watcher");
 
 const FEED_CHECK_TIME_IN_SECONDS = 60;
-const defaultProcessor = (item) => item;
+const defaultProcessor = (item, showTitle: string) => item;
 
 export type FeedItem = {
+  show: string;
   title: string;
   date: Date;
   url: string;
@@ -17,7 +18,7 @@ export type FeedItem = {
 };
 
 export type FeedListenerOptions = {
-  processor?: (item: any) => FeedItem;
+  processor?: (item: any, showTitle: string) => FeedItem;
   rssInterval?: number;
   searchOptions?: Fuse.IFuseOptions<FeedItem>;
 };
@@ -28,7 +29,7 @@ export class FeedListener extends Watcher {
   albumArt: string;
   fuse: Fuse<FeedItem>;
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
-  processor: (item: any) => FeedItem;
+  processor: (item: any, showTitle: string) => FeedItem;
 
   constructor(feed: string, options?: FeedListenerOptions) {
     super(feed, options.rssInterval || FEED_CHECK_TIME_IN_SECONDS);
@@ -59,7 +60,7 @@ export class FeedListener extends Watcher {
   private listen() {
     this.on("new entries", (entries) => {
       entries.forEach((episode) => {
-        const mappedEpisode = this.processor(episode);
+        const mappedEpisode = this.processor(episode, this.title);
         this.episodes.push(mappedEpisode);
         this.emit("newContent", { feed: this.title, content: mappedEpisode });
       });

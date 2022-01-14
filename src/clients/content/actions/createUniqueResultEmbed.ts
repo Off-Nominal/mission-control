@@ -2,12 +2,9 @@ import { format } from "date-fns";
 import { MessageEmbed } from "discord.js";
 import { FeedItem } from "../../../listeners/feedListener/feedListener";
 
-export default function createUniqueResultEmbed(
-  title: string,
-  result: FeedItem
-) {
+export default function createUniqueResultEmbed(result: FeedItem) {
   return new MessageEmbed()
-    .setAuthor({ name: title })
+    .setAuthor({ name: result.show })
     .setTitle(result.title)
     .setURL(result.url)
     .setDescription(result.summary)
