@@ -212,7 +212,7 @@ eventBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
-// eventBot.on("eventEnded", contentBot.handleEventEnded)
+eventBot.on("eventEnded", contentBotHandlers.handleEventEnded);
 
 /***********************************
  *  Feed Listeners Event Handlers

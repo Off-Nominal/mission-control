@@ -80,4 +80,8 @@ export class FeedListener extends Watcher {
       return Number(epString) === ep;
     });
   }
+
+  public getEpisodeByUrl(url: string) {
+    return this.episodes.find((episode) => episode.url === url);
+  }
 }
