@@ -19,13 +19,15 @@ const commands = [
         .addIntegerOption((option) =>
           option
             .setName("duration")
-            .setDescription("How long should the event last?")
+            .setDescription("How long should the event last (in minutes)?")
             .setRequired(true)
+            .setMaxValue(180)
+            .setMinValue(30)
         )
         .addStringOption((option) =>
           option
-            .setName("description")
-            .setDescription("Describe the event")
+            .setName("title")
+            .setDescription("Title of the event")
             .setRequired(true)
         )
     ),

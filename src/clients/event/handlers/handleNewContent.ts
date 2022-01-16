@@ -4,6 +4,7 @@ import fetchTextChannel from "../../actions/fetchChannel";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
 import fetchYouTubeVideo from "../actions/fetchYouTubeVideo";
+import generateEventDetailsFromYouTube from "../actions/generateEventDetailsFromYouTube";
 
 const ANNOUNCEMENTS_CHANNEL_ID = process.env.ANNOUNCEMENTSCHANNELID;
 const offnomThumb =
@@ -21,8 +22,8 @@ export default async function handleNewContent(
     if (!liveStreamingDetails || liveStreamingDetails.actualEndTime) {
       return;
     }
-
-    const event = await createDiscordEvent(video, client);
+    const eventDetails = generateEventDetailsFromYouTube(video);
+    const event = await createDiscordEvent(eventDetails, client);
     const embed = createEventAnnouncementEmbed(event, offnomThumb);
     const channel = await fetchTextChannel(client, ANNOUNCEMENTS_CHANNEL_ID);
     await channel.send({ embeds: [embed] });
