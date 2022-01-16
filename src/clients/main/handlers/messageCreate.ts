@@ -19,6 +19,7 @@ export enum AllowedPrefix {
   OLD_HL = "!hl",
   OLD_RPR = "!rpr",
   OLD_PODCASTS = "!podcasts",
+  OLD_TOPIC = "!topic",
 }
 
 export default async function handleMessageCreate(message: Message) {
@@ -85,6 +86,13 @@ export default async function handleMessageCreate(message: Message) {
     case AllowedPrefix.OLD_OFN: {
       message.channel.send(
         "The podcast bots have been replaced by one Content Bot to rule them all. Type `/content` to access the new slash commands and use `/content help` for more info."
+      );
+      break;
+    }
+
+    case AllowedPrefix.OLD_TOPIC: {
+      message.channel.send(
+        "The !topic command has been deprecated. Try the new `/events start` command to use Discord's built in event feature."
       );
       break;
     }
