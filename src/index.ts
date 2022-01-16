@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+import { Client as DbClient } from "pg";
 import { Client, Intents } from "discord.js";
 
 import bcBotHandlers from "./clients/bookclub/handlers";
@@ -16,6 +16,10 @@ import {
   simpleCastFeedMapper,
 } from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
+
+// Database Config
+const db = new DbClient();
+db.connect();
 
 const searchOptions = require("../config/searchOptions.json");
 

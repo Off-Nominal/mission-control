@@ -41,8 +41,11 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
+    "@types/pg": "^8.6.4",
     "nodemon": "^2.0.15",
     "ts-node": "^10.4.0",
+    "db-migrate": "^0.11.13",
+    "db-migrate-pg": "^1.2.2",
     "typescript": "^4.5.4"
   },
   "engines": {
