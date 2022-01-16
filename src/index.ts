@@ -11,7 +11,6 @@ import devHandlers from "./clients/dev/handlers";
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
-import { ChannelBabysitter } from "./utilities/channelBabysitter";
 import {
   youtubeFeedMapper,
   simpleCastFeedMapper,
@@ -23,7 +22,6 @@ const searchOptions = require("../config/searchOptions.json");
 const TEST_CHANNEL = process.env.TESTCHANNEL;
 
 const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
-const LIVECHATCHANNELID = process.env.LIVECHATCHANNELID || TEST_CHANNEL;
 
 const WMFEED = process.env.WMFEED;
 const MECOFEED = process.env.MECOFEED;
@@ -150,7 +148,6 @@ const ytFeedListener = new FeedListener(OFN_YT_FEED, {
  ************************************/
 
 const reportGenerator = new ReportGenerator();
-const channelBabysitter = new ChannelBabysitter(utilityBot, LIVECHATCHANNELID);
 
 /***********************************
  *  ASYNC LOGINS/INITS
@@ -175,17 +172,10 @@ starshipChecker.initialize();
  *  Utility Bot Event Handlers
  ************************************/
 
-utilityBot.once("ready", (client) => {
-  mainBotHandlers.handleReady(client);
-  channelBabysitter.initialize();
-});
+utilityBot.once("ready", mainBotHandlers.handleReady);
 utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
 utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
-utilityBot.on("messageReactionAdd", (messageReact, user) => {
-  mainBotHandlers.handleMessageReactionAdd(messageReact, user, {
-    channelBabysitter,
-  });
-});
+utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
@@ -235,6 +225,7 @@ eventBot.on(
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
+eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
 
 /***********************************
  *  Feed Listeners Event Handlers
