@@ -37,8 +37,7 @@ export default async function handleInteractionCreate(
       );
 
       await interaction.reply({
-        content: "Request receieved! The event will start imminently.",
-        ephemeral: true,
+        content: `Request receieved! Your event "${name}" will start imminently.`,
       });
     } catch (err) {
       await interaction.reply({
