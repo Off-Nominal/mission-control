@@ -18,11 +18,6 @@ const mainShows: Array<[string, string]> = [
   ["Off-Nominal Podcast", "ofn"],
 ];
 
-const showOptions = new SlashCommandStringOption()
-  .setName("show")
-  .setDescription("Choose which show to search")
-  .setRequired(true);
-
 const commands = [
   new SlashCommandBuilder()
     .setName("content")
