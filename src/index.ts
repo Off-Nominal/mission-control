@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+import { Client as DbClient } from "pg";
 import { Client, Intents } from "discord.js";
 
 import bcBotHandlers from "./clients/bookclub/handlers";
@@ -16,6 +16,10 @@ import {
   simpleCastFeedMapper,
 } from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
+
+// Database Config
+const db = new DbClient();
+db.connect();
 
 const searchOptions = require("../config/searchOptions.json");
 
@@ -264,5 +268,14 @@ if (process.env.NODE_ENV === "dev") {
   utilityBot.on("dev_new entries", (show) => {
     const feed = feeds[show] as FeedListener;
     feed.emit("newContent", feed.fetchRecent());
+  });
+  utilityBot.on("dev_dbtest", () => {
+    console.log("dbtest invoked");
+    db.query("SELECT NOW()")
+      .then((res) => console.log(`Time on database is ${res.rows[0].now}`))
+      .catch((err) => {
+        console.error("Could not connect to db");
+        console.error(err);
+      });
   });
 }

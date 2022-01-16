@@ -33,6 +33,13 @@ export default async function handleMessageCreate(message: Message) {
 
   const [prefix] = parseCommands(message);
 
+  // for testing connection to db
+  if (process.env.NODE_ENV === "dev") {
+    if (prefix === "!dbtest") {
+      this.emit("dev_dbtest");
+    }
+  }
+
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;
 
   switch (prefix) {

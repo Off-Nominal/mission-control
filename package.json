@@ -35,13 +35,17 @@
     "fuse.js": "^6.4.6",
     "googleapis": "^92.0.0",
     "mars-date-utils": "^1.1.1",
+    "pg": "^8.7.1",
     "string-strip-html": "^8.2.9",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
+    "@types/pg": "^8.6.4",
     "nodemon": "^2.0.15",
     "ts-node": "^10.4.0",
+    "db-migrate": "^0.11.13",
+    "db-migrate-pg": "^1.2.2",
     "typescript": "^4.5.4"
   },
   "engines": {
