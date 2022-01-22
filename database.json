@@ -5,8 +5,7 @@
     "password": { "ENV": "PGPASSWORD" },
     "host": { "ENV": "PGHOST" },
     "database": { "ENV": "PGDATABASE" },
-    "port": { "ENV": "PGPORT" },
-    "ssl": "true"
+    "port": { "ENV": "PGPORT" }
   },
   "prod": {
     "driver": "pg",

@@ -16,8 +16,12 @@ exports.setup = function (options, seedLink) {
 
 exports.up = function (db) {
   return db.createTable("users", {
-    id: { type: "int", primaryKey: true },
-    discord_id: "string",
+    id: { type: "int", primaryKey: true, autoIncrement: true, notNull: true },
+    discord_id: {
+      type: "string",
+      notNull: true,
+      unique: true,
+    },
   });
 };
 
