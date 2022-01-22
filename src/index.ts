@@ -229,7 +229,9 @@ eventBot.on(
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
-eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
+eventBot.on("interactionCreate", (interaction) =>
+  eventBotHandlers.handleInteractionCreate(interaction, db)
+);
 
 /***********************************
  *  Feed Listeners Event Handlers

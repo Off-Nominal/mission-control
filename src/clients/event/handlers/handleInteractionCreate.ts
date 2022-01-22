@@ -1,15 +1,18 @@
 import { add } from "date-fns";
 import { Interaction } from "discord.js";
+import { Client } from "pg";
+import { setEventSubscriptions } from "../../../queries/users";
 import createDiscordEvent from "../actions/createDiscordEvent";
 
 const livechatChannelID = process.env.LIVECHATCHANNELID;
 
 export default async function handleInteractionCreate(
-  interaction: Interaction
+  interaction: Interaction,
+  db: Client
 ) {
   if (!interaction.isCommand()) return;
 
-  const { options, commandName } = interaction;
+  const { options } = interaction;
   const subCommand = options.getSubcommand(false);
 
   if (subCommand === "start") {
@@ -46,6 +49,45 @@ export default async function handleInteractionCreate(
         ephemeral: true,
       });
       console.error(err);
+    }
+  }
+
+  if (subCommand === "subscribe") {
+    const subscribe = options.getBoolean("event-start");
+    const preEvent = options.getInteger("pre-event");
+    const discordId = interaction.user.id;
+
+    if (subscribe === null && preEvent === null) {
+      return await interaction.reply({
+        content:
+          "No parameters set, so no changes to your subscription settings.",
+      });
+    }
+
+    try {
+      const userSettings = await setEventSubscriptions(
+        db,
+        discordId,
+        subscribe,
+        preEvent
+      );
+      const { auto_subscribe, pre_notification } = userSettings.rows[0];
+      await interaction.reply({
+        content: `Subscription updated! Your current subscription settings are now:\nAuto-subscribe to new Events: ${
+          auto_subscribe ? "Enabled" : "Disabled"
+        }\nPre-Event notification schedule: ${
+          pre_notification
+            ? pre_notification + " minutes before the event"
+            : "Disabled"
+        }`,
+      });
+    } catch (err) {
+      console.error(err);
+      await interaction.reply({
+        content:
+          "Something went wrong setting your subscriptions. Please let Jake know!",
+        ephemeral: true,
+      });
     }
   }
 }
