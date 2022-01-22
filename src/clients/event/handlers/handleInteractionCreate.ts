@@ -60,23 +60,23 @@ export default function generateInteractionCreateHandler(db: Client) {
       subCommand === AllowedCommands.SUBSCRIBE ||
       subCommand === AllowedCommands.UNSUBSCRIBE
     ) {
-      let subscribe: boolean | undefined | null = undefined;
+      let newEvent: boolean | undefined | null = undefined;
       let preEvent: number | undefined | null = undefined;
 
       if (subCommand === AllowedCommands.SUBSCRIBE) {
-        subscribe = options.getBoolean("event-start") || undefined;
+        newEvent = options.getBoolean("new-event") || undefined;
         preEvent = options.getInteger("pre-event") || undefined;
       }
 
       if (subCommand === AllowedCommands.UNSUBSCRIBE) {
-        subscribe = null;
+        newEvent = null;
         preEvent = null;
       }
 
-      if (subscribe === undefined && preEvent === undefined) {
+      if (newEvent === undefined && preEvent === undefined) {
         return await interaction.reply({
           content:
-            "No parameters set, so no changes to your subscription settings.",
+            "No parameters set, so no changes to your notificatin subscription settings.",
         });
       }
 
@@ -86,19 +86,19 @@ export default function generateInteractionCreateHandler(db: Client) {
         const userSettings = await setEventSubscriptions(
           db,
           discordId,
-          subscribe,
+          newEvent,
           preEvent
         );
 
-        const { auto_subscribe, pre_notification } = userSettings.rows[0];
+        const { new_event, pre_notification } = userSettings.rows[0];
 
         const embed = new MessageEmbed()
           .setTitle("Subscription updated!")
           .setDescription("Current subscription settings are:")
           .addFields([
             {
-              name: "Event-Start Notifications",
-              value: auto_subscribe ? "Enabled" : "Disabled",
+              name: "New Event Notifications",
+              value: new_event ? "Enabled" : "Disabled",
               inline: true,
             },
             {

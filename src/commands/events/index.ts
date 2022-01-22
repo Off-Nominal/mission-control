@@ -34,19 +34,17 @@ const commands = [
     .addSubcommand((command) =>
       command
         .setName("subscribe")
-        .setDescription(
-          "Automatically subscribe to and get notifications for Events."
-        )
+        .setDescription("Get notifications about new Discord events.")
         .addBooleanOption((option) =>
           option
-            .setName("event-start")
-            .setDescription("Get notified when the event starts")
+            .setName("new-event")
+            .setDescription("Get notified when a new event is created")
         )
         .addIntegerOption((option) =>
           option
             .setName("pre-event")
             .setDescription(
-              "Get a notification before the event starts (give us a number in minutes before the event starts)"
+              "Get notified before event starts (give us a number in minutes before the event starts)"
             )
             .setMaxValue(180)
             .setMinValue(5)

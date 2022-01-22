@@ -15,7 +15,7 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.addColumn("users", "auto_subscribe", {
+  return db.addColumn("users", "new_event", {
     type: "boolean",
     notNull: true,
     defaultValue: false,
@@ -23,7 +23,7 @@ exports.up = function (db) {
 };
 
 exports.down = function (db) {
-  return db.removeColumn("users", "auto_subscribe");
+  return db.removeColumn("users", "new_event");
 };
 
 exports._meta = {

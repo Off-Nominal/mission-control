@@ -230,6 +230,10 @@ eventBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
+eventBot.on(
+  "guildScheduledEventCreate",
+  eventBotHandlers.handleGuildScheduledEventCreate
+);
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );

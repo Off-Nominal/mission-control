@@ -3,6 +3,7 @@ import handleNewContent from "./handleNewContent";
 import handleGuildScheduledEventUpdate from "./handleGuildScheduledEventUpdate";
 import generateInteractionCreateHandler from "./handleInteractionCreate";
 import { Client } from "pg";
+import generateGuildScheduledEventCreate from "./handleGuildScheduledEventCreate";
 
 export default function generateEventBotHandlers(db: Client) {
   return {
@@ -10,5 +11,6 @@ export default function generateEventBotHandlers(db: Client) {
     handleNewContent,
     handleGuildScheduledEventUpdate,
     handleInteractionCreate: generateInteractionCreateHandler(db),
+    handleGuildScheduledEventCreate: generateGuildScheduledEventCreate(db),
   };
 }
