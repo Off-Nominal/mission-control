@@ -48,6 +48,8 @@ const commands = [
             .setDescription(
               "Get a notification before the event starts (give us a number in minutes before the event starts)"
             )
+            .setMaxValue(180)
+            .setMinValue(5)
         )
     ),
 ].map((command) => command.toJSON());
