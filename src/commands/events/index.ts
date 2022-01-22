@@ -51,6 +51,13 @@ const commands = [
             .setMaxValue(180)
             .setMinValue(5)
         )
+    )
+    .addSubcommand((command) =>
+      command
+        .setName("unsubscribe")
+        .setDescription(
+          "Unsubscribe from all future automatic event notifications."
+        )
     ),
 ].map((command) => command.toJSON());
 
