@@ -2,11 +2,7 @@ require("dotenv").config();
 import { Client as DbClient } from "pg";
 import { Client, Intents } from "discord.js";
 
-import bcBotHandlers from "./clients/bookclub/handlers";
-import mainBotHandlers from "./clients/main/handlers";
-import contentBotHandlers from "./clients/content/handlers";
-import eventBotHandlers from "./clients/event/handlers";
-import devHandlers from "./clients/dev/handlers";
+import generateHandlers from "./clients/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { SiteListener } from "./listeners/siteListener";
@@ -20,6 +16,14 @@ import deployWeMartians from "./utilities/deployWeMartians";
 // Database Config
 const db = new DbClient();
 db.connect();
+
+const {
+  bookClubBotHandlers,
+  contentBotHandlers,
+  devHandlers,
+  eventBotHandlers,
+  mainBotHandlers,
+} = generateHandlers(db);
 
 const searchOptions = require("../config/searchOptions.json");
 
@@ -193,10 +197,10 @@ if (process.env.NODE_ENV === "dev") {
  *  Book Club Bot Event Handlers
  ************************************/
 
-bcBot.once("ready", bcBotHandlers.handleReady);
-bcBot.on("messageCreate", bcBotHandlers.handleMessageCreate);
-bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
-bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
+bcBot.once("ready", bookClubBotHandlers.handleReady);
+bcBot.on("messageCreate", bookClubBotHandlers.handleMessageCreate);
+bcBot.on("threadCreate", bookClubBotHandlers.handleThreadCreate);
+bcBot.on("interactionCreate", bookClubBotHandlers.handleInteractionCreate);
 
 /***********************************
  *  Content Bot Event Handlers
@@ -229,9 +233,7 @@ eventBot.on(
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
-eventBot.on("interactionCreate", (interaction) =>
-  eventBotHandlers.handleInteractionCreate(interaction, db)
-);
+eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
 
 /***********************************
  *  Feed Listeners Event Handlers

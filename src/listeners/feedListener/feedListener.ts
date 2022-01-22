@@ -49,6 +49,9 @@ export class FeedListener extends Watcher {
       console.log(
         `${this.title} feed loaded with ${this.episodes.length} items.`
       );
+      this.on("error", (error) =>
+        console.error(`Error checking ${this.title}.`, error)
+      );
     } catch (err) {
       console.error(`Error loading ${this.feed}.`);
       console.error(err);
@@ -56,7 +59,6 @@ export class FeedListener extends Watcher {
 
     this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client
     this.listen(); // listen for new entries on RSS
-    this.on("error", console.error);
   }
 
   private listen() {

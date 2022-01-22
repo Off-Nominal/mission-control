@@ -1,11 +1,15 @@
-import handleMessageCreate from "./messageCreate";
-import handleThreadCreate from "./threadCreate";
-import handleReady from "./ready";
-import handleInteractionCreate from "./interactionCreate";
+import { Client } from "pg";
 
-export default {
-  handleMessageCreate,
-  handleThreadCreate,
-  handleReady,
-  handleInteractionCreate,
-};
+import handleMessageCreate from "./messageCreate";
+import handleInteractionCreate from "./interactionCreate";
+import handleReady from "./handleReady";
+import handleThreadCreate from "./handleThreadCreate";
+
+export default function generateBookClubBotHandlers(db: Client) {
+  return {
+    handleMessageCreate,
+    handleInteractionCreate,
+    handleReady,
+    handleThreadCreate,
+  };
+}
