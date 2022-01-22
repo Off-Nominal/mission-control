@@ -17,8 +17,6 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db) {
   return db.addColumn("users", "pre_notification", {
     type: "int",
-    notNull: true,
-    defaultValue: 1,
   });
 };
 

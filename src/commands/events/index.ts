@@ -30,6 +30,25 @@ const commands = [
             .setDescription("Title of the event")
             .setRequired(true)
         )
+    )
+    .addSubcommand((command) =>
+      command
+        .setName("subscribe")
+        .setDescription(
+          "Automatically subscribe to and get notifications for Events."
+        )
+        .addBooleanOption((option) =>
+          option
+            .setName("event-start")
+            .setDescription("Get notified when the event starts")
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName("pre-event")
+            .setDescription(
+              "Get a notification before the event starts (give us a number in minutes before the event starts)"
+            )
+        )
     ),
 ].map((command) => command.toJSON());
 
