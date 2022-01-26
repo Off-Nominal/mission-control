@@ -8,6 +8,7 @@ const offnomThumb =
 
 export default function generateGuildScheduledEventCreate(db: Client) {
   const { fetchNewEventSubscribers } = userQueries(db);
+
   return async function handleGuildScheduledEventCreate(
     event: GuildScheduledEvent
   ) {
@@ -22,12 +23,13 @@ export default function generateGuildScheduledEventCreate(db: Client) {
       return console.error(err);
     }
 
+    const content = `There is a new event in the Off-Nominal Discord!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
     const embed = createEventAnnouncementEmbed(event, offnomThumb);
 
     subscribers.forEach(async (subscriber) => {
       try {
         const dmChannel = await subscriber.createDM();
-        await dmChannel.send({ embeds: [embed] });
+        await dmChannel.send({ content, embeds: [embed] });
       } catch (err) {
         console.error(
           `Error sending new event notificaiton to ${subscriber.displayName}`
