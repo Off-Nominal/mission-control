@@ -242,10 +242,12 @@ eventBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
+eventBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
 eventBot.on(
   "guildScheduledEventCreate",
   eventBotHandlers.handleGuildScheduledEventCreate
 );
+eventBot.on("guildScheduledEventCreate", eventsListener.addEvent);
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );

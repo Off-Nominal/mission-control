@@ -14,6 +14,8 @@ export class EventsListener extends EventEmitter {
     super();
     this.listenInterval = FIVE_MINS_IN_MS;
     this.initialize = this.initialize.bind(this);
+    this.addEvent = this.addEvent.bind(this);
+    this.updateEvent = this.updateEvent.bind(this);
   }
 
   public initialize(
@@ -23,6 +25,7 @@ export class EventsListener extends EventEmitter {
     >
   ) {
     this.events = events;
+    console.log(this.events);
     console.log(
       `EventsListener loaded with ${events.size} event(s) being monitored`
     );
@@ -33,5 +36,27 @@ export class EventsListener extends EventEmitter {
     const interval = setInterval(() => {
       console.log("test");
     }, this.listenInterval);
+  }
+
+  public addEvent(event: GuildScheduledEvent<"SCHEDULED">) {
+    this.events.set(event.id, event);
+  }
+
+  public updateEvent(
+    event: GuildScheduledEvent<
+      "CANCELED" | "COMPLETED" | "ACTIVE" | "SCHEDULED"
+    >
+  ) {
+    if (
+      event.status === "ACTIVE" ||
+      event.status === "CANCELED" ||
+      event.status === "COMPLETED"
+    ) {
+      this.events.delete(event.id);
+    }
+
+    if (event.status === "SCHEDULED") {
+      this.events.set(event.id, event);
+    }
   }
 }
