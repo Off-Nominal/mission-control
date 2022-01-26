@@ -12,6 +12,9 @@ import {
   simpleCastFeedMapper,
 } from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
+import { EventsListener } from "./listeners/eventsListener/EventsListener";
+
+import handleError from "./clients/actions/handleError";
 
 // Database Config
 const db = new DbClient();
@@ -119,6 +122,12 @@ const starshipChecker = new SiteListener(
 );
 
 /***********************************
+ *  Events Listener Setup
+ ************************************/
+
+const eventsListener = new EventsListener();
+
+/***********************************
  *  Feed Listener Setup
  ************************************/
 
@@ -188,6 +197,7 @@ utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
+utilityBot.on("error", handleError);
 
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
@@ -201,6 +211,7 @@ bcBot.once("ready", bookClubBotHandlers.handleReady);
 bcBot.on("messageCreate", bookClubBotHandlers.handleMessageCreate);
 bcBot.on("threadCreate", bookClubBotHandlers.handleThreadCreate);
 bcBot.on("interactionCreate", bookClubBotHandlers.handleInteractionCreate);
+bcBot.on("error", handleError);
 
 /***********************************
  *  Content Bot Event Handlers
@@ -220,6 +231,7 @@ contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
 contentBot.on("interactionCreate", (interaction) =>
   contentBotHandlers.handleInteractionCreate(interaction, feeds)
 );
+contentBot.on("error", handleError);
 
 /***********************************
  *  Event Bot Event Handlers
@@ -238,6 +250,8 @@ eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
 eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
+eventBot.on("eventsRetrieved", eventsListener.initialize);
+eventBot.on("error", handleError);
 
 /***********************************
  *  Feed Listeners Event Handlers
