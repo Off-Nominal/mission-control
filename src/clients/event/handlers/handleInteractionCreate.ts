@@ -1,5 +1,9 @@
 import { add } from "date-fns";
-import { Interaction, MessageEmbed } from "discord.js";
+import {
+  GuildScheduledEventCreateOptions,
+  Interaction,
+  MessageEmbed,
+} from "discord.js";
 import { Client } from "pg";
 import { setEventSubscriptions } from "../../../queries/users";
 import createDiscordEvent from "../actions/createDiscordEvent";
@@ -28,21 +32,19 @@ export default function generateInteractionCreateHandler(db: Client) {
       // Hopefully this accounts for rqeuest time from user to bot to Discord
       const scheduledStartTime = add(new Date(), { seconds: 2 });
 
-      try {
-        await createDiscordEvent(
-          {
-            name,
-            scheduledStartTime,
-            scheduledEndTime: add(scheduledStartTime, { minutes: duration }),
-            privacyLevel: "GUILD_ONLY",
-            entityType: "EXTERNAL",
-            description: `Come hang out in <#${livechatChannelID}> and watch the event with us!`,
-            entityMetadata: { location: url },
-            reason: "User initiated slash command",
-          },
-          interaction.client
-        );
+      const eventOptions: GuildScheduledEventCreateOptions = {
+        name,
+        scheduledStartTime,
+        scheduledEndTime: add(scheduledStartTime, { minutes: duration }),
+        privacyLevel: "GUILD_ONLY",
+        entityType: "EXTERNAL",
+        description: `Come hang out in <#${livechatChannelID}> and watch the event with us!`,
+        entityMetadata: { location: url },
+        reason: "User initiated slash command",
+      };
 
+      try {
+        await createDiscordEvent(eventOptions, interaction.client);
         await interaction.reply({
           content: `Request receieved! Your event "${name}" will start imminently.`,
         });
@@ -60,11 +62,16 @@ export default function generateInteractionCreateHandler(db: Client) {
       subCommand === AllowedCommands.SUBSCRIBE ||
       subCommand === AllowedCommands.UNSUBSCRIBE
     ) {
+      // undefined means the user submitted no input (don't change)
+      // null means the user requested to unsubscribe
+      // false means the user requested to unsubscribe
+      // true or a number is a request to subscribe
       let newEvent: boolean | undefined | null = undefined;
       let preEvent: number | undefined | null = undefined;
 
       if (subCommand === AllowedCommands.SUBSCRIBE) {
-        newEvent = options.getBoolean("new-event") || undefined;
+        const newEventInput = options.getBoolean("new-event");
+        newEvent = newEventInput === null ? undefined : newEventInput;
         preEvent = options.getInteger("pre-event") || undefined;
       }
 
@@ -80,12 +87,10 @@ export default function generateInteractionCreateHandler(db: Client) {
         });
       }
 
-      const discordId = interaction.user.id;
-
       try {
         const userSettings = await setEventSubscriptions(
           db,
-          discordId,
+          interaction.user.id,
           newEvent,
           preEvent
         );

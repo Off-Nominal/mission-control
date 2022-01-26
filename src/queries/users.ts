@@ -43,3 +43,9 @@ export const setEventSubscriptions = async (
     ]
   );
 };
+
+export const fetchNewEventSubscribers = async (db: Client) => {
+  return await db.query<User>(
+    "SELECT discord_id FROM users WHERE new_event = true"
+  );
+};
