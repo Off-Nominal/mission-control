@@ -1,16 +1,17 @@
 import { Collection, GuildMember, GuildScheduledEvent } from "discord.js";
 import { Client } from "pg";
-import { fetchNewEventSubscribers } from "../../../queries/users";
+import userQueries from "../../../queries/users";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
 
 const offnomThumb =
   "https://res.cloudinary.com/dj5enq03a/image/upload/v1642095232/Discord%20Assets/offnominal_2021-01_w4buun.png";
 
 export default function generateGuildScheduledEventCreate(db: Client) {
+  const { fetchNewEventSubscribers } = userQueries(db);
   return async function handleGuildScheduledEventCreate(
     event: GuildScheduledEvent
   ) {
-    const query = await fetchNewEventSubscribers(db);
+    const query = await fetchNewEventSubscribers();
     const memberIds = query.rows.map((user) => user.discord_id);
     let subscribers: Collection<string, GuildMember>;
 

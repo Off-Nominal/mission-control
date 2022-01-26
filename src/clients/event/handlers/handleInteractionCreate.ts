@@ -5,7 +5,7 @@ import {
   MessageEmbed,
 } from "discord.js";
 import { Client } from "pg";
-import { setEventSubscriptions } from "../../../queries/users";
+import userQueries from "../../../queries/users";
 import createDiscordEvent from "../actions/createDiscordEvent";
 
 const livechatChannelID = process.env.LIVECHATCHANNELID;
@@ -17,6 +17,8 @@ enum AllowedCommands {
 }
 
 export default function generateInteractionCreateHandler(db: Client) {
+  const { setEventSubscriptions } = userQueries(db);
+
   return async function handleInteractionCreate(interaction: Interaction) {
     if (!interaction.isCommand()) return;
 
@@ -89,7 +91,6 @@ export default function generateInteractionCreateHandler(db: Client) {
 
       try {
         const userSettings = await setEventSubscriptions(
-          db,
           interaction.user.id,
           newEvent,
           preEvent
