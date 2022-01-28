@@ -40,7 +40,6 @@ export class EventsListener extends EventEmitter {
 
   public addEvent(event: GuildScheduledEvent<"SCHEDULED">) {
     this.events.set(event.id, event);
-    console.log(this.events.map((event) => event.name));
   }
 
   public updateEvent(
@@ -49,17 +48,14 @@ export class EventsListener extends EventEmitter {
   ) {
     if (newEvent.status === "ACTIVE" || newEvent.status === "COMPLETED") {
       this.events.delete(newEvent.id);
-      console.log(this.events.map((event) => event.name));
     }
 
     if (newEvent.status === "SCHEDULED") {
       this.events.set(newEvent.id, newEvent);
-      console.log(this.events.map((event) => event.name));
     }
   }
 
-  public cancelEvent(event: GuildScheduledEvent<"CANCELED">) {
+  public cancelEvent(event: GuildScheduledEvent<"CANCELED" | "SCHEDULED">) {
     this.events.delete(event.id);
-    console.log(this.events.map((event) => event.name));
   }
 }
