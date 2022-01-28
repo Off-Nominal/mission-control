@@ -16,6 +16,7 @@ export class EventsListener extends EventEmitter {
     this.initialize = this.initialize.bind(this);
     this.addEvent = this.addEvent.bind(this);
     this.updateEvent = this.updateEvent.bind(this);
+    this.cancelEvent = this.cancelEvent.bind(this);
   }
 
   public initialize(
@@ -25,7 +26,6 @@ export class EventsListener extends EventEmitter {
     >
   ) {
     this.events = events;
-    console.log(this.events);
     console.log(
       `EventsListener loaded with ${events.size} event(s) being monitored`
     );
@@ -40,23 +40,26 @@ export class EventsListener extends EventEmitter {
 
   public addEvent(event: GuildScheduledEvent<"SCHEDULED">) {
     this.events.set(event.id, event);
+    console.log(this.events.map((event) => event.name));
   }
 
   public updateEvent(
-    event: GuildScheduledEvent<
-      "CANCELED" | "COMPLETED" | "ACTIVE" | "SCHEDULED"
-    >
+    oldEvent: GuildScheduledEvent<"COMPLETED" | "ACTIVE" | "SCHEDULED">,
+    newEvent: GuildScheduledEvent<"COMPLETED" | "ACTIVE" | "SCHEDULED">
   ) {
-    if (
-      event.status === "ACTIVE" ||
-      event.status === "CANCELED" ||
-      event.status === "COMPLETED"
-    ) {
-      this.events.delete(event.id);
+    if (newEvent.status === "ACTIVE" || newEvent.status === "COMPLETED") {
+      this.events.delete(newEvent.id);
+      console.log(this.events.map((event) => event.name));
     }
 
-    if (event.status === "SCHEDULED") {
-      this.events.set(event.id, event);
+    if (newEvent.status === "SCHEDULED") {
+      this.events.set(newEvent.id, newEvent);
+      console.log(this.events.map((event) => event.name));
     }
+  }
+
+  public cancelEvent(event: GuildScheduledEvent<"CANCELED">) {
+    this.events.delete(event.id);
+    console.log(this.events.map((event) => event.name));
   }
 }

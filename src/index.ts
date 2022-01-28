@@ -248,6 +248,7 @@ eventBot.on(
   eventBotHandlers.handleGuildScheduledEventCreate
 );
 eventBot.on("guildScheduledEventCreate", eventsListener.addEvent);
+eventBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );

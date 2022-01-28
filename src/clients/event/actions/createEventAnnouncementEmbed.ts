@@ -9,7 +9,7 @@ export default function createEventAnnouncementEmbed(
   return new MessageEmbed()
     .setTitle(event.name)
     .setAuthor("🎉 New Live Event!")
-    .setDescription(event.description)
+    .setDescription(event.description || "")
     .setThumbnail(thumbnail)
     .addField(
       "Date/Time",
