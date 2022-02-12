@@ -3,9 +3,6 @@ import { Client } from "pg";
 import userQueries from "../../../queries/users";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
 
-const offnomThumb =
-  "https://res.cloudinary.com/dj5enq03a/image/upload/v1642095232/Discord%20Assets/offnominal_2021-01_w4buun.png";
-
 export default function generateGuildScheduledEventCreate(db: Client) {
   const { fetchNewEventSubscribers } = userQueries(db);
 
@@ -24,7 +21,7 @@ export default function generateGuildScheduledEventCreate(db: Client) {
     }
 
     const content = `There is a new event in the Off-Nominal Discord!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
-    const embed = createEventAnnouncementEmbed(event, offnomThumb);
+    const embed = createEventAnnouncementEmbed(event, "new");
 
     subscribers.forEach(async (subscriber) => {
       try {

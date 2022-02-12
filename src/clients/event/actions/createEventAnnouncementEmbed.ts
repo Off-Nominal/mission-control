@@ -2,14 +2,22 @@ import { GuildScheduledEvent, MessageEmbed } from "discord.js";
 
 export default function createEventAnnouncementEmbed(
   event: GuildScheduledEvent,
-  thumbnail: string
+  type: "new" | "pre",
+  options?: {
+    thumbnail?: string;
+  }
 ): MessageEmbed {
-  const timestamp = (event.scheduledStartTimestamp / 1000).toString();
+  const timestamp = Math.floor(event.scheduledStartTimestamp / 1000).toString();
+  const thumbnail =
+    options?.thumbnail ||
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1642095232/Discord%20Assets/offnominal_2021-01_w4buun.png";
+  const author =
+    type === "pre" ? "📅 Event Happening Soon!" : "🎉 New Live Event!";
 
   return new MessageEmbed()
     .setTitle(event.name)
-    .setAuthor("🎉 New Live Event!")
-    .setDescription(event.description || "")
+    .setAuthor(author)
+    .setDescription(event.description || "No event description provided.")
     .setThumbnail(thumbnail)
     .addField(
       "Date/Time",
@@ -18,7 +26,7 @@ export default function createEventAnnouncementEmbed(
     .addFields(
       {
         name: "Watch here",
-        value: `[YouTube](${event.entityMetadata.location})`,
+        value: `[Event URL](${event.entityMetadata.location})`,
         inline: true,
       },
       {

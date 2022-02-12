@@ -284,6 +284,12 @@ ytFeedListener.on("newContent", (content) => {
 });
 
 /***********************************
+ *  Event Listeners Event Handlers
+ ************************************/
+
+eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
+
+/***********************************
  *  Dev Test Event Handlers
  *  Only runs in Dev environment
  *  to enable simulated events

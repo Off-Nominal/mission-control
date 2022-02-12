@@ -50,8 +50,15 @@ export default function userQueries(db: Client) {
     );
   };
 
+  const fetchPreNotificationSubscribers = async () => {
+    return await db.query<User>(
+      "SELECT discord_id, pre_notification FROM users WHERE pre_notification IS NOT NULL"
+    );
+  };
+
   return {
     setEventSubscriptions,
     fetchNewEventSubscribers,
+    fetchPreNotificationSubscribers,
   };
 }

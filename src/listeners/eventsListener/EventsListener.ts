@@ -2,6 +2,14 @@ import { Collection, GuildScheduledEvent } from "discord.js";
 import EventEmitter = require("events");
 
 const FIVE_MINS_IN_MS = 300000;
+const MS_IN_A_SEC = 1000;
+const SEC_IN_AN_MIN = 60;
+
+export type EventWindow = {
+  event: GuildScheduledEvent<"SCHEDULED" | "ACTIVE" | "COMPLETED" | "CANCELED">;
+  minTime: number;
+  maxTime: number;
+};
 
 export class EventsListener extends EventEmitter {
   private events: Collection<
@@ -34,7 +42,21 @@ export class EventsListener extends EventEmitter {
 
   private monitor() {
     const interval = setInterval(() => {
-      console.log("test");
+      const eventWindows = this.events.map((event): EventWindow => {
+        const eventStartTimeStamp = event.scheduledStartAt.getTime();
+        const now = Date.now();
+
+        const maxTime =
+          (eventStartTimeStamp - now) / MS_IN_A_SEC / SEC_IN_AN_MIN;
+        const minTime = maxTime - 5;
+
+        return {
+          event,
+          minTime,
+          maxTime,
+        };
+      });
+      this.emit("eventsMonitored", eventWindows);
     }, this.listenInterval);
   }
 
