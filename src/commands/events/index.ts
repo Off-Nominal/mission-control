@@ -21,7 +21,7 @@ const commands = [
             .setName("duration")
             .setDescription("How long should the event last (in minutes)?")
             .setRequired(true)
-            .setMaxValue(180)
+            .setMaxValue(1440)
             .setMinValue(5)
         )
         .addStringOption((option) =>
