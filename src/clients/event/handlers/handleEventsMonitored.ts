@@ -25,8 +25,6 @@ export default function generateHandleEventsMonitored(db) {
       };
     });
 
-    console.log(notifications);
-
     notifications.forEach((notification) => {
       if (!notification.recipients.length) {
         return;
