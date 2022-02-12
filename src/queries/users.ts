@@ -24,13 +24,10 @@ export default function userQueries(db: Client) {
     const user = userQuery.rows[0];
 
     if (!user) {
+      console.log();
       return db.query<User>(
         "INSERT INTO users (discord_id, new_event, pre_notification) VALUES ($1, $2, $3) RETURNING *",
-        [
-          discord_id,
-          subscribeSet ? newEvent || false : false,
-          preEventSet && preEvent,
-        ]
+        [discord_id, subscribeSet ? newEvent || false : false, preEvent || null]
       );
     }
 
