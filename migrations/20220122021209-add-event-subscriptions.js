@@ -15,14 +15,15 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable("users", {
-    id: { type: "int", primaryKey: true },
-    discord_id: "string",
+  return db.addColumn("users", "new_event", {
+    type: "boolean",
+    notNull: true,
+    defaultValue: false,
   });
 };
 
 exports.down = function (db) {
-  return db.dropTable("users");
+  return db.removeColumn("users", "new_event");
 };
 
 exports._meta = {

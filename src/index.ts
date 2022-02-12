@@ -2,11 +2,7 @@ require("dotenv").config();
 import { Client as DbClient } from "pg";
 import { Client, Intents } from "discord.js";
 
-import bcBotHandlers from "./clients/bookclub/handlers";
-import mainBotHandlers from "./clients/main/handlers";
-import contentBotHandlers from "./clients/content/handlers";
-import eventBotHandlers from "./clients/event/handlers";
-import devHandlers from "./clients/dev/handlers";
+import generateHandlers from "./clients/handlers";
 
 import { FeedListener } from "./listeners/feedListener/feedListener";
 import { SiteListener } from "./listeners/siteListener";
@@ -16,10 +12,21 @@ import {
   simpleCastFeedMapper,
 } from "./listeners/feedListener/mappers";
 import deployWeMartians from "./utilities/deployWeMartians";
+import { EventsListener } from "./listeners/eventsListener/EventsListener";
+
+import handleError from "./clients/actions/handleError";
 
 // Database Config
 const db = new DbClient();
 db.connect();
+
+const {
+  bookClubBotHandlers,
+  contentBotHandlers,
+  devHandlers,
+  eventBotHandlers,
+  mainBotHandlers,
+} = generateHandlers(db);
 
 const searchOptions = require("../config/searchOptions.json");
 
@@ -115,6 +122,12 @@ const starshipChecker = new SiteListener(
 );
 
 /***********************************
+ *  Events Listener Setup
+ ************************************/
+
+const eventsListener = new EventsListener();
+
+/***********************************
  *  Feed Listener Setup
  ************************************/
 
@@ -184,6 +197,7 @@ utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
+utilityBot.on("error", handleError);
 
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
@@ -193,10 +207,11 @@ if (process.env.NODE_ENV === "dev") {
  *  Book Club Bot Event Handlers
  ************************************/
 
-bcBot.once("ready", bcBotHandlers.handleReady);
-bcBot.on("messageCreate", bcBotHandlers.handleMessageCreate);
-bcBot.on("threadCreate", bcBotHandlers.handleThreadCreate);
-bcBot.on("interactionCreate", bcBotHandlers.handleInteractionCreate);
+bcBot.once("ready", bookClubBotHandlers.handleReady);
+bcBot.on("messageCreate", bookClubBotHandlers.handleMessageCreate);
+bcBot.on("threadCreate", bookClubBotHandlers.handleThreadCreate);
+bcBot.on("interactionCreate", bookClubBotHandlers.handleInteractionCreate);
+bcBot.on("error", handleError);
 
 /***********************************
  *  Content Bot Event Handlers
@@ -216,6 +231,7 @@ contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
 contentBot.on("interactionCreate", (interaction) =>
   contentBotHandlers.handleInteractionCreate(interaction, feeds)
 );
+contentBot.on("error", handleError);
 
 /***********************************
  *  Event Bot Event Handlers
@@ -226,10 +242,19 @@ eventBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
+eventBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
+eventBot.on(
+  "guildScheduledEventCreate",
+  eventBotHandlers.handleGuildScheduledEventCreate
+);
+eventBot.on("guildScheduledEventCreate", eventsListener.addEvent);
+eventBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
 eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
+eventBot.on("eventsRetrieved", eventsListener.initialize);
+eventBot.on("error", handleError);
 
 /***********************************
  *  Feed Listeners Event Handlers
@@ -257,6 +282,12 @@ hhFeedListener.on("newContent", (content) => {
 ytFeedListener.on("newContent", (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);
 });
+
+/***********************************
+ *  Event Listeners Event Handlers
+ ************************************/
+
+eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
 
 /***********************************
  *  Dev Test Event Handlers

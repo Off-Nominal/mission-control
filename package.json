@@ -42,10 +42,12 @@
   "devDependencies": {
     "@types/node": "^16.11.7",
     "@types/pg": "^8.6.4",
-    "nodemon": "^2.0.15",
-    "ts-node": "^10.4.0",
+    "@types/db-migrate-base": "^0.0.10",
+    "@types/db-migrate-pg": "^0.0.10",
     "db-migrate": "^0.11.13",
     "db-migrate-pg": "^1.2.2",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
   },
   "engines": {
