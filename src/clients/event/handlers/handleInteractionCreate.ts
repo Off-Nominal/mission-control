@@ -86,6 +86,7 @@ export default function generateInteractionCreateHandler(db: Client) {
         return await interaction.reply({
           content:
             "No parameters set, so no changes to your notificatin subscription settings.",
+          ephemeral: true,
         });
       }
 
