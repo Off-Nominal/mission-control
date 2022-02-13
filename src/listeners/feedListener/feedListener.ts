@@ -57,7 +57,6 @@ export class FeedListener extends Watcher {
     } catch (err) {
       console.error(`Error loading ${this.feed}.`);
       if (this.loadAttempts < 3) {
-        this.loadAttempts++;
         console.error("Attempting retry in 5 seconds.");
         setTimeout(() => this.initialize(), 5000);
       } else {
