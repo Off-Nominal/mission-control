@@ -1,13 +1,10 @@
 import { GuildMember, MessageEmbed, TextChannel } from "discord.js";
+import fetchTextChannel from "../../actions/fetchChannel";
 const Discord = require("discord.js");
 
-export default function handleGuildMemberAdd(member: GuildMember) {
-  const channel = member.guild.channels.cache.find(
-    (ch) => ch.name === "general"
-  ) as TextChannel;
+const GENERAL_CHANNEL_ID = process.env.GENERALCHANNELID;
 
-  if (!channel) return;
-
+export default async function handleGuildMemberAdd(member: GuildMember) {
   const embed: MessageEmbed = new Discord.MessageEmbed();
 
   embed
@@ -33,5 +30,13 @@ export default function handleGuildMemberAdd(member: GuildMember) {
       }
     );
 
-  channel.send({ content: `Attention <@${member.user.id}>!`, embeds: [embed] });
+  try {
+    const channel = await fetchTextChannel(member.client, GENERAL_CHANNEL_ID);
+    channel.send({
+      content: `Attention <@${member.user.id}>!`,
+      embeds: [embed],
+    });
+  } catch (err) {
+    console.error(err);
+  }
 }
