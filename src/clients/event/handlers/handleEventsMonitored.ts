@@ -1,4 +1,4 @@
-import { GuildMember, User } from "discord.js";
+import { GuildMember } from "discord.js";
 import { EventWindow } from "../../../listeners/eventsListener/EventsListener";
 import userQueries from "../../../queries/users";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
