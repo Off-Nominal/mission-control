@@ -14,9 +14,6 @@ export default async function handleThreadCreate(thread: ThreadChannel) {
     member.roles.cache.some((role) => role.id === MODS_ROLE_ID)
   );
 
-  console.log(`Found ${mods.size} mods.`);
-  console.log("Adding mods to Thread");
-
   mods.forEach((mod) => {
     thread.members
       .add(mod.id)

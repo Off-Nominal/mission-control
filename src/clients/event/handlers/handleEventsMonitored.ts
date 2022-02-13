@@ -38,7 +38,6 @@ export default function generateHandleEventsMonitored(db) {
 
         try {
           user = await notification.event.guild.members.fetch(recipient);
-          console.log(user);
           const dmChannel = await user.createDM();
           await dmChannel.send({ content, embeds: [embed] });
         } catch (err) {

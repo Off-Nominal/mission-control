@@ -29,8 +29,6 @@ export default async function shunt(
     });
   }
 
-  console.log("shunt passes checks");
-
   const shunter = interaction.member.user;
   const shunterName = shunter.username;
 
@@ -69,8 +67,6 @@ export default async function shunt(
   // Source Message
   let sourceReply: Message<boolean> | null = null;
 
-  console.log("sourceReply before fetch: ", sourceReply);
-
   try {
     await interaction.reply({
       embeds: [
@@ -85,10 +81,7 @@ export default async function shunt(
     console.error(err);
   }
 
-  console.log("sourceReply after fetch: ", sourceReply);
   let inboundDestination: ThreadChannel | TextChannel;
-
-  console.log("inboundDestination before thread check: ", inboundDestination);
 
   // Create Thread
   if (thread) {
@@ -106,7 +99,6 @@ export default async function shunt(
     inboundDestination = targetChannel;
   }
 
-  console.log("inboundDestination after thread check: ", inboundDestination);
   // Destination Message
   try {
     const destinationMessage = await inboundDestination.send({
@@ -117,7 +109,6 @@ export default async function shunt(
         }),
       ],
     });
-    console.log(destinationMessage);
     return await interaction.editReply({
       embeds: [
         generateEmbed({
