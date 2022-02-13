@@ -30,6 +30,7 @@ export class FeedListener extends Watcher {
   fuse: Fuse<FeedItem>;
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
   processor: (item: any, showTitle: string) => FeedItem;
+  loadAttempts: number = 0;
 
   constructor(feed: string, options?: FeedListenerOptions) {
     super(feed, options.rssInterval || FEED_CHECK_TIME_IN_SECONDS);
@@ -39,6 +40,7 @@ export class FeedListener extends Watcher {
 
   public async initialize() {
     try {
+      this.loadAttempts++;
       const entries = await this.start(); // fetch data from RSS
       this.title = entries[0].meta.title; // extract Feed program title
       this.albumArt = entries[0].meta.image.url;
@@ -54,7 +56,16 @@ export class FeedListener extends Watcher {
       );
     } catch (err) {
       console.error(`Error loading ${this.feed}.`);
-      console.error(err);
+      if (this.loadAttempts < 3) {
+        this.loadAttempts++;
+        console.error("Attempting retry in 5 seconds.");
+        setTimeout(() => this.initialize(), 5000);
+      } else {
+        console.log(
+          `Attempted to initialize ${this.feed} ${this.loadAttempts} times, could not fetch data.`
+        );
+        console.error(err);
+      }
     }
 
     this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client
