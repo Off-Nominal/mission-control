@@ -31,9 +31,11 @@ export class FeedListener extends Watcher {
   searchOptions: Fuse.IFuseOptions<FeedItem> | null;
   processor: (item: any, showTitle: string) => FeedItem;
   loadAttempts: number = 0;
+  feed: string;
 
   constructor(feed: string, options?: FeedListenerOptions) {
     super(feed, options.rssInterval || FEED_CHECK_TIME_IN_SECONDS);
+    this.feed = feed;
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;
   }
