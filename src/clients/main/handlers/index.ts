@@ -4,6 +4,7 @@ import handleGuildMemberAdd from "./handleGuildMemberAdd";
 import handleMessageReactionAdd from "./handleMessageReactionAdd";
 import handleReady from "./handleReady";
 import handleInteractionCreate from "./handleInteractionCreate";
+import handleThreadDigestSend from "./handleThreadDigestSend";
 import { Client } from "pg";
 
 export default function generateMainBotHandlers(db: Client) {
@@ -14,5 +15,6 @@ export default function generateMainBotHandlers(db: Client) {
     handleMessageReactionAdd,
     handleReady,
     handleInteractionCreate,
+    handleThreadDigestSend,
   };
 }

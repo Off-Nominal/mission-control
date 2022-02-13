@@ -15,6 +15,8 @@ import deployWeMartians from "./utilities/deployWeMartians";
 import { EventsListener } from "./listeners/eventsListener/EventsListener";
 
 import handleError from "./clients/actions/handleError";
+import getNextTime from "./helpers/getNextTime";
+import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 
 // Database Config
 const db = new DbClient();
@@ -190,6 +192,7 @@ starshipChecker.initialize();
  ************************************/
 
 utilityBot.once("ready", mainBotHandlers.handleReady);
+utilityBot.once("ready", scheduleThreadDigest);
 utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
 utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
@@ -198,6 +201,7 @@ utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 utilityBot.on("error", handleError);
+utilityBot.on("threadDigestSend", mainBotHandlers.handleThreadDigestSend);
 
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
