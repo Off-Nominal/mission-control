@@ -1,4 +1,4 @@
-import { GuildMember, User } from "discord.js";
+import { GuildMember } from "discord.js";
 import { EventWindow } from "../../../listeners/eventsListener/EventsListener";
 import userQueries from "../../../queries/users";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
@@ -38,7 +38,6 @@ export default function generateHandleEventsMonitored(db) {
 
         try {
           user = await notification.event.guild.members.fetch(recipient);
-          console.log(user);
           const dmChannel = await user.createDM();
           await dmChannel.send({ content, embeds: [embed] });
         } catch (err) {

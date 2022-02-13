@@ -21,7 +21,7 @@ const commands = [
             .setName("duration")
             .setDescription("How long should the event last (in minutes)?")
             .setRequired(true)
-            .setMaxValue(1440)
+            .setMaxValue(180)
             .setMinValue(5)
         )
         .addStringOption((option) =>
@@ -46,7 +46,7 @@ const commands = [
             .setDescription(
               "Get notified before event starts (give us a number in minutes before the event starts)"
             )
-            .setMaxValue(180)
+            .setMaxValue(1440)
             .setMinValue(5)
         )
     )
