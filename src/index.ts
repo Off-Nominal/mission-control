@@ -15,7 +15,6 @@ import deployWeMartians from "./utilities/deployWeMartians";
 import { EventsListener } from "./listeners/eventsListener/EventsListener";
 
 import handleError from "./clients/actions/handleError";
-import getNextTime from "./helpers/getNextTime";
 import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 
 // Database Config
@@ -118,8 +117,6 @@ const eventBot = new Client({
 
 const starshipChecker = new SiteListener(
   "https://www.spacex.com/vehicles/starship/",
-  utilityBot,
-  BOCACHICACHANNELID,
   { interval: 15, cooldown: 600 }
 );
 
@@ -292,6 +289,12 @@ ytFeedListener.on("newContent", (content) => {
  ************************************/
 
 eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
+
+/***********************************
+ *  Site Listeners Event Handlers
+ ************************************/
+
+starshipChecker.on("siteUpdate", mainBotHandlers.handleStarshipSiteUpdate);
 
 /***********************************
  *  Dev Test Event Handlers
