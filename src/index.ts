@@ -15,7 +15,6 @@ import deployWeMartians from "./utilities/deployWeMartians";
 import { EventsListener } from "./listeners/eventsListener/EventsListener";
 
 import handleError from "./clients/actions/handleError";
-import getNextTime from "./helpers/getNextTime";
 import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 
 // Database Config
@@ -31,10 +30,6 @@ const {
 } = generateHandlers(db);
 
 const searchOptions = require("../config/searchOptions.json");
-
-const TEST_CHANNEL = process.env.TESTCHANNEL;
-
-const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
 
 const WMFEED = process.env.WMFEED;
 const MECOFEED = process.env.MECOFEED;
@@ -118,8 +113,6 @@ const eventBot = new Client({
 
 const starshipChecker = new SiteListener(
   "https://www.spacex.com/vehicles/starship/",
-  utilityBot,
-  BOCACHICACHANNELID,
   { interval: 15, cooldown: 600 }
 );
 
@@ -202,6 +195,7 @@ utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 utilityBot.on("error", handleError);
 utilityBot.on("threadDigestSend", mainBotHandlers.handleThreadDigestSend);
+utilityBot.on("starshipSiteUpdate", mainBotHandlers.handleStarshipSiteUpdate);
 
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
@@ -292,6 +286,14 @@ ytFeedListener.on("newContent", (content) => {
  ************************************/
 
 eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
+
+/***********************************
+ *  Site Listeners Event Handlers
+ ************************************/
+
+starshipChecker.on("siteUpdate", (update) =>
+  utilityBot.emit("starshipSiteUpdate", update)
+);
 
 /***********************************
  *  Dev Test Event Handlers

@@ -1,12 +1,7 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
-import { Client, MessageEmbed, TextChannel } from "discord.js";
+import EventEmitter = require("events");
 import { GitHubAgent } from "./github";
-const Discord = require("discord.js");
-
-const OWNER = "mendahu";
-const REPO = "starship-site-tracking";
-const BRANCH = process.env.STARSHIP_SITE_TRACKER_BRANCH;
 
 export type SiteListenerOptions = {
   interval?: number;
@@ -23,15 +18,19 @@ export type ChangeLog = {
   date: Date;
 };
 
-export class SiteListener {
+export type GithubUpdateEmbedData = {
+  date: Date;
+  url: string;
+  diffUrl: string;
+};
+
+export class SiteListener extends EventEmitter {
   //params
   private url: string;
   private cooldown: number = 0;
   private interval: number = 30000;
-  private channelId: string;
 
   //clients
-  private discordClient: Client;
   private gitHubAgent: GitHubAgent;
 
   //data
@@ -41,15 +40,9 @@ export class SiteListener {
   //cooldown
   private lastMessage: Date;
 
-  constructor(
-    url: string,
-    client: Client,
-    channelId: string,
-    options: SiteListenerOptions
-  ) {
+  constructor(url: string, options: SiteListenerOptions) {
+    super();
     this.url = url;
-    this.discordClient = client;
-    this.channelId = channelId;
 
     if (options.interval) {
       this.interval = options.interval * 1000;
@@ -64,7 +57,7 @@ export class SiteListener {
   private async checkSite() {
     // Fetch the tracked site's HEAD record
     // We're going to see if there is a change from our most recently tracked etag
-    let response;
+    let response: AxiosResponse<never>;
     try {
       response = await axios.head(this.url);
     } catch (err) {
@@ -99,7 +92,12 @@ export class SiteListener {
       console.log(`SiteListener is in Cooldown mode.`);
     } else {
       try {
-        this.notifyChanges(diffUrl, response.headers["last-modified"]);
+        const updateData: GithubUpdateEmbedData = {
+          url: this.url,
+          diffUrl,
+          date: new Date(response.headers["last-modified"]),
+        };
+        this.emit("siteUpdate", updateData);
         this.lastMessage = new Date(); // Tracks time for cooldown purposes
       } catch (err) {
         console.error(err);
@@ -197,41 +195,6 @@ export class SiteListener {
     this.updateMetadata(contents);
 
     return diffUrl;
-  }
-
-  private async notifyChanges(diffUrl: string, date: string) {
-    const embed: MessageEmbed = new Discord.MessageEmbed();
-
-    embed
-      .setColor("#3e7493")
-      .setTitle(`Change detected on Starship's Website`)
-      .setDescription(`Change occured at ${date}.`)
-      .addFields([
-        {
-          name: "View",
-          value: `[Starship Site](${this.url})`,
-          inline: true,
-        },
-        {
-          name: "Compare",
-          value: `[Differences](${diffUrl})`,
-          inline: true,
-        },
-        {
-          name: "History",
-          value: `[Recent Changes](https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/log.json)`,
-          inline: true,
-        },
-      ])
-      .setTimestamp();
-
-    try {
-      const channel = await this.discordClient.channels.fetch(this.channelId);
-      await (channel as TextChannel).send({ embeds: [embed] });
-      console.log(`Discord successfully notified of changes to ${this.url}`);
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   private extractMetadata(response, filename: string) {
