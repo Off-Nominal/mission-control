@@ -2,7 +2,6 @@ import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
 import EventEmitter = require("events");
 import { GitHubAgent } from "./github";
-const Discord = require("discord.js");
 
 export type SiteListenerOptions = {
   interval?: number;
