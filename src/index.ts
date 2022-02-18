@@ -199,6 +199,7 @@ utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
 utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 utilityBot.on("error", handleError);
 utilityBot.on("threadDigestSend", mainBotHandlers.handleThreadDigestSend);
+utilityBot.on("starshipSiteUpdate", mainBotHandlers.handleStarshipSiteUpdate);
 
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
@@ -294,7 +295,9 @@ eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
  *  Site Listeners Event Handlers
  ************************************/
 
-starshipChecker.on("siteUpdate", mainBotHandlers.handleStarshipSiteUpdate);
+starshipChecker.on("siteUpdate", (update) =>
+  utilityBot.emit("starshipSiteUpdate", update)
+);
 
 /***********************************
  *  Dev Test Event Handlers

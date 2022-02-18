@@ -14,7 +14,7 @@ export default async function handleStarshipSiteUpdate(
   const client: Client = this;
   const embed: MessageEmbed = new MessageEmbed();
 
-  const discordDate = `<t:${new Date(update.date).getTime()}:F>`;
+  const discordDate = `<t:${new Date(update.date).getTime() / 1000}:F>`;
 
   embed
     .setColor("#3e7493")
