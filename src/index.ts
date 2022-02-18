@@ -31,10 +31,6 @@ const {
 
 const searchOptions = require("../config/searchOptions.json");
 
-const TEST_CHANNEL = process.env.TESTCHANNEL;
-
-const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
-
 const WMFEED = process.env.WMFEED;
 const MECOFEED = process.env.MECOFEED;
 const OFNFEED = process.env.OFNFEED;

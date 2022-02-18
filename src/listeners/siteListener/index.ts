@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
 import EventEmitter = require("events");
 import { GitHubAgent } from "./github";
@@ -20,7 +20,7 @@ export type ChangeLog = {
 };
 
 export type GithubUpdateEmbedData = {
-  date: string;
+  date: Date;
   url: string;
   diffUrl: string;
 };
@@ -58,7 +58,7 @@ export class SiteListener extends EventEmitter {
   private async checkSite() {
     // Fetch the tracked site's HEAD record
     // We're going to see if there is a change from our most recently tracked etag
-    let response;
+    let response: AxiosResponse<never>;
     try {
       response = await axios.head(this.url);
     } catch (err) {
@@ -96,7 +96,7 @@ export class SiteListener extends EventEmitter {
         const updateData: GithubUpdateEmbedData = {
           url: this.url,
           diffUrl,
-          date: response.headers["last-modified"],
+          date: new Date(response.headers["last-modified"]),
         };
         this.emit("siteUpdate", updateData);
         this.lastMessage = new Date(); // Tracks time for cooldown purposes
