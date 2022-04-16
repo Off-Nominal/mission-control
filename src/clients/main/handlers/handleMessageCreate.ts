@@ -2,7 +2,7 @@ import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
 import {
   findTempsToConvert,
-  sendTemperatureConversions,
+  createTempConversionEmbed,
 } from "../actions/translateTemp";
 
 export enum AllowedPrefix {
@@ -26,7 +26,12 @@ export default async function handleMessageCreate(message: Message) {
   //Checks for Temperatures to Convert
   const temperaturesToConvert = findTempsToConvert(message);
   if (temperaturesToConvert.length) {
-    await sendTemperatureConversions(message, temperaturesToConvert);
+    const embeds = [createTempConversionEmbed(temperaturesToConvert)];
+    try {
+      await message.channel.send({ embeds });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   if (message.author.bot) return;

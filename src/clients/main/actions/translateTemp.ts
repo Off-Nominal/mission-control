@@ -60,10 +60,7 @@ export const findTempsToConvert = (message: Message) => {
   return tempsToConvert;
 };
 
-export const sendTemperatureConversions = async (
-  message: Message,
-  temps: Temperature[]
-) => {
+export const createTempConversionEmbed = (temps: Temperature[]) => {
   const embed = new MessageEmbed({
     title: "Temperature Converter",
   });
@@ -88,11 +85,5 @@ export const sendTemperatureConversions = async (
     ];
   });
 
-  embed.addFields(fields.flat());
-
-  try {
-    await message.channel.send({ embeds: [embed] });
-  } catch (err) {
-    console.error(err);
-  }
+  return embed.addFields(fields.flat());
 };
