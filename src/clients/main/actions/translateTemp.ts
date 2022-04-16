@@ -1,15 +1,45 @@
 import { Message, MessageEmbed } from "discord.js";
 
-type Unit = "C" | "F";
+type Unit = "C" | "F" | "K";
 
-type Temperature = {
-  value: number;
-  unit: Unit;
-};
+class Temperature {
+  public celsius: number;
+  public fahrenheit: number;
+  public kelvin: number;
+
+  constructor(value: number, unit: Unit) {
+    if (unit === "C") {
+      this.celsius = value;
+
+      this.kelvin = this.round(value + 273.15);
+      this.fahrenheit = this.round(value * 1.8 + 32);
+    }
+
+    if (unit === "K") {
+      this.kelvin = value;
+
+      this.celsius = this.round(value - 273.15);
+      this.fahrenheit = this.round((this.celsius - 32) / 1.8);
+    }
+
+    if (unit === "F") {
+      this.fahrenheit = value;
+
+      this.celsius = this.round((value - 32) / 1.8);
+      this.kelvin = this.round(this.celsius + 273.15);
+    }
+  }
+
+  private round(value) {
+    return Math.round(value * 10) / 10;
+  }
+}
+
+const numConvert = (str: string) => Number(str.replaceAll(",", ""));
 
 export const findTempsToConvert = (message: Message) => {
   const regex = new RegExp(
-    /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>\d+,?\d{0,3}\.?\d*)-?(?<temp2>\d+,?\d{0,3}\.?\d*)?\s?°?(?<unit>[FC]|celsius|fahrenheit)\b/gi
+    /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?\s?°?\s?(?<unit>C|celsius|F|fahrenheit|K|kelvin)\b/gi
   );
   const matches = message.content.matchAll(regex);
 
@@ -17,73 +47,43 @@ export const findTempsToConvert = (message: Message) => {
 
   for (const match of matches) {
     const { sign, temp1, temp2, unit } = match.groups;
+    const formattedUnit = unit.toUpperCase().slice(0, 1) as Unit;
 
-    const value = sign ? -Number(temp1) : Number(temp1);
-
-    const temp: Temperature = {
-      value,
-      unit: unit.toUpperCase().slice(0, 1) as Unit,
-    };
-
-    tempsToConvert.push(temp);
+    const value = sign ? -numConvert(temp1) : numConvert(temp1);
+    tempsToConvert.push(new Temperature(value, formattedUnit));
 
     if (temp2) {
-      const value = Number(temp2);
-
-      const temp: Temperature = {
-        value,
-        unit: unit.toUpperCase() as Unit,
-      };
-
-      tempsToConvert.push(temp);
+      const value = numConvert(temp2);
+      tempsToConvert.push(new Temperature(value, formattedUnit));
     }
   }
-
   return tempsToConvert;
 };
 
-const translateTemp = (temp: Temperature): Temperature => {
-  const { unit } = temp;
-  const oppositeUnit = unit === "C" ? "F" : "C";
-  let basis: number;
-
-  if (unit === "C") {
-    basis = (temp.value * 1.8 + 32) * 10;
-  } else if (unit === "F") {
-    basis = ((temp.value - 32) / 1.8) * 10;
-  }
-
-  const value = Math.round(basis) / 10;
-  return {
-    value,
-    unit: oppositeUnit,
-  };
-};
-
-export const sendTemperatureConversions = async (
-  message: Message,
-  temps: Temperature[]
-) => {
-  const embed = new MessageEmbed();
-  embed.setTitle("Temperature Converter");
-
-  let description = "";
-
-  temps.forEach((temp) => {
-    const initialTemp = temp.value.toString().concat("°", temp.unit);
-
-    const translation = translateTemp(temp);
-
-    const newTemp = translation?.value.toString().concat("°", translation.unit);
-
-    description = description.concat(`${initialTemp} is ${newTemp}\n`);
+export const createTempConversionEmbed = (temps: Temperature[]) => {
+  const embed = new MessageEmbed({
+    title: "Temperature Converter",
   });
 
-  embed.setDescription(description);
+  const fields = temps.map((temp) => {
+    return [
+      {
+        value: `${temp.fahrenheit} °F`,
+        name: ":flag_us:",
+        inline: true,
+      },
+      {
+        value: `${temp.celsius} °C`,
+        name: ":earth_americas:",
+        inline: true,
+      },
+      {
+        value: `${temp.kelvin} K`,
+        name: ":microscope:",
+        inline: true,
+      },
+    ];
+  });
 
-  try {
-    await message.channel.send({ embeds: [embed] });
-  } catch (err) {
-    console.error(err);
-  }
+  return embed.addFields(fields.flat());
 };

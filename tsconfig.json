@@ -4,7 +4,7 @@
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "dist",
-    "lib": ["es2020.string"],
+    "lib": ["es2021.string"],
     "downlevelIteration": true,
     "skipLibCheck": true
   },
