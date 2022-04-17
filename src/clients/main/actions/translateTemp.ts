@@ -11,27 +11,43 @@ class Temperature {
     if (unit === "C") {
       this.celsius = value;
 
-      this.kelvin = this.round(value + 273.15);
-      this.fahrenheit = this.round(value * 1.8 + 32);
+      this.kelvin = this.round(this.CtoK(value));
+      this.fahrenheit = this.round(this.CtoF(value));
     }
 
     if (unit === "K") {
       this.kelvin = value;
 
-      this.celsius = this.round(value - 273.15);
-      this.fahrenheit = this.round((this.celsius - 32) / 1.8);
+      this.celsius = this.round(this.KtoC(value));
+      this.fahrenheit = this.round(this.CtoF(this.celsius));
     }
 
     if (unit === "F") {
       this.fahrenheit = value;
 
-      this.celsius = this.round((value - 32) / 1.8);
-      this.kelvin = this.round(this.celsius + 273.15);
+      this.celsius = this.round(this.FtoC(value));
+      this.kelvin = this.round(this.CtoK(this.celsius));
     }
   }
 
   private round(value) {
     return Math.round(value * 10) / 10;
+  }
+
+  private CtoF(val) {
+    return val * 1.8 + 32;
+  }
+
+  private CtoK(val) {
+    return val + 273.15;
+  }
+
+  private FtoC(val) {
+    return (val - 32) / 1.8;
+  }
+
+  private KtoC(val) {
+    return val - 273.15;
   }
 }
 
