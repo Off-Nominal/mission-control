@@ -55,7 +55,7 @@ const numConvert = (str: string) => Number(str.replaceAll(",", ""));
 
 export const findTempsToConvert = (message: Message) => {
   const regex = new RegExp(
-    /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?\s?°?\s?(?<unit>C|celsius|F|fahrenheit|K|kelvin)\b/gi
+    /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?°?\s?(?<unit>C|celsius|F|fahrenheit|K|kelvin)\b/gi
   );
   const matches = message.content.matchAll(regex);
 
