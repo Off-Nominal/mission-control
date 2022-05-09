@@ -21,6 +21,7 @@ import {
   generateLinkSummary,
   generateTwitterSummary,
 } from "../clients/main/actions/generateSummary/reportFieldGenerators";
+import { fetchMessagesInLast } from "../helpers/fetchMessagesInLast";
 
 export type ReportGeneratorError = {
   dm: string;
@@ -130,53 +131,53 @@ export class ReportGenerator {
     }
   }
 
-  private async fetchMessages(channel: TextChannel, hourLimit: number) {
-    const DISCORD_API_LIMIT = 100; // Discord's API prevents more than 100 messages per API call
+  // private async fetchMessages(channel: TextChannel, hourLimit: number) {
+  //   const DISCORD_API_LIMIT = 100; // Discord's API prevents more than 100 messages per API call
 
-    let messagePoint: Snowflake;
-    let messages = new Collection<string, Message>();
+  //   let messagePoint: Snowflake;
+  //   let messages = new Collection<string, Message>();
 
-    const options: ChannelLogsQueryOptions = {
-      limit: DISCORD_API_LIMIT,
-    };
+  //   const options: ChannelLogsQueryOptions = {
+  //     limit: DISCORD_API_LIMIT,
+  //   };
 
-    const now = new Date();
-    const timeHorizon = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
+  //   const now = new Date();
+  //   const timeHorizon = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
 
-    const fetcher = async () => {
-      if (messagePoint) {
-        options.before = messagePoint;
-      }
+  //   const fetcher = async () => {
+  //     if (messagePoint) {
+  //       options.before = messagePoint;
+  //     }
 
-      try {
-        const response = await channel.messages.fetch(options);
-        messagePoint = response.last().id;
-        messages = messages.concat(response);
-      } catch (err) {
-        throw err;
-      }
+  //     try {
+  //       const response = await channel.messages.fetch(options);
+  //       messagePoint = response.last().id;
+  //       messages = messages.concat(response);
+  //     } catch (err) {
+  //       throw err;
+  //     }
 
-      const timeStamp = new Date(messages.last().createdTimestamp);
+  //     const timeStamp = new Date(messages.last().createdTimestamp);
 
-      if (timeStamp > timeHorizon) {
-        await fetcher(); // recursively call fetcher until the accumulated Collection spans the designated time window.
-      }
-    };
+  //     if (timeStamp > timeHorizon) {
+  //       await fetcher(); // recursively call fetcher until the accumulated Collection spans the designated time window.
+  //     }
+  //   };
 
-    try {
-      await fetcher();
-    } catch (err) {
-      throw err;
-    }
+  //   try {
+  //     await fetcher();
+  //   } catch (err) {
+  //     throw err;
+  //   }
 
-    // Remove items older than time limit
-    // Since the original API calls go in batches, the last batch usually fetches
-    // messages past the time limit. This removes them.
-    messages =
-      messages && messages.filter((msg) => msg.createdAt > timeHorizon);
+  //   // Remove items older than time limit
+  //   // Since the original API calls go in batches, the last batch usually fetches
+  //   // messages past the time limit. This removes them.
+  //   messages =
+  //     messages && messages.filter((msg) => msg.createdAt > timeHorizon);
 
-    this.collections[channel.id] = messages;
-  }
+  //   this.collections[channel.id] = messages;
+  // }
 
   public getReportId(noticeId: string) {
     return this.notices[noticeId];
@@ -195,7 +196,10 @@ export class ReportGenerator {
 
     // Ensures adaquate message collection size has been fetched to generate report from
     try {
-      await this.fetchMessages(channel, hourLimit);
+      this.collections[channel.id] = await fetchMessagesInLast(
+        channel,
+        hourLimit
+      );
     } catch (err) {
       throw err;
     }
