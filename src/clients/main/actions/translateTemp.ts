@@ -58,11 +58,16 @@ export const findTempsToConvert = (message: Message) => {
     /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?°?\s?(?<unit>C|celsius|F|fahrenheit|K|kelvin)\b/gi
   );
   const matches = message.content.matchAll(regex);
-
   const tempsToConvert: Temperature[] = [];
 
   for (const match of matches) {
     const { sign, temp1, temp2, unit } = match.groups;
+
+    // Ignore negative Kelvin values, these aren't real temperatures
+    if (sign && unit === "K") {
+      continue;
+    }
+
     const formattedUnit = unit.toUpperCase().slice(0, 1) as Unit;
 
     const value = sign ? -numConvert(temp1) : numConvert(temp1);
@@ -73,6 +78,7 @@ export const findTempsToConvert = (message: Message) => {
       tempsToConvert.push(new Temperature(value, formattedUnit));
     }
   }
+
   return tempsToConvert;
 };
 
