@@ -1,40 +1,89 @@
-import { Collection, MessageEmbed, Snowflake, ThreadChannel } from "discord.js";
-import fetchTextChannel from "../../actions/fetchChannel";
+import {
+  Collection,
+  MessageEmbed,
+  NewsChannel,
+  Snowflake,
+  TextChannel,
+  ThreadChannel,
+} from "discord.js";
+import { fetchMessagesInLast } from "../../../helpers/fetchMessagesInLast";
 import fetchGuild from "../../actions/fetchGuild";
 
-const GENERAL_CHANNEL_ID = process.env.GENERALCHANNELID;
+type ThreadData = {
+  thread: ThreadChannel;
+  messageCount: number;
+};
+
+type ThreadDigest = {
+  channel: TextChannel | NewsChannel;
+  threads: ThreadData[];
+};
+
+type ThreadDigests = {
+  [key: string]: ThreadDigest;
+};
 
 export default async function handleThreadDigestSend() {
-  let threads: Collection<Snowflake, ThreadChannel>;
+  let activeThreads: Collection<Snowflake, ThreadChannel>;
 
   try {
     const guild = await fetchGuild(this);
     const fetchedThreads = await guild.channels.fetchActiveThreads();
-    threads = fetchedThreads.threads.filter(
+    activeThreads = fetchedThreads.threads.filter(
       (thread) => thread.type === "GUILD_PUBLIC_THREAD" && !thread.archived
     );
   } catch (err) {
     return console.error(err);
   }
 
-  const fields = threads.map((thread) => {
-    return {
-      name: thread.name,
-      value: `<#${thread.id}> in ${thread.parent} has ${thread.messageCount} messages`,
-    };
-  });
-
-  const embed = new MessageEmbed({
-    title: "Active Discord Threads",
-    description:
-      "Sometimes, threads are hard to notice on Discord. Here is your daily summary of the active conversations you might be missing!",
-    fields,
-  });
+  let fetchedActiveThreads: ThreadData[];
 
   try {
-    const channel = await fetchTextChannel(this, GENERAL_CHANNEL_ID);
-    await channel.send({ embeds: [embed] });
-  } catch (err) {
-    console.error(err);
+    const fulfilledPromises = await Promise.all(
+      activeThreads.map((thread) => fetchMessagesInLast(thread, 72))
+    );
+    fetchedActiveThreads = fulfilledPromises.map((msgCollection) => {
+      return {
+        thread: msgCollection.first().channel as ThreadChannel,
+        messageCount: msgCollection.size,
+      };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+  const threadDigests: ThreadDigests = {};
+
+  fetchedActiveThreads.forEach((threadData) => {
+    if (!threadDigests[threadData.thread.parentId]) {
+      threadDigests[threadData.thread.parentId] = {
+        channel: threadData.thread.parent,
+        threads: [],
+      };
+    }
+
+    threadDigests[threadData.thread.parentId].threads.push(threadData);
+  });
+
+  for (const digest in threadDigests) {
+    const fields = threadDigests[digest].threads.map((threadData) => {
+      return {
+        name: threadData.thread.name,
+        value: `<#${threadData.thread.id}> has ${threadData.messageCount} messages in the last 3 days.`,
+      };
+    });
+
+    const embed = new MessageEmbed({
+      title: "Active Discord Threads",
+      description:
+        "Sometimes, threads are hard to notice on Discord. Here is your daily summary of the active conversations you might be missing in this channel!",
+      fields,
+    });
+
+    try {
+      await threadDigests[digest].channel.send({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

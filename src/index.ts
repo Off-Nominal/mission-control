@@ -306,6 +306,7 @@ if (process.env.NODE_ENV === "dev") {
     const feed = feeds[show] as FeedListener;
     feed.emit("newContent", feed.fetchRecent());
   });
+
   utilityBot.on("dev_dbtest", () => {
     console.log("dbtest invoked");
     db.query("SELECT NOW()")
@@ -315,4 +316,6 @@ if (process.env.NODE_ENV === "dev") {
         console.error(err);
       });
   });
+
+  utilityBot.on("dev_threadDigestSend", mainBotHandlers.handleThreadDigestSend);
 }
