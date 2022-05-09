@@ -11,6 +11,6 @@ export default function handleMessageCreate(message: Message) {
   }
 
   if (prefix === "!threaddigest") {
-    message.client.emit("threadDigestSend");
+    message.client.emit("dev_threadDigestSend");
   }
 }
