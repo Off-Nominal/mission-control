@@ -48,7 +48,7 @@ export default function generateInteractionCreateHandler(db: Client) {
       try {
         await createDiscordEvent(eventOptions, interaction.client);
         await interaction.reply({
-          content: `Request receieved! Your event "${name}" will start imminently.`,
+          content: `Your event "${name}" will start imminently.\n\n${url}`,
         });
       } catch (err) {
         await interaction.reply({
