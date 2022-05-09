@@ -20,6 +20,7 @@ export const fetchMessagesInLast = async (
 
   let messagePoint: Snowflake;
   let messages = new Collection<string, Message>();
+  let lastMessageReached = false;
 
   const now = new Date();
   const timeHorizon = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
@@ -31,6 +32,11 @@ export const fetchMessagesInLast = async (
 
     try {
       const response = await channel.messages.fetch(options);
+
+      if (response.size < 100) {
+        lastMessageReached = true;
+      }
+
       messagePoint = response.last().id;
       messages = messages.concat(response);
     } catch (err) {
@@ -39,9 +45,11 @@ export const fetchMessagesInLast = async (
 
     const timeStamp = new Date(messages.last().createdTimestamp);
 
-    if (timeStamp > timeHorizon) {
-      await fetcher(); // recursively call fetcher until the accumulated Collection spans the designated time window.
+    if (timeStamp < timeHorizon || lastMessageReached) {
+      return; // if the last message spans the time horizon, or you've reached the first message in the thread
     }
+
+    await fetcher(); // recursively call fetcher
   };
 
   try {

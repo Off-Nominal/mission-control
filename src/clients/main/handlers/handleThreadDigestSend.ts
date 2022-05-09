@@ -1,17 +1,22 @@
 import {
   Collection,
-  Message,
   MessageEmbed,
   NewsChannel,
   Snowflake,
   TextChannel,
   ThreadChannel,
 } from "discord.js";
+import { fetchMessagesInLast } from "../../../helpers/fetchMessagesInLast";
 import fetchGuild from "../../actions/fetchGuild";
+
+type ThreadData = {
+  thread: ThreadChannel;
+  messageCount: number;
+};
 
 type ThreadDigest = {
   channel: TextChannel | NewsChannel;
-  threads: ThreadChannel[];
+  threads: ThreadData[];
 };
 
 type ThreadDigests = {
@@ -31,32 +36,40 @@ export default async function handleThreadDigestSend() {
     return console.error(err);
   }
 
-  const threadDigests: ThreadDigests = {};
-  const fetchPromises: Promise<Collection<string, Message<boolean>>>[] = [];
+  let fetchedActiveThreads: ThreadData[];
 
-  activeThreads.forEach((thread) => {
-    if (!threadDigests[thread.parentId]) {
-      threadDigests[thread.parentId] = {
-        channel: thread.parent,
+  try {
+    const fulfilledPromises = await Promise.all(
+      activeThreads.map((thread) => fetchMessagesInLast(thread, 72))
+    );
+    fetchedActiveThreads = fulfilledPromises.map((msgCollection) => {
+      return {
+        thread: msgCollection.first().channel as ThreadChannel,
+        messageCount: msgCollection.size,
+      };
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+  const threadDigests: ThreadDigests = {};
+
+  fetchedActiveThreads.forEach((threadData) => {
+    if (!threadDigests[threadData.thread.parentId]) {
+      threadDigests[threadData.thread.parentId] = {
+        channel: threadData.thread.parent,
         threads: [],
       };
     }
 
-    threadDigests[thread.parentId].threads.push(thread);
-    fetchPromises.push(thread.messages.fetch({}, { force: true }));
+    threadDigests[threadData.thread.parentId].threads.push(threadData);
   });
 
-  try {
-    await Promise.all(fetchPromises);
-  } catch (err) {
-    console.error(err);
-  }
-
   for (const digest in threadDigests) {
-    const fields = threadDigests[digest].threads.map((thread) => {
+    const fields = threadDigests[digest].threads.map((threadData) => {
       return {
-        name: thread.name,
-        value: `<#${thread.id}> has ${thread.messages.cache.size} messages`,
+        name: threadData.thread.name,
+        value: `<#${threadData.thread.id}> has ${threadData.messageCount} messages in the last 3 days.`,
       };
     });
 

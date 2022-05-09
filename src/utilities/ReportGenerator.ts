@@ -1,12 +1,9 @@
-import { sub } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import {
-  ChannelLogsQueryOptions,
   Collection,
   CommandInteraction,
   Message,
   MessageEmbed,
-  Snowflake,
   TextChannel,
   User,
 } from "discord.js";
@@ -130,54 +127,6 @@ export class ReportGenerator {
       console.error(err);
     }
   }
-
-  // private async fetchMessages(channel: TextChannel, hourLimit: number) {
-  //   const DISCORD_API_LIMIT = 100; // Discord's API prevents more than 100 messages per API call
-
-  //   let messagePoint: Snowflake;
-  //   let messages = new Collection<string, Message>();
-
-  //   const options: ChannelLogsQueryOptions = {
-  //     limit: DISCORD_API_LIMIT,
-  //   };
-
-  //   const now = new Date();
-  //   const timeHorizon = sub(now, { hours: hourLimit }); // The oldest Date a message can be to fit within specified window
-
-  //   const fetcher = async () => {
-  //     if (messagePoint) {
-  //       options.before = messagePoint;
-  //     }
-
-  //     try {
-  //       const response = await channel.messages.fetch(options);
-  //       messagePoint = response.last().id;
-  //       messages = messages.concat(response);
-  //     } catch (err) {
-  //       throw err;
-  //     }
-
-  //     const timeStamp = new Date(messages.last().createdTimestamp);
-
-  //     if (timeStamp > timeHorizon) {
-  //       await fetcher(); // recursively call fetcher until the accumulated Collection spans the designated time window.
-  //     }
-  //   };
-
-  //   try {
-  //     await fetcher();
-  //   } catch (err) {
-  //     throw err;
-  //   }
-
-  //   // Remove items older than time limit
-  //   // Since the original API calls go in batches, the last batch usually fetches
-  //   // messages past the time limit. This removes them.
-  //   messages =
-  //     messages && messages.filter((msg) => msg.createdAt > timeHorizon);
-
-  //   this.collections[channel.id] = messages;
-  // }
 
   public getReportId(noticeId: string) {
     return this.notices[noticeId];
