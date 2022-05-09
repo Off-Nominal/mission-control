@@ -83,29 +83,17 @@ export const findTempsToConvert = (message: Message) => {
 };
 
 export const createTempConversionEmbed = (temps: Temperature[]) => {
+  const description = temps
+    .map(
+      (temp) =>
+        `:flag_us: ${temp.fahrenheit} °F :earth_americas: ${temp.celsius} °C :microscope: ${temp.kelvin} K`
+    )
+    .join("\n");
+
   const embed = new MessageEmbed({
     title: "Temperature Converter",
+    description,
   });
 
-  const fields = temps.map((temp) => {
-    return [
-      {
-        value: `${temp.fahrenheit} °F`,
-        name: ":flag_us:",
-        inline: true,
-      },
-      {
-        value: `${temp.celsius} °C`,
-        name: ":earth_americas:",
-        inline: true,
-      },
-      {
-        value: `${temp.kelvin} K`,
-        name: ":microscope:",
-        inline: true,
-      },
-    ];
-  });
-
-  return embed.addFields(fields.flat());
+  return embed;
 };
