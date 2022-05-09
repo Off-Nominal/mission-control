@@ -1,5 +1,6 @@
 import {
   Collection,
+  Message,
   MessageEmbed,
   NewsChannel,
   Snowflake,
@@ -12,6 +13,7 @@ type ThreadDigest = {
   channel: TextChannel | NewsChannel;
   threads: ThreadChannel[];
 };
+
 type ThreadDigests = {
   [key: string]: ThreadDigest;
 };
@@ -30,7 +32,7 @@ export default async function handleThreadDigestSend() {
   }
 
   const threadDigests: ThreadDigests = {};
-  const fetchPromises = [];
+  const fetchPromises: Promise<Collection<string, Message<boolean>>>[] = [];
 
   activeThreads.forEach((thread) => {
     if (!threadDigests[thread.parentId]) {
