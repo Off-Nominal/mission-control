@@ -293,6 +293,7 @@ ytFeedListener.on("streamStarted", streamHost.startParty);
  ************************************/
 
 eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
+streamHost.on("partyMessage", eventBotHandlers.handlePartyMessage);
 
 /***********************************
  *  Site Listeners Event Handlers
