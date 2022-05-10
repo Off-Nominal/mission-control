@@ -104,11 +104,19 @@ export class FeedListener extends Watcher {
     return this.episodes.find((episode) => episode.url === url);
   }
 
-  public verifyEvent(event: GuildScheduledEvent<"ACTIVE">) {
+  public verifyEvent(event: GuildScheduledEvent<"ACTIVE" | "COMPLETED">) {
     const stream = this.episodes.find(
       (episode) => episode.url === event.entityMetadata?.location
     );
-    if (stream) {
+
+    if (!stream) {
+      return;
+    }
+
+    if (event.status === "COMPLETED") {
+      this.emit("streamEnded", event);
+    }
+    if (event.status === "ACTIVE") {
       this.emit("streamStarted", event);
     }
   }

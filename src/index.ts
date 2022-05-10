@@ -254,6 +254,7 @@ eventBot.on("eventStarted", ytFeedListener.verifyEvent);
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
+eventBot.on("eventEnded", ytFeedListener.verifyEvent);
 
 eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
 eventBot.on("eventsRetrieved", eventsListener.initialize);
@@ -287,6 +288,7 @@ ytFeedListener.on("newContent", (content) => {
 });
 
 ytFeedListener.on("streamStarted", streamHost.startParty);
+ytFeedListener.on("streamEnded", streamHost.endParty);
 
 /***********************************
  *  Event Listeners Event Handlers
