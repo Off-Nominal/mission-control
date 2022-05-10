@@ -1,3 +1,4 @@
+import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
 const FuseJS = require("fuse.js");
 const Watcher = require("feed-watcher");
@@ -38,6 +39,7 @@ export class FeedListener extends Watcher {
     this.feed = feed;
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;
+    this.verifyEvent = this.verifyEvent.bind(this);
   }
 
   public async initialize() {
@@ -100,5 +102,14 @@ export class FeedListener extends Watcher {
 
   public getEpisodeByUrl(url: string) {
     return this.episodes.find((episode) => episode.url === url);
+  }
+
+  public verifyEvent(event: GuildScheduledEvent<"ACTIVE">) {
+    const stream = this.episodes.find(
+      (episode) => episode.url === event.entityMetadata?.location
+    );
+    if (stream) {
+      this.emit("streamStarted", event);
+    }
   }
 }

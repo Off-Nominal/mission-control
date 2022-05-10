@@ -6,7 +6,7 @@ export default function handleGuildScheduledEventUpdate(
 ) {
   const newStatus = newEvent.status;
   if (newStatus === "ACTIVE") {
-    // event has started
+    newEvent.client.emit("eventStarted", newEvent);
   }
   if (newStatus === "COMPLETED") {
     newEvent.client.emit("eventEnded", newEvent);

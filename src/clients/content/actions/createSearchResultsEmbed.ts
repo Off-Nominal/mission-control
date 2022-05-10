@@ -11,7 +11,7 @@ export const createSearchResultsEmbed = (
   return new MessageEmbed()
     .setColor("#3e7493")
     .setTitle("Search Results")
-    .setAuthor(title)
+    .setAuthor({ name: title })
     .setThumbnail(image)
     .setDescription(`Top three results for your search \`${searchTerm}\``)
     .addFields(

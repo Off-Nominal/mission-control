@@ -11,9 +11,10 @@ import {
   youtubeFeedMapper,
   simpleCastFeedMapper,
 } from "./listeners/feedListener/mappers";
-import deployWeMartians from "./utilities/deployWeMartians";
 import { EventsListener } from "./listeners/eventsListener/EventsListener";
+import { StreamHost } from "./listeners/streamHost/streamHost";
 
+import deployWeMartians from "./utilities/deployWeMartians";
 import handleError from "./clients/actions/handleError";
 import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 
@@ -121,6 +122,7 @@ const starshipChecker = new SiteListener(
  ************************************/
 
 const eventsListener = new EventsListener();
+const streamHost = new StreamHost();
 
 /***********************************
  *  Feed Listener Setup
@@ -240,16 +242,19 @@ eventBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
-eventBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
 eventBot.on(
   "guildScheduledEventCreate",
   eventBotHandlers.handleGuildScheduledEventCreate
 );
+eventBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
 eventBot.on("guildScheduledEventCreate", eventsListener.addEvent);
 eventBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
+
+eventBot.on("eventStarted", ytFeedListener.verifyEvent);
 eventBot.on("eventEnded", (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
+
 eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
 eventBot.on("eventsRetrieved", eventsListener.initialize);
 eventBot.on("error", handleError);
@@ -280,6 +285,8 @@ hhFeedListener.on("newContent", (content) => {
 ytFeedListener.on("newContent", (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);
 });
+
+ytFeedListener.on("streamStarted", streamHost.startParty);
 
 /***********************************
  *  Event Listeners Event Handlers
