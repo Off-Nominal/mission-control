@@ -1,5 +1,5 @@
 import { MessageEmbed } from "discord.js";
-import letters from "./pollOptions";
+import letters from "../../../../helpers/pollIndicators";
 
 export default function createPollEmbed(question: string, answers: string[]) {
   const optionsString = answers

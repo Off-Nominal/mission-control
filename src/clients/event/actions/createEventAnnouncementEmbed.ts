@@ -16,7 +16,7 @@ export default function createEventAnnouncementEmbed(
 
   return new MessageEmbed()
     .setTitle(event.name)
-    .setAuthor(author)
+    .setAuthor({ name: author })
     .setDescription(event.description || "No event description provided.")
     .setThumbnail(thumbnail)
     .addField(

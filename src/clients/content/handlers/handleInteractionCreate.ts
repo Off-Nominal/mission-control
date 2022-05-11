@@ -12,6 +12,8 @@ export default function handleInteractionCreate(
     ofn: FeedListener;
     rpr: FeedListener;
     hl: FeedListener;
+    hh: FeedListener;
+    yt: FeedListener;
   }
 ) {
   if (!interaction.isCommand()) return;

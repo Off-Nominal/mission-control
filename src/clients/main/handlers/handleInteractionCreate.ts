@@ -4,7 +4,7 @@ import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
 import { marsTime } from "../actions/marstime/marsTime";
 import shunt from "../actions/shunt";
-import letters from "../actions/poll/pollOptions";
+import letters from "../../../helpers/pollIndicators";
 import createPollHelpEmbed from "../actions/poll/createPollHelpEmbed";
 
 export default async function handleInteractionCreate(

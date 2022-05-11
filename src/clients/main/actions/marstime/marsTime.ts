@@ -130,7 +130,7 @@ export const marsTime = async (spacecraft: string) => {
     createEmbedFields(data);
 
   return new MessageEmbed()
-    .setAuthor(author)
+    .setAuthor({ name: author })
     .setDescription(description)
     .addFields([
       {
