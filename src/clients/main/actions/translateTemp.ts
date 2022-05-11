@@ -60,7 +60,7 @@ const numConvert = (str: string) => Number(str.replaceAll(",", ""));
 export const findTempsToConvert = (message: Message) => {
   const matches = message.content.matchAll(regex);
   const tempsToConvert: Temperature[] = [];
-  const dupChecker = []; // stores simple values to check for duplicates
+  const dupChecker: string[] = []; // stores simple values to check for duplicates
 
   for (const match of matches) {
     const { sign, temp1, temp2, unit } = match.groups;
