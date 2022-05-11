@@ -1,5 +1,6 @@
 import {
   Collection,
+  Message,
   MessageEmbed,
   NewsChannel,
   Snowflake,
@@ -39,17 +40,25 @@ export default async function handleThreadDigestSend() {
   let fetchedActiveThreads: ThreadData[];
 
   try {
-    const fulfilledPromises = await Promise.all(
+    const fulfilledPromises = await Promise.allSettled(
       activeThreads.map((thread) => fetchMessagesInLast(thread, 72))
     );
-    fetchedActiveThreads = fulfilledPromises.map((msgCollection) => {
+
+    fetchedActiveThreads = (
+      fulfilledPromises.filter((promise) => {
+        if (promise.status === "rejected") {
+          console.error(promise.reason);
+        }
+        return promise.status === "fulfilled";
+      }) as PromiseFulfilledResult<Collection<string, Message<boolean>>>[]
+    ).map((msgCollection) => {
       return {
-        thread: msgCollection.first().channel as ThreadChannel,
-        messageCount: msgCollection.size,
+        thread: msgCollection.value.first().channel as ThreadChannel,
+        messageCount: msgCollection.value.size,
       };
     });
   } catch (error) {
-    console.error(error);
+    return console.error(error);
   }
 
   const threadDigests: ThreadDigests = {};
