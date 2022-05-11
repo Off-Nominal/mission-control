@@ -37,29 +37,23 @@ export default async function handleThreadDigestSend() {
     return console.error(err);
   }
 
-  let fetchedActiveThreads: ThreadData[];
+  const promises = await Promise.allSettled(
+    activeThreads.map((thread) => fetchMessagesInLast(thread, 72))
+  );
 
-  try {
-    const fulfilledPromises = await Promise.allSettled(
-      activeThreads.map((thread) => fetchMessagesInLast(thread, 72))
-    );
-
-    fetchedActiveThreads = (
-      fulfilledPromises.filter((promise) => {
-        if (promise.status === "rejected") {
-          console.error(promise.reason);
-        }
-        return promise.status === "fulfilled";
-      }) as PromiseFulfilledResult<Collection<string, Message<boolean>>>[]
-    ).map((msgCollection) => {
-      return {
-        thread: msgCollection.value.first().channel as ThreadChannel,
-        messageCount: msgCollection.value.size,
-      };
-    });
-  } catch (error) {
-    return console.error(error);
-  }
+  const fetchedActiveThreads: ThreadData[] = (
+    promises.filter((promise) => {
+      if (promise.status === "rejected") {
+        console.error(promise.reason);
+      }
+      return promise.status === "fulfilled";
+    }) as PromiseFulfilledResult<Collection<string, Message<boolean>>>[]
+  ).map((msgCollection) => {
+    return {
+      thread: msgCollection.value.first().channel as ThreadChannel,
+      messageCount: msgCollection.value.size,
+    };
+  });
 
   const threadDigests: ThreadDigests = {};
 
