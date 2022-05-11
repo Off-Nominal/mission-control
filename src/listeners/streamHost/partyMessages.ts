@@ -1,8 +1,13 @@
-import { GuildScheduledEvent, MessageEmbed } from "discord.js";
+import { GuildMember, GuildScheduledEvent, MessageEmbed } from "discord.js";
 
 export type PartyMessages = {
   text: string;
   waitTime: number;
+};
+
+export type TitleSuggestion = {
+  title: string;
+  suggester: GuildMember;
 };
 
 export const generatePartyMessages = (
@@ -12,10 +17,6 @@ export const generatePartyMessages = (
     {
       text: `Welcome to the stream for ${event.name}! I'll be your host for this event. Let's see if we can't spice things up a little today!`,
       waitTime: 0,
-    },
-    {
-      text: "Over under on these guys getting started on time?",
-      waitTime: 0.25,
     },
   ];
 
