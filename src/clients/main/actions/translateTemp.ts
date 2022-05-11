@@ -64,26 +64,28 @@ export const findTempsToConvert = (message: Message) => {
 
   for (const match of matches) {
     const { sign, temp1, temp2, unit } = match.groups;
-    const simpleValue = `${sign}${temp1}-${temp2}${unit}`;
-
-    // checks if value is a duplicate
-    if (dupChecker.includes(simpleValue)) {
-      continue;
-    } else {
-      dupChecker.push(simpleValue);
-    }
-
-    // Ignore negative Kelvin values, these aren't real temperatures
-    if (sign && unit === "K") {
-      continue;
-    }
-
     const formattedUnit = unit.toUpperCase().slice(0, 1) as Unit;
 
-    const value = sign ? -numConvert(temp1) : numConvert(temp1);
-    tempsToConvert.push(new Temperature(value, formattedUnit));
+    const simpleValue1 = `${sign}${temp1}${unit}`;
 
-    if (temp2) {
+    // checks if value is a duplicate
+    if (temp1 && !dupChecker.includes(simpleValue1)) {
+      dupChecker.push(simpleValue1);
+
+      // Ignore negative Kelvin values, these aren't real temperatures
+      if (sign && unit === "K") {
+        continue;
+      }
+
+      const value = sign ? -numConvert(temp1) : numConvert(temp1);
+      tempsToConvert.push(new Temperature(value, formattedUnit));
+    }
+
+    const simpleValue2 = `${temp2}${unit}`;
+
+    if (temp2 && !dupChecker.includes(simpleValue2)) {
+      dupChecker.push(simpleValue2);
+
       const value = numConvert(temp2);
       tempsToConvert.push(new Temperature(value, formattedUnit));
     }
