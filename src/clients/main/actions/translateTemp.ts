@@ -1,5 +1,9 @@
 import { Message, MessageEmbed } from "discord.js";
 
+const regex = new RegExp(
+  /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?°?\s?(?<unit>C|celsius|F|fahrenheit|K|kelvin)\b/gi
+);
+
 type Unit = "C" | "F" | "K";
 
 class Temperature {
@@ -54,14 +58,20 @@ class Temperature {
 const numConvert = (str: string) => Number(str.replaceAll(",", ""));
 
 export const findTempsToConvert = (message: Message) => {
-  const regex = new RegExp(
-    /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?°?\s?(?<unit>C|celsius|F|fahrenheit|K|kelvin)\b/gi
-  );
   const matches = message.content.matchAll(regex);
   const tempsToConvert: Temperature[] = [];
+  const dupChecker = []; // stores simple values to check for duplicates
 
   for (const match of matches) {
     const { sign, temp1, temp2, unit } = match.groups;
+    const simpleValue = `${sign}${temp1}-${temp2}${unit}`;
+
+    // checks if value is a duplicate
+    if (dupChecker.includes(simpleValue)) {
+      continue;
+    } else {
+      dupChecker.push(simpleValue);
+    }
 
     // Ignore negative Kelvin values, these aren't real temperatures
     if (sign && unit === "K") {
