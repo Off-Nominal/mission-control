@@ -2,10 +2,12 @@ import { GuildScheduledEvent } from "discord.js";
 import EventEmitter = require("events");
 import { generatePartyMessages, PartyMessages } from "./partyMessages";
 
+const MS_IN_A_MINUTE = 60000;
+
 export class StreamHost extends EventEmitter {
   private active: boolean;
   private activeEvent: GuildScheduledEvent<"ACTIVE"> = null;
-  private partyMessages: PartyMessages | null = null;
+  private partyMessages: PartyMessages[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
 
   constructor() {
@@ -19,20 +21,19 @@ export class StreamHost extends EventEmitter {
   }
 
   private sendPartyMessage(
-    key: string,
+    message: string,
     event: GuildScheduledEvent<"ACTIVE"> = this.activeEvent
   ) {
-    this.emit("partyMessage", this.partyMessages[key].text, event);
+    this.emit("partyMessage", message, event);
   }
 
   private initiatePartyMessageSchedule() {
-    for (const message in this.partyMessages) {
-      this.partyMessageTimers.push(
-        setTimeout(() => {
-          this.sendPartyMessage(message);
-        }, this.partyMessages[message].waitTime)
-      );
-    }
+    console.log(this.partyMessages);
+    this.partyMessageTimers = this.partyMessages.map((msg) => {
+      return setTimeout(() => {
+        this.sendPartyMessage(msg.text);
+      }, msg.waitTime * MS_IN_A_MINUTE);
+    });
   }
 
   public startParty(event: GuildScheduledEvent<"ACTIVE">) {
@@ -53,6 +54,10 @@ export class StreamHost extends EventEmitter {
   }
 
   public endParty() {
+    if (!this.active) {
+      return;
+    }
+
     this.emit("partyMessage", "Thanks for hanging out!", this.activeEvent);
     this.clearMessageTimers();
     this.active = false;
