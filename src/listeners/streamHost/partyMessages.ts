@@ -23,13 +23,17 @@ export const generatePartyMessages = (
   const randomMessages = [
     "Is there something on Jake's shirt?",
     "Oh dear, this one's going off the rails, isn't it...",
+    "This is gonna be a two beer episode, isn't it...",
     "Wait what did he just say?",
-    "Omg",
+    "Omg lol",
     "brb, I'm going to get another beer",
     "I love hanging out with y'all!",
+    "Am I getting on Chase's nerves yet?",
+    "Wow, this is a great episode so far.",
+    "Mac and cheese should be eaten with a fork.",
   ];
 
-  const chosenMessages = randomMessages.filter(() => Math.random() > 0.5);
+  const chosenMessages = randomMessages.filter(() => Math.random() > 0.4);
 
   const timedChosenMessages = chosenMessages.map((msg) => {
     return {
