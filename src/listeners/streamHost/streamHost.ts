@@ -1,6 +1,10 @@
-import { GuildScheduledEvent } from "discord.js";
+import { GuildScheduledEvent, MessageEmbed } from "discord.js";
 import EventEmitter = require("events");
-import { generatePartyMessages, PartyMessages } from "./partyMessages";
+import {
+  generatePartyMessages,
+  PartyMessages,
+  streamTitleEmbed,
+} from "./partyMessages";
 
 const MS_IN_A_MINUTE = 60000;
 
@@ -47,6 +51,13 @@ export class StreamHost extends EventEmitter {
     console.log(`New Stream Party Started: ${event.name}`);
 
     this.initiatePartyMessageSchedule();
+    setTimeout(() => {
+      this.emit(
+        "partyMessage",
+        { embeds: [streamTitleEmbed] },
+        this.activeEvent
+      );
+    });
   }
 
   private clearMessageTimers() {
@@ -64,5 +75,9 @@ export class StreamHost extends EventEmitter {
     this.activeEvent = null;
     this.partyMessages = null;
     console.log("Stream Party Ended");
+  }
+
+  public eventActive() {
+    return this.active;
   }
 }

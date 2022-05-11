@@ -1,4 +1,4 @@
-import { GuildScheduledEvent } from "discord.js";
+import { GuildScheduledEvent, MessageEmbed } from "discord.js";
 
 export type PartyMessages = {
   text: string;
@@ -15,7 +15,7 @@ export const generatePartyMessages = (
     },
     {
       text: "Over under on these guys getting started on time?",
-      waitTime: 0.1,
+      waitTime: 0.25,
     },
   ];
 
@@ -28,7 +28,7 @@ export const generatePartyMessages = (
     "I love hanging out with y'all!",
   ];
 
-  const chosenMessages = randomMessages.filter((msg) => Math.random() > 0.5);
+  const chosenMessages = randomMessages.filter(() => Math.random() > 0.5);
 
   const timedChosenMessages = chosenMessages.map((msg) => {
     return {
@@ -39,3 +39,24 @@ export const generatePartyMessages = (
 
   return [...standardMessages, ...timedChosenMessages];
 };
+
+export const streamTitleEmbed = new MessageEmbed({
+  title: "Help pick an episode title!",
+  description:
+    "Throughout the stream, you can suggest episode titles here in the chat. I'll aggregate these, and at the end of the stream, you can vote on your favourite.",
+  fields: [
+    {
+      name: "Suggesting a title",
+      value: "To suggest a title, use the command `/suggest <title>`",
+    },
+    {
+      name: "Voting on a title",
+      value:
+        "At the end of the episode, I'll put all the titles in the chat and you can vote with emojies on your favourite.",
+    },
+    {
+      name: "Cool, will Anthony and Jake abide by the results of the vote?",
+      value: "LOL like they'd give you that much power!",
+    },
+  ],
+});
