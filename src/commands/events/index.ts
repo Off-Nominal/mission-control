@@ -56,6 +56,17 @@ const commands = [
         .setDescription(
           "Unsubscribe from all future automatic event notifications."
         )
+    )
+    .addSubcommand((command) =>
+      command
+        .setName("suggest")
+        .setDescription("Suggest a title for an Off-Nominal episode.")
+        .addStringOption((option) =>
+          option
+            .setName("title")
+            .setDescription("The title of the episode")
+            .setRequired(true)
+        )
     ),
 ].map((command) => command.toJSON());
 

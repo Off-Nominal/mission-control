@@ -47,7 +47,7 @@ export const streamTitleEmbed = new MessageEmbed({
   fields: [
     {
       name: "Suggesting a title",
-      value: "To suggest a title, use the command `/suggest <title>`",
+      value: "To suggest a title, use the command `/events suggest <title>`",
     },
     {
       name: "Voting on a title",
