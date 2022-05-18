@@ -37,13 +37,9 @@ export default async function handleThreadDigestSend() {
     return console.error(err);
   }
 
-  console.log("Active Threads", activeThreads.size);
-
   const promises = await Promise.allSettled(
     activeThreads.map((thread) => fetchMessagesInLast(thread, 72))
   );
-
-  console.log("Promises for Thread Requests", promises.length);
 
   const fulfilledPromises = promises.filter((promise) => {
     if (promise.status === "rejected") {
@@ -52,18 +48,14 @@ export default async function handleThreadDigestSend() {
     return promise.status === "fulfilled";
   }) as PromiseFulfilledResult<Collection<string, Message<boolean>>>[];
 
-  console.log("Fulfilled Promises", fulfilledPromises.length);
-
   const messageCollections = fulfilledPromises.map(
     (fulfilledPromise) => fulfilledPromise.value
   );
 
-  console.log("Message Collections", messageCollections.length);
-
   const fetchedActiveThreads: ThreadData[] = messageCollections.map(
-    (msgCollection) => {
+    (msgCollection, index) => {
       return {
-        thread: msgCollection.first().channel as ThreadChannel,
+        thread: activeThreads.at(index),
         messageCount: msgCollection.size,
       };
     }
