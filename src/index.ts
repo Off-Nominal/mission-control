@@ -260,6 +260,7 @@ eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
 eventBot.on("eventsRetrieved", eventsListener.initialize);
 eventBot.on("error", handleError);
 eventBot.on("newStreamTitle", streamHost.logSuggestion);
+eventBot.on("viewStreamTitles", streamHost.viewSuggestions);
 
 /***********************************
  *  Feed Listeners Event Handlers

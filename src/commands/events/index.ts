@@ -67,6 +67,11 @@ const commands = [
             .setDescription("The title of the episode")
             .setRequired(true)
         )
+    )
+    .addSubcommand((command) =>
+      command
+        .setName("suggestions")
+        .setDescription("View current suggestsions for Episode titles.")
     ),
 ].map((command) => command.toJSON());
 

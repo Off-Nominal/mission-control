@@ -33,8 +33,7 @@ export class StreamHost extends EventEmitter {
       this.initiatePartyMessageSchedule.bind(this);
     this.clearMessageTimers = this.clearMessageTimers.bind(this);
     this.logSuggestion = this.logSuggestion.bind(this);
-    this.sendCurrentTitleSuggestions =
-      this.sendCurrentTitleSuggestions.bind(this);
+    this.viewSuggestions = this.viewSuggestions.bind(this);
   }
 
   private sendPartyMessage(
@@ -109,25 +108,13 @@ export class StreamHost extends EventEmitter {
     return this.active;
   }
 
-  private sendCurrentTitleSuggestions() {
-    this.sendPartyMessage({
-      embeds: [
-        createPollEmbed(
-          "Current suggestions so far",
-          this.titleSuggestions.map(
-            (sugg) => `**"${sugg.title}"** by *${sugg.suggester.displayName}*`
-          )
-        ),
-      ],
-    });
-  }
-
   public async logSuggestion(title: string, interaction: CommandInteraction) {
     if (!this.active) {
       try {
-        await interaction.reply(
-          `This command only works during a live Off-Nominal episode stream.`
-        );
+        await interaction.reply({
+          content: `This command only works during a live Off-Nominal episode stream.`,
+          ephemeral: true,
+        });
       } catch (err) {
         console.error(err);
       }
@@ -153,8 +140,40 @@ export class StreamHost extends EventEmitter {
     });
 
     try {
-      await interaction.reply(`Got your suggestion of "${title}"!`);
-      this.sendCurrentTitleSuggestions();
+      await interaction.reply({
+        content: `Logged your suggestion of **"${title}"**!\n\nTo view the currently logged suggestsions, use \`/events suggestions\``,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  public async viewSuggestions(interaction: CommandInteraction) {
+    if (!this.active) {
+      try {
+        await interaction.reply({
+          content: `This command only works during a live Off-Nominal episode stream.`,
+          ephemeral: true,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+
+      return;
+    }
+
+    try {
+      await interaction.reply({
+        embeds: [
+          createPollEmbed(
+            "Current suggestions so far",
+            this.titleSuggestions.map(
+              (sugg) => `**"${sugg.title}"** by *${sugg.suggester.displayName}*`
+            )
+          ),
+        ],
+        ephemeral: true,
+      });
     } catch (err) {
       console.error(err);
     }
