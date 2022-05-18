@@ -15,6 +15,7 @@ import {
 } from "./partyMessages";
 
 const MS_IN_A_MINUTE = 60000;
+const MAX_TITLE_SUGGESTIONS = 36;
 
 export class StreamHost extends EventEmitter {
   private active: boolean;
@@ -81,7 +82,7 @@ export class StreamHost extends EventEmitter {
     }
 
     this.emit(
-      "streamTitleVote",
+      "partyMessage",
       {
         content: "Thanks for hanging out everyone!",
         embeds: [
@@ -93,8 +94,7 @@ export class StreamHost extends EventEmitter {
           ),
         ],
       },
-      this.activeEvent,
-      this.titleSuggestions
+      this.activeEvent
     );
 
     this.clearMessageTimers();
@@ -135,7 +135,7 @@ export class StreamHost extends EventEmitter {
       return;
     }
 
-    if (this.titleSuggestions.length > 25) {
+    if (this.titleSuggestions.length >= MAX_TITLE_SUGGESTIONS) {
       try {
         await interaction.reply(
           `Actually, I'm not that sophisticated of a bot, and I can only remember 26 suggestions at a time. If you've reached this point, this is either a really funny episode (not likely), or you're trying to break me (likely) and maybe you should get some new hobbies or something.`

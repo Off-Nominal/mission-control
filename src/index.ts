@@ -297,7 +297,6 @@ ytFeedListener.on("streamEnded", streamHost.endParty);
 
 eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
 streamHost.on("partyMessage", eventBotHandlers.handlePartyMessage);
-streamHost.on("streamTitleVote", eventBotHandlers.handleStreamTitleVote);
 
 /***********************************
  *  Site Listeners Event Handlers

@@ -6,7 +6,6 @@ import { Client } from "pg";
 import generateGuildScheduledEventCreate from "./handleGuildScheduledEventCreate";
 import generateHandleEventsMonitored from "./handleEventsMonitored";
 import handlePartyMessage from "./handlePartyMessage";
-import handleStreamTitleVote from "./handleStreamTitleVote";
 
 export default function generateEventBotHandlers(db: Client) {
   return {
@@ -17,6 +16,5 @@ export default function generateEventBotHandlers(db: Client) {
     handleGuildScheduledEventCreate: generateGuildScheduledEventCreate(db),
     handleEventsMonitored: generateHandleEventsMonitored(db),
     handlePartyMessage,
-    handleStreamTitleVote,
   };
 }
