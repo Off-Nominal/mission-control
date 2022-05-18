@@ -89,7 +89,7 @@ export class StreamHost extends EventEmitter {
           createPollEmbed(
             "Vote on your favourite title suggestion",
             this.titleSuggestions.map(
-              (sugg) => `${sugg.title} by ${sugg.suggester.displayName}`
+              (sugg) => `**"${sugg.title}"** by *${sugg.suggester.displayName}*`
             )
           ),
         ],
