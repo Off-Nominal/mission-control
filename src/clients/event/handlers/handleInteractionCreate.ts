@@ -15,6 +15,7 @@ enum AllowedCommands {
   SUBSCRIBE = "subscribe",
   UNSUBSCRIBE = "unsubscribe",
   SUGGEST = "suggest",
+  SUGGESTIONS = "suggestions",
 }
 
 export default function generateInteractionCreateHandler(db: Client) {
@@ -29,6 +30,10 @@ export default function generateInteractionCreateHandler(db: Client) {
     if (subCommand === AllowedCommands.SUGGEST) {
       const title = options.getString("title", true);
       this.emit("newStreamTitle", title, interaction);
+    }
+
+    if (subCommand === AllowedCommands.SUGGESTIONS) {
+      this.emit("viewStreamTitles", interaction);
     }
 
     if (subCommand === AllowedCommands.START) {

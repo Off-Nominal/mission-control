@@ -15,6 +15,7 @@ import {
 } from "./partyMessages";
 
 const MS_IN_A_MINUTE = 60000;
+const MAX_TITLE_SUGGESTIONS = 36;
 
 export class StreamHost extends EventEmitter {
   private active: boolean;
@@ -32,8 +33,7 @@ export class StreamHost extends EventEmitter {
       this.initiatePartyMessageSchedule.bind(this);
     this.clearMessageTimers = this.clearMessageTimers.bind(this);
     this.logSuggestion = this.logSuggestion.bind(this);
-    this.sendCurrentTitleSuggestions =
-      this.sendCurrentTitleSuggestions.bind(this);
+    this.viewSuggestions = this.viewSuggestions.bind(this);
   }
 
   private sendPartyMessage(
@@ -81,20 +81,19 @@ export class StreamHost extends EventEmitter {
     }
 
     this.emit(
-      "streamTitleVote",
+      "partyMessage",
       {
         content: "Thanks for hanging out everyone!",
         embeds: [
           createPollEmbed(
             "Vote on your favourite title suggestion",
             this.titleSuggestions.map(
-              (sugg) => `${sugg.title} by ${sugg.suggester.displayName}`
+              (sugg) => `**"${sugg.title}"** by *${sugg.suggester.displayName}*`
             )
           ),
         ],
       },
-      this.activeEvent,
-      this.titleSuggestions
+      this.activeEvent
     );
 
     this.clearMessageTimers();
@@ -109,25 +108,13 @@ export class StreamHost extends EventEmitter {
     return this.active;
   }
 
-  private sendCurrentTitleSuggestions() {
-    this.sendPartyMessage({
-      embeds: [
-        createPollEmbed(
-          "Current suggestions so far",
-          this.titleSuggestions.map(
-            (sugg) => `${sugg.title} by ${sugg.suggester.displayName}`
-          )
-        ),
-      ],
-    });
-  }
-
   public async logSuggestion(title: string, interaction: CommandInteraction) {
     if (!this.active) {
       try {
-        await interaction.reply(
-          `This command only works during a live Off-Nominal episode stream.`
-        );
+        await interaction.reply({
+          content: `This command only works during a live Off-Nominal episode stream.`,
+          ephemeral: true,
+        });
       } catch (err) {
         console.error(err);
       }
@@ -135,7 +122,7 @@ export class StreamHost extends EventEmitter {
       return;
     }
 
-    if (this.titleSuggestions.length > 25) {
+    if (this.titleSuggestions.length >= MAX_TITLE_SUGGESTIONS) {
       try {
         await interaction.reply(
           `Actually, I'm not that sophisticated of a bot, and I can only remember 26 suggestions at a time. If you've reached this point, this is either a really funny episode (not likely), or you're trying to break me (likely) and maybe you should get some new hobbies or something.`
@@ -153,8 +140,40 @@ export class StreamHost extends EventEmitter {
     });
 
     try {
-      await interaction.reply(`Got your suggestion of "${title}"!`);
-      this.sendCurrentTitleSuggestions();
+      await interaction.reply({
+        content: `Logged your suggestion of **"${title}"**!\n\nTo view the currently logged suggestsions, use \`/events suggestions\``,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  public async viewSuggestions(interaction: CommandInteraction) {
+    if (!this.active) {
+      try {
+        await interaction.reply({
+          content: `This command only works during a live Off-Nominal episode stream.`,
+          ephemeral: true,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+
+      return;
+    }
+
+    try {
+      await interaction.reply({
+        embeds: [
+          createPollEmbed(
+            "Current suggestions so far",
+            this.titleSuggestions.map(
+              (sugg) => `**"${sugg.title}"** by *${sugg.suggester.displayName}*`
+            )
+          ),
+        ],
+        ephemeral: true,
+      });
     } catch (err) {
       console.error(err);
     }
