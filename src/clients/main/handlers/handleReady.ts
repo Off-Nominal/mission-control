@@ -1,8 +1,7 @@
 import { Client } from "discord.js";
 import { generatePresenceData } from "../../../helpers/generatePresenceData";
 import { logReady } from "../../actions/logReady";
-
-const GUILD_ID = process.env.GUILD_ID;
+import fetchGuild from "../../actions/fetchGuild";
 
 export default function handleReady(client: Client) {
   logReady(client.user.tag);
@@ -10,7 +9,7 @@ export default function handleReady(client: Client) {
   client.user.setPresence(generatePresenceData("/help"));
 
   // Find Off-Nominal Discord Guild, fetch members to prevent partials
-  const guild = client.guilds.cache.find((guild) => guild.id === GUILD_ID);
+  const guild = fetchGuild(client);
   guild.members
     .fetch()
     .catch((err) =>
