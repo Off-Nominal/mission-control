@@ -43,6 +43,10 @@ export default async function handleMessageCreate(message: Message) {
     if (prefix === "!dbtest") {
       this.emit("dev_dbtest");
     }
+
+    if (prefix === "!senddelinquents") {
+      this.emit("dev_sendDelinquents");
+    }
   }
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;

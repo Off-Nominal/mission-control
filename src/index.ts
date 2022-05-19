@@ -17,6 +17,7 @@ import { StreamHost } from "./listeners/streamHost/streamHost";
 import deployWeMartians from "./utilities/deployWeMartians";
 import handleError from "./clients/actions/handleError";
 import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
+import { MemberManager } from "./listeners/memberManager/memberManager";
 
 // Database Config
 const db = new DbClient();
@@ -123,6 +124,15 @@ const starshipChecker = new SiteListener(
 
 const eventsListener = new EventsListener();
 const streamHost = new StreamHost();
+
+/***********************************
+ *  Member Manager Setup
+ ************************************/
+
+const memberManager = new MemberManager();
+memberManager.on("sendDelinquents", () => {
+  mainBotHandlers.handleSendDelinquents(utilityBot);
+});
 
 /***********************************
  *  Feed Listener Setup
@@ -330,4 +340,5 @@ if (process.env.NODE_ENV === "dev") {
   });
 
   utilityBot.on("dev_threadDigestSend", mainBotHandlers.handleThreadDigestSend);
+  utilityBot.on("dev_sendDelinquents", memberManager.sendDelinquents);
 }
