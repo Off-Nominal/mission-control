@@ -2,7 +2,7 @@ import { Client, MessageEmbed } from "discord.js";
 import fetchTextChannel from "../../actions/fetchChannel";
 import fetchGuild from "../../actions/fetchGuild";
 
-const CHANNEL_ID = process.env.GENERALCHANNELID;
+const CHANNEL_ID = process.env.MODSCHANNELID;
 
 const WM_ROLE_ID = process.env.WM_ROLE_ID;
 const MECO_ROLE_ID = process.env.MECO_ROLE_ID;
