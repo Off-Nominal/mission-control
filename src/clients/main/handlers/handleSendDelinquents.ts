@@ -19,12 +19,14 @@ export default async function handleSendDelinquents(client: Client) {
   const allUsers = await guildMemberManager.list({ limit: 1000 });
 
   const delinquents = allUsers.filter((member) => {
-    const hasWMrole = member.roles.cache.has(WM_ROLE_ID);
-    const hasMECOrole = member.roles.cache.has(MECO_ROLE_ID);
-    const hasOFNrole = member.roles.cache.has(OFN_ROLE_ID);
-    const isABot = member.roles.cache.has(BOT_ROLE_ID);
-    const isHost = member.roles.cache.has(HOST_ROLE_ID);
-    return !hasWMrole && !hasMECOrole && !hasOFNrole && !isABot && !isHost;
+    const roleChecks = [
+      member.roles.cache.has(WM_ROLE_ID),
+      member.roles.cache.has(MECO_ROLE_ID),
+      member.roles.cache.has(OFN_ROLE_ID),
+      member.roles.cache.has(BOT_ROLE_ID),
+      member.roles.cache.has(HOST_ROLE_ID),
+    ];
+    return !roleChecks.includes(true);
   });
 
   const embed = new MessageEmbed({
