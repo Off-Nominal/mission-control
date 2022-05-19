@@ -7,6 +7,7 @@ const CHANNEL_ID = process.env.MODSCHANNELID;
 const WM_ROLE_ID = process.env.WM_ROLE_ID;
 const MECO_ROLE_ID = process.env.MECO_ROLE_ID;
 const OFN_ROLE_ID = process.env.OFN_ROLE_ID;
+const BOT_ROLE_ID = process.env.BOT_ROLE_ID;
 
 export default async function handleSendDelinquents(client: Client) {
   const guild = fetchGuild(client);
@@ -20,7 +21,8 @@ export default async function handleSendDelinquents(client: Client) {
     const hasWMrole = member.roles.cache.has(WM_ROLE_ID);
     const hasMECOrole = member.roles.cache.has(MECO_ROLE_ID);
     const hasOFNrole = member.roles.cache.has(OFN_ROLE_ID);
-    return !hasWMrole && !hasMECOrole && !hasOFNrole;
+    const isABot = member.roles.cache.has(BOT_ROLE_ID);
+    return !hasWMrole && !hasMECOrole && !hasOFNrole && !isABot;
   });
 
   const embed = new MessageEmbed({
