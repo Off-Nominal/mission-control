@@ -9,6 +9,7 @@ export class MemberManager extends EventEmitter {
     this.scheduleNextTimer();
     this.scheduleNextTimer = this.scheduleNextTimer.bind(this);
     this.sendDelinquents = this.sendDelinquents.bind(this);
+    this.emit = this.emit.bind(this);
   }
 
   private scheduleNextTimer() {
