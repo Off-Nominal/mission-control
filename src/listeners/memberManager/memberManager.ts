@@ -9,14 +9,15 @@ export class MemberManager extends EventEmitter {
     this.scheduleNextTimer();
     this.scheduleNextTimer = this.scheduleNextTimer.bind(this);
     this.sendDelinquents = this.sendDelinquents.bind(this);
-    this.emit = this.emit.bind(this);
   }
 
   private scheduleNextTimer() {
     clearTimeout(this.nextTimer); // clears last timer
 
     const nextTime = getNextTime({ hour: 12 }).getTime() - Date.now();
-    this.nextTimer = setTimeout(this.sendDelinquents, nextTime);
+    this.nextTimer = setTimeout(() => {
+      this.sendDelinquents();
+    }, nextTime);
   }
 
   public sendDelinquents() {
