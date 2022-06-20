@@ -9,6 +9,7 @@ const MECO_ROLE_ID = process.env.MECO_ROLE_ID;
 const OFN_ROLE_ID = process.env.OFN_ROLE_ID;
 const BOT_ROLE_ID = process.env.BOT_ROLE_ID;
 const HOST_ROLE_ID = process.env.HOST_ROLE_ID;
+const GUEST_ROLE_ID = process.env.GUEST_ROLE_ID;
 
 export default async function handleSendDelinquents(client: Client) {
   const guild = fetchGuild(client);
@@ -25,6 +26,7 @@ export default async function handleSendDelinquents(client: Client) {
       member.roles.cache.has(OFN_ROLE_ID),
       member.roles.cache.has(BOT_ROLE_ID),
       member.roles.cache.has(HOST_ROLE_ID),
+      member.roles.cache.has(GUEST_ROLE_ID),
     ];
     return !roleChecks.includes(true);
   });
