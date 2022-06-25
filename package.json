@@ -26,6 +26,8 @@
     "@discordjs/builders": "^0.12.0",
     "@discordjs/rest": "^0.4.1",
     "@octokit/auth-app": "^3.4.0",
+    "@sanity/client": "^3.3.2",
+    "@sanity/types": "^2.29.5",
     "axios": "^0.27.2",
     "cloudinary": "^1.27.0",
     "date-fns": "^2.25.0",
