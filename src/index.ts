@@ -18,6 +18,7 @@ import deployWeMartians from "./utilities/deployWeMartians";
 import handleError from "./clients/actions/handleError";
 import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 import { MemberManager } from "./listeners/memberManager/memberManager";
+import { NewsListener } from "./listeners/newsListener/newsListener";
 
 // Database Config
 const db = new DbClient();
@@ -117,6 +118,16 @@ const starshipChecker = new SiteListener(
   "https://www.spacex.com/vehicles/starship/",
   { interval: 15, cooldown: 600 }
 );
+
+/***********************************
+ *  News Feed Listener Setup
+ ************************************/
+
+const newsFeedListener = new NewsListener();
+newsFeedListener.initialize();
+newsFeedListener.on("newNews", (newsItem) => {
+  contentBotHandlers.handleNewNews(newsItem, contentBot);
+});
 
 /***********************************
  *  Events Listener Setup
