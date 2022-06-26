@@ -11,25 +11,23 @@ export default async function handleNewNews(
   },
   client: Client
 ) {
+  const { rssEntry, feed } = newsItem;
+
   const embed = new MessageEmbed({
-    title: `${newsItem.rssEntry.title}`,
-    description: `${newsItem.rssEntry.description}`,
-    url: `${newsItem.rssEntry.link}`,
+    title: `${rssEntry.title}`,
+    description: `${rssEntry.description}`,
+    url: `${rssEntry.link}`,
     author: {
-      name: `${newsItem.rssEntry.author}`,
-      icon_url: `${newsItem.feed.thumbnail || ""}`,
+      name: `${rssEntry.author}`,
+      icon_url: `${feed.thumbnail || ""}`,
     },
-    thumbnail: { url: `${newsItem.feed.thumbnail}` },
-    fields: [
-      {
-        name: "Feed Output",
-        value: `\`\`\`json\n${JSON.stringify(newsItem.rssEntry).slice(
-          0,
-          511
-        )}...\n\`\`\``,
-      },
-    ],
+    timestamp: new Date(),
+    footer: {
+      text: "Published",
+    },
   });
+
+  feed.thumbnail && embed.setThumbnail(feed.thumbnail);
 
   let newsChannel: TextChannel;
 
@@ -40,7 +38,13 @@ export default async function handleNewNews(
   }
 
   try {
-    await newsChannel.send({ embeds: [embed] });
+    await newsChannel.send({
+      embeds: [embed],
+      content: `\`\`\`json\n${JSON.stringify(rssEntry).slice(
+        0,
+        1985
+      )}...\n\`\`\``,
+    });
   } catch (err) {
     console.error(err);
     await newsChannel.send({
