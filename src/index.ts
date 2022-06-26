@@ -125,6 +125,9 @@ const starshipChecker = new SiteListener(
 
 const newsFeedListener = new NewsListener();
 newsFeedListener.initialize();
+newsFeedListener.on("newNews", (newsItem) => {
+  contentBotHandlers.handleNewNews(newsItem, contentBot);
+});
 
 /***********************************
  *  Events Listener Setup

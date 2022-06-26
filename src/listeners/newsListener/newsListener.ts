@@ -2,21 +2,23 @@ import EventEmitter = require("events");
 const Watcher = require("feed-watcher");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
-import { Mutation } from "@sanity/types/dist/dts";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
-interface Feed {
-  data: {
-    url: string;
-    _id: string;
-    name: string;
-  };
-  watcher: any;
+export interface CmsResponseData {
+  url: string;
+  _id: string;
+  name: string;
+  thumbnail: string;
 }
 
+export type CmsNewsFeed = {
+  data: CmsResponseData;
+  watcher: any;
+};
+
 export class NewsListener extends EventEmitter {
-  private feeds: Feed[];
+  private feeds: CmsNewsFeed[];
   private cmsClient: SanityClient;
 
   constructor() {
@@ -26,7 +28,7 @@ export class NewsListener extends EventEmitter {
       projectId: process.env.SANITY_CMS_ID,
       dataset: process.env.NODE_ENV,
       apiVersion: "2022-06-24",
-      useCdn: false,
+      useCdn: true,
     });
   }
 
@@ -34,7 +36,10 @@ export class NewsListener extends EventEmitter {
     const watcher = new Watcher(feed.url, FEED_INTERVAL);
     watcher.on("new entries", (entries) => {
       entries.forEach((entry) => {
-        this.notifyNew(entry);
+        this.notifyNew({
+          rssEntry: entry,
+          feed,
+        });
       });
     });
     watcher.on("error", (error) => {
@@ -42,14 +47,16 @@ export class NewsListener extends EventEmitter {
     });
     watcher
       .start()
-      .then((entries) => {
+      .then(() => {
+        this.feeds.push({
+          data: feed,
+          watcher,
+        });
         console.log(`Watching newsFeed ${feed.name}`);
       })
-      .catch((error) => console.error(error));
-    this.feeds.push({
-      data: feed,
-      watcher,
-    });
+      .catch((error) =>
+        console.error(`Error watching Feed ${feed.name}`, error)
+      );
   }
 
   public queryCms(query) {
@@ -88,14 +95,14 @@ export class NewsListener extends EventEmitter {
   }
 
   public initialize() {
-    const query = '*[_type == "newsFeed"]';
+    const query =
+      '*[_type == "newsFeed"]{name, _id, "thumbnail": thumbnail.asset->url, url}';
 
     this.queryCms(query);
     this.subscribeToCms(query);
   }
 
   public notifyNew(newsItem) {
-    console.log("newNews", newsItem);
     this.emit("newNews", newsItem);
   }
 }
