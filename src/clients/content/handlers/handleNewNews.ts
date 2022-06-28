@@ -1,5 +1,5 @@
 import { Client, MessageEmbed, TextChannel } from "discord.js";
-import { CmsResponseData } from "../../../listeners/newsListener/newsListener";
+import { CmsResponseData } from "../../../listeners/feedListener/newsListener";
 import fetchTextChannel from "../../actions/fetchChannel";
 import { stripHtml } from "string-strip-html";
 

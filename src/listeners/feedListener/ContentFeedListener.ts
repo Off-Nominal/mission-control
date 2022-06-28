@@ -1,12 +1,11 @@
 import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
+import { RobustWatcher } from "./RobustWatcher";
 const FuseJS = require("fuse.js");
-const Watcher = require("feed-watcher");
 
-const FEED_CHECK_TIME_IN_SECONDS = 60;
 const defaultProcessor = (item, showTitle: string) => item;
 
-export type FeedItem = {
+export type ContentFeedItem = {
   show: string;
   title: string;
   date: Date;
@@ -18,25 +17,22 @@ export type FeedItem = {
   id?: string;
 };
 
-export type FeedListenerOptions = {
-  processor?: (item: any, showTitle: string) => FeedItem;
+export type ContentFeedListenerOptions = {
+  processor?: (item: any, showTitle: string) => ContentFeedItem;
   rssInterval?: number;
-  searchOptions?: Fuse.IFuseOptions<FeedItem>;
+  searchOptions?: Fuse.IFuseOptions<ContentFeedItem>;
 };
 
-export class FeedListener extends Watcher {
-  episodes: FeedItem[];
+export class ContentFeedListener extends RobustWatcher {
+  episodes: ContentFeedItem[];
   title: string;
   albumArt: string;
-  fuse: Fuse<FeedItem>;
-  searchOptions: Fuse.IFuseOptions<FeedItem> | null;
-  processor: (item: any, showTitle: string) => FeedItem;
-  loadAttempts: number = 0;
-  feed: string;
+  fuse: Fuse<ContentFeedItem>;
+  searchOptions: Fuse.IFuseOptions<ContentFeedItem> | null;
+  processor: (item: any, showTitle: string) => ContentFeedItem;
 
-  constructor(feed: string, options?: FeedListenerOptions) {
-    super(feed, options.rssInterval || FEED_CHECK_TIME_IN_SECONDS);
-    this.feed = feed;
+  constructor(feedUrl: string, options?: ContentFeedListenerOptions) {
+    super(feedUrl, { interval: options.rssInterval });
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;
     this.verifyEvent = this.verifyEvent.bind(this);
@@ -44,8 +40,7 @@ export class FeedListener extends Watcher {
 
   public async initialize() {
     try {
-      this.loadAttempts++;
-      const entries = await this.start(); // fetch data from RSS
+      const entries = await this.robustStart();
       this.title = entries[0].meta.title; // extract Feed program title
       this.albumArt = entries[0].meta.image.url;
       this.episodes = entries
@@ -59,16 +54,10 @@ export class FeedListener extends Watcher {
         console.error(`Error checking ${this.title}.`, error)
       );
     } catch (err) {
-      console.error(`Error loading ${this.feed}.`);
-      if (this.loadAttempts < 3) {
-        console.error("Attempting retry in 5 seconds.");
-        setTimeout(() => this.initialize(), 5000);
-      } else {
-        console.log(
-          `Attempted to initialize ${this.feed} ${this.loadAttempts} times, could not fetch data.`
-        );
-        console.error(err);
-      }
+      console.log(
+        `Attempted to initialize ${this.feed} multiple times, could not fetch data.`
+      );
+      console.error(err);
     }
 
     this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client

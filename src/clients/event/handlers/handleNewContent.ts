@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { FeedItem } from "../../../listeners/feedListener/feedListener";
+import { ContentFeedItem } from "../../../listeners/feedListener/contentFeedListener";
 import fetchTextChannel from "../../actions/fetchChannel";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
@@ -9,7 +9,7 @@ import generateEventDetailsFromYouTube from "../actions/generateEventDetailsFrom
 const ANNOUNCEMENTS_CHANNEL_ID = process.env.ANNOUNCEMENTSCHANNELID;
 
 export default async function handleNewContent(
-  content: FeedItem,
+  content: ContentFeedItem,
   client: Client
 ) {
   try {

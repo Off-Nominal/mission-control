@@ -1,7 +1,10 @@
 import { stripHtml } from "string-strip-html";
-import { FeedItem } from "./feedListener";
+import { ContentFeedItem } from "./contentFeedListener";
 
-export const youtubeFeedMapper = (feedItem, showTitle: string): FeedItem => {
+export const youtubeFeedMapper = (
+  feedItem,
+  showTitle: string
+): ContentFeedItem => {
   return {
     show: showTitle,
     title: feedItem.title,
@@ -13,7 +16,10 @@ export const youtubeFeedMapper = (feedItem, showTitle: string): FeedItem => {
   };
 };
 
-export const simpleCastFeedMapper = (feedItem, showTitle: string): FeedItem => {
+export const simpleCastFeedMapper = (
+  feedItem,
+  showTitle: string
+): ContentFeedItem => {
   const description = stripHtml(feedItem.description).result;
   return {
     show: showTitle,

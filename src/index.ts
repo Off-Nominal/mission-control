@@ -4,7 +4,7 @@ import { Client, Intents } from "discord.js";
 
 import generateHandlers from "./clients/handlers";
 
-import { FeedListener } from "./listeners/feedListener/feedListener";
+import { ContentFeedListener } from "./listeners/feedListener/ContentFeedListener";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import {
@@ -18,7 +18,7 @@ import deployWeMartians from "./utilities/deployWeMartians";
 import handleError from "./clients/actions/handleError";
 import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 import { MemberManager } from "./listeners/memberManager/memberManager";
-import { NewsListener } from "./listeners/newsListener/newsListener";
+import { NewsListener } from "./listeners/feedListener/newsListener";
 
 // Database Config
 const db = new DbClient();
@@ -66,13 +66,13 @@ export enum Feed {
 }
 
 export type FeedList = {
-  [Feed.WEMARTIANS]: FeedListener;
-  [Feed.MAIN_ENGINE_CUT_OFF]: FeedListener;
-  [Feed.OFF_NOMINAL_PODCAST]: FeedListener;
-  [Feed.RED_PLANET_REVIEW]: FeedListener;
-  [Feed.HAPPY_HOUR]: FeedListener;
-  [Feed.MECO_HEADLINES]: FeedListener;
-  [Feed.OFF_NOMINAL_YOUTUBE]: FeedListener;
+  [Feed.WEMARTIANS]: ContentFeedListener;
+  [Feed.MAIN_ENGINE_CUT_OFF]: ContentFeedListener;
+  [Feed.OFF_NOMINAL_PODCAST]: ContentFeedListener;
+  [Feed.RED_PLANET_REVIEW]: ContentFeedListener;
+  [Feed.HAPPY_HOUR]: ContentFeedListener;
+  [Feed.MECO_HEADLINES]: ContentFeedListener;
+  [Feed.OFF_NOMINAL_YOUTUBE]: ContentFeedListener;
 };
 
 /***********************************
@@ -149,31 +149,31 @@ memberManager.on("sendDelinquents", () => {
  *  Feed Listener Setup
  ************************************/
 
-const wmFeedListener = new FeedListener(WMFEED, {
+const wmFeedListener = new ContentFeedListener(WMFEED, {
   processor: simpleCastFeedMapper,
   searchOptions: WM_SEARCH_OPTIONS,
 });
-const mecoFeedListener = new FeedListener(MECOFEED, {
+const mecoFeedListener = new ContentFeedListener(MECOFEED, {
   processor: simpleCastFeedMapper,
   searchOptions: MECO_SEARCH_OPTIONS,
 });
-const ofnFeedListener = new FeedListener(OFNFEED, {
+const ofnFeedListener = new ContentFeedListener(OFNFEED, {
   processor: simpleCastFeedMapper,
   searchOptions: OFN_SEARCH_OPTIONS,
 });
-const rprFeedListener = new FeedListener(RPRFEED, {
+const rprFeedListener = new ContentFeedListener(RPRFEED, {
   processor: simpleCastFeedMapper,
   searchOptions: RPR_SEARCH_OPTIONS,
 });
-const hlFeedListener = new FeedListener(HLFEED, {
+const hlFeedListener = new ContentFeedListener(HLFEED, {
   processor: simpleCastFeedMapper,
   searchOptions: HL_SEARCH_OPTIONS,
 });
-const hhFeedListener = new FeedListener(HHFEED, {
+const hhFeedListener = new ContentFeedListener(HHFEED, {
   processor: youtubeFeedMapper,
   searchOptions: HH_SEARCH_OPTIONS,
 });
-const ytFeedListener = new FeedListener(OFN_YT_FEED, {
+const ytFeedListener = new ContentFeedListener(OFN_YT_FEED, {
   processor: youtubeFeedMapper,
   searchOptions: YT_SEARCH_OPTIONS,
 });
@@ -336,7 +336,7 @@ starshipChecker.on("siteUpdate", (update) =>
 
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("dev_new entries", (show) => {
-    const feed = feeds[show] as FeedListener;
+    const feed = feeds[show] as ContentFeedListener;
     feed.emit("newContent", feed.fetchRecent());
   });
 

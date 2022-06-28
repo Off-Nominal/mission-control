@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { FeedItem } from "../../../listeners/feedListener/feedListener";
+import { ContentFeedItem } from "../../../listeners/feedListener/contentFeedListener";
 import fetchTextChannel from "../../actions/fetchChannel";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 
@@ -7,7 +7,7 @@ const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
 const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
 
 export default async function handleNewContent(
-  content: FeedItem,
+  content: ContentFeedItem,
   client: Client,
   timeout: number = 0
 ) {

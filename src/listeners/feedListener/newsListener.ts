@@ -2,8 +2,11 @@ import EventEmitter = require("events");
 const Watcher = require("feed-watcher");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
+import { RobustWatcher } from "./RobustWatcher";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
+
+const defaultProcessor = (item, title: string) => item;
 
 export interface CmsResponseData {
   url: string;
@@ -33,7 +36,7 @@ export class NewsListener extends EventEmitter {
   }
 
   public initiateWatcher(feed) {
-    const watcher = new Watcher(feed.url, FEED_INTERVAL);
+    const watcher = new RobustWatcher(feed.url, { interval: FEED_INTERVAL });
     watcher.on("new entries", (entries) => {
       entries.forEach((entry) => {
         this.notifyNew({
