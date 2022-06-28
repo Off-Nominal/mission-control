@@ -4,7 +4,7 @@ import { Client, Intents } from "discord.js";
 
 import generateHandlers from "./clients/handlers";
 
-import { ContentFeedListener } from "./listeners/feedListener/ContentFeedListener";
+import { ContentFeedListener } from "./listeners/feedListener/contentFeedListener";
 import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import {

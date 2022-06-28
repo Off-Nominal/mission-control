@@ -16,7 +16,9 @@ export default async function handleNewNews(
 
   const embed = new MessageEmbed({
     title: `${rssEntry.title}`,
-    description: `${stripHtml(rssEntry.summary || rssEntry.description)}`,
+    description: `${
+      stripHtml(rssEntry.summary || rssEntry.description).result
+    }`,
     url: `${rssEntry.link}`,
     author: {
       name: `${rssEntry.author}`,
