@@ -49,7 +49,7 @@ export class NewsListener extends EventEmitter {
       console.error(`Error reading news Feed: ${feed.name}`, error);
     });
     watcher
-      .start()
+      .robustStart()
       .then(() => {
         this.feeds.push({
           data: feed,
