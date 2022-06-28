@@ -1,6 +1,7 @@
 import { Client, MessageEmbed, TextChannel } from "discord.js";
 import { CmsResponseData } from "../../../listeners/newsListener/newsListener";
 import fetchTextChannel from "../../actions/fetchChannel";
+import { stripHtml } from "string-strip-html";
 
 const CHANNEL_ID = process.env.NEWS_CHANNEL_ID;
 
@@ -15,7 +16,7 @@ export default async function handleNewNews(
 
   const embed = new MessageEmbed({
     title: `${rssEntry.title}`,
-    description: `${rssEntry.description}`,
+    description: `${stripHtml(rssEntry.summary || rssEntry.description)}`,
     url: `${rssEntry.link}`,
     author: {
       name: `${rssEntry.author}`,
@@ -40,10 +41,7 @@ export default async function handleNewNews(
   try {
     await newsChannel.send({
       embeds: [embed],
-      content: `\`\`\`json\n${JSON.stringify(rssEntry).slice(
-        0,
-        1985
-      )}...\n\`\`\``,
+      content: "```json\n" + JSON.stringify(rssEntry).slice(0, 1985) + "\n```",
     });
   } catch (err) {
     console.error(err);
