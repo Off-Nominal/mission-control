@@ -1,7 +1,7 @@
 import EventEmitter = require("events");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
-import { RobustWatcher } from "./RobustWatcher";
+import { RobustWatcher } from "./robustWatcher";
 import { newsFeedMapper } from "./mappers";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
