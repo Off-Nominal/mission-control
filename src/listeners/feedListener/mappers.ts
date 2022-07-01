@@ -47,8 +47,8 @@ export const newsFeedMapper = (
     date: new Date(feedItem.date),
     url: feedItem.link,
     thumbnail: feedThumbnail,
-    description: stripHtml(feedItem.summary || feedItem.description).result,
-    summary: feedItem.summary,
+    description: stripHtml(feedItem.description).result,
+    summary: stripHtml(feedItem.summary).result,
     source: feedTitle,
   };
 };

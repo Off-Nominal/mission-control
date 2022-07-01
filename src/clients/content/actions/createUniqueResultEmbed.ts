@@ -2,7 +2,8 @@ import { MessageEmbed } from "discord.js";
 import { ContentFeedItem } from "../handlers/handleNewContent";
 
 export default function createUniqueResultEmbed(feedItem: ContentFeedItem) {
-  const { author, title, url, summary, date, thumbnail, source } = feedItem;
+  const { author, title, url, description, summary, date, thumbnail, source } =
+    feedItem;
 
   const embed = new MessageEmbed({
     author: {
@@ -10,7 +11,7 @@ export default function createUniqueResultEmbed(feedItem: ContentFeedItem) {
     },
     title,
     url,
-    description: summary,
+    description: description || summary,
     footer: {
       text: source,
     },
