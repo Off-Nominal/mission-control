@@ -15,7 +15,6 @@ export type ContentFeedListenerOptions = {
 export class ContentFeedListener extends RobustWatcher {
   episodes: ContentFeedItem[];
   title: string;
-  albumArt: string;
   fuse: Fuse<ContentFeedItem>;
   searchOptions: Fuse.IFuseOptions<ContentFeedItem> | null;
   processor: (item: any, showTitle: string) => ContentFeedItem;
@@ -31,7 +30,6 @@ export class ContentFeedListener extends RobustWatcher {
     try {
       const entries = await this.robustStart();
       this.title = entries[0].meta.title; // extract Feed program title
-      this.albumArt = entries[0].meta.image.url;
       this.episodes = entries
         .map((entry) => this.processor(entry, this.title))
         .reverse(); // map entries from RSS feed to episode format using processor
