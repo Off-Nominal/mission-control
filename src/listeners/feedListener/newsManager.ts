@@ -3,21 +3,59 @@ const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
 import { RobustWatcher } from "./robustWatcher";
 import { newsFeedMapper } from "./mappers";
+import { compileExpression } from "filtrex";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
 const defaultProcessor = (item, title: string) => item;
 
+const getFilterTerms = (filter: string) => {
+  const expressionTerms = ["and", "or", "not", "if", "then", "else"];
+  const arr = filter.split(" ");
+  return arr
+    .map((term) => term.replace(/([)(])/g, ""))
+    .filter((term) => !expressionTerms.includes(term));
+};
+
 export interface CmsResponseData {
   url: string;
   _id: string;
   name: string;
+  filter: string;
   thumbnail: string;
 }
 
 export type CmsNewsFeed = {
   data: CmsResponseData;
   watcher: any;
+};
+
+const shouldFilter = (entry, feed) => {
+  if (!feed.filter) {
+    return false;
+  }
+
+  try {
+    const filterExpression = feed.filter;
+    const filter = compileExpression(filterExpression);
+    const terms = getFilterTerms(filterExpression);
+    const regex = new RegExp(`\\b(${terms.join("|")})\\b`, "g");
+
+    const testString =
+      entry.title + " " + entry.description + " " + entry.summary;
+    const matches = testString.toLowerCase().matchAll(regex);
+    const evaluator = new Map(terms.map((term) => [term, false]));
+
+    for (const match of matches) {
+      evaluator.set(match[0], true);
+    }
+
+    return !filter(Object.fromEntries(evaluator));
+  } catch (err) {
+    console.error(`Error in filter expression for ${feed.name}`);
+    console.error(err);
+    return false;
+  }
 };
 
 export class NewsManager extends EventEmitter {
@@ -36,20 +74,31 @@ export class NewsManager extends EventEmitter {
     });
   }
 
-  public async initiateWatcher(feed) {
-    const watcher = new RobustWatcher(feed.url, { interval: FEED_INTERVAL })
+  private watcherGenerator = (feed) => {
+    const { url, name, thumbnail } = feed;
+
+    return new RobustWatcher(url, { interval: FEED_INTERVAL })
       .on("new entries", (entries) => {
         entries.forEach((entry) => {
+          if (shouldFilter(entry, feed)) {
+            return console.log("Filtered out a value: ", entry.link);
+          }
+
           this.rssEntries.push(entry);
+
           this.notifyNew(
-            newsFeedMapper(entry, feed.name, feed.thumbnail),
+            newsFeedMapper(entry, name, thumbnail),
             "```json\n" + JSON.stringify(entry).slice(0, 1985) + "\n```"
           );
         });
       })
       .on("error", (error) => {
-        console.error(`Error reading news Feed: ${feed.name}`, error);
+        console.error(`Error reading news Feed: ${name}`, error);
       });
+  };
+
+  public async initiateWatcher(feed) {
+    const watcher = this.watcherGenerator(feed);
 
     try {
       this.rssEntries = await watcher.robustStart();
@@ -100,7 +149,7 @@ export class NewsManager extends EventEmitter {
 
   public initialize() {
     const query =
-      '*[_type == "newsFeed"]{name, _id, "thumbnail": thumbnail.asset->url, url}';
+      '*[_type == "newsFeed"]{name, filter, _id, "thumbnail": thumbnail.asset->url, url}';
 
     this.queryCms(query);
     this.subscribeToCms(query);
