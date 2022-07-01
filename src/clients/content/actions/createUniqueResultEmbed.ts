@@ -1,13 +1,24 @@
-import { format } from "date-fns";
 import { MessageEmbed } from "discord.js";
-import { FeedItem } from "../../../listeners/feedListener/feedListener";
+import { ContentFeedItem } from "../handlers/handleNewContent";
 
-export default function createUniqueResultEmbed(result: FeedItem) {
-  return new MessageEmbed()
-    .setAuthor({ name: result.show })
-    .setTitle(result.title)
-    .setURL(result.url)
-    .setDescription(result.summary)
-    .addField("Published", format(result.date, "PPP"))
-    .setThumbnail(result.image);
+export default function createUniqueResultEmbed(feedItem: ContentFeedItem) {
+  const { author, title, url, summary, date, thumbnail, source } = feedItem;
+
+  const embed = new MessageEmbed({
+    author: {
+      name: author,
+    },
+    title,
+    url,
+    description: summary,
+    footer: {
+      text: source,
+    },
+    timestamp: date,
+    thumbnail: {
+      url: thumbnail,
+    },
+  });
+
+  return embed;
 }

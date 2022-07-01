@@ -1,31 +1,55 @@
 import { stripHtml } from "string-strip-html";
-import { FeedItem } from "./feedListener";
+import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
 
-export const youtubeFeedMapper = (feedItem, showTitle: string): FeedItem => {
+export const youtubeFeedMapper = (
+  feedItem,
+  showTitle: string
+): ContentFeedItem => {
   return {
-    show: showTitle,
+    author: showTitle,
     title: feedItem.title,
     date: new Date(feedItem.date),
     url: feedItem.link,
-    image: feedItem.image.url,
+    thumbnail: feedItem.image.url,
     summary: feedItem["media:group"]["media:description"]["#"],
     id: feedItem["yt:videoid"]["#"],
+    source: showTitle,
   };
 };
 
-export const simpleCastFeedMapper = (feedItem, showTitle: string): FeedItem => {
+export const simpleCastFeedMapper = (
+  feedItem,
+  showTitle: string
+): ContentFeedItem => {
   const description = stripHtml(feedItem.description).result;
   return {
-    show: showTitle,
+    author: feedItem.meta.author,
     title: feedItem.title,
     date: new Date(feedItem.date),
     url: feedItem.link,
-    audioUrl: feedItem.enclosures[0].url,
-    image: feedItem.image.url || feedItem.meta.image.url,
+    thumbnail: feedItem.image.url || feedItem.meta.image.url,
     description,
     summary:
       (feedItem["itunes:summary"] && feedItem["itunes:summary"]["#"]) ||
       description.slice(0, 99).concat("..."),
+    source: showTitle,
+  };
+};
+
+export const newsFeedMapper = (
+  feedItem,
+  feedTitle: string,
+  feedThumbnail: string = ""
+): ContentFeedItem => {
+  return {
+    author: feedItem.author,
+    title: feedItem.title,
+    date: new Date(feedItem.date),
+    url: feedItem.link,
+    thumbnail: feedThumbnail,
+    description: stripHtml(feedItem.summary || feedItem.description).result,
+    summary: feedItem.summary,
+    source: feedTitle,
   };
 };
 

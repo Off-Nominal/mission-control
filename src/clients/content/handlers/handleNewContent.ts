@@ -1,38 +1,57 @@
-import { Client } from "discord.js";
-import { FeedItem } from "../../../listeners/feedListener/feedListener";
+import { Client, TextChannel } from "discord.js";
 import fetchTextChannel from "../../actions/fetchChannel";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 
-const TESTCONTENTCHANNEL = process.env.TESTCONTENTCHANNEL;
-const CONTENTCHANNELID = process.env.CONTENTCHANNELID || TESTCONTENTCHANNEL;
+const DEFAULT_TIMEOUT = 0;
+
+export type ContentFeedItem = {
+  author: string;
+  title: string;
+  date: Date;
+  url: string;
+  thumbnail: string;
+  description?: string;
+  summary: string;
+  id?: string;
+  source: string;
+};
+
+const channels = {
+  news: process.env.NEWS_CHANNEL_ID,
+  content: process.env.CONTENTCHANNELID,
+};
 
 export default async function handleNewContent(
-  content: FeedItem,
+  content: ContentFeedItem,
   client: Client,
-  timeout: number = 0
+  target: "news" | "content",
+  options?: {
+    timeout?: number;
+    text?: string;
+  }
 ) {
-  const { show } = content;
+  const { source } = content;
+  const timeout = options?.timeout || DEFAULT_TIMEOUT;
 
-  const channel = await fetchTextChannel(client, CONTENTCHANNELID);
+  let channel: TextChannel;
 
-  function announceNewItem() {
-    channel
-      .send({
-        content: `It's podcast release day for ${show}!`,
-        embeds: [createUniqueResultEmbed(content)],
-      })
-      .then(() => {
-        console.log(
-          `Discord successfully notified of new podcast episode in ${show}`
-        );
-      })
-      .catch((err) => {
-        console.error(`Error sending message to Discord for update to ${show}`);
-        console.error(err);
-      });
+  try {
+    channel = await fetchTextChannel(client, channels[target]);
+  } catch (err) {
+    console.error(err);
   }
 
   setTimeout(() => {
-    announceNewItem();
+    channel
+      .send({
+        embeds: [createUniqueResultEmbed(content)],
+        content: options?.text,
+      })
+      .catch((err) => {
+        console.error(
+          `Error sending message to Discord for update to ${source}`
+        );
+        console.error(err);
+      });
   }, timeout * 1000);
 }

@@ -1,9 +1,12 @@
 import EventEmitter = require("events");
-const Watcher = require("feed-watcher");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
+import { RobustWatcher } from "./RobustWatcher";
+import { newsFeedMapper } from "./mappers";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
+
+const defaultProcessor = (item, title: string) => item;
 
 export interface CmsResponseData {
   url: string;
@@ -17,9 +20,10 @@ export type CmsNewsFeed = {
   watcher: any;
 };
 
-export class NewsListener extends EventEmitter {
+export class NewsManager extends EventEmitter {
   private feeds: CmsNewsFeed[];
   private cmsClient: SanityClient;
+  private rssEntries: any[];
 
   constructor() {
     super();
@@ -32,31 +36,31 @@ export class NewsListener extends EventEmitter {
     });
   }
 
-  public initiateWatcher(feed) {
-    const watcher = new Watcher(feed.url, FEED_INTERVAL);
-    watcher.on("new entries", (entries) => {
-      entries.forEach((entry) => {
-        this.notifyNew({
-          rssEntry: entry,
-          feed,
+  public async initiateWatcher(feed) {
+    const watcher = new RobustWatcher(feed.url, { interval: FEED_INTERVAL })
+      .on("new entries", (entries) => {
+        entries.forEach((entry) => {
+          this.rssEntries.push(entry);
+          this.notifyNew(
+            newsFeedMapper(entry, feed.name, feed.thumbnail),
+            "```json\n" + JSON.stringify(entry).slice(0, 1985) + "\n```"
+          );
         });
-      });
-    });
-    watcher.on("error", (error) => {
-      console.error(`Error reading news Feed: ${feed.name}`, error);
-    });
-    watcher
-      .start()
-      .then(() => {
-        this.feeds.push({
-          data: feed,
-          watcher,
-        });
-        console.log(`Watching newsFeed ${feed.name}`);
       })
-      .catch((error) =>
-        console.error(`Error watching Feed ${feed.name}`, error)
-      );
+      .on("error", (error) => {
+        console.error(`Error reading news Feed: ${feed.name}`, error);
+      });
+
+    try {
+      this.rssEntries = await watcher.robustStart();
+      this.feeds.push({
+        data: feed,
+        watcher,
+      });
+      console.log(`Watching newsFeed ${feed.name}`);
+    } catch (error) {
+      console.error(`Error watching Feed ${feed.name}`, error);
+    }
   }
 
   public queryCms(query) {
@@ -102,7 +106,7 @@ export class NewsListener extends EventEmitter {
     this.subscribeToCms(query);
   }
 
-  public notifyNew(newsItem) {
-    this.emit("newNews", newsItem);
+  public notifyNew(data, text) {
+    this.emit("newNews", data, text);
   }
 }
