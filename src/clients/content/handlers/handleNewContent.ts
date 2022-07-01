@@ -14,6 +14,7 @@ export type ContentFeedItem = {
   summary: string;
   id?: string;
   source: string;
+  albumArt?: string;
 };
 
 const channels = {

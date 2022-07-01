@@ -6,20 +6,20 @@ const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;
 
-export type ContentFeedListenerOptions = {
+export type ContentWatcherOptions = {
   processor?: (item: any, showTitle: string) => ContentFeedItem;
   rssInterval?: number;
   searchOptions?: Fuse.IFuseOptions<ContentFeedItem>;
 };
 
-export class ContentFeedListener extends RobustWatcher {
+export class ContentWatcher extends RobustWatcher {
   episodes: ContentFeedItem[];
   title: string;
   fuse: Fuse<ContentFeedItem>;
   searchOptions: Fuse.IFuseOptions<ContentFeedItem> | null;
   processor: (item: any, showTitle: string) => ContentFeedItem;
 
-  constructor(feedUrl: string, options?: ContentFeedListenerOptions) {
+  constructor(feedUrl: string, options?: ContentWatcherOptions) {
     super(feedUrl, { interval: options.rssInterval });
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;
