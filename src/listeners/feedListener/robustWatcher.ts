@@ -20,6 +20,10 @@ export class RobustWatcher extends Watcher {
   }
 
   public async robustStart() {
+    const attempts = this.options.attempts || DEFAULT_RETRY_ATTEMPTS;
+    const retryTime =
+      (this.options.retryTime || DEFAULT_RETRY_WAIT_TIME_IN_SECONDS) * 1000;
+
     return new Promise<any[]>((resolve, reject) => {
       const starter = (resolver: (value: unknown) => void) => {
         this.loadAttempts++;
@@ -28,16 +32,13 @@ export class RobustWatcher extends Watcher {
             resolver(entries);
           })
           .catch((err) => {
-            if (
-              this.loadAttempts < this.options.attempts ||
-              DEFAULT_RETRY_ATTEMPTS
-            ) {
-              setTimeout(() => {
-                starter(resolver);
-              }, this.options.retryTime || DEFAULT_RETRY_WAIT_TIME_IN_SECONDS * 1000);
-            } else {
+            if (attempts > this.loadAttempts) {
               reject(err);
             }
+
+            setTimeout(() => {
+              starter(resolver);
+            }, retryTime);
           });
       };
 
