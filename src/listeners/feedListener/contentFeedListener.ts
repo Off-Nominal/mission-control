@@ -1,21 +1,10 @@
 import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
+import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
 import { RobustWatcher } from "./RobustWatcher";
 const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;
-
-export type ContentFeedItem = {
-  show: string;
-  title: string;
-  date: Date;
-  url: string;
-  audioUrl?: string;
-  image: string;
-  description?: string;
-  summary: string;
-  id?: string;
-};
 
 export type ContentFeedListenerOptions = {
   processor?: (item: any, showTitle: string) => ContentFeedItem;

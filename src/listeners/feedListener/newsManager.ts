@@ -1,8 +1,8 @@
 import EventEmitter = require("events");
-const Watcher = require("feed-watcher");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
 import { RobustWatcher } from "./RobustWatcher";
+import { newsFeedMapper } from "./mappers";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
@@ -20,7 +20,7 @@ export type CmsNewsFeed = {
   watcher: any;
 };
 
-export class NewsListener extends EventEmitter {
+export class NewsManager extends EventEmitter {
   private feeds: CmsNewsFeed[];
   private cmsClient: SanityClient;
   private rssEntries: any[];
@@ -41,10 +41,10 @@ export class NewsListener extends EventEmitter {
       .on("new entries", (entries) => {
         entries.forEach((entry) => {
           this.rssEntries.push(entry);
-          this.notifyNew({
-            rssEntry: entry,
-            feed,
-          });
+          this.notifyNew(
+            newsFeedMapper(entry, feed.name, feed.thumbnail),
+            "```json\n" + JSON.stringify(entry).slice(0, 1985) + "\n```"
+          );
         });
       })
       .on("error", (error) => {
@@ -106,7 +106,7 @@ export class NewsListener extends EventEmitter {
     this.subscribeToCms(query);
   }
 
-  public notifyNew(newsItem) {
-    this.emit("newNews", newsItem);
+  public notifyNew(data, text) {
+    this.emit("newNews", data, text);
   }
 }

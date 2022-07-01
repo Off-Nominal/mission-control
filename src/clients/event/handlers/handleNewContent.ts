@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
-import { ContentFeedItem } from "../../../listeners/feedListener/contentFeedListener";
 import fetchTextChannel from "../../actions/fetchChannel";
+import { ContentFeedItem } from "../../content/handlers/handleNewContent";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
 import fetchYouTubeVideo from "../actions/fetchYouTubeVideo";

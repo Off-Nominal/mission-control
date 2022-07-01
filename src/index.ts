@@ -18,7 +18,7 @@ import deployWeMartians from "./utilities/deployWeMartians";
 import handleError from "./clients/actions/handleError";
 import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 import { MemberManager } from "./listeners/memberManager/memberManager";
-import { NewsListener } from "./listeners/feedListener/newsListener";
+import { NewsManager } from "./listeners/feedListener/newsManager";
 
 // Database Config
 const db = new DbClient();
@@ -123,10 +123,12 @@ const starshipChecker = new SiteListener(
  *  News Feed Listener Setup
  ************************************/
 
-const newsFeedListener = new NewsListener();
+const newsFeedListener = new NewsManager();
 newsFeedListener.initialize();
-newsFeedListener.on("newNews", (newsItem) => {
-  contentBotHandlers.handleNewNews(newsItem, contentBot);
+newsFeedListener.on("newNews", (contentFeedItem, text) => {
+  contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
+    text,
+  });
 });
 
 /***********************************
@@ -289,19 +291,21 @@ eventBot.on("viewStreamTitles", streamHost.viewSuggestions);
 
 wmFeedListener.on("newContent", (content) => {
   deployWeMartians();
-  contentBotHandlers.handleNewContent(content, contentBot, 600);
+  contentBotHandlers.handleNewContent(content, contentBot, "content", {
+    timeout: 600,
+  });
 });
 mecoFeedListener.on("newContent", (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot);
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 ofnFeedListener.on("newContent", (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot);
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 rprFeedListener.on("newContent", (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot);
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 hlFeedListener.on("newContent", (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot);
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 hhFeedListener.on("newContent", (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);
