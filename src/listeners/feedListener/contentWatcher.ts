@@ -1,7 +1,7 @@
 import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
-import { RobustWatcher } from "./RobustWatcher";
+import { RobustWatcher } from "./robustWatcher";
 const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;
