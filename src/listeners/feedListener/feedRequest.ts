@@ -24,29 +24,19 @@ export const feedRequest = (url: string): Promise<FeedParserEntry[]> => {
         resolve(entries);
       });
 
-    const request = (url: string): Promise<void> => {
-      const requester = url.startsWith("https") ? https : http;
+    const requester = url.startsWith("https") ? https : http;
 
-      return new Promise((resolve, reject) => {
-        const req = requester.get(url, (res) => {
-          if (res.statusCode !== 200) {
-            reject(new Error(`Bad response from feed ${res.statusCode}`));
-          }
+    requester
+      .get(url, (res) => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`Bad response from feed ${res.statusCode}`));
+        }
 
-          res.pipe(feedParser);
-          resolve();
-        });
-
-        req.on("error", (err) => {
-          reject(err);
-        });
-
-        req.end();
-      });
-    };
-
-    request(url).catch((err) => {
-      reject(err);
-    });
+        res.pipe(feedParser);
+      })
+      .on("error", (err) => {
+        reject(err);
+      })
+      .end();
   });
 };

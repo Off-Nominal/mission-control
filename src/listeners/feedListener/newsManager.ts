@@ -4,6 +4,7 @@ import { SanityClient } from "@sanity/client";
 import { newsFeedMapper } from "./mappers";
 import { compileExpression } from "filtrex";
 import { FeedWatcher } from "./feedWatcher";
+import { FeedParserEntry } from "./feedTypes";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
@@ -61,7 +62,7 @@ const shouldFilter = (entry, feed) => {
 export class NewsManager extends EventEmitter {
   private feeds: CmsNewsFeed[];
   private cmsClient: SanityClient;
-  private rssEntries: any[];
+  private rssEntries: FeedParserEntry[];
 
   constructor() {
     super();
@@ -78,7 +79,7 @@ export class NewsManager extends EventEmitter {
     const { url, name, thumbnail } = feed;
 
     return new FeedWatcher(url, { interval: FEED_INTERVAL })
-      .on("new entries", (entries) => {
+      .on("new", (entries) => {
         entries.forEach((entry) => {
           if (shouldFilter(entry, feed)) {
             return console.log("Filtered out a value: ", entry.link);
@@ -114,7 +115,7 @@ export class NewsManager extends EventEmitter {
 
   public queryCms(query) {
     this.cmsClient
-      .fetch(query)
+      .fetch<CmsResponseData[]>(query)
       .then((response) => {
         response.forEach((feed) => this.initiateWatcher(feed));
       })
