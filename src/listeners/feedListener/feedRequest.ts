@@ -26,7 +26,13 @@ export const feedRequest = (feedUrl: string): Promise<FeedParserEntry[]> => {
       });
 
     axios
-      .get(feedUrl, { responseType: "stream" })
+      .get(feedUrl, {
+        responseType: "stream",
+        headers: {
+          Accept:
+            "application/rss+xml, application/rdf+xml;q=0.8, application/atom+xml;q=0.6, application/xml;q=0.4, text/xml;q=0.4",
+        },
+      })
       .then(({ data }) => data.pipe(feedParser))
       .catch((err) => reject(err));
   });
