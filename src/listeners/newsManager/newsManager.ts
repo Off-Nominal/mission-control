@@ -1,9 +1,10 @@
 import EventEmitter = require("events");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
-import { RobustWatcher } from "./robustWatcher";
-import { newsFeedMapper } from "./mappers";
+import { newsFeedMapper } from "../feedListener/mappers";
 import { compileExpression } from "filtrex";
+import { FeedWatcher } from "../feedListener/feedWatcher";
+import { FeedParserEntry } from "../feedListener/feedTypes";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
@@ -61,24 +62,25 @@ const shouldFilter = (entry, feed) => {
 export class NewsManager extends EventEmitter {
   private feeds: CmsNewsFeed[];
   private cmsClient: SanityClient;
-  private rssEntries: any[];
+  private rssEntries: FeedParserEntry[];
 
   constructor() {
     super();
     this.feeds = [];
     this.cmsClient = sanityClient({
       projectId: process.env.SANITY_CMS_ID,
-      dataset: process.env.NODE_ENV,
+      dataset:
+        process.env.SANITY_DATASET || process.env.NODE_ENV || "development",
       apiVersion: "2022-06-24",
-      useCdn: true,
+      useCdn: process.env.SANITY_CDN || true,
     });
   }
 
   private watcherGenerator = (feed) => {
     const { url, name, thumbnail } = feed;
 
-    return new RobustWatcher(url, { interval: FEED_INTERVAL })
-      .on("new entries", (entries) => {
+    return new FeedWatcher(url, { interval: FEED_INTERVAL })
+      .on("new", (entries) => {
         entries.forEach((entry) => {
           if (shouldFilter(entry, feed)) {
             return console.log("Filtered out a value: ", entry.link);
@@ -101,7 +103,7 @@ export class NewsManager extends EventEmitter {
     const watcher = this.watcherGenerator(feed);
 
     try {
-      this.rssEntries = await watcher.robustStart();
+      this.rssEntries = await watcher.start();
       this.feeds.push({
         data: feed,
         watcher,
@@ -114,7 +116,7 @@ export class NewsManager extends EventEmitter {
 
   public queryCms(query) {
     this.cmsClient
-      .fetch(query)
+      .fetch<CmsResponseData[]>(query)
       .then((response) => {
         response.forEach((feed) => this.initiateWatcher(feed));
       })

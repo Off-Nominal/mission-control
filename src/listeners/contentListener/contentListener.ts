@@ -1,18 +1,18 @@
 import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
-import { RobustWatcher } from "./robustWatcher";
+import { FeedWatcher } from "../feedListener/feedWatcher";
 const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;
 
-export type ContentWatcherOptions = {
+export type ContentListenerOptions = {
   processor?: (item: any, showTitle: string) => ContentFeedItem;
   rssInterval?: number;
   searchOptions?: Fuse.IFuseOptions<ContentFeedItem>;
 };
 
-export class ContentWatcher extends RobustWatcher {
+export class ContentListener extends FeedWatcher {
   episodes: ContentFeedItem[];
   title: string;
   albumArt: string;
@@ -20,7 +20,7 @@ export class ContentWatcher extends RobustWatcher {
   searchOptions: Fuse.IFuseOptions<ContentFeedItem> | null;
   processor: (item: any, showTitle: string) => ContentFeedItem;
 
-  constructor(feedUrl: string, options?: ContentWatcherOptions) {
+  constructor(feedUrl: string, options?: ContentListenerOptions) {
     super(feedUrl, { interval: options.rssInterval });
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;
@@ -29,9 +29,9 @@ export class ContentWatcher extends RobustWatcher {
 
   public async initialize() {
     try {
-      const entries = await this.robustStart();
+      const entries = await this.start();
       this.title = entries[0].meta.title; // extract Feed program title
-      this.albumArt = entries[0].meta.image; // extract Feed program album art
+      this.albumArt = entries[0].meta.image.url; // extract Feed program album art
       this.episodes = entries
         .map((entry) => this.processor(entry, this.title))
         .reverse(); // map entries from RSS feed to episode format using processor
@@ -44,7 +44,7 @@ export class ContentWatcher extends RobustWatcher {
       );
     } catch (err) {
       console.log(
-        `Attempted to initialize ${this.feed} multiple times, could not fetch data.`
+        `Attempted to initialize ${this.title} multiple times, could not fetch data.`
       );
       console.error(err);
     }
