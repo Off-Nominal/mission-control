@@ -1,10 +1,10 @@
 import EventEmitter = require("events");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
-import { newsFeedMapper } from "./mappers";
+import { newsFeedMapper } from "../feedListener/mappers";
 import { compileExpression } from "filtrex";
-import { FeedWatcher } from "./feedWatcher";
-import { FeedParserEntry } from "./feedTypes";
+import { FeedWatcher } from "../feedListener/feedWatcher";
+import { FeedParserEntry } from "../feedListener/feedTypes";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 

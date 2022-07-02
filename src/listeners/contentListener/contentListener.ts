@@ -1,18 +1,18 @@
 import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
-import { FeedWatcher } from "./feedWatcher";
+import { FeedWatcher } from "../feedListener/feedWatcher";
 const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;
 
-export type ContentWatcherOptions = {
+export type ContentListenerOptions = {
   processor?: (item: any, showTitle: string) => ContentFeedItem;
   rssInterval?: number;
   searchOptions?: Fuse.IFuseOptions<ContentFeedItem>;
 };
 
-export class ContentWatcher extends FeedWatcher {
+export class ContentListener extends FeedWatcher {
   episodes: ContentFeedItem[];
   title: string;
   albumArt: string;
@@ -20,7 +20,7 @@ export class ContentWatcher extends FeedWatcher {
   searchOptions: Fuse.IFuseOptions<ContentFeedItem> | null;
   processor: (item: any, showTitle: string) => ContentFeedItem;
 
-  constructor(feedUrl: string, options?: ContentWatcherOptions) {
+  constructor(feedUrl: string, options?: ContentListenerOptions) {
     super(feedUrl, { interval: options.rssInterval });
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;

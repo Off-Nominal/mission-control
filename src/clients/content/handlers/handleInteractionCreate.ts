@@ -1,5 +1,5 @@
 import { Interaction, MessageOptions } from "discord.js";
-import { ContentWatcher } from "../../../listeners/feedListener/contentWatcher";
+import { ContentListener } from "../../../listeners/contentListener/contentListener";
 import { createPodcastHelpEmbed } from "../actions/createPodcastHelpEmbed";
 import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
@@ -7,13 +7,13 @@ import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 export default function handleInteractionCreate(
   interaction: Interaction,
   listeners: {
-    wm: ContentWatcher;
-    meco: ContentWatcher;
-    ofn: ContentWatcher;
-    rpr: ContentWatcher;
-    hl: ContentWatcher;
-    hh: ContentWatcher;
-    yt: ContentWatcher;
+    wm: ContentListener;
+    meco: ContentListener;
+    ofn: ContentListener;
+    rpr: ContentListener;
+    hl: ContentListener;
+    hh: ContentListener;
+    yt: ContentListener;
   }
 ) {
   if (!interaction.isCommand()) return;
@@ -26,7 +26,7 @@ export default function handleInteractionCreate(
   }
 
   const show = options.getString("show", true);
-  const feedListener = listeners[show] as ContentWatcher;
+  const feedListener = listeners[show] as ContentListener;
 
   let returnMessage: MessageOptions = {
     embeds: [],
