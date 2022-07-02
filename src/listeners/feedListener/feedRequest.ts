@@ -20,14 +20,14 @@ export const feedRequest = (feedUrl: string): Promise<FeedParserEntry[]> => {
         if (!entries.length) {
           reject(new Error("No entries in the feed"));
         }
-        resolve(entries);
+        resolve(
+          entries.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime())
+        );
       });
 
     axios
       .get(feedUrl, { responseType: "stream" })
-      .then((response) => {
-        response.data.pipe(feedParser);
-      })
+      .then(({ data }) => data.pipe(feedParser))
       .catch((err) => reject(err));
   });
 };
