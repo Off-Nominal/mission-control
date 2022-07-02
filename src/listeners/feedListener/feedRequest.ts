@@ -1,15 +1,14 @@
 import { FeedParserEntry } from "./feedTypes";
+import axios from "axios";
 
 const FeedParser = require("feedparser");
-const https = require("https");
-const http = require("http");
 
-export const feedRequest = (url: string): Promise<FeedParserEntry[]> => {
+export const feedRequest = (feedUrl: string): Promise<FeedParserEntry[]> => {
   return new Promise((resolve, reject) => {
     const entries: FeedParserEntry[] = [];
-    const options = { feedurl: url };
+    // const options = { feedurl: url };
 
-    const feedParser = new FeedParser([options])
+    const feedParser = new FeedParser()
       .on("error", (err) => console.error(err))
       .on("readable", () => {
         let item: FeedParserEntry;
@@ -24,19 +23,11 @@ export const feedRequest = (url: string): Promise<FeedParserEntry[]> => {
         resolve(entries);
       });
 
-    const requester = url.startsWith("https") ? https : http;
-
-    requester
-      .get(url, (res) => {
-        if (res.statusCode !== 200) {
-          reject(new Error(`Bad response from feed ${res.statusCode}`));
-        }
-
-        res.pipe(feedParser);
+    axios
+      .get(feedUrl, { responseType: "stream" })
+      .then((response) => {
+        response.data.pipe(feedParser);
       })
-      .on("error", (err) => {
-        reject(err);
-      })
-      .end();
+      .catch((err) => reject(err));
   });
 };

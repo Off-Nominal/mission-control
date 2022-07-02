@@ -69,9 +69,9 @@ export class NewsManager extends EventEmitter {
     this.feeds = [];
     this.cmsClient = sanityClient({
       projectId: process.env.SANITY_CMS_ID,
-      dataset: process.env.NODE_ENV,
+      dataset: "production" || process.env.NODE_ENV,
       apiVersion: "2022-06-24",
-      useCdn: true,
+      useCdn: false,
     });
   }
 

@@ -43,8 +43,8 @@ export class FeedWatcher extends EventEmitter {
       (this.options.retryTime || DEFAULT_RETRY_WAIT_TIME_IN_SECONDS) * 1000;
 
     return new Promise((resolve, reject) => {
-      this.loadAttempts++;
       const fetcher = (resolver) => {
+        this.loadAttempts++;
         this.fetchEntries()
           .then((entries) => {
             this.lastEntryDate = entries[0].pubDate;
@@ -52,8 +52,9 @@ export class FeedWatcher extends EventEmitter {
             resolver(entries);
           })
           .catch((err) => {
-            if (attempts > this.loadAttempts) {
-              reject(err);
+            if (attempts <= this.loadAttempts) {
+              console.error(`Tried loading ${this.feedurl} ${attempts} times`);
+              return reject(err);
             }
 
             setTimeout(() => {
