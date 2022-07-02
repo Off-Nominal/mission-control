@@ -1,8 +1,9 @@
 import { stripHtml } from "string-strip-html";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
+import { FeedParserEntry } from "./feedTypes";
 
 export const youtubeFeedMapper = (
-  feedItem,
+  feedItem: FeedParserEntry,
   showTitle: string
 ): ContentFeedItem => {
   return {
@@ -18,7 +19,7 @@ export const youtubeFeedMapper = (
 };
 
 export const simpleCastFeedMapper = (
-  feedItem,
+  feedItem: FeedParserEntry,
   showTitle: string
 ): ContentFeedItem => {
   const description = stripHtml(feedItem.description).result;
@@ -29,15 +30,13 @@ export const simpleCastFeedMapper = (
     url: feedItem.link,
     thumbnail: feedItem.image.url || feedItem.meta.image.url,
     description,
-    summary:
-      (feedItem["itunes:summary"] && feedItem["itunes:summary"]["#"]) ||
-      description.slice(0, 99).concat("..."),
+    summary: feedItem["itunes:summary"] && feedItem["itunes:summary"]["#"],
     source: showTitle,
   };
 };
 
 export const newsFeedMapper = (
-  feedItem,
+  feedItem: FeedParserEntry,
   feedTitle: string,
   feedThumbnail: string = ""
 ): ContentFeedItem => {

@@ -1,9 +1,9 @@
 import EventEmitter = require("events");
 const sanityClient = require("@sanity/client");
 import { SanityClient } from "@sanity/client";
-import { RobustWatcher } from "./robustWatcher";
 import { newsFeedMapper } from "./mappers";
 import { compileExpression } from "filtrex";
+import { FeedWatcher } from "./feedWatcher";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
@@ -77,7 +77,7 @@ export class NewsManager extends EventEmitter {
   private watcherGenerator = (feed) => {
     const { url, name, thumbnail } = feed;
 
-    return new RobustWatcher(url, { interval: FEED_INTERVAL })
+    return new FeedWatcher(url, { interval: FEED_INTERVAL })
       .on("new entries", (entries) => {
         entries.forEach((entry) => {
           if (shouldFilter(entry, feed)) {
@@ -101,7 +101,7 @@ export class NewsManager extends EventEmitter {
     const watcher = this.watcherGenerator(feed);
 
     try {
-      this.rssEntries = await watcher.robustStart();
+      this.rssEntries = await watcher.start();
       this.feeds.push({
         data: feed,
         watcher,
