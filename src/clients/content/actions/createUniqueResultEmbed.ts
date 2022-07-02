@@ -11,7 +11,7 @@ export default function createUniqueResultEmbed(feedItem: ContentFeedItem) {
     },
     title,
     url,
-    description: description || summary,
+    description: summary || description.slice(0, 99).concat("..."),
     footer: {
       text: source,
     },
