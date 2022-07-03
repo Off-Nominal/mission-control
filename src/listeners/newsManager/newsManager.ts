@@ -67,7 +67,9 @@ export class NewsManager extends EventEmitter {
   };
 
   public async initiateWatcher(feed: NewsFeedDocument) {
-    const thumbnail = this.imageUrlBuilder.image(feed.thumbnail).url();
+    const thumbnail = feed.thumbnail
+      ? this.imageUrlBuilder.image(feed.thumbnail).url()
+      : "";
     const formattedFeed = {
       ...feed,
       thumbnail,
