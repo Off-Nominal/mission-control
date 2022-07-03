@@ -19,6 +19,7 @@ import scheduleThreadDigest from "./utilities/scheduleThreadDigest";
 import { MemberManager } from "./listeners/memberManager/memberManager";
 import { NewsManager } from "./listeners/newsManager/newsManager";
 import { ContentListener } from "./listeners/contentListener/contentListener";
+import { ContentFeedItem } from "./clients/content/handlers/handleNewContent";
 
 // Database Config
 const db = new DbClient();
@@ -125,11 +126,14 @@ const starshipChecker = new SiteListener(
 
 const newsFeedListener = new NewsManager();
 newsFeedListener.initialize();
-newsFeedListener.on("newNews", (contentFeedItem, text) => {
-  contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
-    text,
-  });
-});
+newsFeedListener.on(
+  "newNews",
+  (contentFeedItem: ContentFeedItem, text: string) => {
+    contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
+      text,
+    });
+  }
+);
 
 /***********************************
  *  Events Listener Setup
