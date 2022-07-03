@@ -27,6 +27,7 @@
     "@discordjs/rest": "^0.4.1",
     "@octokit/auth-app": "^3.4.0",
     "@sanity/client": "^3.3.2",
+    "@sanity/image-url": "^1.0.1",
     "@sanity/types": "^2.29.5",
     "axios": "^0.27.2",
     "cloudinary": "^1.27.0",

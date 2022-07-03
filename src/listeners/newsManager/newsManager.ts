@@ -1,68 +1,37 @@
 import EventEmitter = require("events");
+
 const sanityClient = require("@sanity/client");
+const imageUrlBuilder = require("@sanity/image-url");
 import { SanityClient } from "@sanity/client";
-import { newsFeedMapper } from "../feedListener/mappers";
-import { compileExpression } from "filtrex";
+import { SanityDocument } from "@sanity/types/dist/dts";
+
 import { FeedWatcher } from "../feedListener/feedWatcher";
 import { FeedParserEntry } from "../feedListener/feedTypes";
+import { newsFeedMapper } from "../feedListener/mappers";
+
+import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
+import { shouldFilter } from "./helpers";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
-const defaultProcessor = (item, title: string) => item;
-
-const getFilterTerms = (filter: string) => {
-  const expressionTerms = ["and", "or", "not", "if", "then", "else"];
-  const arr = filter.split(" ");
-  return arr
-    .map((term) => term.replace(/([)(])/g, ""))
-    .filter((term) => !expressionTerms.includes(term));
-};
-
-export interface CmsResponseData {
+export interface NewsFeedDocument extends SanityDocument {
   url: string;
-  _id: string;
   name: string;
-  filter: string;
+  filter?: string;
   thumbnail: string;
+  diagnostic: string;
 }
 
 export type CmsNewsFeed = {
-  data: CmsResponseData;
+  data: NewsFeedDocument;
   watcher: any;
-};
-
-const shouldFilter = (entry, feed) => {
-  if (!feed.filter) {
-    return false;
-  }
-
-  try {
-    const filterExpression = feed.filter;
-    const filter = compileExpression(filterExpression);
-    const terms = getFilterTerms(filterExpression);
-    const regex = new RegExp(`\\b(${terms.join("|")})\\b`, "g");
-
-    const testString =
-      entry.title + " " + entry.description + " " + entry.summary;
-    const matches = testString.toLowerCase().matchAll(regex);
-    const evaluator = new Map(terms.map((term) => [term, false]));
-
-    for (const match of matches) {
-      evaluator.set(match[0], true);
-    }
-
-    return !filter(Object.fromEntries(evaluator));
-  } catch (err) {
-    console.error(`Error in filter expression for ${feed.name}`);
-    console.error(err);
-    return false;
-  }
 };
 
 export class NewsManager extends EventEmitter {
   private feeds: CmsNewsFeed[];
   private cmsClient: SanityClient;
   private rssEntries: FeedParserEntry[];
+  private imageUrlBuilder;
 
   constructor() {
     super();
@@ -74,24 +43,22 @@ export class NewsManager extends EventEmitter {
       apiVersion: "2022-06-24",
       useCdn: process.env.SANITY_CDN || true,
     });
+    this.imageUrlBuilder = imageUrlBuilder(this.cmsClient);
   }
 
-  private watcherGenerator = (feed) => {
-    const { url, name, thumbnail } = feed;
+  private watcherGenerator = (feed: NewsFeedDocument) => {
+    const { url, name, thumbnail, diagnostic } = feed;
 
     return new FeedWatcher(url, { interval: FEED_INTERVAL })
-      .on("new", (entries) => {
+      .on("new", (entries: FeedParserEntry[]) => {
         entries.forEach((entry) => {
           if (shouldFilter(entry, feed)) {
             return console.log("Filtered out a value: ", entry.link);
           }
 
           this.rssEntries.push(entry);
-
-          this.notifyNew(
-            newsFeedMapper(entry, name, thumbnail),
-            "```json\n" + JSON.stringify(entry).slice(0, 1985) + "\n```"
-          );
+          diagnostic && console.log(entry);
+          this.notifyNew(newsFeedMapper(entry, name, thumbnail));
         });
       })
       .on("error", (error) => {
@@ -99,13 +66,18 @@ export class NewsManager extends EventEmitter {
       });
   };
 
-  public async initiateWatcher(feed) {
-    const watcher = this.watcherGenerator(feed);
+  public async initiateWatcher(feed: NewsFeedDocument) {
+    const thumbnail = this.imageUrlBuilder.image(feed.thumbnail).url();
+    const formattedFeed = {
+      ...feed,
+      thumbnail,
+    };
+    const watcher = this.watcherGenerator(formattedFeed);
 
     try {
       this.rssEntries = await watcher.start();
       this.feeds.push({
-        data: feed,
+        data: formattedFeed,
         watcher,
       });
       console.log(`Watching newsFeed ${feed.name}`);
@@ -114,36 +86,46 @@ export class NewsManager extends EventEmitter {
     }
   }
 
-  public queryCms(query) {
+  public queryCms(query: string) {
     this.cmsClient
-      .fetch<CmsResponseData[]>(query)
+      .fetch<NewsFeedDocument[]>(query)
       .then((response) => {
         response.forEach((feed) => this.initiateWatcher(feed));
       })
       .catch((err) => console.error("Unable to fetch Feeds from CMS", err));
   }
 
-  public subscribeToCms(query) {
-    this.cmsClient.listen(query).subscribe((update) => {
+  private fetchFeedIndex(id: string) {
+    return this.feeds.findIndex((feed) => feed.data._id === id);
+  }
+
+  private deleteFeed(id: string) {
+    const feedIndex = this.fetchFeedIndex(id);
+
+    if (feedIndex < 0) {
+      return;
+    }
+
+    const feed = this.feeds[feedIndex];
+    feed.watcher.stop();
+    this.feeds.splice(feedIndex, 1);
+    console.log(`Stopped monitoring ${feed.data.name}`);
+  }
+
+  public subscribeToCms(query: string) {
+    this.cmsClient.listen<NewsFeedDocument>(query).subscribe((update) => {
       update.mutations.forEach((mutation) => {
+        const id = update.documentId;
+
+        if ("createOrReplace" in mutation) {
+          this.deleteFeed(id);
+          this.initiateWatcher(update.result);
+        }
         if ("create" in mutation) {
           this.initiateWatcher(update.result);
         }
-
         if ("delete" in mutation) {
-          const deletedFeedIndex = this.feeds.findIndex(
-            (feed) =>
-              "id" in mutation.delete && feed.data._id === mutation.delete.id
-          );
-
-          if (deletedFeedIndex < 0) {
-            return;
-          }
-
-          const feed = this.feeds[deletedFeedIndex];
-          feed.watcher.stop();
-          console.log(`Stopped monitoring ${feed.data.name}`);
-          this.feeds.splice(deletedFeedIndex, 1);
+          this.deleteFeed(id);
         }
       });
     });
@@ -151,13 +133,13 @@ export class NewsManager extends EventEmitter {
 
   public initialize() {
     const query =
-      '*[_type == "newsFeed"]{name, filter, _id, "thumbnail": thumbnail.asset->url, url}';
+      '*[_type == "newsFeed"]{name, filter, _id, diagnostic, thumbnail, url}';
 
     this.queryCms(query);
     this.subscribeToCms(query);
   }
 
-  public notifyNew(data, text) {
+  public notifyNew(data: ContentFeedItem, text?: string) {
     this.emit("newNews", data, text);
   }
 }
