@@ -11,6 +11,7 @@ import { newsFeedMapper } from "../feedListener/mappers";
 
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
 import { shouldFilter } from "./helpers";
+import { sub } from "date-fns";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
@@ -30,7 +31,7 @@ export type CmsNewsFeed = {
 export class NewsManager extends EventEmitter {
   private feeds: CmsNewsFeed[];
   private cmsClient: SanityClient;
-  private rssEntries: FeedParserEntry[];
+  private entryUrls: { [key: string]: boolean } = {};
   private imageUrlBuilder;
 
   constructor() {
@@ -56,7 +57,11 @@ export class NewsManager extends EventEmitter {
             return console.log("Filtered out a value: ", entry.link);
           }
 
-          this.rssEntries.push(entry);
+          if (this.entryUrls[entry.link]) {
+            return console.log("Duplicate story: ", entry.link);
+          }
+
+          this.entryUrls[entry.link] = true;
           diagnostic && console.log(entry);
           this.notifyNew(newsFeedMapper(entry, name, thumbnail));
         });
@@ -66,33 +71,45 @@ export class NewsManager extends EventEmitter {
       });
   };
 
-  public async initiateWatcher(feed: NewsFeedDocument) {
-    const thumbnail = feed.thumbnail
-      ? this.imageUrlBuilder.image(feed.thumbnail).url()
-      : "";
-    const formattedFeed = {
-      ...feed,
-      thumbnail,
-    };
-    const watcher = this.watcherGenerator(formattedFeed);
+  public initiateWatcher(feed: NewsFeedDocument) {
+    return new Promise((resolve, reject) => {
+      const thumbnail = feed.thumbnail
+        ? this.imageUrlBuilder.image(feed.thumbnail).url()
+        : "";
+      const formattedFeed = {
+        ...feed,
+        thumbnail,
+      };
+      const watcher = this.watcherGenerator(formattedFeed);
+      const thresholdDate = sub(new Date(), { days: 3 });
 
-    try {
-      this.rssEntries = await watcher.start();
-      this.feeds.push({
-        data: formattedFeed,
-        watcher,
-      });
-      console.log(`Watching newsFeed ${feed.name}`);
-    } catch (error) {
-      console.error(`Error watching Feed ${feed.name}`, error);
-    }
+      watcher
+        .start()
+        .then((entries) => {
+          const recentEntries = entries.filter(
+            (entry) => entry.pubDate.getTime() > thresholdDate.getTime()
+          );
+          recentEntries.forEach((entry) => (this.entryUrls[entry.link] = true));
+          this.feeds.push({
+            data: formattedFeed,
+            watcher,
+          });
+          console.log(`Watching newsFeed ${feed.name}`);
+          resolve("Success!");
+        })
+        .catch((error) => {
+          console.error(`Error watching Feed ${feed.name}`, error);
+          reject(error);
+        });
+    });
   }
 
   public queryCms(query: string) {
     this.cmsClient
       .fetch<NewsFeedDocument[]>(query)
-      .then((response) => {
-        response.forEach((feed) => this.initiateWatcher(feed));
+      .then((feeds) => {
+        const promises = feeds.map((feed) => this.initiateWatcher(feed));
+        return Promise.allSettled(promises);
       })
       .catch((err) => console.error("Unable to fetch Feeds from CMS", err));
   }
