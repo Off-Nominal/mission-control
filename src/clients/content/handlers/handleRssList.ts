@@ -1,4 +1,4 @@
-import { EmbedFieldData, Interaction, MessageEmbed } from "discord.js";
+import { Interaction, MessageEmbed } from "discord.js";
 
 const NEWS_CHANNEL_ID = process.env.NEWS_CHANNEL_ID;
 
