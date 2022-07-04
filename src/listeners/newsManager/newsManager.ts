@@ -146,7 +146,7 @@ export class NewsManager extends EventEmitter {
 
   public initialize() {
     const query =
-      '*[_type == "newsFeed"]{name, category->{name}, filter, _id, diagnostic, thumbnail, url}';
+      '*[_type == "newsFeed"]{name, filter, _id, diagnostic, thumbnail, url}';
 
     this.queryCms(query);
     this.subscribeToCms(query);
