@@ -1,6 +1,6 @@
 require("dotenv").config();
 import { Client as DbClient } from "pg";
-import { Client, Intents } from "discord.js";
+import { BaseCommandInteraction, Client, Intents } from "discord.js";
 
 import generateHandlers from "./clients/handlers";
 
@@ -255,10 +255,11 @@ const feeds: FeedList = {
 };
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
-contentBot.on("interactionCreate", (interaction) =>
-  contentBotHandlers.handleInteractionCreate(interaction, feeds)
-);
+contentBot.on("interactionCreate", (interaction: BaseCommandInteraction) => {
+  contentBotHandlers.handleInteractionCreate(interaction, feeds);
+});
 contentBot.on("error", handleError);
+contentBot.on("rssList", contentBotHandlers.handleRssList);
 
 /***********************************
  *  Event Bot Event Handlers

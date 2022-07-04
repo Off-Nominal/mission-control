@@ -1,7 +1,4 @@
 import EventEmitter = require("events");
-
-const sanityClient = require("@sanity/client");
-const imageUrlBuilder = require("@sanity/image-url");
 import { SanityClient } from "@sanity/client";
 import { SanityDocument } from "@sanity/types/dist/dts";
 
@@ -13,6 +10,8 @@ import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent
 import { shouldFilter } from "./helpers";
 import { sub } from "date-fns";
 
+import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
+
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
 export interface NewsFeedDocument extends SanityDocument {
@@ -21,6 +20,7 @@ export interface NewsFeedDocument extends SanityDocument {
   filter?: string;
   thumbnail: string;
   diagnostic: string;
+  category: string;
 }
 
 export type CmsNewsFeed = {
@@ -37,14 +37,8 @@ export class NewsManager extends EventEmitter {
   constructor() {
     super();
     this.feeds = [];
-    this.cmsClient = sanityClient({
-      projectId: process.env.SANITY_CMS_ID,
-      dataset:
-        process.env.SANITY_DATASET || process.env.NODE_ENV || "development",
-      apiVersion: "2022-06-24",
-      useCdn: process.env.SANITY_CDN || true,
-    });
-    this.imageUrlBuilder = imageUrlBuilder(this.cmsClient);
+    this.cmsClient = sanityClient;
+    this.imageUrlBuilder = sanityImageUrlBuilder;
   }
 
   private watcherGenerator = (feed: NewsFeedDocument) => {

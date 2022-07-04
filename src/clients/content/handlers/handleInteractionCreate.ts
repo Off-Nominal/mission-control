@@ -21,6 +21,10 @@ export default function handleInteractionCreate(
   const { options } = interaction;
   const subCommand = options.getSubcommand(false);
 
+  if (subCommand === "rss") {
+    return interaction.client.emit("rssList", interaction);
+  }
+
   if (subCommand === "help") {
     return interaction.reply({ embeds: [createPodcastHelpEmbed()] });
   }
