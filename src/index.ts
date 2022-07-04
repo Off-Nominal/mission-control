@@ -259,9 +259,7 @@ contentBot.on("interactionCreate", (interaction: BaseCommandInteraction) => {
   contentBotHandlers.handleInteractionCreate(interaction, feeds);
 });
 contentBot.on("error", handleError);
-contentBot.on("rssList", (interaction) =>
-  contentBotHandlers.handleRssList(interaction, newsFeedListener.getFeedList())
-);
+contentBot.on("rssList", contentBotHandlers.handleRssList);
 
 /***********************************
  *  Event Bot Event Handlers

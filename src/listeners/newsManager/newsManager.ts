@@ -20,6 +20,7 @@ export interface NewsFeedDocument extends SanityDocument {
   filter?: string;
   thumbnail: string;
   diagnostic: string;
+  category: string;
 }
 
 export type CmsNewsFeed = {
@@ -145,7 +146,7 @@ export class NewsManager extends EventEmitter {
 
   public initialize() {
     const query =
-      '*[_type == "newsFeed"]{name, filter, _id, diagnostic, thumbnail, url}';
+      '*[_type == "newsFeed"]{name, category->{name}, filter, _id, diagnostic, thumbnail, url}';
 
     this.queryCms(query);
     this.subscribeToCms(query);
@@ -153,15 +154,5 @@ export class NewsManager extends EventEmitter {
 
   public notifyNew(data: ContentFeedItem, text?: string) {
     this.emit("newNews", data, text);
-  }
-
-  public getFeedList() {
-    return this.feeds.map((feed) => {
-      return {
-        name: feed.data.name,
-        url: feed.data.url,
-        thumbnail: feed.data.thumbnail,
-      };
-    });
   }
 }
