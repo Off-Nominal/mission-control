@@ -18,7 +18,10 @@ export class FeedWatcher extends EventEmitter {
   private timer: null | NodeJS.Timer;
   private loadAttempts: number = 0;
   private options: RobustWatcherOptions;
-  private lastEntryDate: Date;
+  private lastEntry: {
+    date?: Date;
+    permalink?: string;
+  };
 
   constructor(feedurl: string, options: RobustWatcherOptions = {}) {
     super();
@@ -31,6 +34,7 @@ export class FeedWatcher extends EventEmitter {
     this.interval = options.interval || DEFAULT_FEED_CHECK_TIME_IN_SECONDS;
     this.options = options;
     this.timer = null;
+    this.lastEntry = {};
   }
 
   private fetchEntries() {
@@ -47,7 +51,8 @@ export class FeedWatcher extends EventEmitter {
         this.loadAttempts++;
         this.fetchEntries()
           .then((entries) => {
-            this.lastEntryDate = entries[0].pubDate;
+            this.lastEntry.date = entries[0].pubDate;
+            this.lastEntry.permalink = entries[0].link;
             this.timer = this.watch();
             resolver(entries);
           })
@@ -76,11 +81,14 @@ export class FeedWatcher extends EventEmitter {
       this.fetchEntries()
         .then((entries) => {
           const newEntries = entries.filter(
-            (entry) => entry.pubDate > this.lastEntryDate
+            (entry) =>
+              entry.pubDate > this.lastEntry.date &&
+              entry.link !== this.lastEntry.permalink
           );
 
           if (newEntries.length > 0) {
-            this.lastEntryDate = newEntries[0].pubDate;
+            this.lastEntry.date = newEntries[0].pubDate;
+            this.lastEntry.permalink = newEntries[0].link;
             this.emit("new", newEntries);
           }
         })
