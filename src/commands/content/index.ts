@@ -73,6 +73,11 @@ const commands = [
     )
     .addSubcommand((command) =>
       command.setName("help").setDescription("Get help searching for podcasts")
+    )
+    .addSubcommand((command) =>
+      command
+        .setName("rss")
+        .setDescription("Show a list of currently subscribed RSS feeds")
     ),
 ].map((command) => command.toJSON());
 
