@@ -154,4 +154,14 @@ export class NewsManager extends EventEmitter {
   public notifyNew(data: ContentFeedItem, text?: string) {
     this.emit("newNews", data, text);
   }
+
+  public getFeedList() {
+    return this.feeds.map((feed) => {
+      return {
+        name: feed.data.name,
+        url: feed.data.url,
+        thumbnail: feed.data.thumbnail,
+      };
+    });
+  }
 }

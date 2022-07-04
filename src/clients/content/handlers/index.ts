@@ -5,6 +5,7 @@ import handleNewContent from "./handleNewContent";
 import handleThreadCreate from "./handleThreadCreate";
 import handleInteractionCreate from "./handleInteractionCreate";
 import handleEventEnded from "./handleEventEnded";
+import handleRssList from "./handleRssList";
 
 export default function generateContentBotHandlers(db: Client) {
   return {
@@ -13,5 +14,6 @@ export default function generateContentBotHandlers(db: Client) {
     handleThreadCreate,
     handleInteractionCreate,
     handleEventEnded,
+    handleRssList,
   };
 }
