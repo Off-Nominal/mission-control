@@ -343,12 +343,11 @@ starshipChecker.on("siteUpdate", (update) =>
  *  to enable simulated events
  ************************************/
 
+utilityBot.on("dev_new entries", (show) => {
+  const feed = feeds[show] as ContentListener;
+  feed.emit("newContent", feed.fetchRecent());
+});
 if (process.env.NODE_ENV === "dev") {
-  utilityBot.on("dev_new entries", (show) => {
-    const feed = feeds[show] as ContentListener;
-    feed.emit("newContent", feed.fetchRecent());
-  });
-
   utilityBot.on("dev_dbtest", () => {
     console.log("dbtest invoked");
     db.query("SELECT NOW()")
