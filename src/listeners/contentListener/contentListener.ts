@@ -54,7 +54,7 @@ export class ContentListener extends FeedWatcher {
   }
 
   private listen() {
-    this.on("new entries", (entries) => {
+    this.on("new", (entries) => {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode, this.title);
         this.episodes.push(mappedEpisode);
