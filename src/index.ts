@@ -226,10 +226,6 @@ utilityBot.on("error", handleError);
 utilityBot.on("threadDigestSend", mainBotHandlers.handleThreadDigestSend);
 utilityBot.on("starshipSiteUpdate", mainBotHandlers.handleStarshipSiteUpdate);
 
-if (process.env.NODE_ENV === "dev") {
-  utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
-}
-
 /***********************************
  *  Book Club Bot Event Handlers
  ************************************/
@@ -342,6 +338,8 @@ starshipChecker.on("siteUpdate", (update) =>
  *  Only runs in Dev environment
  *  to enable simulated events
  ************************************/
+
+utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
 
 utilityBot.on("dev_new entries", (show) => {
   const feed = feeds[show] as ContentListener;
