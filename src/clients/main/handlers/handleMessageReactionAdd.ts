@@ -4,6 +4,7 @@ import {
   PartialUser,
   User,
 } from "discord.js";
+import { UtilityBotEvents } from "../../types";
 
 export default async function handleMessageReactionAdd(
   messageReact: MessageReaction | PartialMessageReaction,
@@ -27,7 +28,7 @@ export default async function handleMessageReactionAdd(
     messageReact.message.embeds[0]?.title !== "Channel Summary Report"
   ) {
     messageReact.client.emit(
-      "summaryReportSend",
+      UtilityBotEvents.SUMMARY_SEND,
       user,
       messageReact.message.id
     );

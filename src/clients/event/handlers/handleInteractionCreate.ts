@@ -6,6 +6,7 @@ import {
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
+import { EventBotEvents } from "../../types";
 import createDiscordEvent from "../actions/createDiscordEvent";
 
 const livechatChannelID = process.env.LIVECHATCHANNELID;
@@ -29,11 +30,11 @@ export default function generateInteractionCreateHandler(db: Client) {
 
     if (subCommand === AllowedCommands.SUGGEST) {
       const title = options.getString("title", true);
-      this.emit("newStreamTitle", title, interaction);
+      this.emit(EventBotEvents.NEW_TITLE, title, interaction);
     }
 
     if (subCommand === AllowedCommands.SUGGESTIONS) {
-      this.emit("viewStreamTitles", interaction);
+      this.emit(EventBotEvents.VIEW_TITLES, interaction);
     }
 
     if (subCommand === AllowedCommands.START) {

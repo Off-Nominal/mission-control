@@ -1,5 +1,6 @@
 import { Collection, GuildScheduledEvent } from "discord.js";
 import EventEmitter = require("events");
+import { EventListenerEvents } from "../../clients/types";
 
 const FIVE_MINS_IN_MS = 300000;
 const MS_IN_A_SEC = 1000;
@@ -56,7 +57,7 @@ export class EventsListener extends EventEmitter {
           maxTime,
         };
       });
-      this.emit("eventsMonitored", eventWindows);
+      this.emit(EventListenerEvents.MONITOR, eventWindows);
     }, this.listenInterval);
   }
 

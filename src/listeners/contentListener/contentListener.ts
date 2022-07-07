@@ -1,6 +1,8 @@
 import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
+import { ContentListnerEvents } from "../../clients/types";
+import { FeedWatcherEvents } from "../feedListener/feedTypes";
 import { FeedWatcher } from "../feedListener/feedWatcher";
 const FuseJS = require("fuse.js");
 
@@ -39,7 +41,7 @@ export class ContentListener extends FeedWatcher {
       console.log(
         `${this.title} feed loaded with ${this.episodes.length} items.`
       );
-      this.on("error", (error) =>
+      this.on(FeedWatcherEvents.ERROR, (error) =>
         console.error(`Error checking ${this.title}.`, error)
       );
     } catch (err) {
@@ -54,11 +56,11 @@ export class ContentListener extends FeedWatcher {
   }
 
   private listen() {
-    this.on("new", (entries) => {
+    this.on(FeedWatcherEvents.NEW, (entries) => {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode, this.title);
         this.episodes.push(mappedEpisode);
-        this.emit("newContent", mappedEpisode);
+        this.emit(ContentListnerEvents.NEW, mappedEpisode);
       });
     });
   }
@@ -92,10 +94,10 @@ export class ContentListener extends FeedWatcher {
     }
 
     if (event.status === "COMPLETED") {
-      this.emit("streamEnded", event);
+      this.emit(ContentListnerEvents.STREAM_END, event);
     }
     if (event.status === "ACTIVE") {
-      this.emit("streamStarted", event);
+      this.emit(ContentListnerEvents.STREAM_START, event);
     }
   }
 }

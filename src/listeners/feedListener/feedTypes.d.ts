@@ -91,3 +91,9 @@ export type FeedParserEntry = {
   enclosures: { url: string; type: string; length: string }[];
   meta: Meta;
 };
+
+export enum FeedWatcherEvents {
+  NEW = "new",
+  STOP = "stop",
+  ERROR = "error",
+}
