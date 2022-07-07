@@ -1,6 +1,7 @@
 import { Interaction, MessageOptions } from "discord.js";
 import { ContentListener } from "../../../listeners/contentListener/contentListener";
-import { ContentBotEvents } from "../../types";
+import { ContentBotEvents } from "../../../types/eventEnums";
+
 import { createPodcastHelpEmbed } from "../actions/createPodcastHelpEmbed";
 import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";

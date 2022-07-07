@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import EventEmitter = require("events");
 import createPollEmbed from "../../clients/main/actions/poll/createPollEmbed";
-import { StreamHostEvents } from "../../clients/types";
+import { StreamHostEvents } from "../../types/eventEnums";
 import {
   generatePartyMessages,
   PartyMessages,

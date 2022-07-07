@@ -32,7 +32,7 @@ import {
   SiteListenerEvents,
   StreamHostEvents,
   UtilityBotEvents,
-} from "./clients/types";
+} from "./types/eventEnums";
 
 // Database Config
 const db = new DbClient();

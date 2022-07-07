@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { UtilityBotEvents } from "../clients/types";
+import { UtilityBotEvents } from "../types/eventEnums";
 import getNextTime from "../helpers/getNextTime";
 
 export default function scheduleThreadDigest(client: Client) {

@@ -1,5 +1,5 @@
 import EventEmitter = require("events");
-import { MemberManagerEvents } from "../../clients/types";
+import { MemberManagerEvents } from "../../types/eventEnums";
 import getNextTime from "../../helpers/getNextTime";
 
 export class MemberManager extends EventEmitter {

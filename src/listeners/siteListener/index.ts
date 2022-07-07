@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
 import EventEmitter = require("events");
-import { SiteListenerEvents } from "../../clients/types";
+import { SiteListenerEvents } from "../../types/eventEnums";
 import { GitHubAgent } from "./github";
 
 export type SiteListenerOptions = {

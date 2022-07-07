@@ -6,7 +6,7 @@ import {
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
-import { EventBotEvents } from "../../types";
+import { EventBotEvents } from "../../../types/eventEnums";
 import createDiscordEvent from "../actions/createDiscordEvent";
 
 const livechatChannelID = process.env.LIVECHATCHANNELID;

@@ -4,7 +4,7 @@ import {
   PartialUser,
   User,
 } from "discord.js";
-import { UtilityBotEvents } from "../../types";
+import { UtilityBotEvents } from "../../../types/eventEnums";
 
 export default async function handleMessageReactionAdd(
   messageReact: MessageReaction | PartialMessageReaction,

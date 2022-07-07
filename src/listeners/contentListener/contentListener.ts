@@ -1,7 +1,7 @@
 import { GuildScheduledEvent } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
-import { ContentListnerEvents } from "../../clients/types";
+import { ContentListnerEvents } from "../../types/eventEnums";
 import { FeedWatcherEvents } from "../feedListener/feedTypes";
 import { FeedWatcher } from "../feedListener/feedWatcher";
 const FuseJS = require("fuse.js");

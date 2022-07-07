@@ -11,7 +11,7 @@ import { shouldFilter } from "./helpers";
 import { sub } from "date-fns";
 
 import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
-import { NewsManagerEvents } from "../../clients/types";
+import { NewsManagerEvents } from "../../types/eventEnums";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 

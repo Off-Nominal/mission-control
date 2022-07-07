@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
-import { DevEvents } from "../../types";
+import { DevEvents } from "../../../types/eventEnums";
 import {
   findTempsToConvert,
   createTempConversionEmbed,

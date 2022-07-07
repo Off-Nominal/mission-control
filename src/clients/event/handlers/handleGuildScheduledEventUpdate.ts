@@ -1,5 +1,5 @@
 import { GuildScheduledEvent } from "discord.js";
-import { EventBotEvents } from "../../types";
+import { EventBotEvents } from "../../../types/eventEnums";
 
 export default function handleGuildScheduledEventUpdate(
   oldEvent: GuildScheduledEvent,
