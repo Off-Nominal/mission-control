@@ -21,6 +21,7 @@ export enum AllowedPrefix {
   OLD_RPR = "!rpr",
   OLD_PODCASTS = "!podcasts",
   OLD_TOPIC = "!topic",
+  SEND_DELINQUENTS = "!senddelinquents",
 }
 
 export default async function handleMessageCreate(message: Message) {
@@ -46,7 +47,7 @@ export default async function handleMessageCreate(message: Message) {
     }
   }
 
-  if (prefix === "!senddelinquents") {
+  if (prefix === AllowedPrefix.SEND_DELINQUENTS) {
     this.emit(UtilityBotEvents.SEND_DELINQUENTS, message);
   }
 
