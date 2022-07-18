@@ -1,8 +1,5 @@
-import { Client, MessageEmbed } from "discord.js";
-import fetchTextChannel from "../../actions/fetchChannel";
+import { Message, MessageEmbed } from "discord.js";
 import fetchGuild from "../../actions/fetchGuild";
-
-const CHANNEL_ID = process.env.MODSCHANNELID;
 
 const WM_ROLE_ID = process.env.WM_ROLE_ID;
 const MECO_ROLE_ID = process.env.MECO_ROLE_ID;
@@ -10,10 +7,16 @@ const OFN_ROLE_ID = process.env.OFN_ROLE_ID;
 const BOT_ROLE_ID = process.env.BOT_ROLE_ID;
 const HOST_ROLE_ID = process.env.HOST_ROLE_ID;
 const GUEST_ROLE_ID = process.env.GUEST_ROLE_ID;
+const MOD_ROLE_ID = process.env.MODS_ROLE_ID;
 
-export default async function handleSendDelinquents(client: Client) {
-  const guild = fetchGuild(client);
+export default async function handleSendDelinquents(message: Message) {
+  const guild = fetchGuild(message.client);
   const guildMemberManager = guild.members;
+
+  const author = await guildMemberManager.fetch(message.author.id);
+  if (!author.roles.cache.has(MOD_ROLE_ID)) {
+    return;
+  }
 
   // Gather Data
   const totalUserCount = guildMemberManager.cache.size;
@@ -47,6 +50,6 @@ export default async function handleSendDelinquents(client: Client) {
     ],
   });
 
-  const channel = await fetchTextChannel(client, CHANNEL_ID);
+  const channel = await author.createDM();
   channel.send({ embeds: [embed] });
 }

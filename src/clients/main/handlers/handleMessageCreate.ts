@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
-import { DevEvents } from "../../../types/eventEnums";
+import { DevEvents, UtilityBotEvents } from "../../../types/eventEnums";
 import {
   findTempsToConvert,
   createTempConversionEmbed,
@@ -44,10 +44,10 @@ export default async function handleMessageCreate(message: Message) {
     if (prefix === "!dbtest") {
       this.emit(DevEvents.DB_TEST);
     }
+  }
 
-    if (prefix === "!senddelinquents") {
-      this.emit(DevEvents.SEND_DELINQUENTS);
-    }
+  if (prefix === "!senddelinquents") {
+    this.emit(UtilityBotEvents.SEND_DELINQUENTS, message);
   }
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;

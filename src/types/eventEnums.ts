@@ -33,6 +33,7 @@ export enum UtilityBotEvents {
   SUMMARY_SEND = "summaryReportSend",
   THREAD_DIGEST_SEND = "threadDigestSend",
   STARSHIP_UPDATE = "starshipSiteUpdate",
+  SEND_DELINQUENTS = "sendDelinquents",
 }
 
 export enum SiteListenerEvents {
@@ -47,5 +48,4 @@ export enum DevEvents {
   NEW_ENTRIES = "dev_new entries",
   DB_TEST = "dev_dbtest",
   THREAD_DIGEST_SEND = "dev_threadDigestSend",
-  SEND_DELINQUENTS = "dev_sendDelinquents",
 }

@@ -159,10 +159,10 @@ const streamHost = new StreamHost();
  *  Member Manager Setup
  ************************************/
 
-const memberManager = new MemberManager();
-memberManager.on(MemberManagerEvents.SEND_DELINQUENTS, () => {
-  mainBotHandlers.handleSendDelinquents(utilityBot);
-});
+// const memberManager = new MemberManager();
+// memberManager.on(MemberManagerEvents.SEND_DELINQUENTS, () => {
+//   mainBotHandlers.handleSendDelinquents(utilityBot);
+// });
 
 /***********************************
  *  Feed Listener Setup
@@ -234,6 +234,10 @@ utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
 utilityBot.on("error", handleError);
+utilityBot.on(
+  UtilityBotEvents.SEND_DELINQUENTS,
+  mainBotHandlers.handleSendDelinquents
+);
 utilityBot.on(
   UtilityBotEvents.SUMMARY_CREATE,
   reportGenerator.handleReportRequest
@@ -388,5 +392,4 @@ if (process.env.NODE_ENV === "dev") {
     DevEvents.THREAD_DIGEST_SEND,
     mainBotHandlers.handleThreadDigestSend
   );
-  utilityBot.on(DevEvents.SEND_DELINQUENTS, memberManager.sendDelinquents);
 }
