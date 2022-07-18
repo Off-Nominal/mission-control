@@ -1,4 +1,5 @@
 import { GuildScheduledEvent } from "discord.js";
+import { EventBotEvents } from "../../../types/eventEnums";
 
 export default function handleGuildScheduledEventUpdate(
   oldEvent: GuildScheduledEvent,
@@ -6,9 +7,9 @@ export default function handleGuildScheduledEventUpdate(
 ) {
   const newStatus = newEvent.status;
   if (newStatus === "ACTIVE") {
-    newEvent.client.emit("eventStarted", newEvent);
+    newEvent.client.emit(EventBotEvents.START, newEvent);
   }
   if (newStatus === "COMPLETED") {
-    newEvent.client.emit("eventEnded", newEvent);
+    newEvent.client.emit(EventBotEvents.END, newEvent);
   }
 }

@@ -3,20 +3,26 @@ import axios from "axios";
 
 const FeedParser = require("feedparser");
 
+enum FeedParserEvents {
+  ERROR = "error",
+  READABLE = "readable",
+  END = "end",
+}
+
 export const feedRequest = (feedUrl: string): Promise<FeedParserEntry[]> => {
   return new Promise((resolve, reject) => {
     const entries: FeedParserEntry[] = [];
     // const options = { feedurl: url };
 
     const feedParser = new FeedParser()
-      .on("error", (err) => console.error(err))
-      .on("readable", () => {
+      .on(FeedParserEvents.ERROR, (err) => console.error(err))
+      .on(FeedParserEvents.READABLE, () => {
         let item: FeedParserEntry;
         while ((item = feedParser.read())) {
           entries.push(item);
         }
       })
-      .on("end", () => {
+      .on(FeedParserEvents.END, () => {
         if (!entries.length) {
           reject(new Error("No entries in the feed"));
         }

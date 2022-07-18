@@ -3,7 +3,7 @@ import { SanityClient } from "@sanity/client";
 import { SanityDocument } from "@sanity/types/dist/dts";
 
 import { FeedWatcher } from "../feedListener/feedWatcher";
-import { FeedParserEntry } from "../feedListener/feedTypes";
+import { FeedParserEntry, FeedWatcherEvents } from "../feedListener/feedTypes";
 import { newsFeedMapper } from "../feedListener/mappers";
 
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
@@ -11,6 +11,7 @@ import { shouldFilter } from "./helpers";
 import { sub } from "date-fns";
 
 import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
+import { NewsManagerEvents } from "../../types/eventEnums";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
@@ -45,7 +46,7 @@ export class NewsManager extends EventEmitter {
     const { url, name, thumbnail, diagnostic } = feed;
 
     return new FeedWatcher(url, { interval: FEED_INTERVAL })
-      .on("new", (entries: FeedParserEntry[]) => {
+      .on(FeedWatcherEvents.NEW, (entries: FeedParserEntry[]) => {
         entries.forEach((entry) => {
           if (shouldFilter(entry, feed)) {
             return console.log("Filtered out a value: ", entry.link);
@@ -60,7 +61,7 @@ export class NewsManager extends EventEmitter {
           this.notifyNew(newsFeedMapper(entry, name, thumbnail));
         });
       })
-      .on("error", (error) => {
+      .on(FeedWatcherEvents.ERROR, (error) => {
         console.error(`Error reading news Feed: ${name}`, error);
       });
   };
@@ -153,6 +154,6 @@ export class NewsManager extends EventEmitter {
   }
 
   public notifyNew(data: ContentFeedItem, text?: string) {
-    this.emit("newNews", data, text);
+    this.emit(NewsManagerEvents.NEW, data, text);
   }
 }

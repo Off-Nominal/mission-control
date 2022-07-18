@@ -1,6 +1,6 @@
 import EventEmitter = require("events");
 import { feedRequest } from "./feedRequest";
-import { FeedParserEntry } from "./feedTypes";
+import { FeedParserEntry, FeedWatcherEvents } from "./feedTypes";
 
 const DEFAULT_FEED_CHECK_TIME_IN_SECONDS = 60;
 const DEFAULT_RETRY_ATTEMPTS = 3;
@@ -73,7 +73,7 @@ export class FeedWatcher extends EventEmitter {
 
   public stop() {
     clearInterval(this.timer);
-    this.emit("stop");
+    this.emit(FeedWatcherEvents.STOP);
   }
 
   private watch() {
@@ -89,7 +89,7 @@ export class FeedWatcher extends EventEmitter {
           if (newEntries.length > 0) {
             this.lastEntry.date = newEntries[0].pubDate;
             this.lastEntry.permalink = newEntries[0].link;
-            this.emit("new", newEntries);
+            this.emit(FeedWatcherEvents.NEW, newEntries);
           }
         })
         .catch((err) => this.emit(err));

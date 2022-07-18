@@ -21,6 +21,19 @@ import { NewsManager } from "./listeners/newsManager/newsManager";
 import { ContentListener } from "./listeners/contentListener/contentListener";
 import { ContentFeedItem } from "./clients/content/handlers/handleNewContent";
 
+import {
+  ContentBotEvents,
+  ContentListnerEvents,
+  DevEvents,
+  EventBotEvents,
+  EventListenerEvents,
+  MemberManagerEvents,
+  NewsManagerEvents,
+  SiteListenerEvents,
+  StreamHostEvents,
+  UtilityBotEvents,
+} from "./types/eventEnums";
+
 // Database Config
 const db = new DbClient();
 db.connect();
@@ -127,7 +140,7 @@ const starshipChecker = new SiteListener(
 const newsFeedListener = new NewsManager();
 newsFeedListener.initialize();
 newsFeedListener.on(
-  "newNews",
+  NewsManagerEvents.NEW,
   (contentFeedItem: ContentFeedItem, text: string) => {
     contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
       text,
@@ -147,7 +160,7 @@ const streamHost = new StreamHost();
  ************************************/
 
 const memberManager = new MemberManager();
-memberManager.on("sendDelinquents", () => {
+memberManager.on(MemberManagerEvents.SEND_DELINQUENTS, () => {
   mainBotHandlers.handleSendDelinquents(utilityBot);
 });
 
@@ -220,11 +233,20 @@ utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
-utilityBot.on("summaryReportCreate", reportGenerator.handleReportRequest);
-utilityBot.on("summaryReportSend", reportGenerator.handleSendRequest);
 utilityBot.on("error", handleError);
-utilityBot.on("threadDigestSend", mainBotHandlers.handleThreadDigestSend);
-utilityBot.on("starshipSiteUpdate", mainBotHandlers.handleStarshipSiteUpdate);
+utilityBot.on(
+  UtilityBotEvents.SUMMARY_CREATE,
+  reportGenerator.handleReportRequest
+);
+utilityBot.on(UtilityBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
+utilityBot.on(
+  UtilityBotEvents.THREAD_DIGEST_SEND,
+  mainBotHandlers.handleThreadDigestSend
+);
+utilityBot.on(
+  UtilityBotEvents.STARSHIP_UPDATE,
+  mainBotHandlers.handleStarshipSiteUpdate
+);
 
 /***********************************
  *  Book Club Bot Event Handlers
@@ -255,7 +277,7 @@ contentBot.on("interactionCreate", (interaction: BaseCommandInteraction) => {
   contentBotHandlers.handleInteractionCreate(interaction, feeds);
 });
 contentBot.on("error", handleError);
-contentBot.on("rssList", contentBotHandlers.handleRssList);
+contentBot.on(ContentBotEvents.RSS_LIST, contentBotHandlers.handleRssList);
 
 /***********************************
  *  Event Bot Event Handlers
@@ -274,63 +296,69 @@ eventBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
 eventBot.on("guildScheduledEventCreate", eventsListener.addEvent);
 eventBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
 
-eventBot.on("eventStarted", ytFeedListener.verifyEvent);
-eventBot.on("eventEnded", (event) =>
+eventBot.on(EventBotEvents.START, ytFeedListener.verifyEvent);
+eventBot.on(EventBotEvents.END, (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
-eventBot.on("eventEnded", ytFeedListener.verifyEvent);
+eventBot.on(EventBotEvents.END, ytFeedListener.verifyEvent);
 
 eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
-eventBot.on("eventsRetrieved", eventsListener.initialize);
+eventBot.on(EventBotEvents.RETRIEVED, eventsListener.initialize);
 eventBot.on("error", handleError);
-eventBot.on("newStreamTitle", streamHost.logSuggestion);
-eventBot.on("viewStreamTitles", streamHost.viewSuggestions);
+eventBot.on(EventBotEvents.NEW_TITLE, streamHost.logSuggestion);
+eventBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);
 
 /***********************************
  *  Feed Listeners Event Handlers
  ************************************/
 
-wmFeedListener.on("newContent", (content) => {
+wmFeedListener.on(ContentListnerEvents.NEW, (content) => {
   deployWeMartians();
   contentBotHandlers.handleNewContent(content, contentBot, "content", {
     timeout: 600,
   });
 });
-mecoFeedListener.on("newContent", (content) => {
+mecoFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
-ofnFeedListener.on("newContent", (content) => {
+ofnFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
-rprFeedListener.on("newContent", (content) => {
+rprFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
-hlFeedListener.on("newContent", (content) => {
+hlFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
-hhFeedListener.on("newContent", (content) => {
+hhFeedListener.on(ContentListnerEvents.NEW, (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);
 });
-ytFeedListener.on("newContent", (content) => {
+ytFeedListener.on(ContentListnerEvents.NEW, (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);
 });
 
-ytFeedListener.on("streamStarted", streamHost.startParty);
-ytFeedListener.on("streamEnded", streamHost.endParty);
+ytFeedListener.on(ContentListnerEvents.STREAM_START, streamHost.startParty);
+ytFeedListener.on(ContentListnerEvents.STREAM_END, streamHost.endParty);
 
 /***********************************
  *  Event Listeners Event Handlers
  ************************************/
 
-eventsListener.on("eventsMonitored", eventBotHandlers.handleEventsMonitored);
-streamHost.on("partyMessage", eventBotHandlers.handlePartyMessage);
+eventsListener.on(
+  EventListenerEvents.MONITOR,
+  eventBotHandlers.handleEventsMonitored
+);
+streamHost.on(
+  StreamHostEvents.PARTY_MESSAGE,
+  eventBotHandlers.handlePartyMessage
+);
 
 /***********************************
  *  Site Listeners Event Handlers
  ************************************/
 
-starshipChecker.on("siteUpdate", (update) =>
-  utilityBot.emit("starshipSiteUpdate", update)
+starshipChecker.on(SiteListenerEvents.UPDATE, (update) =>
+  utilityBot.emit(UtilityBotEvents.STARSHIP_UPDATE, update)
 );
 
 /***********************************
@@ -342,11 +370,11 @@ starshipChecker.on("siteUpdate", (update) =>
 if (process.env.NODE_ENV === "dev") {
   utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
 
-  utilityBot.on("dev_new entries", (show) => {
+  utilityBot.on(DevEvents.NEW_ENTRIES, (show) => {
     const feed = feeds[show] as ContentListener;
-    feed.emit("newContent", feed.fetchRecent());
+    feed.emit(ContentListnerEvents.NEW, feed.fetchRecent());
   });
-  utilityBot.on("dev_dbtest", () => {
+  utilityBot.on(DevEvents.DB_TEST, () => {
     console.log("dbtest invoked");
     db.query("SELECT NOW()")
       .then((res) => console.log(`Time on database is ${res.rows[0].now}`))
@@ -356,6 +384,9 @@ if (process.env.NODE_ENV === "dev") {
       });
   });
 
-  utilityBot.on("dev_threadDigestSend", mainBotHandlers.handleThreadDigestSend);
-  utilityBot.on("dev_sendDelinquents", memberManager.sendDelinquents);
+  utilityBot.on(
+    DevEvents.THREAD_DIGEST_SEND,
+    mainBotHandlers.handleThreadDigestSend
+  );
+  utilityBot.on(DevEvents.SEND_DELINQUENTS, memberManager.sendDelinquents);
 }

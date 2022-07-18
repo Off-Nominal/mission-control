@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 import EventEmitter = require("events");
 import createPollEmbed from "../../clients/main/actions/poll/createPollEmbed";
+import { StreamHostEvents } from "../../types/eventEnums";
 import {
   generatePartyMessages,
   PartyMessages,
@@ -40,7 +41,7 @@ export class StreamHost extends EventEmitter {
     message: string | MessagePayload | MessageOptions,
     event: GuildScheduledEvent<"ACTIVE"> = this.activeEvent
   ) {
-    this.emit("partyMessage", message, event);
+    this.emit(StreamHostEvents.PARTY_MESSAGE, message, event);
   }
 
   private initiatePartyMessageSchedule() {
@@ -64,7 +65,7 @@ export class StreamHost extends EventEmitter {
     this.initiatePartyMessageSchedule();
     setTimeout(() => {
       this.emit(
-        "partyMessage",
+        StreamHostEvents.PARTY_MESSAGE,
         { embeds: [streamTitleEmbed] },
         this.activeEvent
       );
@@ -81,7 +82,7 @@ export class StreamHost extends EventEmitter {
     }
 
     this.emit(
-      "partyMessage",
+      StreamHostEvents.PARTY_MESSAGE,
       {
         content: "Thanks for hanging out everyone!",
         embeds: [

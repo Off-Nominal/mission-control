@@ -1,4 +1,5 @@
 import EventEmitter = require("events");
+import { MemberManagerEvents } from "../../types/eventEnums";
 import getNextTime from "../../helpers/getNextTime";
 
 export class MemberManager extends EventEmitter {
@@ -21,7 +22,7 @@ export class MemberManager extends EventEmitter {
   }
 
   public sendDelinquents() {
-    this.emit("sendDelinquents");
+    this.emit(MemberManagerEvents.SEND_DELINQUENTS);
     this.scheduleNextTimer();
   }
 }

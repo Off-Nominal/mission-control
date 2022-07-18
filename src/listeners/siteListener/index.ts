@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
 import EventEmitter = require("events");
+import { SiteListenerEvents } from "../../types/eventEnums";
 import { GitHubAgent } from "./github";
 
 export type SiteListenerOptions = {
@@ -97,7 +98,7 @@ export class SiteListener extends EventEmitter {
           diffUrl,
           date: new Date(response.headers["last-modified"]),
         };
-        this.emit("siteUpdate", updateData);
+        this.emit(SiteListenerEvents.UPDATE, updateData);
         this.lastMessage = new Date(); // Tracks time for cooldown purposes
       } catch (err) {
         console.error(err);

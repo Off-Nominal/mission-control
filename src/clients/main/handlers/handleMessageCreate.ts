@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
+import { DevEvents } from "../../../types/eventEnums";
 import {
   findTempsToConvert,
   createTempConversionEmbed,
@@ -41,11 +42,11 @@ export default async function handleMessageCreate(message: Message) {
   // for testing connection to db
   if (process.env.NODE_ENV === "dev") {
     if (prefix === "!dbtest") {
-      this.emit("dev_dbtest");
+      this.emit(DevEvents.DB_TEST);
     }
 
     if (prefix === "!senddelinquents") {
-      this.emit("dev_sendDelinquents");
+      this.emit(DevEvents.SEND_DELINQUENTS);
     }
   }
 

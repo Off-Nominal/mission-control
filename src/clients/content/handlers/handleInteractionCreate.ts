@@ -1,5 +1,7 @@
 import { Interaction, MessageOptions } from "discord.js";
 import { ContentListener } from "../../../listeners/contentListener/contentListener";
+import { ContentBotEvents } from "../../../types/eventEnums";
+
 import { createPodcastHelpEmbed } from "../actions/createPodcastHelpEmbed";
 import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
@@ -22,7 +24,7 @@ export default function handleInteractionCreate(
   const subCommand = options.getSubcommand(false);
 
   if (subCommand === "rss") {
-    return interaction.client.emit("rssList", interaction);
+    return interaction.client.emit(ContentBotEvents.RSS_LIST, interaction);
   }
 
   if (subCommand === "help") {
