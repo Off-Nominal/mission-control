@@ -1,6 +1,6 @@
 require("dotenv").config();
 import { Client as DbClient } from "pg";
-import { sanityClient, sanityImageUrlBuilder } from "./cms/client";
+
 import { BaseCommandInteraction, Client, Intents } from "discord.js";
 
 import generateHandlers from "./clients/handlers";
@@ -138,7 +138,7 @@ const starshipChecker = new SiteListener(
  *  News Feed Listener Setup
  ************************************/
 
-const newsFeedListener = new NewsManager(sanityClient, sanityImageUrlBuilder);
+const newsFeedListener = new NewsManager();
 newsFeedListener.initialize();
 newsFeedListener.on(
   NewsManagerEvents.NEW,
@@ -154,7 +154,7 @@ newsFeedListener.on(
  ************************************/
 
 const eventsListener = new EventsListener();
-const streamHost = new StreamHost(sanityClient);
+const streamHost = new StreamHost();
 
 /***********************************
  *  Member Manager Setup

@@ -1,5 +1,5 @@
-import { SanityClient } from "@sanity/client";
 import { GuildMember, GuildScheduledEvent, MessageEmbed } from "discord.js";
+import { sanityClient } from "../../cms/client";
 
 export type PartyMessage = {
   text: string;
@@ -12,7 +12,6 @@ export type TitleSuggestion = {
 };
 
 export const generatePartyMessages = (
-  client: SanityClient,
   event: GuildScheduledEvent<"ACTIVE">
 ): Promise<PartyMessage[]> => {
   const standardMessages: PartyMessage[] = [
@@ -24,7 +23,7 @@ export const generatePartyMessages = (
 
   const query = '*[_type == "eventPartyMessages"]{message}';
 
-  return client
+  return sanityClient
     .fetch<string[]>(query)
     .then((messages) => {
       const chosenMessages = messages.filter(() => Math.random() > 0.4);

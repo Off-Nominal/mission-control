@@ -1,5 +1,4 @@
 import EventEmitter = require("events");
-import { SanityClient } from "@sanity/client";
 import { SanityDocument } from "@sanity/types/dist/dts";
 
 import { FeedWatcher } from "../feedListener/feedWatcher";
@@ -10,6 +9,7 @@ import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent
 import { shouldFilter } from "./helpers";
 import { sub } from "date-fns";
 
+import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
 import { NewsManagerEvents } from "../../types/eventEnums";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
@@ -30,15 +30,11 @@ export type CmsNewsFeed = {
 
 export class NewsManager extends EventEmitter {
   private feeds: CmsNewsFeed[];
-  private cmsClient: SanityClient;
   private entryUrls: { [key: string]: boolean } = {};
-  private imageUrlBuilder;
 
-  constructor(client, imgUrlBuilder) {
+  constructor() {
     super();
     this.feeds = [];
-    this.cmsClient = client;
-    this.imageUrlBuilder = this.imageUrlBuilder;
   }
 
   private watcherGenerator = (feed: NewsFeedDocument) => {
@@ -68,7 +64,7 @@ export class NewsManager extends EventEmitter {
   public initiateWatcher(feed: NewsFeedDocument) {
     return new Promise((resolve, reject) => {
       const thumbnail = feed.thumbnail
-        ? this.imageUrlBuilder.image(feed.thumbnail).url()
+        ? sanityImageUrlBuilder.image(feed.thumbnail).url()
         : "";
       const formattedFeed = {
         ...feed,
@@ -99,7 +95,7 @@ export class NewsManager extends EventEmitter {
   }
 
   public queryCms(query: string) {
-    this.cmsClient
+    sanityClient
       .fetch<NewsFeedDocument[]>(query)
       .then((feeds) => {
         const promises = feeds.map((feed) => this.initiateWatcher(feed));
@@ -126,7 +122,7 @@ export class NewsManager extends EventEmitter {
   }
 
   public subscribeToCms(query: string) {
-    this.cmsClient.listen<NewsFeedDocument>(query).subscribe((update) => {
+    sanityClient.listen<NewsFeedDocument>(query).subscribe((update) => {
       update.mutations.forEach((mutation) => {
         const id = update.documentId;
 

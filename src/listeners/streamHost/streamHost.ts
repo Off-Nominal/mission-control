@@ -1,4 +1,3 @@
-import { SanityClient } from "@sanity/client";
 import {
   CommandInteraction,
   GuildMember,
@@ -25,11 +24,9 @@ export class StreamHost extends EventEmitter {
   private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
-  private client: SanityClient;
 
-  constructor(client) {
+  constructor() {
     super();
-    this.client = client;
     this.sendPartyMessage = this.sendPartyMessage.bind(this);
     this.startParty = this.startParty.bind(this);
     this.endParty = this.endParty.bind(this);
@@ -62,7 +59,7 @@ export class StreamHost extends EventEmitter {
 
     this.active = true;
     this.activeEvent = event;
-    this.partyMessages = await generatePartyMessages(this.client, event);
+    this.partyMessages = await generatePartyMessages(event);
 
     this.initiatePartyMessageSchedule();
     setTimeout(() => {
@@ -104,7 +101,6 @@ export class StreamHost extends EventEmitter {
     this.activeEvent = null;
     this.partyMessages = null;
     this.titleSuggestions = [];
-    console.log("Stream Party Ended");
   }
 
   public eventActive() {
