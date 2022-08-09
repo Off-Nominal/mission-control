@@ -10,7 +10,6 @@ import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent
 import { shouldFilter } from "./helpers";
 import { sub } from "date-fns";
 
-import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
 import { NewsManagerEvents } from "../../types/eventEnums";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
@@ -35,11 +34,11 @@ export class NewsManager extends EventEmitter {
   private entryUrls: { [key: string]: boolean } = {};
   private imageUrlBuilder;
 
-  constructor() {
+  constructor(client, imgUrlBuilder) {
     super();
     this.feeds = [];
-    this.cmsClient = sanityClient;
-    this.imageUrlBuilder = sanityImageUrlBuilder;
+    this.cmsClient = client;
+    this.imageUrlBuilder = this.imageUrlBuilder;
   }
 
   private watcherGenerator = (feed: NewsFeedDocument) => {
