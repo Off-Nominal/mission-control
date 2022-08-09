@@ -1,6 +1,7 @@
 import { GuildMember, GuildScheduledEvent, MessageEmbed } from "discord.js";
+import { sanityClient } from "../../cms/client";
 
-export type PartyMessages = {
+export type PartyMessage = {
   text: string;
   waitTime: number;
 };
@@ -12,37 +13,34 @@ export type TitleSuggestion = {
 
 export const generatePartyMessages = (
   event: GuildScheduledEvent<"ACTIVE">
-): PartyMessages[] => {
-  const standardMessages = [
+): Promise<PartyMessage[]> => {
+  const standardMessages: PartyMessage[] = [
     {
       text: `Welcome to the stream for ${event.name}! I'll be your host for this event. Let's see if we can't spice things up a little today!`,
       waitTime: 0,
     },
   ];
 
-  const randomMessages = [
-    "Is there something on Jake's shirt?",
-    "Oh dear, this one's going off the rails, isn't it...",
-    "This is gonna be a two beer episode, isn't it...",
-    "Wait what did he just say?",
-    "Omg lol",
-    "brb, I'm going to get another beer",
-    "I love hanging out with y'all!",
-    "Am I getting on Chase's nerves yet?",
-    "Wow, this is a great episode so far.",
-    "Mac and cheese should be eaten with a fork.",
-  ];
+  const query = '*[_type == "eventPartyMessages"]{message}';
 
-  const chosenMessages = randomMessages.filter(() => Math.random() > 0.4);
+  return sanityClient
+    .fetch<string[]>(query)
+    .then((messages) => {
+      const chosenMessages = messages.filter(() => Math.random() > 0.4);
 
-  const timedChosenMessages = chosenMessages.map((msg) => {
-    return {
-      text: msg,
-      waitTime: Math.random() * 50 + 5, // 5-55 minutes
-    };
-  });
+      const timedChosenMessages: PartyMessage[] = chosenMessages.map((msg) => {
+        return {
+          text: msg,
+          waitTime: Math.random() * 50 + 5, // 5-55 minutes
+        };
+      });
 
-  return [...standardMessages, ...timedChosenMessages];
+      return [...standardMessages, ...timedChosenMessages];
+    })
+    .catch((err) => {
+      console.error("Unable to fetch Party Messages from CMS", err);
+      return [...standardMessages];
+    });
 };
 
 export const streamTitleEmbed = new MessageEmbed({

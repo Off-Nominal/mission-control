@@ -10,7 +10,7 @@ import createPollEmbed from "../../clients/main/actions/poll/createPollEmbed";
 import { StreamHostEvents } from "../../types/eventEnums";
 import {
   generatePartyMessages,
-  PartyMessages,
+  PartyMessage,
   streamTitleEmbed,
   TitleSuggestion,
 } from "./partyMessages";
@@ -21,7 +21,7 @@ const MAX_TITLE_SUGGESTIONS = 36;
 export class StreamHost extends EventEmitter {
   private active: boolean;
   private activeEvent: GuildScheduledEvent<"ACTIVE"> = null;
-  private partyMessages: PartyMessages[] | null = null;
+  private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
 
@@ -52,15 +52,14 @@ export class StreamHost extends EventEmitter {
     });
   }
 
-  public startParty(event: GuildScheduledEvent<"ACTIVE">) {
+  public async startParty(event: GuildScheduledEvent<"ACTIVE">) {
     if (this.active) {
       return;
     }
 
     this.active = true;
     this.activeEvent = event;
-    this.partyMessages = generatePartyMessages(event);
-    console.log(`New Stream Party Started: ${event.name}`);
+    this.partyMessages = await generatePartyMessages(event);
 
     this.initiatePartyMessageSchedule();
     setTimeout(() => {
@@ -102,7 +101,6 @@ export class StreamHost extends EventEmitter {
     this.activeEvent = null;
     this.partyMessages = null;
     this.titleSuggestions = [];
-    console.log("Stream Party Ended");
   }
 
   public eventActive() {

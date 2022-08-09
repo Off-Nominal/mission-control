@@ -1,5 +1,6 @@
 require("dotenv").config();
 import { Client as DbClient } from "pg";
+
 import { BaseCommandInteraction, Client, Intents } from "discord.js";
 
 import generateHandlers from "./clients/handlers";
