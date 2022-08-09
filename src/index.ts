@@ -154,7 +154,7 @@ newsFeedListener.on(
  ************************************/
 
 const eventsListener = new EventsListener();
-const streamHost = new StreamHost();
+const streamHost = new StreamHost(sanityClient);
 
 /***********************************
  *  Member Manager Setup

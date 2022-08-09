@@ -1,3 +1,4 @@
+import { SanityClient } from "@sanity/client";
 import {
   CommandInteraction,
   GuildMember,
@@ -10,7 +11,7 @@ import createPollEmbed from "../../clients/main/actions/poll/createPollEmbed";
 import { StreamHostEvents } from "../../types/eventEnums";
 import {
   generatePartyMessages,
-  PartyMessages,
+  PartyMessage,
   streamTitleEmbed,
   TitleSuggestion,
 } from "./partyMessages";
@@ -21,12 +22,14 @@ const MAX_TITLE_SUGGESTIONS = 36;
 export class StreamHost extends EventEmitter {
   private active: boolean;
   private activeEvent: GuildScheduledEvent<"ACTIVE"> = null;
-  private partyMessages: PartyMessages[] | null = null;
+  private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
+  private client: SanityClient;
 
-  constructor() {
+  constructor(client) {
     super();
+    this.client = client;
     this.sendPartyMessage = this.sendPartyMessage.bind(this);
     this.startParty = this.startParty.bind(this);
     this.endParty = this.endParty.bind(this);
@@ -52,15 +55,14 @@ export class StreamHost extends EventEmitter {
     });
   }
 
-  public startParty(event: GuildScheduledEvent<"ACTIVE">) {
+  public async startParty(event: GuildScheduledEvent<"ACTIVE">) {
     if (this.active) {
       return;
     }
 
     this.active = true;
     this.activeEvent = event;
-    this.partyMessages = generatePartyMessages(event);
-    console.log(`New Stream Party Started: ${event.name}`);
+    this.partyMessages = await generatePartyMessages(this.client, event);
 
     this.initiatePartyMessageSchedule();
     setTimeout(() => {
