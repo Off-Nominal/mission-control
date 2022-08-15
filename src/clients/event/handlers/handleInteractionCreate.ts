@@ -30,6 +30,7 @@ export default function generateInteractionCreateHandler(db: Client) {
 
     if (subCommand === AllowedCommands.SUGGEST) {
       const title = options.getString("title", true);
+      console.log("Title interaction called", title);
       this.emit(EventBotEvents.NEW_TITLE, title, interaction);
     }
 
