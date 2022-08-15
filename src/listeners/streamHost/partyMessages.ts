@@ -21,7 +21,7 @@ export const generatePartyMessages = (
     },
   ];
 
-  const query = '*[_type == "eventPartyMessages"]{message}';
+  const query = '*[_type == "eventPartyMessages"].message';
 
   return sanityClient
     .fetch<string[]>(query)

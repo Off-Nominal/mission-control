@@ -108,8 +108,6 @@ export class StreamHost extends EventEmitter {
   }
 
   public async logSuggestion(title: string, interaction: CommandInteraction) {
-    console.log("logSuggestion called");
-
     if (!this.active) {
       try {
         await interaction.reply({
@@ -117,7 +115,6 @@ export class StreamHost extends EventEmitter {
           ephemeral: true,
         });
       } catch (err) {
-        console.log("Not Active Event Error");
         console.error(err);
       }
 
@@ -130,7 +127,6 @@ export class StreamHost extends EventEmitter {
           `Actually, I'm not that sophisticated of a bot, and I can only remember like ${MAX_TITLE_SUGGESTIONS} suggestions at a time. If you've reached this point, this is either a really funny episode (not likely), or you're trying to break me (likely) and maybe you should get some new hobbies or something.`
         );
       } catch (err) {
-        console.log("Too many Suggestions error");
         console.error(err);
       }
 
@@ -142,15 +138,11 @@ export class StreamHost extends EventEmitter {
       suggester: interaction.member as GuildMember,
     });
 
-    console.log("Title pushed to array");
-    console.log(this.titleSuggestions);
-
     try {
       await interaction.reply({
         content: `Logged your suggestion of **"${title}"**!\n\nTo view the currently logged suggestsions, use \`/events suggestions\``,
       });
     } catch (err) {
-      console.log("Error sending confirmation of suggestion");
       console.error(err);
     }
   }
