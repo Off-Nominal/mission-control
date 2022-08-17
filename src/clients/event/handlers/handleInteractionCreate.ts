@@ -2,7 +2,7 @@ import { add } from "date-fns";
 import {
   GuildScheduledEventCreateOptions,
   Interaction,
-  MessageEmbed,
+  EmbedBuilder,
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
@@ -111,7 +111,7 @@ export default function generateInteractionCreateHandler(db: Client) {
 
         const { new_event, pre_notification } = userSettings.rows[0];
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setTitle("Subscription updated!")
           .setDescription("Current subscription settings are:")
           .addFields([

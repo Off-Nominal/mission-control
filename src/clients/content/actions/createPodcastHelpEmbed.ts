@@ -1,7 +1,7 @@
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 
 export const createPodcastHelpEmbed = () => {
-  const embed = new MessageEmbed();
+  const embed = new EmbedBuilder();
 
   embed
     .setTitle("Getting information about the Podcasts")

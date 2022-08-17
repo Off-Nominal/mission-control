@@ -1,4 +1,4 @@
-import { Collection, Message, MessageEmbed } from "discord.js";
+import { Collection, Message, EmbedBuilder } from "discord.js";
 import { filterNumbers } from "../helpers/filterNumbers";
 import { filterWords } from "../helpers/filterWords";
 import { generateWordCloud } from "../helpers/generateWordCloud";
@@ -9,7 +9,7 @@ export const generateDiscussionSummary = async (
   channelId: string
 ) => {
   let discussedWords = [];
-  const embed = new MessageEmbed();
+  const embed = new EmbedBuilder();
   embed
     .setAuthor({
       name: "Discussion Summary",

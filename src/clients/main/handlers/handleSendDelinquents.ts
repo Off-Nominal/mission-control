@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from "discord.js";
+import { Message, EmbedBuilder } from "discord.js";
 import fetchGuild from "../../actions/fetchGuild";
 
 const WM_ROLE_ID = process.env.WM_ROLE_ID;
@@ -34,7 +34,7 @@ export default async function handleSendDelinquents(message: Message) {
     return !roleChecks.includes(true);
   });
 
-  const embed = new MessageEmbed({
+  const embed = new EmbedBuilder({
     title: "Delinquents",
     description:
       "These are the members who do not have requisite roles in Discord.",

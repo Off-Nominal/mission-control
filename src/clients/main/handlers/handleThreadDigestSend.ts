@@ -1,7 +1,7 @@
 import {
   Collection,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   NewsChannel,
   Snowflake,
   TextChannel,
@@ -82,7 +82,7 @@ export default async function handleThreadDigestSend() {
       };
     });
 
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "Active Discord Threads",
       description:
         "Sometimes, threads are hard to notice on Discord. Here is your daily summary of the active conversations you might be missing in this channel!",

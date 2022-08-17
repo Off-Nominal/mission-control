@@ -1,7 +1,7 @@
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 
 export default function createPollHelpEmbed() {
-  return new MessageEmbed()
+  return new EmbedBuilder()
     .setTitle("Creating polls")
     .setDescription(
       "Ask the community a question with multiple answers. Polling supports up to 10 answers."

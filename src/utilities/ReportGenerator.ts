@@ -3,7 +3,7 @@ import {
   Collection,
   CommandInteraction,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   TextChannel,
   User,
 } from "discord.js";
@@ -26,10 +26,10 @@ export type ReportGeneratorError = {
 };
 
 export type Report = {
-  news?: MessageEmbed;
-  youtube?: MessageEmbed;
-  twitter?: MessageEmbed;
-  discussion?: MessageEmbed;
+  news?: EmbedBuilder;
+  youtube?: EmbedBuilder;
+  twitter?: EmbedBuilder;
+  discussion?: EmbedBuilder;
 };
 
 export class ReportGenerator {
@@ -52,7 +52,7 @@ export class ReportGenerator {
     interaction: CommandInteraction,
     hourLimit: number
   ) => {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "Channel Summary Report",
       description: `Generating a summary of activity in <#${interaction.channel.id}> over the last ${hourLimit} hour(s) and sending to requestor via DM (this make take 5-10 seconds).\n\nWant a copy of this report, too? Click the 📩  below to have one sent to your DMs.`,
     });

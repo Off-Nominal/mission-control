@@ -1,7 +1,7 @@
 import {
   CommandInteraction,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   TextChannel,
   ThreadChannel,
 } from "discord.js";
@@ -58,7 +58,7 @@ export default async function shunt(
 
     const { title, description, thumbnail } = copy[direction];
 
-    return new MessageEmbed()
+    return new EmbedBuilder()
       .setTitle(title)
       .setDescription(description)
       .setThumbnail(thumbnail);

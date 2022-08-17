@@ -1,7 +1,7 @@
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 
 export const generateHelpEmbed = () => {
-  return new MessageEmbed()
+  return new EmbedBuilder()
     .setTitle("How do you use these Discord bots anyway?")
     .setDescription(
       "Many bots have their own help commands. Here's a list to call them up. Consider sending them a direct message with this command in order to keep the channel free of clutter."
