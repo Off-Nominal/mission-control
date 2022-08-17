@@ -1,4 +1,7 @@
-import { SlashCommandBuilder } from "discord.js";
+import {
+  APIApplicationCommandOptionChoice,
+  SlashCommandBuilder,
+} from "discord.js";
 import { spacecraftData } from "../../clients/main/actions/marstime/constants";
 
 // Help
@@ -15,7 +18,7 @@ const shuntCommand = new SlashCommandBuilder()
       .setName("channel")
       .setDescription("Destination channel")
       .setRequired(true)
-      .addChannelType(0)
+      .addChannelTypes(0)
   )
   .addStringOption((option) =>
     option
@@ -36,10 +39,12 @@ const marstimeCommand = new SlashCommandBuilder()
       .setName("spacecraft")
       .setDescription("Select a specific spacecraft")
       .addChoices(
-        Object.keys(spacecraftData).map<[string, string]>((spacecraft) => [
-          spacecraftData[spacecraft].name,
-          spacecraft,
-        ])
+        ...Object.keys(spacecraftData).map<
+          APIApplicationCommandOptionChoice<string>
+        >((spacecraft) => ({
+          name: spacecraftData[spacecraft].name,
+          value: spacecraft,
+        }))
       )
   );
 
