@@ -3,6 +3,7 @@ import {
   GuildScheduledEventCreateOptions,
   Interaction,
   EmbedBuilder,
+  InteractionType,
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
@@ -23,7 +24,7 @@ export default function generateInteractionCreateHandler(db: Client) {
   const { setEventSubscriptions } = userQueries(db);
 
   return async function handleInteractionCreate(interaction: Interaction) {
-    if (!interaction.isCommand()) return;
+    if (interaction.type !== InteractionType.ApplicationCommand) return;
 
     const { options } = interaction;
     const subCommand = options.getSubcommand(false);

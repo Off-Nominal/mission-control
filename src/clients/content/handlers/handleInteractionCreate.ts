@@ -1,4 +1,4 @@
-import { Interaction, MessageOptions } from "discord.js";
+import { Interaction, InteractionType, MessageOptions } from "discord.js";
 import { ContentListener } from "../../../listeners/contentListener/contentListener";
 import { ContentBotEvents } from "../../../types/eventEnums";
 
@@ -18,7 +18,7 @@ export default function handleInteractionCreate(
     yt: ContentListener;
   }
 ) {
-  if (!interaction.isCommand()) return;
+  if (interaction.type !== InteractionType.ApplicationCommand) return;
 
   const { options } = interaction;
   const subCommand = options.getSubcommand(false);

@@ -1,5 +1,5 @@
 import { SanityDocument } from "@sanity/client";
-import { Interaction, EmbedBuilder } from "discord.js";
+import { Interaction, EmbedBuilder, InteractionType } from "discord.js";
 import { sanityClient } from "../../../cms/client";
 import { NewsFeedDocument } from "../../../listeners/newsManager/newsManager";
 
@@ -11,7 +11,7 @@ export interface NewsCategoryDocument extends SanityDocument {
 }
 
 export default function handleRssList(interaction: Interaction) {
-  if (!interaction.isCommand()) return;
+  if (interaction.type !== InteractionType.ApplicationCommand) return;
 
   const query =
     '*[_type == "newsCategory"] | order(name) {name, _id, "feeds": *[_type == "newsFeed" && references(^._id)] | order(name) {name, url}}';
