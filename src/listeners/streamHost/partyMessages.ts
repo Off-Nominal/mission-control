@@ -1,4 +1,9 @@
-import { GuildMember, GuildScheduledEvent, EmbedBuilder } from "discord.js";
+import {
+  GuildMember,
+  GuildScheduledEvent,
+  EmbedBuilder,
+  GuildScheduledEventStatus,
+} from "discord.js";
 import { sanityClient } from "../../cms/client";
 
 export type PartyMessage = {
@@ -12,7 +17,7 @@ export type TitleSuggestion = {
 };
 
 export const generatePartyMessages = (
-  event: GuildScheduledEvent<"ACTIVE">
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
 ): Promise<PartyMessage[]> => {
   const standardMessages: PartyMessage[] = [
     {

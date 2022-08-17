@@ -1,4 +1,8 @@
-import { Collection, GuildScheduledEvent } from "discord.js";
+import {
+  Collection,
+  GuildScheduledEvent,
+  GuildScheduledEventStatus,
+} from "discord.js";
 import EventEmitter = require("events");
 import { EventListenerEvents } from "../../types/eventEnums";
 
@@ -7,16 +11,13 @@ const MS_IN_A_SEC = 1000;
 const SEC_IN_AN_MIN = 60;
 
 export type EventWindow = {
-  event: GuildScheduledEvent<"SCHEDULED" | "ACTIVE" | "COMPLETED" | "CANCELED">;
+  event: GuildScheduledEvent;
   minTime: number;
   maxTime: number;
 };
 
 export class EventsListener extends EventEmitter {
-  private events: Collection<
-    string,
-    GuildScheduledEvent<"SCHEDULED" | "ACTIVE" | "COMPLETED" | "CANCELED">
-  >;
+  private events: Collection<string, GuildScheduledEvent>;
   private listenInterval: number;
 
   constructor() {
@@ -28,12 +29,7 @@ export class EventsListener extends EventEmitter {
     this.cancelEvent = this.cancelEvent.bind(this);
   }
 
-  public initialize(
-    events: Collection<
-      string,
-      GuildScheduledEvent<"SCHEDULED" | "ACTIVE" | "COMPLETED" | "CANCELED">
-    >
-  ) {
+  public initialize(events: Collection<string, GuildScheduledEvent>) {
     this.events = events;
     console.log(
       `EventsListener loaded with ${events.size} event(s) being monitored`
@@ -61,24 +57,41 @@ export class EventsListener extends EventEmitter {
     }, this.listenInterval);
   }
 
-  public addEvent(event: GuildScheduledEvent<"SCHEDULED">) {
+  public addEvent(
+    event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>
+  ) {
     this.events.set(event.id, event);
   }
 
   public updateEvent(
-    oldEvent: GuildScheduledEvent<"COMPLETED" | "ACTIVE" | "SCHEDULED">,
-    newEvent: GuildScheduledEvent<"COMPLETED" | "ACTIVE" | "SCHEDULED">
+    oldEvent: GuildScheduledEvent<
+      | GuildScheduledEventStatus.Active
+      | GuildScheduledEventStatus.Completed
+      | GuildScheduledEventStatus.Scheduled
+    >,
+    newEvent: GuildScheduledEvent<
+      | GuildScheduledEventStatus.Active
+      | GuildScheduledEventStatus.Completed
+      | GuildScheduledEventStatus.Scheduled
+    >
   ) {
-    if (newEvent.status === "ACTIVE" || newEvent.status === "COMPLETED") {
+    if (
+      newEvent.status === GuildScheduledEventStatus.Active ||
+      GuildScheduledEventStatus.Completed
+    ) {
       this.events.delete(newEvent.id);
     }
 
-    if (newEvent.status === "SCHEDULED") {
+    if (newEvent.status === GuildScheduledEventStatus.Scheduled) {
       this.events.set(newEvent.id, newEvent);
     }
   }
 
-  public cancelEvent(event: GuildScheduledEvent<"CANCELED" | "SCHEDULED">) {
+  public cancelEvent(
+    event: GuildScheduledEvent<
+      GuildScheduledEventStatus.Canceled | GuildScheduledEventStatus.Scheduled
+    >
+  ) {
     this.events.delete(event.id);
   }
 }
