@@ -19,11 +19,11 @@ export default function createEventAnnouncementEmbed(
     .setAuthor({ name: author })
     .setDescription(event.description || "No event description provided.")
     .setThumbnail(thumbnail)
-    .addField(
-      "Date/Time",
-      `<t:${timestamp}:F> (time local to you)\n(<t:${timestamp}:R>)`
-    )
     .addFields(
+      {
+        name: "Date/Time",
+        value: `<t:${timestamp}:F> (time local to you)\n(<t:${timestamp}:R>)`,
+      },
       {
         name: "Watch here",
         value: `[Event URL](${event.entityMetadata.location})`,

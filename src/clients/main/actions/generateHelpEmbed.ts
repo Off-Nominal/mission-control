@@ -13,21 +13,24 @@ export const generateHelpEmbed = () => {
       { name: "Launch Alerts", value: "`!l help`", inline: true },
       { name: "Terminal Count", value: "`!tc help`", inline: true },
       { name: "Tracking Station", value: "`!map help`", inline: true },
-    ])
-    .addField(
-      "Shunt - Move a conversation to a new channel (with option for thread)",
-      "`/shunt [channel] [topic] [thread?]` - Request a conversation be moved to another channel."
-    )
-    .addField(
-      "Poll - poll the discord with a question",
-      "`/poll ask` with 2-10 options. Type `/poll help` for more."
-    )
-    .addField(
-      "Mars Time - Get the local time for any spacecraft on Mars",
-      "`/marstime` to get Mars Coordinated Time, or add `spacecraft` option and select a vehicle from the list."
-    )
-    .addField(
-      "Summary Bot - get a bot-interpreted summary of channel activity",
-      "`/summary` with a `duration` integer in hours. Type `/summary help` for more info."
-    );
+      {
+        name: "Shunt - Move a conversation to a new channel (with option for thread)",
+        value:
+          "`/shunt [channel] [topic] [thread?]` - Request a conversation be moved to another channel.",
+      },
+      {
+        name: "Poll - poll the discord with a question",
+        value: "`/poll ask` with 2-10 options. Type `/poll help` for more.",
+      },
+      {
+        name: "Mars Time - Get the local time for any spacecraft on Mars",
+        value:
+          "`/marstime` to get Mars Coordinated Time, or add `spacecraft` option and select a vehicle from the list.",
+      },
+      {
+        name: "Summary Bot - get a bot-interpreted summary of channel activity",
+        value:
+          "`/summary` with a `duration` integer in hours. Type `/summary help` for more info.",
+      },
+    ]);
 };
