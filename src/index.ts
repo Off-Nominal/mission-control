@@ -1,7 +1,7 @@
 require("dotenv").config();
 import { Client as DbClient } from "pg";
 
-import { BaseCommandInteraction, Client, Intents } from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 
 import generateHandlers from "./clients/handlers";
 
@@ -94,25 +94,24 @@ export type FeedList = {
  *  Bot Setup
  ************************************/
 
-const simpleIntents = new Intents();
-const utilityIntents = new Intents();
-const eventIntents = new Intents();
-
-simpleIntents.add(
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.DIRECT_MESSAGES
-);
-
-utilityIntents.add(
-  Intents.FLAGS.GUILD_MEMBERS,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS
-);
-
-eventIntents.add(Intents.FLAGS.GUILD_SCHEDULED_EVENTS);
+const simpleIntents = [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.DirectMessages,
+];
+const utilityIntents = [
+  GatewayIntentBits.GuildMembers,
+  GatewayIntentBits.GuildMessageReactions,
+];
+const eventIntents = [GatewayIntentBits.GuildScheduledEvents];
 
 const utilityBot = new Client({
-  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
+  partials: [
+    Partials.Message,
+    Partials.Channel,
+    Partials.Reaction,
+    Partials.GuildMember,
+  ],
   intents: [simpleIntents, utilityIntents],
 });
 const bcBot = new Client({
