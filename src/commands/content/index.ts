@@ -1,7 +1,4 @@
-import {
-  SlashCommandBuilder,
-  SlashCommandStringOption,
-} from "@discordjs/builders";
+import { SlashCommandBuilder, SlashCommandStringOption } from "discord.js";
 
 const allShows: Array<[string, string]> = [
   ["WeMartians", "wm"],
