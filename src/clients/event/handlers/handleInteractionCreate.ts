@@ -3,6 +3,8 @@ import {
   GuildScheduledEventCreateOptions,
   EmbedBuilder,
   BaseInteraction,
+  GuildScheduledEventPrivacyLevel,
+  GuildScheduledEventEntityType,
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
@@ -50,8 +52,8 @@ export default function generateInteractionCreateHandler(db: Client) {
         name,
         scheduledStartTime,
         scheduledEndTime: add(scheduledStartTime, { minutes: duration }),
-        privacyLevel: "GUILD_ONLY",
-        entityType: "EXTERNAL",
+        privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+        entityType: GuildScheduledEventEntityType.External,
         description: `Come hang out in <#${livechatChannelID}> and watch the event with us!`,
         entityMetadata: { location: url },
         reason: "User initiated slash command",
