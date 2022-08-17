@@ -6,6 +6,7 @@ import {
   EmbedBuilder,
   TextChannel,
   User,
+  ChannelType,
 } from "discord.js";
 import {
   getDiscussion,
@@ -78,7 +79,7 @@ export class ReportGenerator {
       });
     }
 
-    if (interaction.channel.type !== "GUILD_TEXT") {
+    if (interaction.channel.type !== ChannelType.GuildText) {
       return await interaction.reply({
         content:
           "My summary method doesn't work great over DM. Please call me in a text channel.",

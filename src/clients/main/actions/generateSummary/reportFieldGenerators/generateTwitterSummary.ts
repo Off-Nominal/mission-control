@@ -1,10 +1,10 @@
-import { Collection, Message, EmbedBuilder } from "discord.js";
+import { Collection, Message, EmbedBuilder, Embed } from "discord.js";
 import { fetchHashtags } from "../helpers/fetchHashtags";
 import { filterNumbers } from "../helpers/filterNumbers";
 import { filterWords } from "../helpers/filterWords";
 import { generateWordCloud } from "../helpers/generateWordCloud";
 
-const countHandle = (embed: EmbedBuilder, handles) => {
+const countHandle = (embed: Embed, handles) => {
   const handleIndex = handles.findIndex(
     (handle) => embed.author.name === handle.name
   );
