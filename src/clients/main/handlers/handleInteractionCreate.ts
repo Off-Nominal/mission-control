@@ -1,4 +1,10 @@
-import { BaseInteraction, Message, TextChannel } from "discord.js";
+import {
+  Awaitable,
+  Interaction,
+  InteractionResponse,
+  Message,
+  TextChannel,
+} from "discord.js";
 import createPollEmbed from "../actions/poll/createPollEmbed";
 import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
@@ -9,7 +15,7 @@ import createPollHelpEmbed from "../actions/poll/createPollHelpEmbed";
 import { UtilityBotEvents } from "../../../types/eventEnums";
 
 export default async function handleInteractionCreate(
-  interaction: BaseInteraction
+  interaction: Interaction
 ) {
   if (!interaction.isChatInputCommand()) return;
 

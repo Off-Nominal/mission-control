@@ -232,16 +232,17 @@ utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
 utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
-utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
+utilityBot.on("interactionCreate", (interaction) => {
+  mainBotHandlers.handleInteractionCreate(interaction);
+});
 utilityBot.on("error", handleError);
 utilityBot.on(
   UtilityBotEvents.SEND_DELINQUENTS,
   mainBotHandlers.handleSendDelinquents
 );
-utilityBot.on(
-  UtilityBotEvents.SUMMARY_CREATE,
-  reportGenerator.handleReportRequest
-);
+utilityBot.on(UtilityBotEvents.SUMMARY_CREATE, (interaction) => {
+  reportGenerator.handleReportRequest(interaction);
+});
 utilityBot.on(UtilityBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
 utilityBot.on(
   UtilityBotEvents.THREAD_DIGEST_SEND,
@@ -259,7 +260,9 @@ utilityBot.on(
 bcBot.once("ready", bookClubBotHandlers.handleReady);
 bcBot.on("messageCreate", bookClubBotHandlers.handleMessageCreate);
 bcBot.on("threadCreate", bookClubBotHandlers.handleThreadCreate);
-bcBot.on("interactionCreate", bookClubBotHandlers.handleInteractionCreate);
+bcBot.on("interactionCreate", (interaction) => {
+  bookClubBotHandlers.handleInteractionCreate(interaction);
+});
 bcBot.on("error", handleError);
 
 /***********************************
@@ -277,7 +280,7 @@ const feeds: FeedList = {
 };
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
-contentBot.on("interactionCreate", (interaction: BaseCommandInteraction) => {
+contentBot.on("interactionCreate", (interaction) => {
   contentBotHandlers.handleInteractionCreate(interaction, feeds);
 });
 contentBot.on("error", handleError);
@@ -306,7 +309,9 @@ eventBot.on(EventBotEvents.END, (event) =>
 );
 eventBot.on(EventBotEvents.END, ytFeedListener.verifyEvent);
 
-eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
+eventBot.on("interactionCreate", (interaction) => {
+  eventBotHandlers.handleInteractionCreate(interaction);
+});
 eventBot.on(EventBotEvents.RETRIEVED, eventsListener.initialize);
 eventBot.on("error", handleError);
 eventBot.on(EventBotEvents.NEW_TITLE, streamHost.logSuggestion);
