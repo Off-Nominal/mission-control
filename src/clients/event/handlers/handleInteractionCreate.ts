@@ -1,9 +1,8 @@
 import { add } from "date-fns";
 import {
   GuildScheduledEventCreateOptions,
-  Interaction,
   EmbedBuilder,
-  InteractionType,
+  BaseInteraction,
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
@@ -23,8 +22,8 @@ enum AllowedCommands {
 export default function generateInteractionCreateHandler(db: Client) {
   const { setEventSubscriptions } = userQueries(db);
 
-  return async function handleInteractionCreate(interaction: Interaction) {
-    if (interaction.type !== InteractionType.ApplicationCommand) return;
+  return async function handleInteractionCreate(interaction: BaseInteraction) {
+    if (!interaction.isChatInputCommand()) return;
 
     const { options } = interaction;
     const subCommand = options.getSubcommand(false);

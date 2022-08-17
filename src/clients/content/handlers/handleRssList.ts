@@ -1,5 +1,5 @@
 import { SanityDocument } from "@sanity/client";
-import { Interaction, EmbedBuilder, InteractionType } from "discord.js";
+import { EmbedBuilder, BaseInteraction } from "discord.js";
 import { sanityClient } from "../../../cms/client";
 import { NewsFeedDocument } from "../../../listeners/newsManager/newsManager";
 
@@ -10,8 +10,8 @@ export interface NewsCategoryDocument extends SanityDocument {
   feeds: NewsFeedDocument[];
 }
 
-export default function handleRssList(interaction: Interaction) {
-  if (interaction.type !== InteractionType.ApplicationCommand) return;
+export default function handleRssList(interaction: BaseInteraction) {
+  if (!interaction.isChatInputCommand()) return;
 
   const query =
     '*[_type == "newsCategory"] | order(name) {name, _id, "feeds": *[_type == "newsFeed" && references(^._id)] | order(name) {name, url}}';
