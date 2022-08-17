@@ -1,7 +1,13 @@
 require("dotenv").config();
 import { Client as DbClient } from "pg";
 
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  Client,
+  GatewayIntentBits,
+  Interaction,
+  Partials,
+} from "discord.js";
 
 import generateHandlers from "./clients/handlers";
 
@@ -240,9 +246,12 @@ utilityBot.on(
   UtilityBotEvents.SEND_DELINQUENTS,
   mainBotHandlers.handleSendDelinquents
 );
-utilityBot.on(UtilityBotEvents.SUMMARY_CREATE, (interaction) => {
-  reportGenerator.handleReportRequest(interaction);
-});
+utilityBot.on(
+  UtilityBotEvents.SUMMARY_CREATE,
+  (interaction: ChatInputCommandInteraction) => {
+    reportGenerator.handleReportRequest(interaction);
+  }
+);
 utilityBot.on(UtilityBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
 utilityBot.on(
   UtilityBotEvents.THREAD_DIGEST_SEND,

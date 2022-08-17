@@ -7,6 +7,7 @@ import {
   TextChannel,
   User,
   ChannelType,
+  ChatInputCommandInteraction,
 } from "discord.js";
 import {
   getDiscussion,
@@ -50,7 +51,7 @@ export class ReportGenerator {
   }
 
   private sendChannelReportNotice = async (
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
     hourLimit: number
   ) => {
     const embed = new EmbedBuilder({
@@ -68,7 +69,7 @@ export class ReportGenerator {
     }
   };
 
-  public async handleReportRequest(interaction: CommandInteraction) {
+  public async handleReportRequest(interaction: ChatInputCommandInteraction) {
     const hourLimit = interaction.options.getInteger("duration", true);
 
     if (hourLimit > 24) {
