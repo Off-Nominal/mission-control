@@ -1,5 +1,9 @@
 import { add } from "date-fns";
-import { GuildScheduledEventCreateOptions } from "discord.js";
+import {
+  GuildScheduledEventCreateOptions,
+  GuildScheduledEventEntityType,
+  GuildScheduledEventPrivacyLevel,
+} from "discord.js";
 import { youtube_v3 } from "googleapis";
 
 export default function generateEventDetailsFromYouTube(
@@ -16,8 +20,8 @@ export default function generateEventDetailsFromYouTube(
     name: video.snippet.title,
     scheduledStartTime,
     scheduledEndTime: add(scheduledStartTime, { minutes: 60 }),
-    privacyLevel: "GUILD_ONLY",
-    entityType: "EXTERNAL",
+    privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+    entityType: GuildScheduledEventEntityType.External,
     description: video.snippet.description.split("\n")[0],
     entityMetadata: { location: `https://www.youtube.com/watch?v=${video.id}` },
     reason: "New stream scheduled on YouTube",

@@ -1,11 +1,10 @@
-import { GuildMember, MessageEmbed, TextChannel } from "discord.js";
+import { GuildMember, EmbedBuilder } from "discord.js";
 import fetchTextChannel from "../../actions/fetchChannel";
-const Discord = require("discord.js");
 
 const GENERAL_CHANNEL_ID = process.env.GENERALCHANNELID;
 
 export default async function handleGuildMemberAdd(member: GuildMember) {
-  const embed: MessageEmbed = new Discord.MessageEmbed();
+  const embed = new EmbedBuilder();
 
   embed
     .setColor("#3e7493")

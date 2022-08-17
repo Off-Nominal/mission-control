@@ -3,9 +3,11 @@ import {
   Collection,
   CommandInteraction,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   TextChannel,
   User,
+  ChannelType,
+  ChatInputCommandInteraction,
 } from "discord.js";
 import {
   getDiscussion,
@@ -26,10 +28,10 @@ export type ReportGeneratorError = {
 };
 
 export type Report = {
-  news?: MessageEmbed;
-  youtube?: MessageEmbed;
-  twitter?: MessageEmbed;
-  discussion?: MessageEmbed;
+  news?: EmbedBuilder;
+  youtube?: EmbedBuilder;
+  twitter?: EmbedBuilder;
+  discussion?: EmbedBuilder;
 };
 
 export class ReportGenerator {
@@ -49,10 +51,10 @@ export class ReportGenerator {
   }
 
   private sendChannelReportNotice = async (
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
     hourLimit: number
   ) => {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "Channel Summary Report",
       description: `Generating a summary of activity in <#${interaction.channel.id}> over the last ${hourLimit} hour(s) and sending to requestor via DM (this make take 5-10 seconds).\n\nWant a copy of this report, too? Click the 📩  below to have one sent to your DMs.`,
     });
@@ -67,7 +69,7 @@ export class ReportGenerator {
     }
   };
 
-  public async handleReportRequest(interaction: CommandInteraction) {
+  public async handleReportRequest(interaction: ChatInputCommandInteraction) {
     const hourLimit = interaction.options.getInteger("duration", true);
 
     if (hourLimit > 24) {
@@ -78,7 +80,7 @@ export class ReportGenerator {
       });
     }
 
-    if (interaction.channel.type !== "GUILD_TEXT") {
+    if (interaction.channel.type !== ChannelType.GuildText) {
       return await interaction.reply({
         content:
           "My summary method doesn't work great over DM. Please call me in a text channel.",

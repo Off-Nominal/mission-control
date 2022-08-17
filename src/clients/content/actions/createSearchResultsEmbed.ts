@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { ContentFeedItem } from "../handlers/handleNewContent";
 
 export const createSearchResultsEmbed = (
@@ -8,7 +8,7 @@ export const createSearchResultsEmbed = (
   image: string,
   searchTerm: string
 ) => {
-  return new MessageEmbed()
+  return new EmbedBuilder()
     .setColor("#3e7493")
     .setTitle("Search Results")
     .setAuthor({ name: title })

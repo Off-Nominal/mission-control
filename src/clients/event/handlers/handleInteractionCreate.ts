@@ -1,8 +1,10 @@
 import { add } from "date-fns";
 import {
   GuildScheduledEventCreateOptions,
-  Interaction,
-  MessageEmbed,
+  EmbedBuilder,
+  BaseInteraction,
+  GuildScheduledEventPrivacyLevel,
+  GuildScheduledEventEntityType,
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
@@ -22,8 +24,8 @@ enum AllowedCommands {
 export default function generateInteractionCreateHandler(db: Client) {
   const { setEventSubscriptions } = userQueries(db);
 
-  return async function handleInteractionCreate(interaction: Interaction) {
-    if (!interaction.isCommand()) return;
+  return async function handleInteractionCreate(interaction: BaseInteraction) {
+    if (!interaction.isChatInputCommand()) return;
 
     const { options } = interaction;
     const subCommand = options.getSubcommand(false);
@@ -50,8 +52,8 @@ export default function generateInteractionCreateHandler(db: Client) {
         name,
         scheduledStartTime,
         scheduledEndTime: add(scheduledStartTime, { minutes: duration }),
-        privacyLevel: "GUILD_ONLY",
-        entityType: "EXTERNAL",
+        privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+        entityType: GuildScheduledEventEntityType.External,
         description: `Come hang out in <#${livechatChannelID}> and watch the event with us!`,
         entityMetadata: { location: url },
         reason: "User initiated slash command",
@@ -111,7 +113,7 @@ export default function generateInteractionCreateHandler(db: Client) {
 
         const { new_event, pre_notification } = userSettings.rows[0];
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setTitle("Subscription updated!")
           .setDescription("Current subscription settings are:")
           .addFields([

@@ -1,4 +1,4 @@
-import { GuildScheduledEvent } from "discord.js";
+import { GuildScheduledEvent, GuildScheduledEventStatus } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
 import { ContentListnerEvents } from "../../types/eventEnums";
@@ -84,7 +84,11 @@ export class ContentListener extends FeedWatcher {
     return this.episodes.find((episode) => episode.url === url);
   }
 
-  public verifyEvent(event: GuildScheduledEvent<"ACTIVE" | "COMPLETED">) {
+  public verifyEvent(
+    event: GuildScheduledEvent<
+      GuildScheduledEventStatus.Active | GuildScheduledEventStatus.Completed
+    >
+  ) {
     const stream = this.episodes.find(
       (episode) => episode.url === event.entityMetadata?.location
     );
@@ -93,10 +97,10 @@ export class ContentListener extends FeedWatcher {
       return;
     }
 
-    if (event.status === "COMPLETED") {
+    if (event.status === GuildScheduledEventStatus.Completed) {
       this.emit(ContentListnerEvents.STREAM_END, event);
     }
-    if (event.status === "ACTIVE") {
+    if (event.status === GuildScheduledEventStatus.Active) {
       this.emit(ContentListnerEvents.STREAM_START, event);
     }
   }

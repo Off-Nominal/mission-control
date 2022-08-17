@@ -22,7 +22,7 @@ const EVENTS_TOKEN = process.env.EVENT_BOT_TOKEN_ID;
 const GUILD_ID = process.env.GUILD_ID;
 
 const register = (appId, token, commands) => {
-  const rest = new REST({ version: "9" }).setToken(token);
+  const rest = new REST({ version: "10" }).setToken(token);
 
   return rest.put(Routes.applicationGuildCommands(appId, GUILD_ID), {
     body: commands,

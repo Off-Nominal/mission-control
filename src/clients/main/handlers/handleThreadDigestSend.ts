@@ -1,11 +1,12 @@
 import {
   Collection,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   NewsChannel,
   Snowflake,
   TextChannel,
   ThreadChannel,
+  ChannelType,
 } from "discord.js";
 import { fetchMessagesInLast } from "../../../helpers/fetchMessagesInLast";
 import fetchGuild from "../../actions/fetchGuild";
@@ -31,7 +32,8 @@ export default async function handleThreadDigestSend() {
     const guild = await fetchGuild(this);
     const fetchedThreads = await guild.channels.fetchActiveThreads();
     activeThreads = fetchedThreads.threads.filter(
-      (thread) => thread.type === "GUILD_PUBLIC_THREAD" && !thread.archived
+      (thread) =>
+        thread.type === ChannelType.GuildPublicThread && !thread.archived
     );
   } catch (err) {
     return console.error(err);
@@ -82,7 +84,7 @@ export default async function handleThreadDigestSend() {
       };
     });
 
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "Active Discord Threads",
       description:
         "Sometimes, threads are hard to notice on Discord. Here is your daily summary of the active conversations you might be missing in this channel!",

@@ -1,4 +1,4 @@
-import { GuildScheduledEvent, MessageEmbed } from "discord.js";
+import { GuildScheduledEvent, EmbedBuilder } from "discord.js";
 
 export default function createEventAnnouncementEmbed(
   event: GuildScheduledEvent,
@@ -6,7 +6,7 @@ export default function createEventAnnouncementEmbed(
   options?: {
     thumbnail?: string;
   }
-): MessageEmbed {
+): EmbedBuilder {
   const timestamp = Math.floor(event.scheduledStartTimestamp / 1000).toString();
   const thumbnail =
     options?.thumbnail ||
@@ -14,16 +14,16 @@ export default function createEventAnnouncementEmbed(
   const author =
     type === "pre" ? "📅 Event Happening Soon!" : "🎉 New Live Event!";
 
-  return new MessageEmbed()
+  return new EmbedBuilder()
     .setTitle(event.name)
     .setAuthor({ name: author })
     .setDescription(event.description || "No event description provided.")
     .setThumbnail(thumbnail)
-    .addField(
-      "Date/Time",
-      `<t:${timestamp}:F> (time local to you)\n(<t:${timestamp}:R>)`
-    )
     .addFields(
+      {
+        name: "Date/Time",
+        value: `<t:${timestamp}:F> (time local to you)\n(<t:${timestamp}:R>)`,
+      },
       {
         name: "Watch here",
         value: `[Event URL](${event.entityMetadata.location})`,

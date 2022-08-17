@@ -1,4 +1,4 @@
-import { PresenceData } from "discord.js";
+import { ActivityType, PresenceData } from "discord.js";
 
 export const generatePresenceData = (helpCommand: string): PresenceData => {
   return {
@@ -6,7 +6,7 @@ export const generatePresenceData = (helpCommand: string): PresenceData => {
     activities: [
       {
         name: helpCommand,
-        type: "PLAYING",
+        type: ActivityType.Playing,
       },
     ],
   };

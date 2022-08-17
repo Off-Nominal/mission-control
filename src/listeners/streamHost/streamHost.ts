@@ -2,6 +2,7 @@ import {
   CommandInteraction,
   GuildMember,
   GuildScheduledEvent,
+  GuildScheduledEventStatus,
   MessageOptions,
   MessagePayload,
 } from "discord.js";
@@ -20,7 +21,8 @@ const MAX_TITLE_SUGGESTIONS = 36;
 
 export class StreamHost extends EventEmitter {
   private active: boolean;
-  private activeEvent: GuildScheduledEvent<"ACTIVE"> = null;
+  private activeEvent: GuildScheduledEvent<GuildScheduledEventStatus.Active> =
+    null;
   private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
@@ -39,7 +41,8 @@ export class StreamHost extends EventEmitter {
 
   private sendPartyMessage(
     message: string | MessagePayload | MessageOptions,
-    event: GuildScheduledEvent<"ACTIVE"> = this.activeEvent
+    event: GuildScheduledEvent<GuildScheduledEventStatus.Active> = this
+      .activeEvent
   ) {
     this.emit(StreamHostEvents.PARTY_MESSAGE, message, event);
   }
@@ -52,7 +55,9 @@ export class StreamHost extends EventEmitter {
     });
   }
 
-  public async startParty(event: GuildScheduledEvent<"ACTIVE">) {
+  public async startParty(
+    event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
+  ) {
     if (this.active) {
       return;
     }

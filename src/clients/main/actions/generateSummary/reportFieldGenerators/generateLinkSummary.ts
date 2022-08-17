@@ -1,4 +1,4 @@
-import { Collection, Message, MessageEmbed } from "discord.js";
+import { Collection, Message, EmbedBuilder } from "discord.js";
 import { SummaryCounterItem } from "./types";
 
 const embedText = {
@@ -24,7 +24,7 @@ export const generateLinkSummary = (
   const copy = embedText[type];
   const counters: SummaryCounterItem[] = [];
 
-  const embed = new MessageEmbed();
+  const embed = new EmbedBuilder();
   embed.setAuthor({ name: copy.title, iconURL: copy.icon });
 
   if (collection.size === 0) {

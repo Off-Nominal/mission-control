@@ -1,7 +1,13 @@
 require("dotenv").config();
 import { Client as DbClient } from "pg";
 
-import { BaseCommandInteraction, Client, Intents } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  Client,
+  GatewayIntentBits,
+  Interaction,
+  Partials,
+} from "discord.js";
 
 import generateHandlers from "./clients/handlers";
 
@@ -94,25 +100,24 @@ export type FeedList = {
  *  Bot Setup
  ************************************/
 
-const simpleIntents = new Intents();
-const utilityIntents = new Intents();
-const eventIntents = new Intents();
-
-simpleIntents.add(
-  Intents.FLAGS.GUILDS,
-  Intents.FLAGS.GUILD_MESSAGES,
-  Intents.FLAGS.DIRECT_MESSAGES
-);
-
-utilityIntents.add(
-  Intents.FLAGS.GUILD_MEMBERS,
-  Intents.FLAGS.GUILD_MESSAGE_REACTIONS
-);
-
-eventIntents.add(Intents.FLAGS.GUILD_SCHEDULED_EVENTS);
+const simpleIntents = [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.DirectMessages,
+];
+const utilityIntents = [
+  GatewayIntentBits.GuildMembers,
+  GatewayIntentBits.GuildMessageReactions,
+];
+const eventIntents = [GatewayIntentBits.GuildScheduledEvents];
 
 const utilityBot = new Client({
-  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
+  partials: [
+    Partials.Message,
+    Partials.Channel,
+    Partials.Reaction,
+    Partials.GuildMember,
+  ],
   intents: [simpleIntents, utilityIntents],
 });
 const bcBot = new Client({
@@ -233,7 +238,9 @@ utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
 utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
-utilityBot.on("interactionCreate", mainBotHandlers.handleInteractionCreate);
+utilityBot.on("interactionCreate", (interaction) => {
+  mainBotHandlers.handleInteractionCreate(interaction);
+});
 utilityBot.on("error", handleError);
 utilityBot.on(
   UtilityBotEvents.SEND_DELINQUENTS,
@@ -241,7 +248,9 @@ utilityBot.on(
 );
 utilityBot.on(
   UtilityBotEvents.SUMMARY_CREATE,
-  reportGenerator.handleReportRequest
+  (interaction: ChatInputCommandInteraction) => {
+    reportGenerator.handleReportRequest(interaction);
+  }
 );
 utilityBot.on(UtilityBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
 utilityBot.on(
@@ -260,7 +269,9 @@ utilityBot.on(
 bcBot.once("ready", bookClubBotHandlers.handleReady);
 bcBot.on("messageCreate", bookClubBotHandlers.handleMessageCreate);
 bcBot.on("threadCreate", bookClubBotHandlers.handleThreadCreate);
-bcBot.on("interactionCreate", bookClubBotHandlers.handleInteractionCreate);
+bcBot.on("interactionCreate", (interaction) => {
+  bookClubBotHandlers.handleInteractionCreate(interaction);
+});
 bcBot.on("error", handleError);
 
 /***********************************
@@ -278,7 +289,7 @@ const feeds: FeedList = {
 };
 contentBot.once("ready", contentBotHandlers.handleReady);
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
-contentBot.on("interactionCreate", (interaction: BaseCommandInteraction) => {
+contentBot.on("interactionCreate", (interaction) => {
   contentBotHandlers.handleInteractionCreate(interaction, feeds);
 });
 contentBot.on("error", handleError);
@@ -307,7 +318,9 @@ eventBot.on(EventBotEvents.END, (event) =>
 );
 eventBot.on(EventBotEvents.END, ytFeedListener.verifyEvent);
 
-eventBot.on("interactionCreate", eventBotHandlers.handleInteractionCreate);
+eventBot.on("interactionCreate", (interaction) => {
+  eventBotHandlers.handleInteractionCreate(interaction);
+});
 eventBot.on(EventBotEvents.RETRIEVED, eventsListener.initialize);
 eventBot.on("error", handleError);
 eventBot.on(EventBotEvents.NEW_TITLE, streamHost.logSuggestion);

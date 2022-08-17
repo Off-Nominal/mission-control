@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from "discord.js";
+import { Message, EmbedBuilder } from "discord.js";
 
 const regex = new RegExp(
   /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?°?\s?(?<unit>C|celsius|F|fahrenheit|kelvin)\b/gi
@@ -102,7 +102,7 @@ export const createTempConversionEmbed = (temps: Temperature[]) => {
     )
     .join("\n");
 
-  const embed = new MessageEmbed({
+  const embed = new EmbedBuilder({
     title: "Temperature Converter",
     description,
   });

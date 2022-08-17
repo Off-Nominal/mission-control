@@ -1,8 +1,7 @@
-const Discord = require("discord.js");
-import { Message, MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 
 export const generateHelpEmbed = () => {
-  const embed: MessageEmbed = new Discord.MessageEmbed();
+  const embed: EmbedBuilder = new EmbedBuilder();
 
   embed
     .setColor("#3e7493")

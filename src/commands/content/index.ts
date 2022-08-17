@@ -1,22 +1,23 @@
 import {
+  APIApplicationCommandOptionChoice,
   SlashCommandBuilder,
   SlashCommandStringOption,
-} from "@discordjs/builders";
+} from "discord.js";
 
-const allShows: Array<[string, string]> = [
-  ["WeMartians", "wm"],
-  ["Main Engine Cut Off", "meco"],
-  ["Off-Nominal Podcast", "ofn"],
-  ["Red Planet Review", "rpr"],
-  ["MECO Headlines", "hl"],
-  ["Off-Nominal Happy Hour", "hh"],
-  ["Off-Nominal", "yt"],
+const allShows: APIApplicationCommandOptionChoice<string>[] = [
+  { name: "WeMartians", value: "wm" },
+  { name: "Main Engine Cut Off", value: "meco" },
+  { name: "Off-Nominal Podcast", value: "ofn" },
+  { name: "Red Planet Review", value: "rpr" },
+  { name: "MECO Headlines", value: "hl" },
+  { name: "Off-Nominal Happy Hour", value: "hh" },
+  { name: "Off-Nominal", value: "yt" },
 ];
 
-const mainShows: Array<[string, string]> = [
-  ["WeMartians", "wm"],
-  ["Main Engine Cut Off", "meco"],
-  ["Off-Nominal Podcast", "ofn"],
+const mainShows: APIApplicationCommandOptionChoice<string>[] = [
+  { name: "WeMartians", value: "wm" },
+  { name: "Main Engine Cut Off", value: "meco" },
+  { name: "Off-Nominal Podcast", value: "ofn" },
 ];
 
 const commands = [
@@ -32,7 +33,7 @@ const commands = [
             .setName("show")
             .setDescription("Choose which show to search")
             .setRequired(true)
-            .addChoices(allShows)
+            .setChoices(...allShows)
         )
         .addStringOption((option) =>
           option
@@ -50,7 +51,7 @@ const commands = [
             .setName("show")
             .setDescription("Choose which show to search")
             .setRequired(true)
-            .addChoices(mainShows)
+            .addChoices(...mainShows)
         )
         .addIntegerOption((option) =>
           option
@@ -68,7 +69,7 @@ const commands = [
             .setName("show")
             .setDescription("Choose which show to search")
             .setRequired(true)
-            .addChoices(allShows)
+            .addChoices(...allShows)
         )
     )
     .addSubcommand((command) =>

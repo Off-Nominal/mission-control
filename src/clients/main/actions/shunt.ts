@@ -1,9 +1,10 @@
 import {
   CommandInteraction,
   Message,
-  MessageEmbed,
+  EmbedBuilder,
   TextChannel,
   ThreadChannel,
+  ChannelType,
 } from "discord.js";
 
 export default async function shunt(
@@ -15,7 +16,7 @@ export default async function shunt(
   const sourceChannel = interaction.channel;
 
   // Only accept shunts/threads from a text channel
-  if (sourceChannel.type !== "GUILD_TEXT") {
+  if (sourceChannel.type !== ChannelType.GuildText) {
     return interaction.reply({
       content:
         "The Shunt command only works from a Text Channel. It won't work via DM or other sources.",
@@ -58,7 +59,7 @@ export default async function shunt(
 
     const { title, description, thumbnail } = copy[direction];
 
-    return new MessageEmbed()
+    return new EmbedBuilder()
       .setTitle(title)
       .setDescription(description)
       .setThumbnail(thumbnail);

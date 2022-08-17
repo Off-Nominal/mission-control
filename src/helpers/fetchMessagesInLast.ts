@@ -1,7 +1,7 @@
 import { sub } from "date-fns";
 import {
-  ChannelLogsQueryOptions,
   Collection,
+  FetchMessagesOptions,
   Message,
   Snowflake,
   TextChannel,
@@ -14,7 +14,7 @@ export const fetchMessagesInLast = async (
   channel: TextChannel | ThreadChannel,
   hourLimit: number
 ): Promise<Collection<string, Message<boolean>>> => {
-  const options: ChannelLogsQueryOptions = {
+  const options: FetchMessagesOptions = {
     limit: DISCORD_API_LIMIT,
   };
 

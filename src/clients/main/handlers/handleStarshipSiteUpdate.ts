@@ -1,4 +1,4 @@
-import { Client, MessageEmbed, TextChannel } from "discord.js";
+import { Client, EmbedBuilder, TextChannel } from "discord.js";
 import { GithubUpdateEmbedData } from "../../../listeners/siteListener";
 
 const TEST_CHANNEL = process.env.TESTCHANNEL;
@@ -12,7 +12,7 @@ export default async function handleStarshipSiteUpdate(
   update: GithubUpdateEmbedData
 ) {
   const client: Client = this;
-  const embed: MessageEmbed = new MessageEmbed();
+  const embed = new EmbedBuilder();
 
   const discordDate = `<t:${update.date.getTime() / 1000}:F>`;
 

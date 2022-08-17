@@ -1,4 +1,9 @@
-import { GuildMember, GuildScheduledEvent, MessageEmbed } from "discord.js";
+import {
+  GuildMember,
+  GuildScheduledEvent,
+  EmbedBuilder,
+  GuildScheduledEventStatus,
+} from "discord.js";
 import { sanityClient } from "../../cms/client";
 
 export type PartyMessage = {
@@ -12,7 +17,7 @@ export type TitleSuggestion = {
 };
 
 export const generatePartyMessages = (
-  event: GuildScheduledEvent<"ACTIVE">
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
 ): Promise<PartyMessage[]> => {
   const standardMessages: PartyMessage[] = [
     {
@@ -43,7 +48,7 @@ export const generatePartyMessages = (
     });
 };
 
-export const streamTitleEmbed = new MessageEmbed({
+export const streamTitleEmbed = new EmbedBuilder({
   title: "Help pick an episode title!",
   description:
     "Throughout the stream, you can suggest episode titles here in the chat. I'll aggregate these, and at the end of the stream, you can vote on your favourite.",

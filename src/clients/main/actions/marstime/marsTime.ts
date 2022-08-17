@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Message, MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { MarsDate } from "mars-date-utils";
 import { Spacecraft, spacecraftData } from "./constants";
 
@@ -129,7 +129,7 @@ export const marsTime = async (spacecraft: string) => {
   const { author, description, lat, lon, lmst, ltst, earthNow, avatar } =
     createEmbedFields(data);
 
-  return new MessageEmbed()
+  return new EmbedBuilder()
     .setAuthor({ name: author })
     .setDescription(description)
     .addFields([

@@ -1,4 +1,4 @@
-import { Interaction } from "discord.js";
+import { BaseInteraction } from "discord.js";
 import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import { getRecommendation } from "../actions/getRecommendation";
 
@@ -11,9 +11,9 @@ const recommendMap = {
 };
 
 export default async function handleInteractionCreate(
-  interaction: Interaction
+  interaction: BaseInteraction
 ) {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
   const { options } = interaction;
 

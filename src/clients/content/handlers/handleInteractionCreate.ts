@@ -1,4 +1,4 @@
-import { Interaction, MessageOptions } from "discord.js";
+import { BaseInteraction, InteractionReplyOptions } from "discord.js";
 import { ContentListener } from "../../../listeners/contentListener/contentListener";
 import { ContentBotEvents } from "../../../types/eventEnums";
 
@@ -7,7 +7,7 @@ import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 
 export default function handleInteractionCreate(
-  interaction: Interaction,
+  interaction: BaseInteraction,
   listeners: {
     wm: ContentListener;
     meco: ContentListener;
@@ -18,7 +18,7 @@ export default function handleInteractionCreate(
     yt: ContentListener;
   }
 ) {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 
   const { options } = interaction;
   const subCommand = options.getSubcommand(false);
@@ -34,7 +34,7 @@ export default function handleInteractionCreate(
   const show = options.getString("show", true);
   const feedListener = listeners[show] as ContentListener;
 
-  let returnMessage: MessageOptions = {
+  const returnMessage: InteractionReplyOptions = {
     embeds: [],
   };
 
