@@ -1,4 +1,4 @@
-import { BaseInteraction, MessageOptions } from "discord.js";
+import { BaseInteraction, InteractionReplyOptions } from "discord.js";
 import { ContentListener } from "../../../listeners/contentListener/contentListener";
 import { ContentBotEvents } from "../../../types/eventEnums";
 
@@ -34,7 +34,7 @@ export default function handleInteractionCreate(
   const show = options.getString("show", true);
   const feedListener = listeners[show] as ContentListener;
 
-  let returnMessage: MessageOptions = {
+  const returnMessage: InteractionReplyOptions = {
     embeds: [],
   };
 
