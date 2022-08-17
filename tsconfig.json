@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "dist",
     "lib": ["es2021.string"],
-    "downlevelIteration": true,
-    "skipLibCheck": true
+    "downlevelIteration": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
