@@ -60,14 +60,17 @@ export class SiteListener extends EventEmitter {
     // We're going to see if there is a change from our most recently tracked etag
     let response: AxiosResponse<never>;
     try {
-      response = await axios.head(this.url);
+      response = await axios.get(this.url);
     } catch (err) {
       console.error(`Request to monitor ${this.url} failed.`);
       console.error(err);
       return;
     }
 
-    console.log(response.headers);
+    if (!response.headers.etag) {
+      console.log("ETAG not found in response.");
+      return;
+    }
 
     // Determine if the current eTag is different from the most recent one we've tracked
     const newEtag = response.headers.etag.replace(/"/gi, "");
