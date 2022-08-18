@@ -67,6 +67,8 @@ export class SiteListener extends EventEmitter {
       return;
     }
 
+    console.log(response.headers);
+
     // Determine if the current eTag is different from the most recent one we've tracked
     const newEtag = response.headers.etag.replace(/"/gi, "");
     const isNewEtag = this.isNewEtag(newEtag);
