@@ -2,31 +2,34 @@ import {
   CommandInteraction,
   Message,
   EmbedBuilder,
-  TextChannel,
-  ThreadChannel,
   ChannelType,
+  GuildBasedChannel,
 } from "discord.js";
 
 export default async function shunt(
   interaction: CommandInteraction,
-  targetChannel: TextChannel,
-  topic: string,
-  thread: boolean
+  targetChannel: GuildBasedChannel,
+  topic: string
 ) {
   const sourceChannel = interaction.channel;
 
-  // Only accept shunts/threads from a text channel
-  if (sourceChannel.type !== ChannelType.GuildText) {
+  // Only accept shunts/threads from/to a text channel or thread
+  if (
+    (sourceChannel.type !== ChannelType.GuildText &&
+      sourceChannel.type !== ChannelType.GuildPublicThread) ||
+    (targetChannel.type !== ChannelType.GuildText &&
+      targetChannel.type !== ChannelType.GuildPublicThread)
+  ) {
     return interaction.reply({
       content:
-        "The Shunt command only works from a Text Channel. It won't work via DM or other sources.",
+        "The Shunt command only works from a Text Channel or a Public Thread. It won't work via DM or other sources.",
     });
   }
 
   // Prevent shunting to same channel
   if (sourceChannel.id === targetChannel.id) {
     return interaction.reply({
-      content: "Cannot shunt to the same channel.",
+      content: "Cannot shunt to the same place.",
     });
   }
 
@@ -76,33 +79,15 @@ export default async function shunt(
         }),
       ],
     });
-    sourceReply = (await interaction.fetchReply()) as Message;
+    sourceReply = await interaction.fetchReply();
   } catch (err) {
     console.error("Unable to send Shunt/Thread Source Message");
     console.error(err);
   }
 
-  let inboundDestination: ThreadChannel | TextChannel;
-
-  // Create Thread
-  if (thread) {
-    try {
-      inboundDestination = await targetChannel.threads.create({
-        name: topic,
-        autoArchiveDuration: 1440, // One Day
-      });
-      await inboundDestination.members.add(shunter.id);
-    } catch (err) {
-      console.error("Could not create thread");
-      console.error(err);
-    }
-  } else {
-    inboundDestination = targetChannel;
-  }
-
   // Destination Message
   try {
-    const destinationMessage = await inboundDestination.send({
+    const destinationMessage = await targetChannel.send({
       embeds: [
         generateEmbed({
           url: sourceReply.url,

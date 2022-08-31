@@ -18,16 +18,13 @@ const shuntCommand = new SlashCommandBuilder()
       .setName("channel")
       .setDescription("Destination channel")
       .setRequired(true)
-      .addChannelTypes(0)
+      .addChannelTypes(0, 11)
   )
   .addStringOption((option) =>
     option
       .setName("topic")
       .setDescription("The conversation topic you're shunting")
       .setRequired(true)
-  )
-  .addBooleanOption((option) =>
-    option.setName("thread").setDescription("Target your shunt to a new Thread")
   );
 
 // Marstime
