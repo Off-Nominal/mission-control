@@ -1,5 +1,6 @@
 import {
   Awaitable,
+  GuildBasedChannel,
   Interaction,
   InteractionResponse,
   Message,
@@ -23,10 +24,9 @@ export default async function handleInteractionCreate(
   const subCommand = options.getSubcommand(false);
 
   if (commandName === "shunt") {
-    const channel = options.getChannel("channel", true) as TextChannel;
+    const channel = options.getChannel("channel", true) as GuildBasedChannel;
     const topic = options.getString("topic", true);
-    const thread = options.getBoolean("thread");
-    shunt(interaction, channel, topic, thread);
+    shunt(interaction, channel, topic);
   }
 
   if (commandName === "help") {
