@@ -5,7 +5,6 @@ import {
   ChatInputCommandInteraction,
   Client,
   GatewayIntentBits,
-  Interaction,
   Partials,
 } from "discord.js";
 
@@ -108,6 +107,7 @@ const simpleIntents = [
 const utilityIntents = [
   GatewayIntentBits.GuildMembers,
   GatewayIntentBits.GuildMessageReactions,
+  GatewayIntentBits.MessageContent,
 ];
 const eventIntents = [GatewayIntentBits.GuildScheduledEvents];
 

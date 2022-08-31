@@ -32,11 +32,11 @@ export default function generateInteractionCreateHandler(db: Client) {
 
     if (subCommand === AllowedCommands.SUGGEST) {
       const title = options.getString("title", true);
-      this.emit(EventBotEvents.NEW_TITLE, title, interaction);
+      interaction.client.emit(EventBotEvents.NEW_TITLE, title, interaction);
     }
 
     if (subCommand === AllowedCommands.SUGGESTIONS) {
-      this.emit(EventBotEvents.VIEW_TITLES, interaction);
+      interaction.client.emit(EventBotEvents.VIEW_TITLES, interaction);
     }
 
     if (subCommand === AllowedCommands.START) {
