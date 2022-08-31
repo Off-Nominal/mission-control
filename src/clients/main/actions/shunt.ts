@@ -3,7 +3,6 @@ import {
   Message,
   EmbedBuilder,
   ChannelType,
-  APIInteractionDataResolvedChannel,
   GuildBasedChannel,
 } from "discord.js";
 

@@ -1,11 +1,4 @@
-import {
-  Awaitable,
-  GuildBasedChannel,
-  Interaction,
-  InteractionResponse,
-  Message,
-  TextChannel,
-} from "discord.js";
+import { GuildBasedChannel, Interaction, Message } from "discord.js";
 import createPollEmbed from "../actions/poll/createPollEmbed";
 import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
