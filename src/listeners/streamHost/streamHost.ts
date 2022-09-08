@@ -145,7 +145,7 @@ export class StreamHost extends EventEmitter {
 
     try {
       await interaction.reply({
-        content: `Logged your suggestion of **"${title}"**!\n\nTo view the currently logged suggestsions, use \`/events suggestions\``,
+        content: `Logged your suggestion of **"${title}"**!\n\nTo view the currently logged suggestions, use \`/events suggestions\``,
       });
     } catch (err) {
       console.error(err);
