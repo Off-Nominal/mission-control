@@ -26,14 +26,14 @@ type ThreadDigests = {
 };
 
 export default async function handleThreadDigestSend() {
+  const guild = fetchGuild(this);
+
   let activeThreads: Collection<Snowflake, ThreadChannel>;
 
   try {
-    const guild = await fetchGuild(this);
     const fetchedThreads = await guild.channels.fetchActiveThreads();
     activeThreads = fetchedThreads.threads.filter(
-      (thread) =>
-        thread.type === ChannelType.GuildPublicThread && !thread.archived
+      (thread) => thread.type === ChannelType.GuildPublicThread
     );
   } catch (err) {
     return console.error(err);
@@ -47,18 +47,14 @@ export default async function handleThreadDigestSend() {
     if (promise.status === "rejected") {
       console.error(promise.reason);
     }
-    return promise.status === "fulfilled";
+    return promise.status === "fulfilled" && promise.value.size > 0;
   }) as PromiseFulfilledResult<Collection<string, Message<boolean>>>[];
 
-  const messageCollections = fulfilledPromises.map(
-    (fulfilledPromise) => fulfilledPromise.value
-  );
-
-  const fetchedActiveThreads: ThreadData[] = messageCollections.map(
-    (msgCollection, index) => {
+  const fetchedActiveThreads: ThreadData[] = fulfilledPromises.map(
+    (fulfilledPromise, index) => {
       return {
         thread: activeThreads.at(index),
-        messageCount: msgCollection.size,
+        messageCount: fulfilledPromise.value.size,
       };
     }
   );
@@ -77,6 +73,16 @@ export default async function handleThreadDigestSend() {
   });
 
   for (const digest in threadDigests) {
+    await threadDigests[digest].channel.messages.fetch({ limit: 1 });
+    const lastMessage = threadDigests[digest].channel.lastMessage;
+    if (
+      lastMessage.author.id === this.user.id &&
+      lastMessage.embeds.length > 0 &&
+      lastMessage.embeds[0]?.data?.title === "Active Discord Threads"
+    ) {
+      await lastMessage.delete();
+    }
+
     const fields = threadDigests[digest].threads.map((threadData) => {
       return {
         name: threadData.thread.name,
