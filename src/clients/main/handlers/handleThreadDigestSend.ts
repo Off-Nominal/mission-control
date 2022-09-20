@@ -73,17 +73,8 @@ export default async function handleThreadDigestSend() {
   });
 
   for (const digest in threadDigests) {
-    await threadDigests[digest].channel.messages.fetch({ limit: 1 });
-    const lastMessage = threadDigests[digest].channel.lastMessage;
-    if (
-      lastMessage.author.id === this.user.id &&
-      lastMessage.embeds.length > 0 &&
-      lastMessage.embeds[0]?.data?.title === "Active Discord Threads"
-    ) {
-      await lastMessage.delete();
-    }
-
-    const fields = threadDigests[digest].threads.map((threadData) => {
+    const currentDigest = threadDigests[digest];
+    const fields = currentDigest.threads.map((threadData) => {
       return {
         name: threadData.thread.name,
         value: `<#${threadData.thread.id}> has ${threadData.messageCount} messages in the last 3 days.`,
@@ -98,7 +89,17 @@ export default async function handleThreadDigestSend() {
     });
 
     try {
-      await threadDigests[digest].channel.send({ embeds: [embed] });
+      await currentDigest.channel.messages.fetch({ limit: 1 });
+      const { lastMessage } = currentDigest.channel;
+      if (
+        lastMessage.author.id === this.user.id &&
+        lastMessage.embeds.length > 0 &&
+        lastMessage.embeds[0]?.data?.title === "Active Discord Threads"
+      ) {
+        await lastMessage.edit({ embeds: [embed] });
+      } else {
+        await currentDigest.channel.send({ embeds: [embed] });
+      }
     } catch (err) {
       console.error(err);
     }
