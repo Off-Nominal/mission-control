@@ -5,13 +5,15 @@ export default function createUniqueResultEmbed(feedItem: ContentFeedItem) {
   const { author, title, url, description, summary, date, thumbnail, source } =
     feedItem;
 
+  const desc = summary || description;
+
   const embed = new EmbedBuilder({
     author: {
       name: author,
     },
     title,
     url,
-    description: summary || description.slice(0, 99).concat("..."),
+    description: desc.length < 300 ? desc : desc.slice(0, 300).concat("..."),
     footer: {
       text: source,
     },
