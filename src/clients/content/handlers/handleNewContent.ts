@@ -53,6 +53,13 @@ export default async function handleNewContent(
           `Error sending message to Discord for update to ${source}`
         );
         console.error(err);
+      })
+      .then((msg) => {
+        msg && target === "content" && msg.crosspost();
+      })
+      .catch((err) => {
+        console.error("Unable to publish content");
+        console.error(err);
       });
   }, timeout * 1000);
 }
