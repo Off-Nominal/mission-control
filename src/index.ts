@@ -39,6 +39,7 @@ import {
   StreamHostEvents,
   UtilityBotEvents,
 } from "./types/eventEnums";
+import { SpecificChannel } from "./types/channelEnums";
 
 // Database Config
 const db = new DbClient();
@@ -148,9 +149,14 @@ newsFeedListener.initialize();
 newsFeedListener.on(
   NewsManagerEvents.NEW,
   (contentFeedItem: ContentFeedItem, text: string) => {
-    contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
-      text,
-    });
+    contentBotHandlers.handleNewContent(
+      contentFeedItem,
+      contentBot,
+      SpecificChannel.NEWS,
+      {
+        text,
+      }
+    );
   }
 );
 
@@ -332,21 +338,41 @@ eventBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);
 
 wmFeedListener.on(ContentListnerEvents.NEW, (content) => {
   deployWeMartians();
-  contentBotHandlers.handleNewContent(content, contentBot, "content", {
-    timeout: 600,
-  });
+  setTimeout(() => {
+    contentBotHandlers.handleNewContent(
+      content,
+      contentBot,
+      SpecificChannel.CONTENT
+    );
+  }, 600000);
 });
 mecoFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  contentBotHandlers.handleNewContent(
+    content,
+    contentBot,
+    SpecificChannel.CONTENT
+  );
 });
 ofnFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  contentBotHandlers.handleNewContent(
+    content,
+    contentBot,
+    SpecificChannel.CONTENT
+  );
 });
 rprFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  contentBotHandlers.handleNewContent(
+    content,
+    contentBot,
+    SpecificChannel.CONTENT
+  );
 });
 hlFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  contentBotHandlers.handleNewContent(
+    content,
+    contentBot,
+    SpecificChannel.CONTENT
+  );
 });
 hhFeedListener.on(ContentListnerEvents.NEW, (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);

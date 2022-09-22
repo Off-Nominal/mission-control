@@ -1,8 +1,7 @@
-import { Client, TextChannel } from "discord.js";
-import fetchTextChannel from "../../actions/fetchChannel";
+import { Channel, ChannelType, Client } from "discord.js";
+import { channelIds, SpecificChannel } from "../../../types/channelEnums";
+import fetchChannel from "../../actions/fetchChannel";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
-
-const DEFAULT_TIMEOUT = 0;
 
 export type ContentFeedItem = {
   author: string;
@@ -17,49 +16,42 @@ export type ContentFeedItem = {
   albumArt?: string;
 };
 
-const channels = {
-  news: process.env.NEWS_CHANNEL_ID,
-  content: process.env.CONTENTCHANNELID,
-};
-
 export default async function handleNewContent(
   content: ContentFeedItem,
   client: Client,
-  target: "news" | "content",
+  target: SpecificChannel.NEWS | SpecificChannel.CONTENT,
   options?: {
-    timeout?: number;
     text?: string;
   }
 ) {
   const { source } = content;
-  const timeout = options?.timeout || DEFAULT_TIMEOUT;
 
-  let channel: TextChannel;
+  let channel: Channel;
 
   try {
-    channel = await fetchTextChannel(client, channels[target]);
+    channel = await fetchChannel(client.channels, target);
   } catch (err) {
     console.error(err);
   }
 
-  setTimeout(() => {
-    channel
-      .send({
-        embeds: [createUniqueResultEmbed(content)],
-        content: options?.text,
-      })
-      .catch((err) => {
-        console.error(
-          `Error sending message to Discord for update to ${source}`
-        );
-        console.error(err);
-      })
-      .then((msg) => {
-        msg && target === "content" && msg.crosspost();
-      })
-      .catch((err) => {
-        console.error("Unable to publish content");
-        console.error(err);
-      });
-  }, timeout * 1000);
+  if (channel.type !== ChannelType.GuildAnnouncement) {
+    return;
+  }
+
+  channel
+    .send({
+      embeds: [createUniqueResultEmbed(content)],
+      content: options?.text,
+    })
+    .catch((err) => {
+      console.error(`Error sending message to Discord for update to ${source}`);
+      console.error(err);
+    })
+    .then((msg) => {
+      msg && target === "content" && msg.crosspost();
+    })
+    .catch((err) => {
+      console.error("Unable to publish content");
+      console.error(err);
+    });
 }

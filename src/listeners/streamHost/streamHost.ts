@@ -3,7 +3,6 @@ import {
   GuildMember,
   GuildScheduledEvent,
   GuildScheduledEventStatus,
-  MessageOptions,
   MessagePayload,
 } from "discord.js";
 import EventEmitter = require("events");
@@ -40,7 +39,7 @@ export class StreamHost extends EventEmitter {
   }
 
   private sendPartyMessage(
-    message: string | MessagePayload | MessageOptions,
+    message: string | MessagePayload,
     event: GuildScheduledEvent<GuildScheduledEventStatus.Active> = this
       .activeEvent
   ) {

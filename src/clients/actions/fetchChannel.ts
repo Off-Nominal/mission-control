@@ -1,5 +1,9 @@
-import { Client, TextChannel } from "discord.js";
+import { ChannelManager } from "discord.js";
+import { SpecificChannel, channelIds } from "../../types/channelEnums";
 
-export default async function fetchTextChannel(client: Client, id: string) {
-  return (await client.channels.fetch(id)) as TextChannel;
+export default async function fetchChannel(
+  channelManager: ChannelManager,
+  channel: SpecificChannel
+) {
+  return await channelManager.fetch(channelIds[channel]);
 }
