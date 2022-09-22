@@ -1,7 +1,6 @@
-import { GuildMember, EmbedBuilder } from "discord.js";
-import fetchTextChannel from "../../actions/fetchChannel";
-
-const GENERAL_CHANNEL_ID = process.env.GENERALCHANNELID;
+import { GuildMember, EmbedBuilder, ChannelType } from "discord.js";
+import { SpecificChannel } from "../../../types/channelEnums";
+import fetchChannel from "../../actions/fetchChannel";
 
 export default async function handleGuildMemberAdd(member: GuildMember) {
   const embed = new EmbedBuilder();
@@ -30,7 +29,11 @@ export default async function handleGuildMemberAdd(member: GuildMember) {
     );
 
   try {
-    const channel = await fetchTextChannel(member.client, GENERAL_CHANNEL_ID);
+    const channel = await fetchChannel(
+      member.client.channels,
+      SpecificChannel.GENERAL
+    );
+    if (channel.type !== ChannelType.GuildText) return;
     channel.send({
       content: `Attention <@${member.user.id}>!`,
       embeds: [embed],

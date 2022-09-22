@@ -1,8 +1,7 @@
-import { Client, EmbedBuilder, TextChannel } from "discord.js";
+import { ChannelType, Client, EmbedBuilder } from "discord.js";
 import { GithubUpdateEmbedData } from "../../../listeners/siteListener";
-
-const TEST_CHANNEL = process.env.TESTCHANNEL;
-const BOCACHICACHANNELID = process.env.BOCACHICACHANNELID || TEST_CHANNEL;
+import { SpecificChannel } from "../../../types/channelEnums";
+import fetchChannel from "../../actions/fetchChannel";
 
 const OWNER = "mendahu";
 const REPO = "starship-site-tracking";
@@ -40,8 +39,12 @@ export default async function handleStarshipSiteUpdate(
     .setTimestamp();
 
   try {
-    const channel = await client.channels.fetch(BOCACHICACHANNELID);
-    await (channel as TextChannel).send({ embeds: [embed] });
+    const channel = await fetchChannel(
+      client.channels,
+      SpecificChannel.BOCA_CHICA
+    );
+    if (channel.type !== ChannelType.GuildText) return;
+    await channel.send({ embeds: [embed] });
     console.log(`Discord successfully notified of changes to ${update.url}`);
   } catch (err) {
     console.error(err);

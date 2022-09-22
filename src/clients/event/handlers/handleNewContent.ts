@@ -1,12 +1,11 @@
-import { Client } from "discord.js";
-import fetchTextChannel from "../../actions/fetchChannel";
+import { ChannelType, Client } from "discord.js";
+import { SpecificChannel } from "../../../types/channelEnums";
+import fetchChannel from "../../actions/fetchChannel";
 import { ContentFeedItem } from "../../content/handlers/handleNewContent";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
 import fetchYouTubeVideo from "../actions/fetchYouTubeVideo";
 import generateEventDetailsFromYouTube from "../actions/generateEventDetailsFromYouTube";
-
-const ANNOUNCEMENTS_CHANNEL_ID = process.env.ANNOUNCEMENTSCHANNELID;
 
 export default async function handleNewContent(
   content: ContentFeedItem,
@@ -23,7 +22,11 @@ export default async function handleNewContent(
     const eventDetails = generateEventDetailsFromYouTube(video);
     const event = await createDiscordEvent(eventDetails, client);
     const embed = createEventAnnouncementEmbed(event, "new");
-    const channel = await fetchTextChannel(client, ANNOUNCEMENTS_CHANNEL_ID);
+    const channel = await fetchChannel(
+      client.channels,
+      SpecificChannel.ANNOUNCEMENTS
+    );
+    if (channel.type !== ChannelType.GuildAnnouncement) return;
     await channel.send({ embeds: [embed] });
   } catch (err) {
     console.error(err);

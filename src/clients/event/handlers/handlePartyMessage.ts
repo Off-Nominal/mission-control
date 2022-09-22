@@ -1,21 +1,23 @@
 import {
+  ChannelType,
   GuildScheduledEvent,
   GuildScheduledEventStatus,
-  MessageOptions,
   MessagePayload,
 } from "discord.js";
-import fetchTextChannel from "../../actions/fetchChannel";
-
-const LIVECHATCHANNELID = process.env.LIVECHATCHANNELID;
+import { SpecificChannel } from "../../../types/channelEnums";
+import fetchChannel from "../../actions/fetchChannel";
 
 export default async function handlePartyMessage(
-  message: string | MessagePayload | MessageOptions,
+  message: string | MessagePayload,
   event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
 ) {
-  const channel = fetchTextChannel(event.client, LIVECHATCHANNELID);
-
   try {
-    (await channel).send(message);
+    const channel = await fetchChannel(
+      event.client.channels,
+      SpecificChannel.LIVECHAT
+    );
+    if (channel.type !== ChannelType.GuildText) return;
+    channel.send(message);
   } catch (err) {
     console.error(err);
   }

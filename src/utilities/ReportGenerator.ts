@@ -1,13 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   Collection,
-  CommandInteraction,
   Message,
   EmbedBuilder,
-  TextChannel,
   User,
-  ChannelType,
   ChatInputCommandInteraction,
+  GuildTextBasedChannel,
 } from "discord.js";
 import {
   getDiscussion,
@@ -80,13 +78,6 @@ export class ReportGenerator {
       });
     }
 
-    if (interaction.channel.type !== ChannelType.GuildText) {
-      return await interaction.reply({
-        content:
-          "My summary method doesn't work great over DM. Please call me in a text channel.",
-      });
-    }
-
     try {
       const noticeId = await this.sendChannelReportNotice(
         interaction,
@@ -135,7 +126,7 @@ export class ReportGenerator {
   }
 
   public async generateReport(
-    channel: TextChannel,
+    channel: GuildTextBasedChannel,
     hourLimit: number = 8,
     noticeId: string
   ): Promise<string> {

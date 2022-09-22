@@ -1,9 +1,8 @@
-import { Client, GuildScheduledEvent } from "discord.js";
+import { ChannelType, Client, GuildScheduledEvent } from "discord.js";
 import { Feed, FeedList } from "../../..";
-import fetchTextChannel from "../../actions/fetchChannel";
+import { SpecificChannel } from "../../../types/channelEnums";
+import fetchChannel from "../../actions/fetchChannel";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
-
-const contentChannelId = process.env.CONTENTCHANNELID;
 
 export default async function handleEventEnded(
   event: GuildScheduledEvent,
@@ -25,7 +24,11 @@ export default async function handleEventEnded(
 
   const embed = createUniqueResultEmbed(episode);
   try {
-    const channel = await fetchTextChannel(client, contentChannelId);
+    const channel = await fetchChannel(
+      client.channels,
+      SpecificChannel.CONTENT
+    );
+    if (channel.type !== ChannelType.GuildAnnouncement) return;
     await channel.send({ embeds: [embed] });
   } catch (err) {
     console.error(err);

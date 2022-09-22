@@ -8,10 +8,9 @@ import {
 } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
+import { SpecificChannel } from "../../../types/channelEnums";
 import { EventBotEvents } from "../../../types/eventEnums";
 import createDiscordEvent from "../actions/createDiscordEvent";
-
-const livechatChannelID = process.env.LIVECHATCHANNELID;
 
 enum AllowedCommands {
   START = "start",
@@ -54,7 +53,7 @@ export default function generateInteractionCreateHandler(db: Client) {
         scheduledEndTime: add(scheduledStartTime, { minutes: duration }),
         privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
         entityType: GuildScheduledEventEntityType.External,
-        description: `Come hang out in <#${livechatChannelID}> and watch the event with us!`,
+        description: `Come hang out in <#${SpecificChannel.LIVECHAT}> and watch the event with us!`,
         entityMetadata: { location: url },
         reason: "User initiated slash command",
       };

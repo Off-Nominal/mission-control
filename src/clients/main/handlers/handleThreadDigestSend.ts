@@ -33,7 +33,7 @@ export default async function handleThreadDigestSend() {
   try {
     const fetchedThreads = await guild.channels.fetchActiveThreads();
     activeThreads = fetchedThreads.threads.filter(
-      (thread) => thread.type === ChannelType.GuildPublicThread
+      (thread) => thread.type === ChannelType.PublicThread
     );
   } catch (err) {
     return console.error(err);
