@@ -2,16 +2,16 @@ import { sub } from "date-fns";
 import {
   Collection,
   FetchMessagesOptions,
+  GuildTextBasedChannel,
   Message,
   Snowflake,
-  TextChannel,
   ThreadChannel,
 } from "discord.js";
 
 const DISCORD_API_LIMIT = 100; // Discord's API prevents more than 100 messages per API call
 
 export const fetchMessagesInLast = async (
-  channel: TextChannel | ThreadChannel,
+  channel: GuildTextBasedChannel | ThreadChannel,
   hourLimit: number
 ): Promise<Collection<string, Message<boolean>>> => {
   const options: FetchMessagesOptions = {

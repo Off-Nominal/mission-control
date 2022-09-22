@@ -1,6 +1,6 @@
 import { GuildMember, EmbedBuilder, ChannelType } from "discord.js";
 import { SpecificChannel } from "../../../types/channelEnums";
-import fetchTextChannel from "../../actions/fetchChannel";
+import fetchChannel from "../../actions/fetchChannel";
 
 export default async function handleGuildMemberAdd(member: GuildMember) {
   const embed = new EmbedBuilder();
@@ -29,7 +29,7 @@ export default async function handleGuildMemberAdd(member: GuildMember) {
     );
 
   try {
-    const channel = await fetchTextChannel(
+    const channel = await fetchChannel(
       member.client.channels,
       SpecificChannel.GENERAL
     );

@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder, TextChannel } from "discord.js";
+import { ChannelType, Client, EmbedBuilder } from "discord.js";
 import { GithubUpdateEmbedData } from "../../../listeners/siteListener";
 import { SpecificChannel } from "../../../types/channelEnums";
 import fetchChannel from "../../actions/fetchChannel";
@@ -43,7 +43,8 @@ export default async function handleStarshipSiteUpdate(
       client.channels,
       SpecificChannel.BOCA_CHICA
     );
-    await (channel as TextChannel).send({ embeds: [embed] });
+    if (channel.type !== ChannelType.GuildText) return;
+    await channel.send({ embeds: [embed] });
     console.log(`Discord successfully notified of changes to ${update.url}`);
   } catch (err) {
     console.error(err);

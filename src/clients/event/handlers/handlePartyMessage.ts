@@ -5,14 +5,14 @@ import {
   MessagePayload,
 } from "discord.js";
 import { SpecificChannel } from "../../../types/channelEnums";
-import fetchTextChannel from "../../actions/fetchChannel";
+import fetchChannel from "../../actions/fetchChannel";
 
 export default async function handlePartyMessage(
   message: string | MessagePayload,
   event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
 ) {
   try {
-    const channel = await fetchTextChannel(
+    const channel = await fetchChannel(
       event.client.channels,
       SpecificChannel.LIVECHAT
     );
