@@ -30,7 +30,7 @@ export default function generateHandleEventsMonitored(db) {
         return;
       }
 
-      const content = `There is an event in the Off-Nominal Discord happening soon!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
+      const content = `Happening soon: ${notification.event.name}\n\nThere is an event in the Off-Nominal Discord happening soon!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
       const embed = createEventAnnouncementEmbed(notification.event, "pre");
 
       notification.recipients.forEach(async (recipient) => {

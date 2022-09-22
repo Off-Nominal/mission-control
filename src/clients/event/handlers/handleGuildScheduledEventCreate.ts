@@ -20,7 +20,7 @@ export default function generateGuildScheduledEventCreate(db: Client) {
       return console.error(err);
     }
 
-    const content = `There is a new event in the Off-Nominal Discord!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
+    const content = `New Event: ${event.name}\n\nThere is a new event in the Off-Nominal Discord!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
     const embed = createEventAnnouncementEmbed(event, "new");
 
     subscribers.forEach(async (subscriber) => {
