@@ -9,7 +9,7 @@ export default function createUniqueResultEmbed(feedItem: ContentFeedItem) {
 
   const embed = new EmbedBuilder({
     author: {
-      name: author.slice(0, 255),
+      name: author?.slice(0, 255),
     },
     title,
     url,
