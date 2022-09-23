@@ -40,6 +40,7 @@ import {
   UtilityBotEvents,
 } from "./types/eventEnums";
 import { SpecificChannel } from "./types/channelEnums";
+import RocketLaunchLiveClient from "./utilities/rocketLaunchLiveClient";
 
 // Database Config
 const db = new DbClient();
