@@ -4,7 +4,10 @@ import { Client as DbClient } from "pg";
 import {
   ChatInputCommandInteraction,
   Client,
+  Collection,
   GatewayIntentBits,
+  GuildScheduledEvent,
+  GuildScheduledEventManager,
   Partials,
 } from "discord.js";
 
@@ -40,7 +43,7 @@ import {
   UtilityBotEvents,
 } from "./types/eventEnums";
 import { SpecificChannel } from "./types/channelEnums";
-import RocketLaunchLiveClient from "./utilities/rocketLaunchLiveClient";
+import LaunchListener from "./listeners/launchListener/launchListener";
 
 // Database Config
 const db = new DbClient();
@@ -131,6 +134,12 @@ const contentBot = new Client({
 const eventBot = new Client({
   intents: [simpleIntents, eventIntents],
 });
+
+/***********************************
+ *  RLL Event Listener
+ ************************************/
+
+const launchListener = new LaunchListener();
 
 /***********************************
  *  Site Listener Setup
@@ -329,6 +338,13 @@ eventBot.on("interactionCreate", (interaction) => {
   eventBotHandlers.handleInteractionCreate(interaction);
 });
 eventBot.on(EventBotEvents.RETRIEVED, eventsListener.initialize);
+eventBot.on(
+  EventBotEvents.RETRIEVED,
+  (
+    events: Collection<string, GuildScheduledEvent>,
+    eventManager: GuildScheduledEventManager
+  ) => launchListener.initialize(events, eventManager)
+);
 eventBot.on("error", handleError);
 eventBot.on(EventBotEvents.NEW_TITLE, streamHost.logSuggestion);
 eventBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);

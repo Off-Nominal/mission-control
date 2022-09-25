@@ -1,0 +1,204 @@
+import { add, compareAsc, format, sub } from "date-fns";
+import {
+  Collection,
+  GuildScheduledEvent,
+  GuildScheduledEventCreateOptions,
+  GuildScheduledEventEditOptions,
+  GuildScheduledEventEntityType,
+  GuildScheduledEventManager,
+  GuildScheduledEventPrivacyLevel,
+  GuildScheduledEventStatus,
+  time,
+  TimestampStyles,
+} from "discord.js";
+import EventEmitter = require("events");
+import RocketLaunchLiveClient, {
+  Launch,
+} from "../../utilities/rocketLaunchLiveClient";
+
+const generateDescription = (launch: Launch): string => {
+  const windowOpen = new Date(launch.win_open);
+  const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
+    windowOpen,
+    TimestampStyles.LongDateTime
+  )}, in ${time(windowOpen, TimestampStyles.RelativeTime)}`;
+  const idString = `\n\nrllId=[${launch.id.toString()}]\n\nData provided by RocketLaunch.live`;
+  return launch.launch_description + infoString + idString;
+};
+
+const getStreamUrl = (launch: Launch) => {
+  const streamMedia = launch.media.find(
+    (media) => media.ldfeatured || media.featured
+  );
+
+  if (!streamMedia) {
+    return "Unavailable";
+  }
+
+  return streamMedia.youtube_vidid
+    ? `https://www.youtube.com/watch?v=${streamMedia.youtube_vidid}`
+    : streamMedia.media_url;
+};
+
+export default class LaunchListener extends EventEmitter {
+  private events: Map<number, GuildScheduledEvent>;
+  private client: RocketLaunchLiveClient;
+
+  constructor() {
+    super();
+    this.events = new Map();
+    this.client = new RocketLaunchLiveClient();
+  }
+
+  public initialize(
+    events: Collection<string, GuildScheduledEvent>,
+    eventsManager: GuildScheduledEventManager
+  ) {
+    events.forEach((event) => {
+      const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
+
+      if (rllId && rllId.length) {
+        this.events.set(Number(rllId[0]), event);
+      }
+    });
+    this.syncEvents(eventsManager);
+  }
+
+  private syncEvents(eventsManager: GuildScheduledEventManager) {
+    // GET ALL EVENTS WITHIN 7 DAYS
+    const now = new Date();
+    const window = add(now, { days: 7 });
+
+    this.client
+      .fetchLaunches({
+        before_date: format(window, "yyyy-MM-dd"),
+        after_date: format(now, "yyyy-MM-dd"),
+      })
+      .then((results) => {
+        const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
+
+        results.forEach((launch) => {
+          // ignore if it has no opening time
+          // we're only creating events for launches with scheduled liftoff times
+          if (!launch.win_open) {
+            return;
+          }
+
+          // ignore win open in the past
+          const now = new Date();
+          const winOpen = new Date(launch.win_open);
+          if (compareAsc(now, winOpen) === 1) {
+            return;
+          }
+
+          const event = this.events.get(launch.id);
+
+          if (event) {
+            // sync it if it already exists
+            promises.push(this.syncEvent(event, launch));
+          } else {
+            const windowOpen = new Date(launch.win_open);
+            const options: GuildScheduledEventCreateOptions = {
+              name: launch.name,
+              scheduledStartTime: sub(windowOpen, { minutes: 15 }),
+              scheduledEndTime: launch.win_close
+                ? add(new Date(launch.win_close), { minutes: 15 })
+                : add(windowOpen, { minutes: 60 }),
+              privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+              entityType: GuildScheduledEventEntityType.External,
+              description: generateDescription(launch),
+              entityMetadata: { location: getStreamUrl(launch) },
+            };
+            promises.push(eventsManager.create(options));
+          }
+        });
+
+        // Sync any events that are not in the API call (which may have moved)
+
+        const fetchedIds = results.map((result) => result.id);
+        this.events.forEach((event, rllId) => {
+          if (!fetchedIds.includes(rllId)) {
+            const promise = this.client
+              .fetchLaunches({ id: rllId.toString() })
+              .then((launch) => {
+                this.syncEvent(event, launch[0]);
+                return launch[0];
+              });
+
+            promises.push(promise);
+          }
+        });
+
+        return Promise.allSettled(promises);
+      })
+      .then(() => {
+        console.log("Discord Events and RocketLaunch.live now synced");
+      })
+      .catch((err) => console.error(err));
+  }
+
+  private monitor() {
+    // query API for changes
+    // update any events that changed
+  }
+
+  private syncEvent(event: GuildScheduledEvent, launch: Launch) {
+    const newData: GuildScheduledEventEditOptions<
+      GuildScheduledEventStatus.Scheduled,
+      GuildScheduledEventStatus.Active
+    > = {};
+
+    // Location
+    const url = getStreamUrl(launch);
+    if (event.entityMetadata.location !== url) {
+      newData.entityMetadata = { location: url };
+    }
+
+    // Topic
+    if (event.name !== launch.name) {
+      newData.name = launch.name;
+    }
+
+    // Start Time
+    const windowOpen = new Date(launch.win_open);
+    const eventStreamStart = event.scheduledStartAt;
+    if (
+      add(eventStreamStart, { minutes: 15 }).toISOString() !==
+        windowOpen.toISOString() &&
+      !event.isActive()
+    ) {
+      newData.scheduledStartTime = sub(windowOpen, { minutes: 15 });
+    }
+
+    // End time
+    const eventStreamEnd = event.scheduledEndAt;
+    if (launch.win_close) {
+      const windowClose = new Date(launch.win_close);
+      if (
+        sub(eventStreamEnd, { minutes: 15 }).toISOString() !==
+        windowClose.toISOString()
+      ) {
+        newData.scheduledEndTime = add(windowClose, {
+          minutes: 15,
+        });
+      }
+    } else {
+      if (
+        sub(eventStreamEnd, { minutes: 60 }).toISOString() !==
+        windowOpen.toISOString()
+      ) {
+        newData.scheduledEndTime = add(windowOpen, {
+          minutes: 60,
+        });
+      }
+    }
+
+    // Description
+    const description = generateDescription(launch);
+    if (event.description !== description) {
+      newData.description = description;
+    }
+
+    return event.edit(newData).catch((err) => console.error(err));
+  }
+}
