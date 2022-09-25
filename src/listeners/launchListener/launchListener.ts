@@ -12,7 +12,6 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import EventEmitter = require("events");
 import RocketLaunchLiveClient, {
   Launch,
 } from "../../utilities/rocketLaunchLiveClient";
@@ -47,14 +46,13 @@ const formatDateForRLL = (date: Date): string => {
   return date.toISOString().split(".")[0] + "Z";
 };
 
-export default class LaunchListener extends EventEmitter {
+export default class LaunchListener {
   private events: Map<number, GuildScheduledEvent>;
   private client: RocketLaunchLiveClient;
   private lastModified: Date;
 
   constructor() {
-    super();
-    this.events = new Map();
+    this.events = new Map<number, GuildScheduledEvent>();
     this.client = new RocketLaunchLiveClient();
   }
 
@@ -159,14 +157,15 @@ export default class LaunchListener extends EventEmitter {
 
   private monitor() {
     setInterval(() => {
-      console.log("* Fetching new launch changes");
       this.client
         .fetchLaunches({
           modified_since: formatDateForRLL(this.lastModified),
         })
         .then((res) => {
           this.lastModified = new Date();
-          console.log("* Amount of changes:", res.length);
+          if (res.length) {
+            console.log("* New RLL changes detected:", res.length);
+          }
           // console.log(res);
           const promises = [];
           res.forEach((launch) => {
@@ -175,8 +174,10 @@ export default class LaunchListener extends EventEmitter {
           });
           return Promise.allSettled(promises);
         })
-        .then(() => {
-          console.log("* All launches synced");
+        .then((res) => {
+          if (res.length) {
+            console.log("* All launches synced");
+          }
         });
       // update any events that changed
     }, FIVE_MINS_IN_MS);
