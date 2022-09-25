@@ -1,4 +1,5 @@
-import { add, compareAsc, format, sub } from "date-fns";
+import { add, format, sub, isBefore } from "date-fns";
+
 import {
   Collection,
   GuildScheduledEvent,
@@ -15,6 +16,8 @@ import EventEmitter = require("events");
 import RocketLaunchLiveClient, {
   Launch,
 } from "../../utilities/rocketLaunchLiveClient";
+
+const FIVE_MINS_IN_MS = 300000;
 
 const generateDescription = (launch: Launch): string => {
   const windowOpen = new Date(launch.win_open);
@@ -40,9 +43,14 @@ const getStreamUrl = (launch: Launch) => {
     : streamMedia.media_url;
 };
 
+const formatDateForRLL = (date: Date): string => {
+  return date.toISOString().split(".")[0] + "Z";
+};
+
 export default class LaunchListener extends EventEmitter {
   private events: Map<number, GuildScheduledEvent>;
   private client: RocketLaunchLiveClient;
+  private lastModified: Date;
 
   constructor() {
     super();
@@ -54,6 +62,7 @@ export default class LaunchListener extends EventEmitter {
     events: Collection<string, GuildScheduledEvent>,
     eventsManager: GuildScheduledEventManager
   ) {
+    console.log(`* Initializing with ${events.size} events`);
     events.forEach((event) => {
       const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
 
@@ -61,7 +70,8 @@ export default class LaunchListener extends EventEmitter {
         this.events.set(Number(rllId[0]), event);
       }
     });
-    this.syncEvents(eventsManager);
+    console.log(`* Only ${this.events.size} events are launches.`);
+    this.syncEvents(eventsManager).then(() => this.monitor());
   }
 
   private syncEvents(eventsManager: GuildScheduledEventManager) {
@@ -69,25 +79,30 @@ export default class LaunchListener extends EventEmitter {
     const now = new Date();
     const window = add(now, { days: 7 });
 
-    this.client
+    return this.client
       .fetchLaunches({
         before_date: format(window, "yyyy-MM-dd"),
         after_date: format(now, "yyyy-MM-dd"),
       })
       .then((results) => {
+        console.log(
+          `* Sync activity fetched ${results.length} events from RLL`
+        );
+        this.lastModified = new Date();
         const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
 
         results.forEach((launch) => {
           // ignore if it has no opening time
           // we're only creating events for launches with scheduled liftoff times
           if (!launch.win_open) {
+            console.log(`* Ignoring ${launch.name}, no launch window open`);
             return;
           }
 
           // ignore win open in the past
-          const now = new Date();
           const winOpen = new Date(launch.win_open);
-          if (compareAsc(now, winOpen) === 1) {
+          if (isBefore(winOpen, now)) {
+            console.log(`* Ignoring ${launch.name}, launch window in the past`);
             return;
           }
 
@@ -95,6 +110,7 @@ export default class LaunchListener extends EventEmitter {
 
           if (event) {
             // sync it if it already exists
+            console.log(`* Syncing ${launch.name}`);
             promises.push(this.syncEvent(event, launch));
           } else {
             const windowOpen = new Date(launch.win_open);
@@ -109,6 +125,7 @@ export default class LaunchListener extends EventEmitter {
               description: generateDescription(launch),
               entityMetadata: { location: getStreamUrl(launch) },
             };
+            console.log(`* Adding ${launch.name}`);
             promises.push(eventsManager.create(options));
           }
         });
@@ -121,6 +138,9 @@ export default class LaunchListener extends EventEmitter {
             const promise = this.client
               .fetchLaunches({ id: rllId.toString() })
               .then((launch) => {
+                console.log(
+                  `* Fetching ${launch[0].name}, which wasn't in the API call, and syncing`
+                );
                 this.syncEvent(event, launch[0]);
                 return launch[0];
               });
@@ -132,14 +152,34 @@ export default class LaunchListener extends EventEmitter {
         return Promise.allSettled(promises);
       })
       .then(() => {
-        console.log("Discord Events and RocketLaunch.live now synced");
+        return console.log("* Discord Events and RocketLaunch.live now synced");
       })
       .catch((err) => console.error(err));
   }
 
   private monitor() {
-    // query API for changes
-    // update any events that changed
+    setInterval(() => {
+      console.log("* Fetching new launch changes");
+      this.client
+        .fetchLaunches({
+          modified_since: formatDateForRLL(this.lastModified),
+        })
+        .then((res) => {
+          this.lastModified = new Date();
+          console.log("* Amount of changes:", res.length);
+          // console.log(res);
+          const promises = [];
+          res.forEach((launch) => {
+            const event = this.events.get(launch.id);
+            promises.push(this.syncEvent(event, launch));
+          });
+          return Promise.allSettled(promises);
+        })
+        .then(() => {
+          console.log("* All launches synced");
+        });
+      // update any events that changed
+    }, FIVE_MINS_IN_MS);
   }
 
   private syncEvent(event: GuildScheduledEvent, launch: Launch) {
@@ -199,6 +239,10 @@ export default class LaunchListener extends EventEmitter {
       newData.description = description;
     }
 
-    return event.edit(newData).catch((err) => console.error(err));
+    if (Object.keys(newData).length) {
+      return event.edit(newData).catch((err) => console.error(err));
+    } else {
+      console.log(`* No changes to ${launch.name}`);
+    }
   }
 }

@@ -102,8 +102,10 @@ export default class RocketLaunchLiveClient {
 
   constructor() {
     // this.fetcher
-    //   .get("https://fdo.rocketlaunch.live/json/launches?id=3208")
-    //   .then((res) => console.log(res.data.result[0]));
+    //   .get(
+    //     "https://fdo.rocketlaunch.live/json/launches?modified_since=2022-09-25T13:51:34Z"
+    //   )
+    //   .then((res) => console.log(res.data.result));
   }
 
   public fetchLaunches(options: LaunchesParams) {
