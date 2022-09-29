@@ -64,7 +64,10 @@ export default class LaunchListener {
       }
     });
     console.log(`* Only ${this.events.size} events are launches.`);
-    this.syncEvents().then(() => this.monitor());
+    this.syncEvents().then(() => {
+      console.log("Launches synced with RLL");
+      this.monitor();
+    });
   }
 
   private syncEvents() {
@@ -78,9 +81,6 @@ export default class LaunchListener {
         after_date: format(now, "yyyy-MM-dd"),
       })
       .then((results) => {
-        console.log(
-          `* Sync activity fetched ${results.length} events from RLL`
-        );
         const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
 
         results.forEach((launch) => {
@@ -142,9 +142,6 @@ export default class LaunchListener {
         });
 
         return Promise.allSettled(promises);
-      })
-      .then(() => {
-        return console.log("* Discord Events and RocketLaunch.live now synced");
       })
       .catch((err) => console.error(err));
   }
