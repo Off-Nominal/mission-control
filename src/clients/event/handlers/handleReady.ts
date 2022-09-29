@@ -11,7 +11,7 @@ export default async function handleReady(client: Client) {
   try {
     const guild = await fetchGuild(client);
     const events = await guild.scheduledEvents.fetch();
-    client.emit(EventBotEvents.RETRIEVED, events);
+    client.emit(EventBotEvents.RETRIEVED, events, guild.scheduledEvents);
   } catch (err) {
     console.error(err);
   }
