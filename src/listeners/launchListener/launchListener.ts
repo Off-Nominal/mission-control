@@ -11,9 +11,8 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import RocketLaunchLiveClient, {
-  Launch,
-} from "../../utilities/rocketLaunchLiveClient";
+import RocketLaunchLiveClient from "../../utilities/rocketLaunchLiveClient/rocketLaunchLiveClient";
+import { Launch } from "../../utilities/rocketLaunchLiveClient/types";
 
 const FIVE_MINS_IN_MS = 300000;
 
