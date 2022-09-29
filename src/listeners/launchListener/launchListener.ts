@@ -1,5 +1,4 @@
 import { add, format, sub, isBefore } from "date-fns";
-
 import {
   Collection,
   GuildScheduledEvent,
@@ -42,14 +41,10 @@ const getStreamUrl = (launch: Launch) => {
     : streamMedia.media_url;
 };
 
-const formatDateForRLL = (date: Date): string => {
-  return date.toISOString().split(".")[0] + "Z";
-};
-
 export default class LaunchListener {
   private events: Map<number, GuildScheduledEvent>;
   private client: RocketLaunchLiveClient;
-  private lastModified: Date;
+  private eventsManager: GuildScheduledEventManager;
 
   constructor() {
     this.events = new Map<number, GuildScheduledEvent>();
@@ -60,6 +55,7 @@ export default class LaunchListener {
     events: Collection<string, GuildScheduledEvent>,
     eventsManager: GuildScheduledEventManager
   ) {
+    this.eventsManager = eventsManager;
     console.log(`* Initializing with ${events.size} events`);
     events.forEach((event) => {
       const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
@@ -69,10 +65,10 @@ export default class LaunchListener {
       }
     });
     console.log(`* Only ${this.events.size} events are launches.`);
-    this.syncEvents(eventsManager).then(() => this.monitor());
+    this.syncEvents().then(() => this.monitor());
   }
 
-  private syncEvents(eventsManager: GuildScheduledEventManager) {
+  private syncEvents() {
     // GET ALL EVENTS WITHIN 7 DAYS
     const now = new Date();
     const window = add(now, { days: 7 });
@@ -86,7 +82,6 @@ export default class LaunchListener {
         console.log(
           `* Sync activity fetched ${results.length} events from RLL`
         );
-        this.lastModified = new Date();
         const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
 
         results.forEach((launch) => {
@@ -108,7 +103,6 @@ export default class LaunchListener {
 
           if (event) {
             // sync it if it already exists
-            console.log(`* Syncing ${launch.name}`);
             promises.push(this.syncEvent(event, launch));
           } else {
             const windowOpen = new Date(launch.win_open);
@@ -124,7 +118,11 @@ export default class LaunchListener {
               entityMetadata: { location: getStreamUrl(launch) },
             };
             console.log(`* Adding ${launch.name}`);
-            promises.push(eventsManager.create(options));
+            const promise = this.eventsManager.create(options).then((event) => {
+              this.events.set(launch.id, event);
+              return event;
+            });
+            promises.push(promise);
           }
         });
 
@@ -136,9 +134,6 @@ export default class LaunchListener {
             const promise = this.client
               .fetchLaunches({ id: rllId.toString() })
               .then((launch) => {
-                console.log(
-                  `* Fetching ${launch[0].name}, which wasn't in the API call, and syncing`
-                );
                 this.syncEvent(event, launch[0]);
                 return launch[0];
               });
@@ -157,33 +152,16 @@ export default class LaunchListener {
 
   private monitor() {
     setInterval(() => {
-      this.client
-        .fetchLaunches({
-          modified_since: formatDateForRLL(this.lastModified),
-        })
-        .then((res) => {
-          this.lastModified = new Date();
-          if (res.length) {
-            console.log("* New RLL changes detected:", res.length);
-          }
-          // console.log(res);
-          const promises = [];
-          res.forEach((launch) => {
-            const event = this.events.get(launch.id);
-            promises.push(this.syncEvent(event, launch));
-          });
-          return Promise.allSettled(promises);
-        })
-        .then((res) => {
-          if (res.length) {
-            console.log("* All launches synced");
-          }
-        });
-      // update any events that changed
+      this.syncEvents();
     }, FIVE_MINS_IN_MS);
   }
 
   private syncEvent(event: GuildScheduledEvent, launch: Launch) {
+    // Edge case for when a launch goes from a specific scheduled time in the next week to unscheduled
+    if (!launch.win_open) {
+      return event.delete();
+    }
+
     const newData: GuildScheduledEventEditOptions<
       GuildScheduledEventStatus.Scheduled,
       GuildScheduledEventStatus.Active
@@ -209,41 +187,25 @@ export default class LaunchListener {
       !event.isActive()
     ) {
       newData.scheduledStartTime = sub(windowOpen, { minutes: 15 });
+      newData.description = generateDescription(launch);
+      const scheduledEndTime = launch.win_close
+        ? add(new Date(launch.win_close), {
+            minutes: 15,
+          })
+        : add(windowOpen, {
+            minutes: 60,
+          });
+
+      newData.scheduledEndTime = scheduledEndTime;
     }
 
-    // End time
-    const eventStreamEnd = event.scheduledEndAt;
-    if (launch.win_close) {
-      const windowClose = new Date(launch.win_close);
-      if (
-        sub(eventStreamEnd, { minutes: 15 }).toISOString() !==
-        windowClose.toISOString()
-      ) {
-        newData.scheduledEndTime = add(windowClose, {
-          minutes: 15,
-        });
-      }
-    } else {
-      if (
-        sub(eventStreamEnd, { minutes: 60 }).toISOString() !==
-        windowOpen.toISOString()
-      ) {
-        newData.scheduledEndTime = add(windowOpen, {
-          minutes: 60,
-        });
-      }
+    // Event has no changes
+    if (!Object.keys(newData).length) {
+      return;
     }
 
-    // Description
-    const description = generateDescription(launch);
-    if (event.description !== description) {
-      newData.description = description;
-    }
-
-    if (Object.keys(newData).length) {
-      return event.edit(newData).catch((err) => console.error(err));
-    } else {
-      console.log(`* No changes to ${launch.name}`);
-    }
+    console.log(`Updating ${launch.name}`);
+    console.log("New data: ", newData);
+    return event.edit(newData).catch((err) => console.error(err));
   }
 }
