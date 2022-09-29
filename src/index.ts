@@ -59,6 +59,8 @@ const {
 
 const searchOptions = require("../config/searchOptions.json");
 
+const RLL_KEY = process.env.RLL_KEY;
+
 const WMFEED = process.env.WMFEED;
 const MECOFEED = process.env.MECOFEED;
 const OFNFEED = process.env.OFNFEED;
@@ -139,7 +141,7 @@ const eventBot = new Client({
  *  RLL Event Listener
  ************************************/
 
-const launchListener = new LaunchListener();
+const launchListener = new LaunchListener(RLL_KEY);
 
 /***********************************
  *  Site Listener Setup

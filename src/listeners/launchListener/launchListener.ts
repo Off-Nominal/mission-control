@@ -45,9 +45,9 @@ export default class LaunchListener {
   private client: RocketLaunchLiveClient;
   private eventsManager: GuildScheduledEventManager;
 
-  constructor() {
+  constructor(key) {
     this.events = new Map<number, GuildScheduledEvent>();
-    this.client = new RocketLaunchLiveClient();
+    this.client = new RocketLaunchLiveClient(key);
   }
 
   public initialize(

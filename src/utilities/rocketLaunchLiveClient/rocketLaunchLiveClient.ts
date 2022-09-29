@@ -1,19 +1,16 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { LaunchesParams, LaunchesResponse } from "./types";
 
 export default class RocketLaunchLiveClient {
   private baseUrl: string = "https://fdo.rocketlaunch.live";
+  private fetcher: AxiosInstance;
 
-  private fetcher = axios.create({
-    headers: {
-      Authorization: `Bearer ${process.env.RLL_KEY}`,
-    },
-  });
-
-  constructor() {
-    this.fetcher
-      .get("https://fdo.rocketlaunch.live/json/launches")
-      .then((res) => console.log(res.data.result));
+  constructor(key) {
+    this.fetcher = axios.create({
+      headers: {
+        Authorization: `Bearer ${key}`,
+      },
+    });
   }
 
   public fetchLaunches(options: LaunchesParams) {
