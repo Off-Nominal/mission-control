@@ -31,10 +31,19 @@ type Vehicle = {
   slug: string;
 };
 
+type Location = {
+  id: number;
+  name: string;
+  state: string;
+  statename: string;
+  country: string;
+  slug: string;
+};
+
 type Pad = {
   id: number;
   name: string;
-  location: {};
+  location: Location;
 };
 
 type Media = {
@@ -46,6 +55,17 @@ type Media = {
   approved: boolean;
 };
 
+type Mission = {
+  id: number;
+  name: string;
+  description: null | string;
+};
+
+type Tag = {
+  id: number;
+  text: string;
+};
+
 export type Launch = {
   id: number;
   cospar_id: string;
@@ -54,7 +74,7 @@ export type Launch = {
   provider: Provider;
   vehicle: Vehicle;
   pad: Pad;
-  missions: [];
+  missions: Mission[];
   mission_description: null | string;
   launch_description: string;
   win_open: null | string;
@@ -67,7 +87,7 @@ export type Launch = {
     quarter: null | string;
   };
   date_str: string;
-  tags: [];
+  tags: Tag[];
   slug: string;
   weather_summary: null | string;
   weather_temp: null | number;
@@ -101,11 +121,9 @@ export default class RocketLaunchLiveClient {
   });
 
   constructor() {
-    // this.fetcher
-    //   .get(
-    //     "https://fdo.rocketlaunch.live/json/launches?modified_since=2022-09-25T13:51:34Z"
-    //   )
-    //   .then((res) => console.log(res.data.result));
+    this.fetcher
+      .get("https://fdo.rocketlaunch.live/json/launches")
+      .then((res) => console.log(res.data.result));
   }
 
   public fetchLaunches(options: LaunchesParams) {
