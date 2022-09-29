@@ -15,8 +15,9 @@ export default class RocketLaunchLiveClient {
 
   public fetchLaunches(options: LaunchesParams) {
     const url = new URL(this.baseUrl);
-    url.pathname = "/json/launches";
     const params = new URLSearchParams(options);
+
+    url.pathname = "/json/launches";
     url.search = params.toString();
 
     return this.fetcher
