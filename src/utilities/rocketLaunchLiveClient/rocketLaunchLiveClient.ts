@@ -47,8 +47,6 @@ export default class RocketLaunchLiveClient {
     return this.fetchLaunches({
       before_date: format(window, "yyyy-MM-dd"),
       after_date: format(startDate, "yyyy-MM-dd"),
-    }).then((response) => {
-      return response.result;
     });
   }
 }
