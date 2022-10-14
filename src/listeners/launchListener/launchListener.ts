@@ -42,25 +42,11 @@ export default class LaunchListener {
     });
   }
 
-  private fetchLaunchesInNext7(now: Date) {
-    // GET ALL EVENTS WITHIN 7 DAYS
-
-    const window = add(now, { days: 7 });
-
-    return this.client
-      .fetchLaunches({
-        before_date: format(window, "yyyy-MM-dd"),
-        after_date: format(now, "yyyy-MM-dd"),
-      })
-      .then((response) => {
-        return response.result;
-      });
-  }
-
   private syncEvents() {
     const now = new Date();
 
-    return this.fetchLaunchesInNext7(now)
+    return this.client
+      .fetchLaunchesInWindow(now, { days: 7 })
       .then((results) => {
         const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
 

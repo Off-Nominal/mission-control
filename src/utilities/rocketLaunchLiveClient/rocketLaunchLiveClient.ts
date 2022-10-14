@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { add, format } from "date-fns";
 import { LaunchesParams, LaunchesResponse } from "./types";
 
 export default class RocketLaunchLiveClient {
@@ -22,6 +23,32 @@ export default class RocketLaunchLiveClient {
 
     return this.fetcher
       .get<LaunchesResponse>(url.toString())
-      .then((res) => res.data);
+      .then((res) => res.data)
+      .catch((err) => {
+        console.error("RocketLaunchLive Client Error: ", err);
+        throw err;
+      });
+  }
+
+  public fetchLaunchesInWindow(
+    startDate: Date,
+    time: {
+      years?: number;
+      months?: number;
+      weeks?: number;
+      days?: number;
+      hours?: number;
+      minutes?: number;
+      seconds?: number;
+    }
+  ) {
+    const window = add(startDate, time);
+
+    return this.fetchLaunches({
+      before_date: format(window, "yyyy-MM-dd"),
+      after_date: format(startDate, "yyyy-MM-dd"),
+    }).then((response) => {
+      return response.result;
+    });
   }
 }
