@@ -42,9 +42,9 @@ export default class LaunchListener {
     });
   }
 
-  private syncEvents() {
+  private fetchLaunchesInNext7(now: Date) {
     // GET ALL EVENTS WITHIN 7 DAYS
-    const now = new Date();
+
     const window = add(now, { days: 7 });
 
     return this.client
@@ -52,6 +52,15 @@ export default class LaunchListener {
         before_date: format(window, "yyyy-MM-dd"),
         after_date: format(now, "yyyy-MM-dd"),
       })
+      .then((response) => {
+        return response.result;
+      });
+  }
+
+  private syncEvents() {
+    const now = new Date();
+
+    return this.fetchLaunchesInNext7(now)
       .then((results) => {
         const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
 
@@ -66,17 +75,11 @@ export default class LaunchListener {
             return promises.push(this.syncEvent(event, launch));
           }
 
-          console.log(`* Adding ${launch.name}`);
-
           const promise = this.eventsManager
             .create(generateEventCreateOptionsFromLaunch(launch))
             .then((event) => {
               this.events.set(launch.id, event);
               return event;
-            })
-            .catch((err) => {
-              console.error(err);
-              throw err;
             });
 
           promises.push(promise);
@@ -89,16 +92,21 @@ export default class LaunchListener {
           if (!fetchedIds.includes(rllId)) {
             const promise = this.client
               .fetchLaunches({ id: rllId.toString() })
-              .then((launch) => {
-                this.syncEvent(event, launch[0]);
-                return launch[0];
-              });
+              .then((response) => this.syncEvent(event, response.result[0]));
 
             promises.push(promise);
           }
         });
 
         return Promise.allSettled(promises);
+      })
+      .then((promises) => {
+        promises.forEach((promise) => {
+          if (promise.status === "rejected") {
+            console.error("Event Edit/Create Failure for Rocket Launch");
+            console.error(promise.reason);
+          }
+        });
       })
       .catch((err) => console.error(err));
   }
@@ -116,10 +124,8 @@ export default class LaunchListener {
 
     const eventEditOptions = generateEventEditOptionsFromLaunch(event, launch);
 
-    if (!eventEditOptions) {
-      return;
-    }
-
-    return event.edit(eventEditOptions).catch((err) => console.error(err));
+    return eventEditOptions
+      ? event.edit(eventEditOptions)
+      : Promise.resolve(event);
   }
 }

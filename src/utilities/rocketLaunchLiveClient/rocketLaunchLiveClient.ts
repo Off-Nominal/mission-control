@@ -22,6 +22,6 @@ export default class RocketLaunchLiveClient {
 
     return this.fetcher
       .get<LaunchesResponse>(url.toString())
-      .then((res) => res.data.result);
+      .then((res) => res.data);
   }
 }
