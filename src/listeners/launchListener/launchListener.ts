@@ -1,64 +1,17 @@
-import { add, format, sub, isBefore } from "date-fns";
+import { add, format, isBefore } from "date-fns";
 import {
   Collection,
   GuildScheduledEvent,
-  GuildScheduledEventCreateOptions,
-  GuildScheduledEventEditOptions,
-  GuildScheduledEventEntityType,
   GuildScheduledEventManager,
-  GuildScheduledEventPrivacyLevel,
-  GuildScheduledEventStatus,
-  time,
-  TimestampStyles,
 } from "discord.js";
 import RocketLaunchLiveClient from "../../utilities/rocketLaunchLiveClient/rocketLaunchLiveClient";
 import { Launch } from "../../utilities/rocketLaunchLiveClient/types";
+import {
+  generateEventCreateOptionsFromLaunch,
+  generateEventEditOptionsFromLaunch,
+} from "./helpers";
 
 const FIVE_MINS_IN_MS = 300000;
-
-const generateDescription = (launch: Launch): string => {
-  const windowOpen = new Date(launch.win_open);
-  const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
-    windowOpen,
-    TimestampStyles.LongDateTime
-  )}, in ${time(windowOpen, TimestampStyles.RelativeTime)}`;
-  const idString = `\n\nrllId=[${launch.id.toString()}]\n\nData provided by RocketLaunch.live`;
-  return launch.launch_description + infoString + idString;
-};
-
-const getStreamUrl = (launch: Launch) => {
-  const streamMedia = launch.media.find(
-    (media) => media.ldfeatured || media.featured
-  );
-
-  if (!streamMedia) {
-    return "Unavailable";
-  }
-
-  return streamMedia.youtube_vidid
-    ? `https://www.youtube.com/watch?v=${streamMedia.youtube_vidid}`
-    : streamMedia.media_url;
-};
-
-const generateEventOptionsFromLaunch = (
-  launch: Launch
-): GuildScheduledEventCreateOptions => {
-  const winOpen = new Date(launch.win_open);
-
-  const options: GuildScheduledEventCreateOptions = {
-    name: launch.name,
-    scheduledStartTime: sub(winOpen, { minutes: 15 }),
-    scheduledEndTime: launch.win_close
-      ? add(new Date(launch.win_close), { minutes: 15 })
-      : add(winOpen, { minutes: 60 }),
-    privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
-    entityType: GuildScheduledEventEntityType.External,
-    description: generateDescription(launch),
-    entityMetadata: { location: getStreamUrl(launch) },
-  };
-
-  return options;
-};
 
 export default class LaunchListener {
   private events: Map<number, GuildScheduledEvent>;
@@ -75,7 +28,6 @@ export default class LaunchListener {
     eventsManager: GuildScheduledEventManager
   ) {
     this.eventsManager = eventsManager;
-    console.log(`* Initializing with ${events.size} events`);
     events.forEach((event) => {
       const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
 
@@ -83,7 +35,7 @@ export default class LaunchListener {
         this.events.set(Number(rllId[0]), event);
       }
     });
-    console.log(`* Only ${this.events.size} events are launches.`);
+
     this.syncEvents().then(() => {
       console.log("Launches synced with RLL");
       this.monitor();
@@ -117,10 +69,14 @@ export default class LaunchListener {
           console.log(`* Adding ${launch.name}`);
 
           const promise = this.eventsManager
-            .create(generateEventOptionsFromLaunch(launch))
+            .create(generateEventCreateOptionsFromLaunch(launch))
             .then((event) => {
               this.events.set(launch.id, event);
               return event;
+            })
+            .catch((err) => {
+              console.error(err);
+              throw err;
             });
 
           promises.push(promise);
@@ -154,55 +110,16 @@ export default class LaunchListener {
   }
 
   private syncEvent(event: GuildScheduledEvent, launch: Launch) {
-    // Edge case for when a launch goes from a specific scheduled time in the next week to unscheduled
     if (!launch.win_open) {
       return event.delete();
     }
 
-    const newData: GuildScheduledEventEditOptions<
-      GuildScheduledEventStatus.Scheduled,
-      GuildScheduledEventStatus.Active
-    > = {};
+    const eventEditOptions = generateEventEditOptionsFromLaunch(event, launch);
 
-    // Location
-    const url = getStreamUrl(launch);
-    if (event.entityMetadata.location !== url) {
-      newData.entityMetadata = { location: url };
-    }
-
-    // Topic
-    if (event.name !== launch.name) {
-      newData.name = launch.name;
-    }
-
-    // Start Time
-    const windowOpen = new Date(launch.win_open);
-    const eventStreamStart = event.scheduledStartAt;
-    if (
-      add(eventStreamStart, { minutes: 15 }).toISOString() !==
-        windowOpen.toISOString() &&
-      !event.isActive()
-    ) {
-      newData.scheduledStartTime = sub(windowOpen, { minutes: 15 });
-      newData.description = generateDescription(launch);
-      const scheduledEndTime = launch.win_close
-        ? add(new Date(launch.win_close), {
-            minutes: 15,
-          })
-        : add(windowOpen, {
-            minutes: 60,
-          });
-
-      newData.scheduledEndTime = scheduledEndTime;
-    }
-
-    // Event has no changes
-    if (!Object.keys(newData).length) {
+    if (!eventEditOptions) {
       return;
     }
 
-    console.log(`Updating ${launch.name}`);
-    console.log("New data: ", newData);
-    return event.edit(newData).catch((err) => console.error(err));
+    return event.edit(eventEditOptions).catch((err) => console.error(err));
   }
 }
