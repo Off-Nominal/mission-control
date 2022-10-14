@@ -47,10 +47,10 @@ export default class LaunchListener {
 
     return this.client
       .fetchLaunchesInWindow(now, { days: 7 })
-      .then((results) => {
+      .then((response) => {
         const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
 
-        results.forEach((launch) => {
+        response.result.forEach((launch) => {
           if (launch.result !== -1) return;
           if (!launch.win_open) return;
           const winOpen = new Date(launch.win_open);
@@ -73,7 +73,7 @@ export default class LaunchListener {
 
         // Sync any events that are not in the API call (which may have moved)
 
-        const fetchedIds = results.map((result) => result.id);
+        const fetchedIds = response.result.map((result) => result.id);
         this.events.forEach((event, rllId) => {
           if (!fetchedIds.includes(rllId)) {
             const promise = this.client
