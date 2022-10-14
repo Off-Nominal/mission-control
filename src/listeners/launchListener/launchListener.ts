@@ -40,6 +40,26 @@ const getStreamUrl = (launch: Launch) => {
     : streamMedia.media_url;
 };
 
+const generateEventOptionsFromLaunch = (
+  launch: Launch
+): GuildScheduledEventCreateOptions => {
+  const winOpen = new Date(launch.win_open);
+
+  const options: GuildScheduledEventCreateOptions = {
+    name: launch.name,
+    scheduledStartTime: sub(winOpen, { minutes: 15 }),
+    scheduledEndTime: launch.win_close
+      ? add(new Date(launch.win_close), { minutes: 15 })
+      : add(winOpen, { minutes: 60 }),
+    privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+    entityType: GuildScheduledEventEntityType.External,
+    description: generateDescription(launch),
+    entityMetadata: { location: getStreamUrl(launch) },
+  };
+
+  return options;
+};
+
 export default class LaunchListener {
   private events: Map<number, GuildScheduledEvent>;
   private client: RocketLaunchLiveClient;
@@ -84,45 +104,26 @@ export default class LaunchListener {
         const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
 
         results.forEach((launch) => {
-          // ignore if it has no opening time
-          // we're only creating events for launches with scheduled liftoff times
-          if (!launch.win_open) {
-            console.log(`* Ignoring ${launch.name}, no launch window open`);
-            return;
-          }
-
-          // ignore win open in the past
+          if (launch.result !== -1) return;
+          if (!launch.win_open) return;
           const winOpen = new Date(launch.win_open);
-          if (isBefore(winOpen, now)) {
-            console.log(`* Ignoring ${launch.name}, launch window in the past`);
-            return;
-          }
+          if (isBefore(winOpen, now)) return;
 
           const event = this.events.get(launch.id);
-
           if (event) {
-            // sync it if it already exists
-            promises.push(this.syncEvent(event, launch));
-          } else {
-            const windowOpen = new Date(launch.win_open);
-            const options: GuildScheduledEventCreateOptions = {
-              name: launch.name,
-              scheduledStartTime: sub(windowOpen, { minutes: 15 }),
-              scheduledEndTime: launch.win_close
-                ? add(new Date(launch.win_close), { minutes: 15 })
-                : add(windowOpen, { minutes: 60 }),
-              privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
-              entityType: GuildScheduledEventEntityType.External,
-              description: generateDescription(launch),
-              entityMetadata: { location: getStreamUrl(launch) },
-            };
-            console.log(`* Adding ${launch.name}`);
-            const promise = this.eventsManager.create(options).then((event) => {
+            return promises.push(this.syncEvent(event, launch));
+          }
+
+          console.log(`* Adding ${launch.name}`);
+
+          const promise = this.eventsManager
+            .create(generateEventOptionsFromLaunch(launch))
+            .then((event) => {
               this.events.set(launch.id, event);
               return event;
             });
-            promises.push(promise);
-          }
+
+          promises.push(promise);
         });
 
         // Sync any events that are not in the API call (which may have moved)
