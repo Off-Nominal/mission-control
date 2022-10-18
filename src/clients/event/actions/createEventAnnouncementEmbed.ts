@@ -1,4 +1,4 @@
-import { GuildScheduledEvent, EmbedBuilder } from "discord.js";
+import { GuildScheduledEvent, EmbedBuilder, Embed } from "discord.js";
 
 export default function createEventAnnouncementEmbed(
   event: GuildScheduledEvent,
@@ -14,12 +14,16 @@ export default function createEventAnnouncementEmbed(
   const author =
     type === "pre" ? "📅 Event Happening Soon!" : "🎉 New Live Event!";
 
-  return new EmbedBuilder()
-    .setTitle(event.name)
-    .setAuthor({ name: author })
-    .setDescription(event.description || "No event description provided.")
-    .setThumbnail(thumbnail)
-    .addFields(
+  const embed = new EmbedBuilder({
+    title: event.name,
+    author: {
+      name: author,
+    },
+    description: event.description || "No event description provided.",
+    thumbnail: {
+      url: thumbnail,
+    },
+    fields: [
       {
         name: "Date/Time",
         value: `<t:${timestamp}:F> (time local to you)\n(<t:${timestamp}:R>)`,
@@ -33,6 +37,15 @@ export default function createEventAnnouncementEmbed(
         name: "Get Notified",
         value: `[Discord Event](${event.url})`,
         inline: true,
-      }
+      },
+    ],
+  });
+
+  if (event.image) {
+    embed.setImage(
+      `https://cdn.discordapp.com/guild-events/${event.id}/${event.image}.png?size=512`
     );
+  }
+
+  return embed;
 }
