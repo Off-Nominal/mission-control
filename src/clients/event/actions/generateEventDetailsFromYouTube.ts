@@ -25,5 +25,6 @@ export default function generateEventDetailsFromYouTube(
     description: video.snippet.description.split("\n")[0],
     entityMetadata: { location: `https://www.youtube.com/watch?v=${video.id}` },
     reason: "New stream scheduled on YouTube",
+    image: video.snippet.thumbnails?.high?.url || "",
   };
 }
