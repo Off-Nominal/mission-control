@@ -11,6 +11,8 @@ import {
 } from "discord.js";
 import { Launch } from "../../../utilities/rocketLaunchLiveClient/types";
 
+import { sanityClient, sanityImageUrlBuilder } from "../../../cms/client";
+
 const generateDescription = (launch: Launch, credit: string | null): string => {
   const windowOpen = new Date(launch.win_open);
   const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
@@ -124,4 +126,24 @@ export const generateEventEditOptionsFromLaunch = (
   }
 
   return Object.keys(newData).length ? newData : null;
+};
+
+export const fetchBannerUrl = (
+  id: number
+): Promise<{ url: string; credit: string } | null> => {
+  const query = `*[_type == "rocketBanner" && id == "${id.toString()}"]{banner, credit}`;
+  return sanityClient
+    .fetch(query)
+    .then((res) =>
+      res[0]?.banner
+        ? {
+            url: sanityImageUrlBuilder.image(res[0].banner).url(),
+            credit: res[0].credit,
+          }
+        : null
+    )
+    .catch((err) => {
+      console.error(err);
+      return null;
+    });
 };

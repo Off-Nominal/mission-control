@@ -1,39 +1,18 @@
-import { isBefore } from "date-fns";
+import RocketLaunchLiveClient from "../../utilities/rocketLaunchLiveClient/rocketLaunchLiveClient";
 import {
   Collection,
   GuildScheduledEvent,
   GuildScheduledEventManager,
 } from "discord.js";
-import RocketLaunchLiveClient from "../../utilities/rocketLaunchLiveClient/rocketLaunchLiveClient";
+import { isBefore } from "date-fns";
 import { Launch } from "../../utilities/rocketLaunchLiveClient/types";
 import {
+  fetchBannerUrl,
   generateEventCreateOptionsFromLaunch,
   generateEventEditOptionsFromLaunch,
 } from "./helpers";
 
-import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
-
 const FIVE_MINS_IN_MS = 300000;
-
-const fetchBannerUrl = (
-  id: number
-): Promise<{ url: string; credit: string } | null> => {
-  const query = `*[_type == "rocketBanner" && id == "${id.toString()}"]{banner, credit}`;
-  return sanityClient
-    .fetch(query)
-    .then((res) =>
-      res[0]?.banner
-        ? {
-            url: sanityImageUrlBuilder.image(res[0].banner).url(),
-            credit: res[0].credit,
-          }
-        : null
-    )
-    .catch((err) => {
-      console.error(err);
-      return null;
-    });
-};
 
 export default class LaunchListener {
   private events: Map<number, GuildScheduledEvent>;
@@ -53,7 +32,7 @@ export default class LaunchListener {
     events.forEach((event) => {
       const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
 
-      if (rllId && rllId.length) {
+      if (rllId?.length) {
         this.events.set(Number(rllId[0]), event);
       }
     });
