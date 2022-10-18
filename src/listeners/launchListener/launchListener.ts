@@ -1,4 +1,4 @@
-import { add, format, isBefore } from "date-fns";
+import { isBefore } from "date-fns";
 import {
   Collection,
   GuildScheduledEvent,
@@ -11,7 +11,29 @@ import {
   generateEventEditOptionsFromLaunch,
 } from "./helpers";
 
+import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
+
 const FIVE_MINS_IN_MS = 300000;
+
+const fetchBannerUrl = (
+  id: number
+): Promise<{ url: string; credit: string } | null> => {
+  const query = `*[_type == "rocketBanner" && id == "${id.toString()}"]{banner, credit}`;
+  return sanityClient
+    .fetch(query)
+    .then((res) =>
+      res[0]?.banner
+        ? {
+            url: sanityImageUrlBuilder.image(res[0].banner).url(),
+            credit: res[0].credit,
+          }
+        : null
+    )
+    .catch((err) => {
+      console.error(err);
+      return null;
+    });
+};
 
 export default class LaunchListener {
   private events: Map<number, GuildScheduledEvent>;
@@ -61,8 +83,12 @@ export default class LaunchListener {
             return promises.push(this.syncEvent(event, launch));
           }
 
-          const promise = this.eventsManager
-            .create(generateEventCreateOptionsFromLaunch(launch))
+          const promise = fetchBannerUrl(launch.vehicle.id)
+            .then((banner) => {
+              return this.eventsManager.create(
+                generateEventCreateOptionsFromLaunch(launch, banner)
+              );
+            })
             .then((event) => {
               this.events.set(launch.id, event);
               return event;
@@ -108,10 +134,15 @@ export default class LaunchListener {
       return event.delete();
     }
 
-    const eventEditOptions = generateEventEditOptionsFromLaunch(event, launch);
-
-    return eventEditOptions
-      ? event.edit(eventEditOptions)
-      : Promise.resolve(event);
+    return fetchBannerUrl(launch.vehicle.id).then((bannerUrl) => {
+      const eventEditOptions = generateEventEditOptionsFromLaunch(
+        event,
+        launch,
+        bannerUrl
+      );
+      return eventEditOptions
+        ? event.edit(eventEditOptions)
+        : Promise.resolve(event);
+    });
   }
 }

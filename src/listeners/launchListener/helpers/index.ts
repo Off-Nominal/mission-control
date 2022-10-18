@@ -11,14 +11,15 @@ import {
 } from "discord.js";
 import { Launch } from "../../../utilities/rocketLaunchLiveClient/types";
 
-const generateDescription = (launch: Launch): string => {
+const generateDescription = (launch: Launch, credit: string | null): string => {
   const windowOpen = new Date(launch.win_open);
   const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
     windowOpen,
     TimestampStyles.LongDateTime
-  )}, in ${time(windowOpen, TimestampStyles.RelativeTime)}`;
+  )}, ${time(windowOpen, TimestampStyles.RelativeTime)}`;
   const idString = `\n\nrllId=[${launch.id.toString()}]\n\nData provided by RocketLaunch.live`;
-  return launch.launch_description + infoString + idString;
+  const creditString = credit ? `\n\nEvent banner courtesy of ${credit}` : "";
+  return launch.launch_description + infoString + idString + creditString;
 };
 
 const getStreamUrl = (launch: Launch) => {
@@ -44,7 +45,11 @@ const generateScheduledEndTime = (winOpen: Date, winClose: string): Date =>
     : add(winOpen, { minutes: 60 });
 
 export const generateEventCreateOptionsFromLaunch = (
-  launch: Launch
+  launch: Launch,
+  banner: {
+    url: string;
+    credit: string;
+  } | null
 ): GuildScheduledEventCreateOptions => {
   const winOpen = new Date(launch.win_open);
 
@@ -54,9 +59,13 @@ export const generateEventCreateOptionsFromLaunch = (
     scheduledEndTime: generateScheduledEndTime(winOpen, launch.win_close),
     privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
     entityType: GuildScheduledEventEntityType.External,
-    description: generateDescription(launch),
+    description: generateDescription(launch, banner ? banner.credit : null),
     entityMetadata: { location: getStreamUrl(launch) },
   };
+
+  if (banner) {
+    options.image = banner.url;
+  }
 
   return options;
 };
@@ -68,7 +77,11 @@ type EditOptions = GuildScheduledEventEditOptions<
 
 export const generateEventEditOptionsFromLaunch = (
   event: GuildScheduledEvent,
-  launch: Launch
+  launch: Launch,
+  banner: {
+    url: string;
+    credit: string;
+  } | null
 ): null | EditOptions => {
   const newData: EditOptions = {};
 
@@ -83,6 +96,11 @@ export const generateEventEditOptionsFromLaunch = (
     newData.name = launch.name;
   }
 
+  //Banner Image
+  if (banner && event.image !== banner.url) {
+    newData.image = banner.url;
+  }
+
   // Times
   const winOpen = new Date(launch.win_open);
   const timesDoNotMatch =
@@ -95,7 +113,14 @@ export const generateEventEditOptionsFromLaunch = (
       winOpen,
       launch.win_close
     );
-    newData.description = generateDescription(launch);
+  }
+
+  // If times or images changes, description must also change
+  if (newData.scheduledStartTime || newData.image) {
+    newData.description = generateDescription(
+      launch,
+      banner ? banner.credit : null
+    );
   }
 
   return Object.keys(newData).length ? newData : null;
