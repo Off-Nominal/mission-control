@@ -21,9 +21,7 @@ export default function generateGuildScheduledEventCreate(db: Client) {
       return console.error(err);
     }
 
-    const now: Date = new Date();
-    const eventTime: Date = event.scheduledStartAt;
-    const diff = formatDistance(now, eventTime);
+    const diff = formatDistance(new Date(), event.scheduledStartAt);
 
     const content = `New Event: ${event.name} in ${diff}\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
     const embed = createEventAnnouncementEmbed(event, "new");
