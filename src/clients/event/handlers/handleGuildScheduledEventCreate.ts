@@ -1,3 +1,4 @@
+import { formatDistance } from "date-fns";
 import { Collection, GuildMember, GuildScheduledEvent } from "discord.js";
 import { Client } from "pg";
 import userQueries from "../../../queries/users";
@@ -20,7 +21,9 @@ export default function generateGuildScheduledEventCreate(db: Client) {
       return console.error(err);
     }
 
-    const content = `New Event: ${event.name}\n\nThere is a new event in the Off-Nominal Discord!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
+    const diff = formatDistance(new Date(), event.scheduledStartAt);
+
+    const content = `New Event: ${event.name} in ${diff}\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
     const embed = createEventAnnouncementEmbed(event, "new");
 
     subscribers.forEach(async (subscriber) => {
