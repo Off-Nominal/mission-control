@@ -1,4 +1,9 @@
-import { GuildScheduledEvent, EmbedBuilder, Embed } from "discord.js";
+import {
+  GuildScheduledEvent,
+  EmbedBuilder,
+  time,
+  TimestampStyles,
+} from "discord.js";
 
 export default function createEventAnnouncementEmbed(
   event: GuildScheduledEvent,
@@ -7,7 +12,6 @@ export default function createEventAnnouncementEmbed(
     thumbnail?: string;
   }
 ): EmbedBuilder {
-  const timestamp = Math.floor(event.scheduledStartTimestamp / 1000).toString();
   const thumbnail =
     options?.thumbnail ||
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1642095232/Discord%20Assets/offnominal_2021-01_w4buun.png";
@@ -26,7 +30,13 @@ export default function createEventAnnouncementEmbed(
     fields: [
       {
         name: "Date/Time",
-        value: `<t:${timestamp}:F> (time local to you)\n(<t:${timestamp}:R>)`,
+        value: `${time(
+          event.scheduledStartAt,
+          TimestampStyles.LongDateTime
+        )} (time local to you)\n(${time(
+          event.scheduledStartAt,
+          TimestampStyles.RelativeTime
+        )})`,
       },
       {
         name: "Watch here",

@@ -1,4 +1,10 @@
-import { ChannelType, Client, EmbedBuilder } from "discord.js";
+import {
+  ChannelType,
+  Client,
+  EmbedBuilder,
+  time,
+  TimestampStyles,
+} from "discord.js";
 import { GithubUpdateEmbedData } from "../../../listeners/siteListener";
 import { SpecificChannel } from "../../../types/channelEnums";
 import fetchChannel from "../../actions/fetchChannel";
@@ -13,12 +19,12 @@ export default async function handleStarshipSiteUpdate(
   const client: Client = this;
   const embed = new EmbedBuilder();
 
-  const discordDate = `<t:${update.date.getTime() / 1000}:F>`;
-
   embed
     .setColor("#3e7493")
     .setTitle(`Change detected on Starship's Website`)
-    .setDescription(`Change occured at ${discordDate}.`)
+    .setDescription(
+      `Change occured at ${time(update.date, TimestampStyles.LongDateTime)}.`
+    )
     .addFields([
       {
         name: "View",
