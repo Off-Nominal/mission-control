@@ -55,6 +55,7 @@ const {
   devHandlers,
   eventBotHandlers,
   mainBotHandlers,
+  ndb2BotHandlers,
 } = generateHandlers(db);
 
 const searchOptions = require("../config/searchOptions.json");
@@ -73,6 +74,7 @@ const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
 const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
 const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
 const EVENT_TOKEN = process.env.EVENT_BOT_TOKEN_ID;
+const NDB2_TOKEN = process.env.NDB2_BOT_TOKEN_ID;
 
 const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
 const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
@@ -136,6 +138,7 @@ const contentBot = new Client({
 const eventBot = new Client({
   intents: [simpleIntents, eventIntents],
 });
+const ndb2Bot = new Client({ intents: [simpleIntents] });
 
 /***********************************
  *  RLL Event Listener
@@ -235,6 +238,7 @@ utilityBot.login(UTILITY_TOKEN);
 bcBot.login(BC_TOKEN);
 contentBot.login(CONTENT_TOKEN);
 eventBot.login(EVENT_TOKEN);
+ndb2Bot.login(NDB2_TOKEN);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
@@ -245,6 +249,12 @@ hhFeedListener.initialize();
 ytFeedListener.initialize();
 
 starshipChecker.initialize();
+
+/***********************************
+ *  NDB2 Bot Event Handlers
+ ************************************/
+
+ndb2Bot.once("ready", ndb2BotHandlers.handleReady);
 
 /***********************************
  *  Utility Bot Event Handlers
