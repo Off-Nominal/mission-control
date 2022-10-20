@@ -6,7 +6,8 @@
     "outDir": "dist",
     "lib": ["es2021.string"],
     "downlevelIteration": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

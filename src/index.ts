@@ -1,4 +1,5 @@
 require("dotenv").config();
+import express from "express";
 import { Client as DbClient } from "pg";
 
 import {
@@ -139,6 +140,19 @@ const eventBot = new Client({
   intents: [simpleIntents, eventIntents],
 });
 const ndb2Bot = new Client({ intents: [simpleIntents] });
+
+/***********************************
+ *  Express Server Setup
+ ************************************/
+
+import usersRouter from "./routers/users";
+import apiAuth from "./middleware/auth";
+
+const app = express();
+app.use(apiAuth);
+app.use("/api/users", usersRouter(ndb2Bot));
+app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
+app.listen(8080, () => console.log("API Endpoints Listening."));
 
 /***********************************
  *  RLL Event Listener
