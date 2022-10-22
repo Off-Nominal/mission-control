@@ -1,23 +1,35 @@
 import { SlashCommandBuilder } from "discord.js";
 
+export enum Ndb2Subcommand {
+  NEW = "new",
+  VIEW = "view",
+  ENDORSE = "endorse",
+  UNDORSE = "undorse",
+  CANCEL = "cancel",
+  SCORE = "score",
+  HELP = "jelp",
+}
+
 // Predict
 const predictCommand = new SlashCommandBuilder()
   .setName("predict")
   .setDescription("Work with Nostradambot2 Predictions")
   .addSubcommand((command) =>
-    command.setName("new").setDescription("Create a new Prediction")
+    command
+      .setName(Ndb2Subcommand.NEW)
+      .setDescription("Create a new Prediction")
   )
   .addSubcommand((command) =>
     command
-      .setName("view")
-      .setDescription("Create a new Prediction")
+      .setName(Ndb2Subcommand.VIEW)
+      .setDescription("View a Prediction")
       .addIntegerOption((option) =>
         option.setName("id").setDescription("Prediction ID").setRequired(true)
       )
   )
   .addSubcommand((command) =>
     command
-      .setName("endorse")
+      .setName(Ndb2Subcommand.ENDORSE)
       .setDescription("Endorse a Prediction")
       .addIntegerOption((option) =>
         option.setName("id").setDescription("Prediction ID").setRequired(true)
@@ -25,7 +37,7 @@ const predictCommand = new SlashCommandBuilder()
   )
   .addSubcommand((command) =>
     command
-      .setName("undorse")
+      .setName(Ndb2Subcommand.UNDORSE)
       .setDescription("Undorse a Prediction")
       .addIntegerOption((option) =>
         option.setName("id").setDescription("Prediction ID").setRequired(true)
@@ -33,17 +45,19 @@ const predictCommand = new SlashCommandBuilder()
   )
   .addSubcommand((command) =>
     command
-      .setName("cancel")
+      .setName(Ndb2Subcommand.CANCEL)
       .setDescription("Cancel a Prediction you just made")
       .addIntegerOption((option) =>
         option.setName("id").setDescription("Prediction ID").setRequired(true)
       )
   )
   .addSubcommand((command) =>
-    command.setName("score").setDescription("View your Nostradambot Scores")
+    command
+      .setName(Ndb2Subcommand.SCORE)
+      .setDescription("View your Nostradambot Scores")
   )
   .addSubcommand((group) =>
-    group.setName("help").setDescription("Help with Nostradambot2")
+    group.setName(Ndb2Subcommand.HELP).setDescription("Help with Nostradambot2")
   );
 
 const commands = [predictCommand].map((command) => command.toJSON());

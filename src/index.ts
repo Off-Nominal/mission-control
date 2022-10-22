@@ -6,6 +6,7 @@ import {
   ChatInputCommandInteraction,
   Client,
   Collection,
+  Events,
   GatewayIntentBits,
   GuildScheduledEvent,
   GuildScheduledEventManager,
@@ -269,6 +270,9 @@ starshipChecker.initialize();
  ************************************/
 
 ndb2Bot.once("ready", ndb2BotHandlers.handleReady);
+ndb2Bot.on(Events.InteractionCreate, (interaction) => {
+  ndb2BotHandlers.handleInteractionCreate(interaction);
+});
 
 /***********************************
  *  Utility Bot Event Handlers
