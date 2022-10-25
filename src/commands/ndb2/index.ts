@@ -7,7 +7,7 @@ export enum Ndb2Subcommand {
   UNDORSE = "undorse",
   CANCEL = "cancel",
   SCORE = "score",
-  HELP = "jelp",
+  HELP = "help",
 }
 
 // Predict

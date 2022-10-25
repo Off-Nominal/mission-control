@@ -1,5 +1,9 @@
-import { differenceInDays, format } from "date-fns";
-import { EmbedBuilder } from "discord.js";
+import { codeBlock, EmbedBuilder, time, TimestampStyles } from "discord.js";
+
+const formatOdds = (odds: number) => {
+  const stringOdds = (odds * 100).toString();
+  return stringOdds.slice(0, 1) + "." + stringOdds.slice(1, 3);
+};
 
 export const generatePredictionEmbed = (
   displayName: string,
@@ -12,15 +16,20 @@ export const generatePredictionEmbed = (
 ) => {
   const embed = new EmbedBuilder({
     title: `${displayName} predicts...`,
-    description: `[#${id}]: ${text}`,
+    description: codeBlock(`[#${id}]: ${text}`),
     fields: [
       {
-        name: "Deets",
-        value: `🎲 ${odds}\n
-        🗓️ ${format(due, "LLL do, y")}\n
-        ⌛ ${differenceInDays(due, new Date())} days until due\n
-        ✅ ${endorsements}\n
-        ❌ ${undorsements}`,
+        name: "Due:",
+        value: `🗓️ ${time(due, TimestampStyles.LongDate)} (${time(
+          due,
+          TimestampStyles.RelativeTime
+        )})`,
+      },
+      {
+        name: "Stats",
+        value: `✅ ${endorsements}\u200B \u200B \u200B \u200B \u200B ❌ ${undorsements}\u200B \u200B \u200B \u200B \u200B 🎲 ${formatOdds(
+          odds
+        )}`,
       },
     ],
   });

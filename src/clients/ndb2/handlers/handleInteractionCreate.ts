@@ -1,21 +1,15 @@
 import {
   ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  GuildMember,
   Interaction,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
-import { Ndb2Client } from "../../../utilities/ndb2Client";
-import { addBet } from "../actions/addBet";
-import { addPrediction } from "../actions/addPrediction";
-import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 
-const ndbKey = process.env.NDB2_CLIENT_ID;
-const ndb2Client = new Ndb2Client(ndbKey);
+import queries from "../../../utilities/ndb2Client/queries/index";
+import { generatePredictionResponse } from "../actions/generatePredictionResponse";
+const { addBet, addPrediction, getPrediction } = queries;
 
 export default async function handleInteractionCreate(
   interaction: Interaction
@@ -26,27 +20,9 @@ export default async function handleInteractionCreate(
     const discordId = interaction.member.user.id;
 
     try {
-      const prediction = await addPrediction(ndb2Client, discordId, text, due);
-      const embed = generatePredictionEmbed(
-        (interaction.member as GuildMember).nickname,
-        prediction.id,
-        prediction.text,
-        prediction.due
-      );
-      const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId(`Endorse ${prediction.id}`)
-            .setLabel("Endorse")
-            .setStyle(ButtonStyle.Success)
-        )
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId(`Undorse ${prediction.id}`)
-            .setLabel("Undorse")
-            .setStyle(ButtonStyle.Danger)
-        );
-      interaction.reply({ embeds: [embed], components: [row] });
+      const prediction = await addPrediction(discordId, text, due);
+      const reply = generatePredictionResponse(interaction, prediction);
+      interaction.reply(reply);
     } catch (err) {
       console.error(err);
     }
@@ -62,12 +38,7 @@ export default async function handleInteractionCreate(
     console.log(endorse, discordId, predictionId);
 
     try {
-      const prediction = await addBet(
-        ndb2Client,
-        discordId,
-        predictionId,
-        endorse
-      );
+      const prediction = await addBet(discordId, predictionId, endorse);
       console.log(prediction);
     } catch (err) {
       console.error(err);
@@ -138,6 +109,24 @@ export default async function handleInteractionCreate(
   }
 
   if (subCommand === Ndb2Subcommand.VIEW) {
-    // View
+    const predictionId = options.getInteger("id");
+    let prediction;
+
+    try {
+      const prediction = await getPrediction(predictionId);
+    } catch (err) {
+      interaction.reply({
+        content: "No prediction exists with that id.",
+        ephemeral: true,
+      });
+    }
+
+    try {
+      const reply = generatePredictionResponse(interaction, prediction);
+      interaction.reply(reply);
+    } catch (err) {
+      console.error(err);
+      interaction.reply({ content: "Something went wrong", ephemeral: true });
+    }
   }
 }
