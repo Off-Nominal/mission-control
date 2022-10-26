@@ -24,6 +24,8 @@ export interface Prediction extends Record {
   judged: Date;
   closer_id: number;
   succesful: boolean;
+  message_id: string;
+  channel_id: string;
 }
 
 export interface Vote extends Record {
@@ -77,12 +79,3 @@ export interface APIEnhancedPrediction
   bets: Omit<APIBet, "prediction_id">[];
   odds: number;
 }
-
-// Response Records
-
-export type AddPredictionResponse = {
-  id: number;
-  text: string;
-  predictor_id: number;
-  due: string;
-};

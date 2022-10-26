@@ -4,13 +4,13 @@ export const generateAddPrediction = (client: Ndb2Client) => {
   const addPrediction = async (
     discordId: string,
     text: string,
-    due: string
+    due: string,
+    messageId: string,
+    channelId: string
   ) => {
     try {
       const { id } = await client.fetchUserId(discordId);
-      const result = await client.newPrediction(text, due, id);
-      const dueDate = new Date(result.due);
-      return { ...result, due: dueDate };
+      return await client.newPrediction(text, due, id, messageId, channelId);
     } catch (err) {
       throw err;
     }

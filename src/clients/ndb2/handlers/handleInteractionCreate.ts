@@ -1,3 +1,4 @@
+import { isFuture, isValid } from "date-fns";
 import {
   ActionRowBuilder,
   Interaction,
@@ -14,13 +15,41 @@ const { addBet, addPrediction, getPrediction } = queries;
 export default async function handleInteractionCreate(
   interaction: Interaction
 ) {
+  // Handle Modal Submissions for new Predictions
   if (interaction.isModalSubmit()) {
     const text = interaction.fields.getTextInputValue("text");
     const due = interaction.fields.getTextInputValue("due");
     const discordId = interaction.member.user.id;
+    const messageId = interaction.channel.lastMessageId;
+    const channelId = interaction.channelId;
+
+    // Validate date format
+    const isDueDateValid = isValid(new Date(due));
+    if (!isDueDateValid) {
+      return interaction.reply({
+        content:
+          "Your Due date format was invalid. Ensure it is entered as YYYY-MM-DD",
+        ephemeral: true,
+      });
+    }
+
+    // Validate date is in the future
+    if (!isFuture(new Date(due))) {
+      return interaction.reply({
+        content:
+          "Your due date is in the past. Predictions are for the future. Please try again.",
+        ephemeral: true,
+      });
+    }
 
     try {
-      const prediction = await addPrediction(discordId, text, due);
+      const prediction = await addPrediction(
+        discordId,
+        text,
+        due,
+        messageId,
+        channelId
+      );
       const reply = generatePredictionResponse(interaction, prediction);
       interaction.reply(reply);
     } catch (err) {
@@ -30,18 +59,28 @@ export default async function handleInteractionCreate(
     return;
   }
 
+  // Handle Button Submissions for Endorsements and Undorsements
   if (interaction.isButton()) {
-    const [command, predictionId] = interaction.customId.split(" ");
-    const endorse = command === "Endorse";
+    const [command, predictionId, initialInteractionId] =
+      interaction.customId.split(" ");
+    const endorsed = command === "Endorse";
     const discordId = interaction.member.user.id;
 
-    console.log(endorse, discordId, predictionId);
-
     try {
-      const prediction = await addBet(discordId, predictionId, endorse);
-      console.log(prediction);
+      await addBet(discordId, predictionId, endorsed);
+      interaction.reply({
+        content: `Prediction successfully ${command.toLowerCase()}d!`,
+        ephemeral: true,
+      });
+
+      const prediction = await getPrediction(predictionId);
+      // const initialInteractionReply = await interaction.message
+      // const initalInteraction = initialInteractionReply.interaction
+      // const reply = generatePredictionResponse(initalInteraction, prediction);
+      // await initalInteraction.editReply(reply);
     } catch (err) {
       console.error(err);
+      interaction.reply({ content: err.error, ephemeral: true });
     }
   }
 
@@ -110,23 +149,20 @@ export default async function handleInteractionCreate(
 
   if (subCommand === Ndb2Subcommand.VIEW) {
     const predictionId = options.getInteger("id");
-    let prediction;
 
-    try {
-      const prediction = await getPrediction(predictionId);
-    } catch (err) {
-      interaction.reply({
-        content: "No prediction exists with that id.",
-        ephemeral: true,
+    getPrediction(predictionId)
+      .catch((err) => {
+        throw interaction.reply({
+          content: "No prediction exists with that id.",
+          ephemeral: true,
+        });
+      })
+      .then((prediction) => {
+        const reply = generatePredictionResponse(interaction, prediction);
+        return interaction.reply(reply);
+      })
+      .catch((err) => {
+        console.error(err);
       });
-    }
-
-    try {
-      const reply = generatePredictionResponse(interaction, prediction);
-      interaction.reply(reply);
-    } catch (err) {
-      console.error(err);
-      interaction.reply({ content: "Something went wrong", ephemeral: true });
-    }
   }
 }

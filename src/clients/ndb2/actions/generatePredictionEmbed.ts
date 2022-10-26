@@ -1,8 +1,8 @@
 import { codeBlock, EmbedBuilder, time, TimestampStyles } from "discord.js";
 
 const formatOdds = (odds: number) => {
-  const stringOdds = (odds * 100).toString();
-  return stringOdds.slice(0, 1) + "." + stringOdds.slice(1, 3);
+  const roundedOdds = Math.round(odds * 100) / 100;
+  return roundedOdds.toString();
 };
 
 export const generatePredictionEmbed = (

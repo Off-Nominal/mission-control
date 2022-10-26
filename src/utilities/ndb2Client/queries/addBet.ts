@@ -8,8 +8,7 @@ export const generateAddBet = (client: Ndb2Client) => {
   ) => {
     try {
       const { id } = await client.fetchUserId(discordId);
-      const result = await client.newBet(predictionId, id, endorsed);
-      return result;
+      return await client.newBet(predictionId, id, endorsed);
     } catch (err) {
       throw err;
     }

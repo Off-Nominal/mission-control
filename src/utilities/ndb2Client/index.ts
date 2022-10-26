@@ -1,10 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import {
-  AddPredictionResponse,
-  APIEnhancedPrediction,
-  APIUser,
-  Record,
-} from "./types";
+import { APIEnhancedPrediction, APIUser, Record } from "./types";
 
 export class Ndb2Client {
   private baseURL = process.env.NDB2_API_BASEURL;
@@ -36,14 +31,22 @@ export class Ndb2Client {
       .then((res) => res.data);
   }
 
-  public newPrediction(text: string, due: string, predictorId: number) {
+  public newPrediction(
+    text: string,
+    due: string,
+    predictorId: number,
+    messageId: string,
+    channelId: string
+  ) {
     const url = new URL(this.baseURL);
     url.pathname = "api/predictions";
     return this.client
-      .post<AddPredictionResponse>(url.toString(), {
+      .post<APIEnhancedPrediction>(url.toString(), {
         text,
         due,
         predictorId,
+        messageId,
+        channelId,
       })
       .then((res) => res.data);
   }
@@ -51,7 +54,7 @@ export class Ndb2Client {
   public newBet(
     predictionId: string | number,
     betterId: string | number,
-    endorse: boolean
+    endorsed: boolean
   ) {
     const url = new URL(this.baseURL);
     url.pathname = "api/bets";
@@ -59,7 +62,7 @@ export class Ndb2Client {
       .post<Record>(url.toString(), {
         predictionId,
         betterId,
-        endorse,
+        endorsed,
       })
       .then((res) => res.data);
   }
