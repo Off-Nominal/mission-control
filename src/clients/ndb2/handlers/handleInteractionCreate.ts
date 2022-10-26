@@ -51,7 +51,7 @@ export default async function handleInteractionCreate(
         messageId,
         channelId
       );
-      const reply = generatePredictionResponse(interaction, prediction);
+      const reply = await generatePredictionResponse(interaction, prediction);
       interaction.reply(reply);
     } catch (err) {
       console.error(err);
@@ -85,18 +85,8 @@ export default async function handleInteractionCreate(
       const predictor = await interaction.guild.members.fetch(
         prediction.predictor.discord_id
       );
-      const endorsements = prediction.bets.filter((bet) => bet.endorsed);
-      const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
 
-      const embed = generatePredictionEmbed(
-        predictor.nickname,
-        prediction.id,
-        prediction.text,
-        new Date(prediction.due),
-        prediction.odds,
-        endorsements.length,
-        undorsements.length
-      );
+      const embed = generatePredictionEmbed(predictor.nickname, prediction);
       await buttonMsg.edit({ embeds: [embed] });
     } catch (err) {
       console.error(err);
@@ -176,10 +166,8 @@ export default async function handleInteractionCreate(
           ephemeral: true,
         });
       })
-      .then((prediction) => {
-        const reply = generatePredictionResponse(interaction, prediction);
-        return interaction.reply(reply);
-      })
+      .then((prediction) => generatePredictionResponse(interaction, prediction))
+      .then((reply) => interaction.reply(reply))
       .catch((err) => {
         console.error(err);
       });

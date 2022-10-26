@@ -3,7 +3,6 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  GuildMember,
   Interaction,
   InteractionReplyOptions,
   MessagePayload,
@@ -11,24 +10,16 @@ import {
 import { APIEnhancedPrediction } from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "./generatePredictionEmbed";
 
-export const generatePredictionResponse = (
+export const generatePredictionResponse = async (
   interaction: Interaction,
   prediction: APIEnhancedPrediction
-): string | MessagePayload | InteractionReplyOptions => {
-  const endorsements = prediction.bets.filter((bet) => bet.endorsed);
-  const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
-
+): Promise<MessagePayload | InteractionReplyOptions> => {
   const dueDate = new Date(prediction.due);
-
-  const embed = generatePredictionEmbed(
-    (interaction.member as GuildMember).nickname,
-    prediction.id,
-    prediction.text,
-    dueDate,
-    prediction.odds,
-    endorsements.length,
-    undorsements.length
+  const predictorName = await interaction.guild.members.fetch(
+    prediction.predictor.discord_id
   );
+
+  const embed = generatePredictionEmbed(predictorName.displayName, prediction);
 
   const voteWindow = add(new Date(prediction.created), { days: 7 });
   const lockDate = isBefore(dueDate, voteWindow) ? dueDate : voteWindow;

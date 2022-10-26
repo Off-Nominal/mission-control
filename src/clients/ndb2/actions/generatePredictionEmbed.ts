@@ -1,4 +1,5 @@
 import { codeBlock, EmbedBuilder, time, TimestampStyles } from "discord.js";
+import { APIEnhancedPrediction } from "../../../utilities/ndb2Client/types";
 
 const formatOdds = (odds: number) => {
   const roundedOdds = Math.round(odds * 100) / 100;
@@ -7,29 +8,46 @@ const formatOdds = (odds: number) => {
 
 export const generatePredictionEmbed = (
   displayName: string,
-  id: string | number,
-  text: string,
-  due: Date,
-  odds: number = 1.0,
-  endorsements: number = 1,
-  undorsements: number = 0
+  prediction: APIEnhancedPrediction
 ) => {
+  const isClosed = !!prediction.judged;
+  const created = new Date(prediction.created);
+  const due = new Date(prediction.due);
+  const closed = new Date(prediction.closed);
+  const endorsements = prediction.bets.filter((bet) => bet.endorsed);
+  const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
+  const wasSuccessful = prediction.result.successful;
+
+  const adverb = isClosed ? (wasSuccessful ? "" : "un") + "successfully " : "";
+  const title = `${
+    isClosed ? (wasSuccessful ? "✅" : "❌") : "❓"
+  } ${displayName} ${adverb}predict${isClosed ? "ed" : "s"}...`;
+
   const embed = new EmbedBuilder({
-    title: `${displayName} predicts...`,
-    description: codeBlock(`[#${id}]: ${text}`),
+    title,
+    description: codeBlock(`[#${prediction.id}]: ${prediction.text}`),
     fields: [
       {
-        name: "Due:",
-        value: `🗓️ ${time(due, TimestampStyles.LongDate)} (${time(
-          due,
+        name: `Created`,
+        value: `🗓️ ${time(created, TimestampStyles.LongDate)} (${time(
+          created,
           TimestampStyles.RelativeTime
         )})`,
       },
       {
+        name: `${isClosed ? "Closed" : "Due"}:`,
+        value: `🗓️ ${time(
+          isClosed ? closed : due,
+          TimestampStyles.LongDate
+        )} (${time(due, TimestampStyles.RelativeTime)}) `,
+      },
+      {
         name: "Stats",
-        value: `✅ ${endorsements}\u200B \u200B \u200B \u200B \u200B ❌ ${undorsements}\u200B \u200B \u200B \u200B \u200B 🎲 ${formatOdds(
-          odds
-        )}`,
+        value: `✅ ${
+          endorsements.length
+        }\u200B \u200B \u200B \u200B \u200B ❌ ${
+          undorsements.length
+        }\u200B \u200B \u200B \u200B \u200B 🎲 ${formatOdds(prediction.odds)}`,
       },
     ],
   });
