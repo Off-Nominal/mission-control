@@ -9,6 +9,10 @@ import {
 import { Ndb2Subcommand } from "../../../commands/ndb2";
 
 import queries from "../../../utilities/ndb2Client/queries/index";
+import {
+  APIEnhancedPrediction,
+  EnhancedPrediction,
+} from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 const { addBet, addPrediction, getPrediction } = queries;
@@ -105,14 +109,6 @@ export default async function handleInteractionCreate(
     });
   }
 
-  if (subCommand === Ndb2Subcommand.CANCEL) {
-    // Cancel
-  }
-
-  if (subCommand === Ndb2Subcommand.ENDORSE) {
-    // Endorse
-  }
-
   if (subCommand === Ndb2Subcommand.HELP) {
     // Help
   }
@@ -152,24 +148,51 @@ export default async function handleInteractionCreate(
     // Score
   }
 
-  if (subCommand === Ndb2Subcommand.UNDORSE) {
-    // Undorse
+  // Prediction specific commands
+
+  const predictionId = options.getInteger("id");
+  let prediction: APIEnhancedPrediction;
+
+  try {
+    prediction = await getPrediction(predictionId);
+  } catch (err) {
+    return interaction.reply({
+      content: "No prediction exists with that id.",
+      ephemeral: true,
+    });
+  }
+
+  if (subCommand === Ndb2Subcommand.CANCEL) {
+    // Cancel
+  }
+
+  if (
+    subCommand === Ndb2Subcommand.ENDORSE ||
+    subCommand === Ndb2Subcommand.UNDORSE
+  ) {
+    const endorsed = subCommand === Ndb2Subcommand.ENDORSE;
+    const discordId = interaction.member.user.id;
+
+    try {
+      await addBet(discordId, predictionId, endorsed);
+      interaction.reply({
+        content: `Prediction successfully ${subCommand}d!`,
+        ephemeral: true,
+      });
+    } catch (err) {
+      return interaction.reply({
+        content: err.response.data.error,
+        ephemeral: true,
+      });
+    }
   }
 
   if (subCommand === Ndb2Subcommand.VIEW) {
-    const predictionId = options.getInteger("id");
-
-    getPrediction(predictionId)
-      .catch((err) => {
-        throw interaction.reply({
-          content: "No prediction exists with that id.",
-          ephemeral: true,
-        });
-      })
-      .then((prediction) => generatePredictionResponse(interaction, prediction))
-      .then((reply) => interaction.reply(reply))
-      .catch((err) => {
-        console.error(err);
-      });
+    try {
+      const reply = await generatePredictionResponse(interaction, prediction);
+      return interaction.reply(reply);
+    } catch (err) {
+      console.error(err);
+    }
   }
 }
