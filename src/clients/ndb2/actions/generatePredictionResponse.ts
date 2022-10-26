@@ -1,3 +1,4 @@
+import { add, isAfter, isBefore } from "date-fns";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -17,28 +18,40 @@ export const generatePredictionResponse = (
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
 
+  const dueDate = new Date(prediction.due);
+
   const embed = generatePredictionEmbed(
     (interaction.member as GuildMember).nickname,
     prediction.id,
     prediction.text,
-    new Date(prediction.due),
+    dueDate,
     prediction.odds,
     endorsements.length,
     undorsements.length
   );
-  const row = new ActionRowBuilder<ButtonBuilder>()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(`Endorse ${prediction.id} ${interaction.id}`)
-        .setLabel("Endorse")
-        .setStyle(ButtonStyle.Success)
-    )
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(`Undorse ${prediction.id} ${interaction.id}`)
-        .setLabel("Undorse")
-        .setStyle(ButtonStyle.Danger)
-    );
 
-  return { embeds: [embed], components: [row] };
+  const voteWindow = add(new Date(prediction.created), { days: 7 });
+  const lockDate = isBefore(dueDate, voteWindow) ? dueDate : voteWindow;
+
+  const bettingOpen = isAfter(lockDate, new Date());
+
+  const components = bettingOpen
+    ? [
+        new ActionRowBuilder<ButtonBuilder>()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(`Endorse ${prediction.id}`)
+              .setLabel("Endorse")
+              .setStyle(ButtonStyle.Success)
+          )
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(`Undorse ${prediction.id}`)
+              .setLabel("Undorse")
+              .setStyle(ButtonStyle.Danger)
+          ),
+      ]
+    : [];
+
+  return { embeds: [embed], components };
 };

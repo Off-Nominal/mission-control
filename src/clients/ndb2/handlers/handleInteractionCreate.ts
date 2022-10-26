@@ -9,6 +9,7 @@ import {
 import { Ndb2Subcommand } from "../../../commands/ndb2";
 
 import queries from "../../../utilities/ndb2Client/queries/index";
+import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 const { addBet, addPrediction, getPrediction } = queries;
 
@@ -61,8 +62,7 @@ export default async function handleInteractionCreate(
 
   // Handle Button Submissions for Endorsements and Undorsements
   if (interaction.isButton()) {
-    const [command, predictionId, initialInteractionId] =
-      interaction.customId.split(" ");
+    const [command, predictionId] = interaction.customId.split(" ");
     const endorsed = command === "Endorse";
     const discordId = interaction.member.user.id;
 
@@ -72,15 +72,34 @@ export default async function handleInteractionCreate(
         content: `Prediction successfully ${command.toLowerCase()}d!`,
         ephemeral: true,
       });
+    } catch (err) {
+      return interaction.reply({
+        content: err.response.data.error,
+        ephemeral: true,
+      });
+    }
 
+    try {
+      const buttonMsg = await interaction.message;
       const prediction = await getPrediction(predictionId);
-      // const initialInteractionReply = await interaction.message
-      // const initalInteraction = initialInteractionReply.interaction
-      // const reply = generatePredictionResponse(initalInteraction, prediction);
-      // await initalInteraction.editReply(reply);
+      const predictor = await interaction.guild.members.fetch(
+        prediction.predictor.discord_id
+      );
+      const endorsements = prediction.bets.filter((bet) => bet.endorsed);
+      const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
+
+      const embed = generatePredictionEmbed(
+        predictor.nickname,
+        prediction.id,
+        prediction.text,
+        new Date(prediction.due),
+        prediction.odds,
+        endorsements.length,
+        undorsements.length
+      );
+      await buttonMsg.edit({ embeds: [embed] });
     } catch (err) {
       console.error(err);
-      interaction.reply({ content: err.error, ephemeral: true });
     }
   }
 
