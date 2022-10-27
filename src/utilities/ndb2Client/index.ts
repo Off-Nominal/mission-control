@@ -72,6 +72,22 @@ export class Ndb2Client {
       .then((res) => res.data);
   }
 
+  public newVote(
+    predictionId: string | number,
+    voterId: string | number,
+    affirmative: boolean
+  ) {
+    const url = new URL(this.baseURL);
+    url.pathname = "api/votes";
+    return this.client
+      .post<Record>(url.toString(), {
+        predictionId,
+        voterId,
+        affirmative,
+      })
+      .then((res) => res.data);
+  }
+
   public triggerPrediction(
     id: string | number,
     closer_discord_id: string | null = null,

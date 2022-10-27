@@ -9,6 +9,7 @@ import {
   userMention,
 } from "discord.js";
 import { APIEnhancedPrediction } from "../../../utilities/ndb2Client/types";
+import { generateVoteEmbed } from "./generateVoteEmbed";
 import { formatOdds } from "./helpers";
 
 export const generateVoteResponse = (
@@ -17,27 +18,7 @@ export const generateVoteResponse = (
     closer_discord_id?: string;
   } = {}
 ): MessageCreateOptions => {
-  const affirmativeVotes = prediction.result.votes.filter(
-    (vote) => vote.affirmative
-  );
-  const negativeVotes = prediction.result.votes.filter(
-    (vote) => !vote.affirmative
-  );
-
-  const embed = new EmbedBuilder({
-    title: "📣 Vote triggered!",
-    description: `${codeBlock(
-      `[${prediction.id}]: ${prediction.text}`
-    )}\nPredicted on ${time(new Date(prediction.created))} by ${userMention(
-      prediction.predictor.discord_id
-    )}.`,
-    fields: [
-      {
-        name: "Votes",
-        value: `✅ ${affirmativeVotes.length}\u200B \u200B \u200B \u200B \u200B ❌ ${negativeVotes.length}`,
-      },
-    ],
-  });
+  const embed = generateVoteEmbed(prediction);
 
   const components = [
     new ActionRowBuilder<ButtonBuilder>()

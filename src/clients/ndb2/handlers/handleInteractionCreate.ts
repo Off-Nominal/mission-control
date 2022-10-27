@@ -9,7 +9,6 @@ import {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  userMention,
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
 
@@ -20,8 +19,17 @@ import {
 } from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
+import { generateVoteEmbed } from "../actions/generateVoteEmbed";
 import { generateVoteResponse } from "../actions/generateVoteResponse";
-const { addBet, addPrediction, getPrediction, triggerPrediction } = queries;
+const { addBet, addVote, addPrediction, getPrediction, triggerPrediction } =
+  queries;
+
+enum ButtonCommand {
+  ENDORSE = "Endorse",
+  UNDORSE = "Undorse",
+  AFFIRM = "Affirm",
+  NEGATE = "Negate",
+}
 
 export default async function handleInteractionCreate(
   interaction: Interaction
@@ -73,22 +81,50 @@ export default async function handleInteractionCreate(
   // Handle Button Submissions for Endorsements and Undorsements
   if (interaction.isButton()) {
     const [command, predictionId] = interaction.customId.split(" ");
-    const endorsed = command === "Endorse";
     const discordId = interaction.member.user.id;
 
-    try {
-      await addBet(discordId, predictionId, endorsed);
-      interaction.reply({
-        content: `Prediction successfully ${command.toLowerCase()}d!`,
-        ephemeral: true,
-      });
-    } catch (err) {
-      return interaction.reply({
-        content: err.response.data.error,
-        ephemeral: true,
-      });
+    const isBet =
+      command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
+    const isVote =
+      command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
+
+    if (isBet) {
+      const endorsed = command === ButtonCommand.ENDORSE;
+
+      // Add Bet
+      try {
+        await addBet(discordId, predictionId, endorsed);
+        interaction.reply({
+          content: `Prediction successfully ${command.toLowerCase()}d!`,
+          ephemeral: true,
+        });
+      } catch (err) {
+        return interaction.reply({
+          content: err.response.data.error,
+          ephemeral: true,
+        });
+      }
     }
 
+    if (isVote) {
+      const affirmed = command === ButtonCommand.AFFIRM;
+
+      // Add Vote
+      try {
+        await addVote(discordId, predictionId, affirmed);
+        interaction.reply({
+          content: `Prediction successfully ${command.toLowerCase()}d!`,
+          ephemeral: true,
+        });
+      } catch (err) {
+        return interaction.reply({
+          content: err.response.data.error,
+          ephemeral: true,
+        });
+      }
+    }
+
+    // Update Embed with new stats
     try {
       const buttonMsg = await interaction.message;
       const prediction = await getPrediction(predictionId);
@@ -96,8 +132,10 @@ export default async function handleInteractionCreate(
         prediction.predictor.discord_id
       );
 
-      const embed = generatePredictionEmbed(predictor.nickname, prediction);
-      await buttonMsg.edit({ embeds: [embed] });
+      const embed = isBet
+        ? generatePredictionEmbed(predictor.nickname, prediction)
+        : generateVoteEmbed(prediction);
+      return await buttonMsg.edit({ embeds: [embed] });
     } catch (err) {
       console.error(err);
     }
