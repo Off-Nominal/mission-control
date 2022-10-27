@@ -1,5 +1,10 @@
 import axios, { AxiosInstance } from "axios";
-import { APIEnhancedPrediction, APIUser, Record } from "./types";
+import {
+  APIEnhancedPrediction,
+  APIUser,
+  ClosePredictionResponse,
+  Record,
+} from "./types";
 
 export class Ndb2Client {
   private baseURL = process.env.NDB2_API_BASEURL;
@@ -65,5 +70,20 @@ export class Ndb2Client {
         endorsed,
       })
       .then((res) => res.data);
+  }
+
+  public triggerPrediction(
+    id: string | number,
+    closer_discord_id: string | null = null,
+    closed: Date | null = null
+  ) {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${id}`;
+    return this.client
+      .post<ClosePredictionResponse>(url.toString(), {
+        closer_discord_id,
+        closed,
+      })
+      .then((res) => res.data[0]);
   }
 }

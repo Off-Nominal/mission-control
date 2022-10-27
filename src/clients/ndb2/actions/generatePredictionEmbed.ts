@@ -1,10 +1,6 @@
 import { codeBlock, EmbedBuilder, time, TimestampStyles } from "discord.js";
 import { APIEnhancedPrediction } from "../../../utilities/ndb2Client/types";
-
-const formatOdds = (odds: number) => {
-  const roundedOdds = Math.round(odds * 100) / 100;
-  return roundedOdds.toString();
-};
+import { formatOdds } from "./helpers";
 
 export const generatePredictionEmbed = (
   displayName: string,

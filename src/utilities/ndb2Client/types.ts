@@ -79,3 +79,9 @@ export interface APIEnhancedPrediction
   bets: Omit<APIBet, "prediction_id">[];
   odds: number;
 }
+
+// API REsponse Records
+
+export interface ClosePredictionResponse extends Record {
+  channel_id: string;
+}

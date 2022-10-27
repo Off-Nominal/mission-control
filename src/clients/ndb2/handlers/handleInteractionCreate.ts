@@ -1,21 +1,27 @@
 import { isFuture, isValid } from "date-fns";
 import {
   ActionRowBuilder,
+  Channel,
+  channelMention,
+  ChannelType,
   Interaction,
+  Message,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
+  userMention,
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
 
 import queries from "../../../utilities/ndb2Client/queries/index";
 import {
   APIEnhancedPrediction,
-  EnhancedPrediction,
+  ClosePredictionResponse,
 } from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-const { addBet, addPrediction, getPrediction } = queries;
+import { generateVoteResponse } from "../actions/generateVoteResponse";
+const { addBet, addPrediction, getPrediction, triggerPrediction } = queries;
 
 export default async function handleInteractionCreate(
   interaction: Interaction
@@ -164,6 +170,92 @@ export default async function handleInteractionCreate(
 
   if (subCommand === Ndb2Subcommand.CANCEL) {
     // Cancel
+  }
+
+  if (subCommand === Ndb2Subcommand.TRIGGER) {
+    const closer_discord_id = interaction.user.id;
+    const closed = new Date(options.getString("closed"));
+
+    // Validate date format
+    const isDueDateValid = isValid(closed);
+    if (!isDueDateValid) {
+      return interaction.reply({
+        content:
+          "Your close date format was invalid. Ensure it is entered as YYYY-MM-DD",
+        ephemeral: true,
+      });
+    }
+
+    // Validate date is in the past
+    if (isFuture(closed)) {
+      return interaction.reply({
+        content:
+          "Your close date is in the future. Either leave it blank to trigger effective now, or put in a past date.",
+        ephemeral: true,
+      });
+    }
+
+    // Trigger prediction
+    let triggeredPrediction: ClosePredictionResponse;
+
+    try {
+      triggeredPrediction = await triggerPrediction(
+        predictionId,
+        closer_discord_id,
+        closed
+      );
+    } catch (err) {
+      return interaction.reply({
+        content: err.response.data.error,
+        ephemeral: true,
+      });
+    }
+
+    // Fetch channel for Prediction Message
+
+    let voteChannel: Channel;
+    try {
+      voteChannel = await interaction.client.channels.fetch(
+        triggeredPrediction.channel_id
+      );
+    } catch (err) {
+      console.log(err);
+      return interaction.reply({
+        content: "Error fetching channel for voting.",
+      });
+    }
+
+    if (voteChannel.type !== ChannelType.GuildText) {
+      return interaction.reply({
+        content: "Something went wrong. Tell Jake to check the logs.",
+        ephemeral: true,
+      });
+    }
+
+    // Send Voting Message
+    let voteMessage: Message;
+
+    try {
+      const vote = generateVoteResponse(prediction, { closer_discord_id });
+      voteMessage = await voteChannel.send(vote);
+    } catch (err) {
+      return interaction.reply({
+        content: "Error sending vote to voting channel.",
+        ephemeral: true,
+      });
+    }
+
+    try {
+      return interaction.reply({
+        content: `Prediction #${predictionId} has been triggered. Voting will now occur in ${channelMention(
+          voteChannel.id
+        )}`,
+      });
+    } catch (err) {
+      return interaction.reply({
+        content: err.response.data.error,
+      });
+    }
   }
 
   if (
