@@ -19,10 +19,17 @@ import {
 } from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
+import { generateUserEmbed } from "../actions/generateUserEmbed";
 import { generateVoteEmbed } from "../actions/generateVoteEmbed";
 import { generateVoteResponse } from "../actions/generateVoteResponse";
-const { addBet, addVote, addPrediction, getPrediction, triggerPrediction } =
-  queries;
+const {
+  addBet,
+  addVote,
+  addPrediction,
+  getPrediction,
+  triggerPrediction,
+  getUser,
+} = queries;
 
 enum ButtonCommand {
   ENDORSE = "Endorse",
@@ -129,7 +136,7 @@ export default async function handleInteractionCreate(
       const buttonMsg = await interaction.message;
       const prediction = await getPrediction(predictionId);
       const predictor = await interaction.guild.members.fetch(
-        prediction.predictor.discord_id
+        prediction.predictor_discord_id
       );
 
       const embed = isBet
@@ -189,7 +196,20 @@ export default async function handleInteractionCreate(
   }
 
   if (subCommand === Ndb2Subcommand.SCORE) {
-    // Score
+    const discordId = interaction.user.id;
+    const interactor = await interaction.guild.members.fetch(discordId);
+
+    try {
+      const user = await getUser(discordId);
+      const embed = generateUserEmbed(user, interactor.displayName);
+      return interaction.reply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      return interaction.reply({
+        content: err.response.data.error,
+        ephemeral: true,
+      });
+    }
   }
 
   // Prediction specific commands

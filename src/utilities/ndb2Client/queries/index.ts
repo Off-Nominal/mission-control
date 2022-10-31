@@ -5,6 +5,7 @@ import { generateAddBet } from "./addBet";
 import { generateAddPrediction } from "./addPrediction";
 import { generateAddVote } from "./addVote";
 import { generateGetPrediction } from "./getPrediction";
+import { generateGetUser } from "./getUser";
 import { generateTriggerPrediction } from "./triggerPrediction";
 
 const ndbKey = process.env.NDB2_CLIENT_ID;
@@ -16,4 +17,5 @@ export default {
   addPrediction: generateAddPrediction(ndb2Client),
   getPrediction: generateGetPrediction(ndb2Client),
   triggerPrediction: generateTriggerPrediction(ndb2Client),
+  getUser: generateGetUser(ndb2Client),
 };

@@ -16,7 +16,7 @@ export const generatePredictionResponse = async (
 ): Promise<MessagePayload | InteractionReplyOptions> => {
   const dueDate = new Date(prediction.due);
   const predictorName = await interaction.guild.members.fetch(
-    prediction.predictor.discord_id
+    prediction.predictor_discord_id
   );
 
   const embed = generatePredictionEmbed(predictorName.displayName, prediction);

@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import {
   APIEnhancedPrediction,
+  APIEnhancedUser,
   APIUser,
   ClosePredictionResponse,
   Record,
@@ -24,7 +25,18 @@ export class Ndb2Client {
     const params = new URLSearchParams({ discordId });
     url.search = params.toString();
 
-    return this.client.get<APIUser>(url.toString()).then((res) => res.data[0]);
+    return this.client
+      .get<APIUser[]>(url.toString())
+      .then((res) => res.data[0]);
+  }
+
+  public fetchEnhancedUser(id: string | number) {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/users/${id}`;
+
+    return this.client
+      .get<APIEnhancedUser>(url.toString())
+      .then((res) => res.data);
   }
 
   public fetchPrediction(id: string | number) {

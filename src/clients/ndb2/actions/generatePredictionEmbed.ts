@@ -12,7 +12,7 @@ export const generatePredictionEmbed = (
   const closed = new Date(prediction.closed);
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
-  const wasSuccessful = prediction.result.successful;
+  const wasSuccessful = prediction.successful;
 
   const adverb = isClosed ? (wasSuccessful ? "" : "un") + "successfully " : "";
   const title = `${

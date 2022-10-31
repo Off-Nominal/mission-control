@@ -34,23 +34,79 @@ export interface Vote extends Record {
   affirmative: boolean;
 }
 
+export interface Season extends Record {
+  name: string;
+  start: Date;
+  end: Date;
+}
+
 // View Records
 
 export interface EnhancedPrediction
   extends Omit<Prediction, "predictor_id" | "closer_id" | "successful"> {
-  predictor: User;
-  closer: User;
-  result: {
-    successful: boolean;
-    votes: Omit<Vote, "prediction_id">[];
-  };
+  predictor_id: number;
+  predictor_discord_id: string;
+  closer_id: number;
+  successful: boolean;
+  votes: Omit<Vote, "prediction_id">[];
   bets: Omit<Bet, "prediction_id">[];
   odds: number;
 }
 
+export interface EnhancedSeason extends Season {
+  status: SeasonStatus;
+}
+
 // API Records
 
+export interface APISeason extends Record {
+  name: string;
+  start: string;
+  end: string;
+}
+
+export interface APIEnhancedSeason extends APISeason {
+  status: SeasonStatus;
+}
+
+export enum SeasonStatus {
+  FUTURE = "future",
+  NEXT = "next",
+  CURRENT = "current",
+  LAST = "last",
+  PAST = "past",
+}
+
 export type APIUser = User;
+
+export interface APIScore {
+  user_id: number;
+  user_discord_id: string;
+  season_id: number;
+  season: Omit<APIEnhancedSeason, "id">;
+  points: number;
+  predictions: {
+    successful: number;
+    unsuccessful: number;
+    pending: number;
+  };
+  endorsements: {
+    successful: number;
+    unsuccessful: number;
+    pending: number;
+  };
+  undorsements: {
+    successful: number;
+    unsuccessful: number;
+    pending: number;
+  };
+}
+
+export interface APIEnhancedUser extends APIUser {
+  predictions: Omit<APIPrediction, "predictor_id">[];
+  bets: Omit<APIBet, "better_id">[];
+  scores: Omit<APIScore, "user_id" | "user_discord_id">[];
+}
 
 export interface APIBet extends Omit<Bet, "created"> {
   created: string;
@@ -70,12 +126,11 @@ export type APIVote = Vote;
 
 export interface APIEnhancedPrediction
   extends Omit<APIPrediction, "predictor_id" | "closer_id" | "successful"> {
-  predictor: APIUser;
-  closer: APIUser;
-  result: {
-    successful: boolean;
-    votes: Omit<APIVote, "prediction_id">[];
-  };
+  predictor_id: number;
+  predictor_discord_id: string;
+  closer_id: number;
+  successful: boolean;
+  votes: Omit<APIVote, "prediction_id">[];
   bets: Omit<APIBet, "prediction_id">[];
   odds: number;
 }
