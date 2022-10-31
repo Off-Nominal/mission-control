@@ -4,6 +4,7 @@ import { Ndb2Client } from "../index";
 import { generateAddBet } from "./addBet";
 import { generateAddPrediction } from "./addPrediction";
 import { generateAddVote } from "./addVote";
+import { generateDeletePrediction } from "./deletePrediction";
 import { generateGetPrediction } from "./getPrediction";
 import { generateGetUser } from "./getUser";
 import { generateTriggerPrediction } from "./triggerPrediction";
@@ -18,4 +19,5 @@ export default {
   getPrediction: generateGetPrediction(ndb2Client),
   triggerPrediction: generateTriggerPrediction(ndb2Client),
   getUser: generateGetUser(ndb2Client),
+  deletePrediction: generateDeletePrediction(ndb2Client),
 };

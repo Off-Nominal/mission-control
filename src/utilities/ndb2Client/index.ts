@@ -114,4 +114,10 @@ export class Ndb2Client {
       })
       .then((res) => res.data[0]);
   }
+
+  public deletePrediction(id: string | number) {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${id}`;
+    return this.client.delete(url.toString()).then((res) => res.data);
+  }
 }

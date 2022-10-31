@@ -1,4 +1,4 @@
-import { isFuture, isValid } from "date-fns";
+import { add, isBefore, isFuture, isValid } from "date-fns";
 import {
   ActionRowBuilder,
   Channel,
@@ -11,7 +11,6 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
-
 import queries from "../../../utilities/ndb2Client/queries/index";
 import {
   APIEnhancedPrediction,
@@ -29,6 +28,7 @@ const {
   getPrediction,
   triggerPrediction,
   getUser,
+  deletePrediction,
 } = queries;
 
 enum ButtonCommand {
@@ -227,7 +227,33 @@ export default async function handleInteractionCreate(
   }
 
   if (subCommand === Ndb2Subcommand.CANCEL) {
-    // Cancel
+    const deleterId = interaction.user.id;
+    if (deleterId !== prediction.predictor_discord_id) {
+      return interaction.reply({
+        content: "You cannot delete other people's predictions.",
+        ephemeral: true,
+      });
+    }
+
+    if (isBefore(add(new Date(prediction.created), { days: 1 }), new Date())) {
+      return interaction.reply({
+        content: "Predictions can only be deleted within 24 hours of creation.",
+        ephemeral: true,
+      });
+    }
+
+    try {
+      await deletePrediction(prediction.id);
+      return interaction.reply({
+        content: `Prediction #${prediction.id} has been cancelled. All bets against it are cancelled as well.`,
+      });
+    } catch (err) {
+      console.log(err);
+      return interaction.reply({
+        content: "Error deleting prediction.",
+        ephemeral: true,
+      });
+    }
   }
 
   if (subCommand === Ndb2Subcommand.TRIGGER) {
