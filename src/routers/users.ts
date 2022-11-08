@@ -17,7 +17,14 @@ const generateRouter = (client: Client) => {
 
     guild.members
       .fetch({ user: discordIds })
-      .then((users) => {
+      .then((guildMembers) => {
+        const users = guildMembers.map((member) => {
+          return {
+            id: member.id,
+            displayName: member.displayName,
+            avatar: member.displayAvatarURL(),
+          };
+        });
         res.json(users);
       })
       .catch((err) => {
