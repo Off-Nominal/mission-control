@@ -1,6 +1,6 @@
+import { sub } from "date-fns";
 import {
   Collection,
-  Message,
   EmbedBuilder,
   NewsChannel,
   Snowflake,
@@ -8,7 +8,8 @@ import {
   ThreadChannel,
   ChannelType,
 } from "discord.js";
-import { fetchMessagesInLast } from "../../../helpers/fetchMessagesInLast";
+import { isFulfilled } from "../../../helpers/allSettledTypeGuard";
+import { fillMessageCache } from "../../../helpers/fillMessageCache";
 import fetchGuild from "../../actions/fetchGuild";
 
 type ThreadData = {
@@ -28,40 +29,38 @@ type ThreadDigests = {
 export default async function handleThreadDigestSend() {
   const guild = fetchGuild(this);
 
-  let activeThreads: Collection<Snowflake, ThreadChannel>;
+  let activePublicThreads: Collection<Snowflake, ThreadChannel>;
 
   try {
-    const fetchedThreads = await guild.channels.fetchActiveThreads();
-    activeThreads = fetchedThreads.threads.filter(
+    const activeThreads = await guild.channels.fetchActiveThreads();
+    activePublicThreads = activeThreads.threads.filter(
       (thread) => thread.type === ChannelType.PublicThread
     );
   } catch (err) {
     return console.error(err);
   }
 
-  const promises = await Promise.allSettled(
-    activeThreads.map((thread) => fetchMessagesInLast(thread, 72))
+  const settledPromises = await Promise.allSettled(
+    activePublicThreads.map((thread) => fillMessageCache(thread, 72))
   );
 
-  const fulfilledPromises = promises.filter((promise) => {
-    if (promise.status === "rejected") {
-      console.error(promise.reason);
-    }
-    return promise.status === "fulfilled" && promise.value.size > 0;
-  }) as PromiseFulfilledResult<Collection<string, Message<boolean>>>[];
+  const fetchedActivePublicThreads = settledPromises
+    .filter(isFulfilled)
+    .map((p) => p.value);
 
-  const fetchedActiveThreads: ThreadData[] = fulfilledPromises.map(
-    (fulfilledPromise, index) => {
-      return {
-        thread: activeThreads.at(index),
-        messageCount: fulfilledPromise.value.size,
-      };
-    }
-  );
+  const threadData: ThreadData[] = fetchedActivePublicThreads.map((thread) => {
+    return {
+      thread,
+      messageCount: thread.messages.cache.filter(
+        (cache) =>
+          cache.createdTimestamp > sub(new Date(), { hours: 72 }).getTime()
+      ).size,
+    };
+  });
 
   const threadDigests: ThreadDigests = {};
 
-  fetchedActiveThreads.forEach((threadData) => {
+  threadData.forEach((threadData) => {
     if (!threadDigests[threadData.thread.parentId]) {
       threadDigests[threadData.thread.parentId] = {
         channel: threadData.thread.parent,
