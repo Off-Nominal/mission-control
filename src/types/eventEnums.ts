@@ -55,3 +55,8 @@ export enum DevEvents {
   DB_TEST = "dev_dbtest",
   THREAD_DIGEST_SEND = "dev_threadDigestSend",
 }
+
+export enum RLLEvents {
+  READY = "ready",
+  ERROR = "error",
+}

@@ -16,7 +16,7 @@ export enum LogStatus {
 }
 
 export class Logger {
-  private fields: string[] = [];
+  private fields: EmbedField[] = [];
   private date: Date = new Date();
   private title: string;
 
@@ -27,22 +27,22 @@ export class Logger {
   public addLog(
     status: LogStatus,
     value: string,
+    inline: boolean = false,
     timestamp: Date = new Date()
   ) {
-    this.fields.push(
-      `${status} ${time(timestamp, TimestampStyles.LongTime)}: ${value}`
-    );
+    const field: EmbedField = {
+      name: "\u200B",
+      value: `${status} ${time(timestamp, TimestampStyles.LongTime)}: ${value}`,
+      inline,
+    };
+
+    this.fields.push(field);
   }
 
   private generateEmbed(): EmbedBuilder {
     const embed = new EmbedBuilder({
       title: this.title + `: ${time(this.date, TimestampStyles.LongDate)}`,
-      fields: [
-        {
-          name: "Logs",
-          value: this.fields.join("\n"),
-        },
-      ],
+      fields: this.fields,
     });
 
     return embed;

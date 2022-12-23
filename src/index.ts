@@ -38,6 +38,7 @@ import {
   EventListenerEvents,
   MemberManagerEvents,
   NewsManagerEvents,
+  RLLEvents,
   SiteListenerEvents,
   StreamHostEvents,
   UtilityBotEvents,
@@ -67,6 +68,7 @@ const bootChecklist = {
   ytFeedListener: false,
   eventsListener: false,
   newsFeed: false,
+  rllClient: false,
 };
 
 // Database Config
@@ -175,6 +177,10 @@ const eventBot = new Client({
  ************************************/
 
 const launchListener = new LaunchListener(RLL_KEY);
+launchListener.on(RLLEvents.READY, (message) => {
+  bootChecklist.rllClient = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
 
 /***********************************
  *  Site Listener Setup
