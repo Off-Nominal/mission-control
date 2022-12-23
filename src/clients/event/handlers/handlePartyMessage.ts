@@ -4,17 +4,15 @@ import {
   GuildScheduledEventStatus,
   MessagePayload,
 } from "discord.js";
-import { SpecificChannel } from "../../../types/channelEnums";
-import fetchChannel from "../../actions/fetchChannel";
+import { SpecificChannel, channelIds } from "../../../types/channelEnums";
 
 export default async function handlePartyMessage(
   message: string | MessagePayload,
   event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
 ) {
   try {
-    const channel = await fetchChannel(
-      event.client.channels,
-      SpecificChannel.LIVECHAT
+    const channel = await event.client.channels.fetch(
+      channelIds[SpecificChannel.LIVECHAT]
     );
     if (channel.type !== ChannelType.GuildText) return;
     channel.send(message);

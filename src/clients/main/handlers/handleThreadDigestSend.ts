@@ -7,9 +7,12 @@ import {
   TextChannel,
   ThreadChannel,
   ChannelType,
+  channelMention,
 } from "discord.js";
-import { isFulfilled } from "../../../helpers/allSettledTypeGuard";
+import { isFulfilled, isRejected } from "../../../helpers/allSettledTypeGuard";
 import { fillMessageCache } from "../../../helpers/fillMessageCache";
+import { LogInitiator } from "../../../types/logEnums";
+import { Logger, LogStatus } from "../../../utilities/logger";
 import fetchGuild from "../../actions/fetchGuild";
 
 type ThreadData = {
@@ -27,19 +30,45 @@ type ThreadDigests = {
 };
 
 export default async function handleThreadDigestSend() {
+  const logger = new Logger(
+    "Thread Digest Log",
+    LogInitiator.SERVER,
+    "Scheduled Digest Send"
+  );
+
   const guild = fetchGuild(this);
+  logger.addLog(
+    LogStatus.INFO,
+    `Guild resolved: ${guild.name} (ID: ${guild.id})`
+  );
 
   let activePublicThreads: Collection<Snowflake, ThreadChannel>;
 
   try {
     const activeThreads = await guild.channels.fetchActiveThreads();
+    logger.addLog(
+      LogStatus.SUCCESS,
+      `${activeThreads.threads.size} active threads fetched from Discord.`
+    );
     activePublicThreads = activeThreads.threads.filter(
       (thread) => thread.type === ChannelType.PublicThread
     );
+    logger.addLog(
+      LogStatus.INFO,
+      `${activePublicThreads.size} active threads after filtering non-public.`
+    );
   } catch (err) {
+    logger.addLog(
+      LogStatus.FAILURE,
+      "Failed to fetch active threads from API."
+    );
     return console.error(err);
   }
 
+  logger.addLog(
+    LogStatus.INFO,
+    "Fetching messages in time window to fill caches for counting."
+  );
   const settledPromises = await Promise.allSettled(
     activePublicThreads.map((thread) => fillMessageCache(thread, 72))
   );
@@ -48,13 +77,35 @@ export default async function handleThreadDigestSend() {
     .filter(isFulfilled)
     .map((p) => p.value);
 
+  if (fetchedActivePublicThreads.length === activePublicThreads.size) {
+    logger.addLog(LogStatus.SUCCESS, "All thread caches filled successfully.");
+  } else {
+    logger.addLog(
+      LogStatus.FAILURE,
+      `Only successfully filled ${fetchedActivePublicThreads.length}/${activePublicThreads.size} thread caches.`
+    );
+    const errors = settledPromises.filter(isRejected).map((p) => p.reason);
+    for (const error of errors) {
+      console.error(error);
+    }
+  }
+
   const threadData: ThreadData[] = fetchedActivePublicThreads.map((thread) => {
+    const messageCount = thread.messages.cache.filter(
+      (cache) =>
+        cache.createdTimestamp > sub(new Date(), { hours: 72 }).getTime()
+    ).size;
+
+    logger.addLog(
+      LogStatus.INFO,
+      `Active Thread ${channelMention(
+        thread.id
+      )} prepped with ${messageCount} messages.`
+    );
+
     return {
       thread,
-      messageCount: thread.messages.cache.filter(
-        (cache) =>
-          cache.createdTimestamp > sub(new Date(), { hours: 72 }).getTime()
-      ).size,
+      messageCount,
     };
   });
 
@@ -71,12 +122,19 @@ export default async function handleThreadDigestSend() {
     threadDigests[threadData.thread.parentId].threads.push(threadData);
   });
 
-  for (const digest in threadDigests) {
-    const currentDigest = threadDigests[digest];
+  for (const parentId in threadDigests) {
+    const currentDigest = threadDigests[parentId];
+    logger.addLog(
+      LogStatus.INFO,
+      `Prepping channel message for Channel ID ${channelMention(
+        parentId
+      )} with ${currentDigest.threads.length} active threads.`
+    );
+
     const fields = currentDigest.threads.map((threadData) => {
       return {
         name: threadData.thread.name,
-        value: `<#${threadData.thread.id}> has ${threadData.messageCount} messages in the last 3 days.`,
+        value: `<#${threadData.thread.id}> has ${threadData.messageCount} messages.`,
       };
     });
 
@@ -89,18 +147,52 @@ export default async function handleThreadDigestSend() {
 
     try {
       await currentDigest.channel.messages.fetch({ limit: 1 });
-      const { lastMessage } = currentDigest.channel;
-      if (
-        lastMessage.author.id === this.user.id &&
-        lastMessage.embeds.length > 0 &&
-        lastMessage.embeds[0]?.data?.title === "Active Discord Threads"
-      ) {
-        await lastMessage.edit({ embeds: [embed] });
-      } else {
-        await currentDigest.channel.send({ embeds: [embed] });
-      }
     } catch (err) {
-      console.error(err);
+      logger.addLog(
+        LogStatus.FAILURE,
+        `Couldn't fetch last message from channel ${channelMention(
+          currentDigest.channel.id
+        )}`
+      );
+    }
+
+    const { lastMessage } = currentDigest.channel;
+
+    if (
+      lastMessage.author.id === this.user.id &&
+      lastMessage.embeds.length > 0 &&
+      lastMessage.embeds[0]?.data?.title === "Active Discord Threads"
+    ) {
+      try {
+        await lastMessage.edit({ embeds: [embed] });
+        logger.addLog(
+          LogStatus.SUCCESS,
+          `Edited last message in ${channelMention(currentDigest.channel.id)}.`
+        );
+      } catch (err) {
+        console.error(err);
+        logger.addLog(
+          LogStatus.FAILURE,
+          `Error editing last message in ${channelMention(
+            currentDigest.channel.id
+          )}.`
+        );
+      }
+    } else {
+      try {
+        await currentDigest.channel.send({ embeds: [embed] });
+        logger.addLog(
+          LogStatus.SUCCESS,
+          `Sent digest to ${channelMention(currentDigest.channel.id)}`
+        );
+      } catch (err) {
+        logger.addLog(
+          LogStatus.FAILURE,
+          `Failed to send digest to ${channelMention(currentDigest.channel.id)}`
+        );
+      }
     }
   }
+
+  logger.sendLog(this);
 }

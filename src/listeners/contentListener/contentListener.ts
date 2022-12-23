@@ -38,14 +38,16 @@ export class ContentListener extends FeedWatcher {
         .map((entry) => this.processor(entry, this.title))
         .reverse(); // map entries from RSS feed to episode format using processor
 
-      console.log(
+      this.emit(
+        ContentListnerEvents.READY,
         `${this.title} feed loaded with ${this.episodes.length} items.`
       );
       this.on(FeedWatcherEvents.ERROR, (error) =>
         console.error(`Error checking ${this.title}.`, error)
       );
     } catch (err) {
-      console.log(
+      this.emit(
+        ContentListnerEvents.ERROR,
         `Attempted to initialize ${this.title} multiple times, could not fetch data.`
       );
       console.error(err);

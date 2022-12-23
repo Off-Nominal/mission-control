@@ -6,8 +6,7 @@ import {
   TimestampStyles,
 } from "discord.js";
 import { GithubUpdateEmbedData } from "../../../listeners/siteListener";
-import { SpecificChannel } from "../../../types/channelEnums";
-import fetchChannel from "../../actions/fetchChannel";
+import { SpecificChannel, channelIds } from "../../../types/channelEnums";
 
 const OWNER = "mendahu";
 const REPO = "starship-site-tracking";
@@ -45,9 +44,8 @@ export default async function handleStarshipSiteUpdate(
     .setTimestamp();
 
   try {
-    const channel = await fetchChannel(
-      client.channels,
-      SpecificChannel.BOCA_CHICA
+    const channel = await client.channels.fetch(
+      channelIds[SpecificChannel.BOCA_CHICA]
     );
     if (channel.type !== ChannelType.GuildText) return;
     await channel.send({ embeds: [embed] });

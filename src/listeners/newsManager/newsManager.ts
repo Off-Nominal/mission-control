@@ -11,6 +11,7 @@ import { sub } from "date-fns";
 
 import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
 import { NewsManagerEvents } from "../../types/eventEnums";
+import { isFulfilled } from "../../helpers/allSettledTypeGuard";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 
@@ -61,47 +62,41 @@ export class NewsManager extends EventEmitter {
       });
   };
 
-  public initiateWatcher(feed: NewsFeedDocument) {
-    return new Promise((resolve, reject) => {
-      const thumbnail = feed.thumbnail
-        ? sanityImageUrlBuilder.image(feed.thumbnail).url()
-        : "";
-      const formattedFeed = {
-        ...feed,
-        thumbnail,
-      };
-      const watcher = this.watcherGenerator(formattedFeed);
-      const thresholdDate = sub(new Date(), { days: 3 });
+  public initiateWatcher(feed: NewsFeedDocument): Promise<string> {
+    const thumbnail = feed.thumbnail
+      ? sanityImageUrlBuilder.image(feed.thumbnail).url()
+      : "";
+    const formattedFeed = {
+      ...feed,
+      thumbnail,
+    };
+    const watcher = this.watcherGenerator(formattedFeed);
+    const thresholdDate = sub(new Date(), { days: 3 });
 
-      watcher
-        .start()
-        .then((entries) => {
-          const recentEntries = entries.filter(
-            (entry) => entry.pubDate.getTime() > thresholdDate.getTime()
-          );
-          recentEntries.forEach((entry) => (this.entryUrls[entry.link] = true));
-          this.feeds.push({
-            data: formattedFeed,
-            watcher,
-          });
-          console.log(`Watching newsFeed ${feed.name}`);
-          resolve("Success!");
-        })
-        .catch((error) => {
-          console.error(`Error watching Feed ${feed.name}`, error);
-          reject(error);
+    return watcher
+      .start()
+      .then((entries) => {
+        const recentEntries = entries.filter(
+          (entry) => entry.pubDate.getTime() > thresholdDate.getTime()
+        );
+        recentEntries.forEach((entry) => (this.entryUrls[entry.link] = true));
+        this.feeds.push({
+          data: formattedFeed,
+          watcher,
         });
-    });
+        return feed.name;
+      })
+      .catch((error) => {
+        console.error(error);
+        throw feed.name;
+      });
   }
 
   public queryCms(query: string) {
-    sanityClient
-      .fetch<NewsFeedDocument[]>(query)
-      .then((feeds) => {
-        const promises = feeds.map((feed) => this.initiateWatcher(feed));
-        return Promise.allSettled(promises);
-      })
-      .catch((err) => console.error("Unable to fetch Feeds from CMS", err));
+    return sanityClient.fetch<NewsFeedDocument[]>(query).then((feeds) => {
+      const promises = feeds.map((feed) => this.initiateWatcher(feed));
+      return Promise.allSettled(promises);
+    });
   }
 
   private fetchFeedIndex(id: string) {
@@ -144,8 +139,32 @@ export class NewsManager extends EventEmitter {
     const query =
       '*[_type == "newsFeed"]{name, filter, _id, diagnostic, thumbnail, url}';
 
-    this.queryCms(query);
+    const queryResult = this.queryCms(query);
     this.subscribeToCms(query);
+    queryResult.then((promises) => {
+      for (const promise of promises) {
+        if (promise.status === "rejected") {
+          this.emit(
+            NewsManagerEvents.ERROR,
+            `Error subscribing to ${promise.reason}.`
+          );
+        }
+      }
+
+      const totalSubs = promises.length;
+      const successfulSubs = promises.map(isFulfilled).length;
+      if (successfulSubs > 0) {
+        this.emit(
+          NewsManagerEvents.READY,
+          `Successfully subscribed to ${successfulSubs}/${totalSubs} news feeds.`
+        );
+      } else {
+        this.emit(
+          NewsManagerEvents.ERROR,
+          `Failure to subscribe to any News Feeds.`
+        );
+      }
+    });
   }
 
   public notifyNew(data: ContentFeedItem, text?: string) {

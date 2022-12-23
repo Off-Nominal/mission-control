@@ -11,15 +11,18 @@ import {
   generateEventCreateOptionsFromLaunch,
   generateEventEditOptionsFromLaunch,
 } from "./helpers";
+import { RLLEvents } from "../../types/eventEnums";
+import EventEmitter = require("events");
 
 const FIVE_MINS_IN_MS = 300000;
 
-export default class LaunchListener {
+export default class LaunchListener extends EventEmitter {
   private events: Map<number, GuildScheduledEvent>;
   private client: RocketLaunchLiveClient;
   private eventsManager: GuildScheduledEventManager;
 
   constructor(key) {
+    super();
     this.events = new Map<number, GuildScheduledEvent>();
     this.client = new RocketLaunchLiveClient(key);
   }
@@ -37,10 +40,15 @@ export default class LaunchListener {
       }
     });
 
-    this.syncEvents().then(() => {
-      console.log("Launches synced with RLL");
-      this.monitor();
-    });
+    this.syncEvents()
+      .then(() => {
+        this.monitor();
+        this.emit(RLLEvents.READY, "RLL Client synced and monitoring API.");
+      })
+      .catch((err) => {
+        console.error(err);
+        this.emit(RLLEvents.ERROR, "RLL Client failed to sync launch events.");
+      });
   }
 
   private syncEvents() {
@@ -94,12 +102,14 @@ export default class LaunchListener {
       .then((promises) => {
         promises.forEach((promise) => {
           if (promise.status === "rejected") {
-            console.error("Event Edit/Create Failure for Rocket Launch");
+            this.emit(
+              RLLEvents.ERROR,
+              "Event Edit/Create Failure for Rocket Launch"
+            );
             console.error(promise.reason);
           }
         });
-      })
-      .catch((err) => console.error(err));
+      });
   }
 
   private monitor() {
