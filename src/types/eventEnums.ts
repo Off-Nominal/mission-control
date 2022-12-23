@@ -20,12 +20,15 @@ export enum EventBotEvents {
 
 export enum EventListenerEvents {
   MONITOR = "eventsMonitored",
+  READY = "ready",
 }
 
 export enum ContentListnerEvents {
   NEW = "newContent",
   STREAM_START = "streamStarted",
   STREAM_END = "streamEnded",
+  READY = "ready",
+  ERROR = "error",
 }
 
 export enum UtilityBotEvents {

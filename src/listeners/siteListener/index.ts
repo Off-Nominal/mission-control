@@ -232,8 +232,6 @@ export class SiteListener extends EventEmitter {
       //Loads log files into memory
       const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
       this.logs = logsResponse.data;
-
-      console.log("GitHubAgent authorized and ready.");
     } catch (err) {
       throw err;
     }

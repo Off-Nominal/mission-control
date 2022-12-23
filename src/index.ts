@@ -47,6 +47,7 @@ import LaunchListener from "./listeners/launchListener/launchListener";
 import { Logger, LogStatus } from "./utilities/logger";
 
 // Boot Logger
+console.log("*** BOOTING... ***");
 const bootLog = new Logger("Application Bootup Log");
 bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 
@@ -57,11 +58,18 @@ const bootChecklist = {
   contentBot: false,
   eventBot: false,
   starshipSiteChecker: false,
+  wmFeedListener: false,
+  mecoFeedListener: false,
+  ofnFeedListener: false,
+  rprFeedListener: false,
+  hlFeedListener: false,
+  hhFeedListener: false,
+  ytFeedListener: false,
+  eventsListener: false,
 };
 
 // Database Config
 const db = new DbClient();
-bootLog.addLog(LogStatus.INFO, "Initiating Database Connection");
 db.connect()
   .then(() => {
     bootLog.addLog(LogStatus.SUCCESS, "Database connected");
@@ -407,6 +415,14 @@ wmFeedListener.on(ContentListnerEvents.NEW, (content) => {
     );
   }, 600000);
 });
+wmFeedListener.on(ContentListnerEvents.READY, (message) => {
+  bootChecklist.wmFeedListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+wmFeedListener.on(ContentListnerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
+
 mecoFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(
     content,
@@ -414,6 +430,14 @@ mecoFeedListener.on(ContentListnerEvents.NEW, (content) => {
     SpecificChannel.CONTENT
   );
 });
+mecoFeedListener.on(ContentListnerEvents.READY, (message) => {
+  bootChecklist.mecoFeedListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+mecoFeedListener.on(ContentListnerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
+
 ofnFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(
     content,
@@ -421,6 +445,14 @@ ofnFeedListener.on(ContentListnerEvents.NEW, (content) => {
     SpecificChannel.CONTENT
   );
 });
+ofnFeedListener.on(ContentListnerEvents.READY, (message) => {
+  bootChecklist.ofnFeedListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+ofnFeedListener.on(ContentListnerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
+
 rprFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(
     content,
@@ -428,6 +460,14 @@ rprFeedListener.on(ContentListnerEvents.NEW, (content) => {
     SpecificChannel.CONTENT
   );
 });
+rprFeedListener.on(ContentListnerEvents.READY, (message) => {
+  bootChecklist.rprFeedListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+rprFeedListener.on(ContentListnerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
+
 hlFeedListener.on(ContentListnerEvents.NEW, (content) => {
   contentBotHandlers.handleNewContent(
     content,
@@ -435,11 +475,34 @@ hlFeedListener.on(ContentListnerEvents.NEW, (content) => {
     SpecificChannel.CONTENT
   );
 });
+hlFeedListener.on(ContentListnerEvents.READY, (message) => {
+  bootChecklist.hlFeedListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+hlFeedListener.on(ContentListnerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
+
 hhFeedListener.on(ContentListnerEvents.NEW, (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);
 });
+hhFeedListener.on(ContentListnerEvents.READY, (message) => {
+  bootChecklist.hhFeedListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+hhFeedListener.on(ContentListnerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
+
 ytFeedListener.on(ContentListnerEvents.NEW, (content) => {
   eventBotHandlers.handleNewContent(content, eventBot);
+});
+ytFeedListener.on(ContentListnerEvents.READY, (message) => {
+  bootChecklist.ytFeedListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+ytFeedListener.on(ContentListnerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
 });
 
 ytFeedListener.on(ContentListnerEvents.STREAM_START, streamHost.startParty);
@@ -453,6 +516,11 @@ eventsListener.on(
   EventListenerEvents.MONITOR,
   eventBotHandlers.handleEventsMonitored
 );
+eventsListener.on(EventListenerEvents.READY, (message) => {
+  bootChecklist.eventsListener = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+
 streamHost.on(
   StreamHostEvents.PARTY_MESSAGE,
   eventBotHandlers.handlePartyMessage

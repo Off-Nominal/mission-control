@@ -41,7 +41,7 @@ export class Logger {
 
   private generateEmbed(): EmbedBuilder {
     const embed = new EmbedBuilder({
-      title: this.title + ` ${time(this.date, TimestampStyles.LongDate)}`,
+      title: this.title + `: ${time(this.date, TimestampStyles.LongDate)}`,
       fields: this.fields,
     });
 
