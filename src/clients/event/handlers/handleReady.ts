@@ -1,11 +1,9 @@
 import { Client } from "discord.js";
 import { generatePresenceData } from "../../../helpers/generatePresenceData";
 import fetchGuild from "../../actions/fetchGuild";
-import { logReady } from "../../actions/logReady";
 import { EventBotEvents } from "../../../types/eventEnums";
 
 export default async function handleReady(client: Client) {
-  logReady(client.user.tag);
   client.user.setPresence(generatePresenceData(`/events help`));
 
   try {

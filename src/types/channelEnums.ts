@@ -35,4 +35,5 @@ export const channelIds = {
   [SpecificChannel.GENERAL]: process.env.GENERALCHANNELID,
   [SpecificChannel.MODS]: process.env.MODSCHANNELID,
   [SpecificChannel.NEWS]: process.env.NEWS_CHANNEL_ID,
+  [SpecificChannel.BOTS]: process.env.BOTS_CHANNEL_ID,
 };

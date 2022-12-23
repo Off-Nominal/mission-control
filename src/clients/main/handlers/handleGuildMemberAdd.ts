@@ -1,6 +1,5 @@
 import { GuildMember, EmbedBuilder, ChannelType } from "discord.js";
-import { SpecificChannel } from "../../../types/channelEnums";
-import fetchChannel from "../../actions/fetchChannel";
+import { SpecificChannel, channelIds } from "../../../types/channelEnums";
 
 export default async function handleGuildMemberAdd(member: GuildMember) {
   const embed = new EmbedBuilder();
@@ -29,9 +28,8 @@ export default async function handleGuildMemberAdd(member: GuildMember) {
     );
 
   try {
-    const channel = await fetchChannel(
-      member.client.channels,
-      SpecificChannel.GENERAL
+    const channel = await member.client.channels.fetch(
+      channelIds[SpecificChannel.GENERAL]
     );
     if (channel.type !== ChannelType.GuildText) return;
     channel.send({

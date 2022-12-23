@@ -38,6 +38,7 @@ export enum UtilityBotEvents {
 
 export enum SiteListenerEvents {
   UPDATE = "siteUpdate",
+  READY = "ready",
 }
 
 export enum StreamHostEvents {

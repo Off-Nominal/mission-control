@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
 import EventEmitter = require("events");
 import { SiteListenerEvents } from "../../types/eventEnums";
+import { Logger } from "../../utilities/logger";
 import { GitHubAgent } from "./github";
 
 export type SiteListenerOptions = {
@@ -244,7 +245,7 @@ export class SiteListener extends EventEmitter {
       setInterval(() => {
         this.checkSite();
       }, this.interval);
-      console.log(`SiteListener now monitoring ${this.url}`);
+      this.emit(SiteListenerEvents.READY);
     } catch (err) {
       console.error(
         "Error initializing GitHub Agent, site tracking is inactive."

@@ -1,6 +1,5 @@
 import { ChannelType, Client } from "discord.js";
-import { SpecificChannel } from "../../../types/channelEnums";
-import fetchChannel from "../../actions/fetchChannel";
+import { SpecificChannel, channelIds } from "../../../types/channelEnums";
 import { ContentFeedItem } from "../../content/handlers/handleNewContent";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
@@ -22,9 +21,8 @@ export default async function handleNewContent(
     const eventDetails = generateEventDetailsFromYouTube(video);
     const event = await createDiscordEvent(eventDetails, client);
     const embed = createEventAnnouncementEmbed(event, "new");
-    const channel = await fetchChannel(
-      client.channels,
-      SpecificChannel.ANNOUNCEMENTS
+    const channel = await client.channels.fetch(
+      channelIds[SpecificChannel.ANNOUNCEMENTS]
     );
     if (channel.type !== ChannelType.GuildAnnouncement) return;
     await channel.send({ embeds: [embed] });

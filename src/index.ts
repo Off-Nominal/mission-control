@@ -44,10 +44,34 @@ import {
 } from "./types/eventEnums";
 import { SpecificChannel } from "./types/channelEnums";
 import LaunchListener from "./listeners/launchListener/launchListener";
+import { Logger, LogStatus } from "./utilities/logger";
+
+// Boot Logger
+const bootLog = new Logger("Application Bootup Log");
+bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
+
+const bootChecklist = {
+  db: false,
+  utilityBot: false,
+  bcBot: false,
+  contentBot: false,
+  eventBot: false,
+  starshipSiteChecker: false,
+};
 
 // Database Config
 const db = new DbClient();
-db.connect();
+bootLog.addLog(LogStatus.INFO, "Initiating Database Connection");
+db.connect()
+  .then(() => {
+    bootLog.addLog(LogStatus.SUCCESS, "Database connected");
+  })
+  .catch((err) => {
+    bootLog.addLog(LogStatus.FAILURE, "Failure to connect to Database");
+  })
+  .finally(() => {
+    bootChecklist.db = true;
+  });
 
 const {
   bookClubBotHandlers,
@@ -147,10 +171,12 @@ const launchListener = new LaunchListener(RLL_KEY);
  *  Site Listener Setup
  ************************************/
 
-const starshipChecker = new SiteListener(
-  "https://www.spacex.com/vehicles/starship/",
-  { interval: 15, cooldown: 600 }
-);
+const starshipURL = "https://www.spacex.com/vehicles/starship/";
+
+const starshipChecker = new SiteListener(starshipURL, {
+  interval: 15,
+  cooldown: 600,
+});
 
 /***********************************
  *  News Feed Listener Setup
@@ -252,6 +278,10 @@ starshipChecker.initialize();
 
 utilityBot.once("ready", mainBotHandlers.handleReady);
 utilityBot.once("ready", scheduleThreadDigest);
+utilityBot.once("ready", () => {
+  bootLog.addLog(LogStatus.SUCCESS, "Main Bot ready");
+  bootChecklist.utilityBot = true;
+});
 utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
 utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
 utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
@@ -285,6 +315,10 @@ utilityBot.on(
  ************************************/
 
 bcBot.once("ready", bookClubBotHandlers.handleReady);
+bcBot.once("ready", () => {
+  bootLog.addLog(LogStatus.SUCCESS, "Book Club Bot ready");
+  bootChecklist.bcBot = true;
+});
 bcBot.on("messageCreate", bookClubBotHandlers.handleMessageCreate);
 bcBot.on("threadCreate", bookClubBotHandlers.handleThreadCreate);
 bcBot.on("interactionCreate", (interaction) => {
@@ -306,6 +340,10 @@ const feeds: FeedList = {
   yt: ytFeedListener,
 };
 contentBot.once("ready", contentBotHandlers.handleReady);
+contentBot.once("ready", () => {
+  bootLog.addLog(LogStatus.SUCCESS, "Content Bot ready");
+  bootChecklist.contentBot = true;
+});
 contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
 contentBot.on("interactionCreate", (interaction) => {
   contentBotHandlers.handleInteractionCreate(interaction, feeds);
@@ -318,6 +356,10 @@ contentBot.on(ContentBotEvents.RSS_LIST, contentBotHandlers.handleRssList);
  ************************************/
 
 eventBot.once("ready", eventBotHandlers.handleReady);
+eventBot.once("ready", () => {
+  bootLog.addLog(LogStatus.SUCCESS, "Event Bot ready");
+  bootChecklist.eventBot = true;
+});
 eventBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
@@ -420,9 +462,51 @@ streamHost.on(
  *  Site Listeners Event Handlers
  ************************************/
 
+starshipChecker.on(SiteListenerEvents.READY, () => {
+  bootChecklist.starshipSiteChecker = true;
+  bootLog.addLog(LogStatus.SUCCESS, `Site listener monitoring: ${starshipURL}`);
+});
 starshipChecker.on(SiteListenerEvents.UPDATE, (update) =>
   utilityBot.emit(UtilityBotEvents.STARSHIP_UPDATE, update)
 );
+
+/***********************************
+ *  Boot Logger
+ ************************************/
+
+let bootLogAttempts = 0;
+const bootChecker = setInterval(() => {
+  let booted = true;
+
+  for (const item in bootChecklist) {
+    if (!bootChecklist[item]) {
+      booted = false;
+      break;
+    }
+  }
+
+  if (booted) {
+    bootLog.addLog(
+      LogStatus.SUCCESS,
+      "Boot Checklist complete. The Off-Nominal Discord Bot is online."
+    );
+    bootLog.sendLog(utilityBot);
+    console.log("*** BOOTUP COMPLETE ***");
+    clearInterval(bootChecker);
+  } else {
+    bootLogAttempts++;
+  }
+
+  if (bootLogAttempts > 15) {
+    bootLog.addLog(
+      LogStatus.FAILURE,
+      "Boot Checklist still incomplete after 15 attempts, logger aborted."
+    );
+    bootLog.sendLog(utilityBot);
+    console.log("*** BOOTUP FAILURE CHECK LOGS ***");
+    clearInterval(bootChecker);
+  }
+}, 1000);
 
 /***********************************
  *  Dev Test Event Handlers
