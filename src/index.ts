@@ -46,10 +46,15 @@ import {
 import { SpecificChannel } from "./types/channelEnums";
 import LaunchListener from "./listeners/launchListener/launchListener";
 import { Logger, LogStatus } from "./utilities/logger";
+import { LogInitiator } from "./types/logEnums";
 
 // Boot Logger
 console.log("*** BOOTING... ***");
-const bootLog = new Logger("Application Bootup Log");
+const bootLog = new Logger(
+  "Application Bootup Log",
+  LogInitiator.SERVER,
+  "Bootup"
+);
 bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 
 const bootChecklist = {

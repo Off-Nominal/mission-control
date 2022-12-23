@@ -7,6 +7,7 @@ import {
   TimestampStyles,
 } from "discord.js";
 import { SpecificChannel, channelIds } from "../types/channelEnums";
+import { LogInitiator } from "../types/logEnums";
 
 export enum LogStatus {
   SUCCESS = "✅",
@@ -19,9 +20,11 @@ export class Logger {
   private fields: EmbedField[] = [];
   private date: Date = new Date();
   private title: string;
+  private description: string;
 
-  constructor(title: string) {
+  constructor(title: string, initiator: LogInitiator, eventName: string) {
     this.title = title;
+    this.description = `Initiated by: ${initiator}\nEvent Name: ${eventName}`;
   }
 
   public addLog(
@@ -42,6 +45,7 @@ export class Logger {
   private generateEmbed(): EmbedBuilder {
     const embed = new EmbedBuilder({
       title: this.title + `: ${time(this.date, TimestampStyles.LongDate)}`,
+      description: this.description,
       fields: this.fields,
     });
 
