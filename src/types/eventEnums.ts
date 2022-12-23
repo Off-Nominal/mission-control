@@ -1,5 +1,7 @@
 export enum NewsManagerEvents {
   NEW = "newNews",
+  READY = "ready",
+  ERROR = "error",
 }
 
 export enum MemberManagerEvents {

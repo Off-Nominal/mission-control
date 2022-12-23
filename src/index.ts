@@ -66,6 +66,7 @@ const bootChecklist = {
   hhFeedListener: false,
   ytFeedListener: false,
   eventsListener: false,
+  newsFeed: false,
 };
 
 // Database Config
@@ -205,6 +206,13 @@ newsFeedListener.on(
     );
   }
 );
+newsFeedListener.on(NewsManagerEvents.READY, (message) => {
+  bootChecklist.newsFeed = true;
+  bootLog.addLog(LogStatus.SUCCESS, message);
+});
+newsFeedListener.on(NewsManagerEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
 
 /***********************************
  *  Events Listener Setup
@@ -532,7 +540,10 @@ streamHost.on(
 
 starshipChecker.on(SiteListenerEvents.READY, () => {
   bootChecklist.starshipSiteChecker = true;
-  bootLog.addLog(LogStatus.SUCCESS, `Site listener monitoring: ${starshipURL}`);
+  bootLog.addLog(
+    LogStatus.SUCCESS,
+    `Site listener monitoring Starship Website`
+  );
 });
 starshipChecker.on(SiteListenerEvents.UPDATE, (update) =>
   utilityBot.emit(UtilityBotEvents.STARSHIP_UPDATE, update)
