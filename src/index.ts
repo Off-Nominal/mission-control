@@ -588,9 +588,17 @@ const bootChecker = setInterval(() => {
   }
 
   if (bootLogAttempts > 15) {
+    let failures: string;
+
+    for (const item in bootChecklist) {
+      if (!bootChecklist[item]) {
+        failures += `- ❌: ${item}`;
+      }
+    }
+
     bootLog.addLog(
       LogStatus.FAILURE,
-      "Boot Checklist still incomplete after 15 attempts, logger aborted."
+      `Boot Checklist still incomplete after 15 attempts, logger aborted. Failed items:\n${failures}`
     );
     bootLog.sendLog(utilityBot);
     console.log("*** BOOTUP FAILURE CHECK LOGS ***");

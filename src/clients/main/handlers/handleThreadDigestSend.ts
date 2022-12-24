@@ -8,6 +8,9 @@ import {
   ThreadChannel,
   ChannelType,
   channelMention,
+  Message,
+  messageLink,
+  hyperlink,
 } from "discord.js";
 import { isFulfilled, isRejected } from "../../../helpers/allSettledTypeGuard";
 import { fillMessageCache } from "../../../helpers/fillMessageCache";
@@ -145,8 +148,18 @@ export default async function handleThreadDigestSend() {
       fields,
     });
 
+    let lastMessage: Message;
+
     try {
-      await currentDigest.channel.messages.fetch({ limit: 1 });
+      const messages = await currentDigest.channel.messages.fetch({ limit: 1 });
+      lastMessage = messages.first();
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Fetched ${hyperlink(
+          "last message",
+          messageLink(currentDigest.channel.id, lastMessage.id)
+        )} from ${channelMention(currentDigest.channel.id)}`
+      );
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
@@ -155,8 +168,6 @@ export default async function handleThreadDigestSend() {
         )}`
       );
     }
-
-    const { lastMessage } = currentDigest.channel;
 
     if (
       lastMessage.author.id === this.user.id &&
