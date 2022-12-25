@@ -156,6 +156,11 @@ export default async function handleThreadDigestSend(client: Client) {
 
     try {
       const messages = await currentDigest.channel.messages.fetch({ limit: 1 });
+      if (messages.size === 0) {
+        throw `Message collection size is zero for ${channelMention(
+          currentDigest.channel.id
+        )}`;
+      }
       lastMessage = messages.first();
       logger.addLog(
         LogStatus.SUCCESS,
@@ -165,6 +170,7 @@ export default async function handleThreadDigestSend(client: Client) {
         )} from ${channelMention(currentDigest.channel.id)}`
       );
     } catch (err) {
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `Couldn't fetch last message from channel ${channelMention(
