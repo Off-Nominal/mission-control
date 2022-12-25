@@ -152,7 +152,7 @@ export class NewsManager extends EventEmitter {
       }
 
       const totalSubs = promises.length;
-      const successfulSubs = promises.map(isFulfilled).length;
+      const successfulSubs = promises.filter(isFulfilled).length;
       if (successfulSubs > 0) {
         this.emit(
           NewsManagerEvents.READY,
