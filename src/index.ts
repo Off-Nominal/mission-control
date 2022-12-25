@@ -186,6 +186,9 @@ launchListener.on(RLLEvents.READY, (message) => {
   bootChecklist.rllClient = true;
   bootLog.addLog(LogStatus.SUCCESS, message);
 });
+launchListener.on(RLLEvents.ERROR, (message) => {
+  bootLog.addLog(LogStatus.FAILURE, message);
+});
 
 /***********************************
  *  Site Listener Setup

@@ -11,6 +11,7 @@ import {
   Message,
   messageLink,
   hyperlink,
+  Client,
 } from "discord.js";
 import { isFulfilled, isRejected } from "../../../helpers/allSettledTypeGuard";
 import { fillMessageCache } from "../../../helpers/fillMessageCache";
@@ -32,7 +33,7 @@ type ThreadDigests = {
   [key: string]: ThreadDigest;
 };
 
-export default async function handleThreadDigestSend() {
+export default async function handleThreadDigestSend(client: Client) {
   const logger = new Logger(
     "Thread Digest Log",
     LogInitiator.SERVER,
@@ -125,6 +126,9 @@ export default async function handleThreadDigestSend() {
     threadDigests[threadData.thread.parentId].threads.push(threadData);
   });
 
+  const totalDigests = Object.keys(threadDigests).length;
+  let sentDigests = 0;
+
   for (const parentId in threadDigests) {
     const currentDigest = threadDigests[parentId];
     logger.addLog(
@@ -170,7 +174,7 @@ export default async function handleThreadDigestSend() {
     }
 
     if (
-      lastMessage.author.id === this.user.id &&
+      lastMessage?.author.id === this.user.id &&
       lastMessage.embeds.length > 0 &&
       lastMessage.embeds[0]?.data?.title === "Active Discord Threads"
     ) {
@@ -180,6 +184,7 @@ export default async function handleThreadDigestSend() {
           LogStatus.SUCCESS,
           `Edited last message in ${channelMention(currentDigest.channel.id)}.`
         );
+        sentDigests++;
       } catch (err) {
         console.error(err);
         logger.addLog(
@@ -196,6 +201,7 @@ export default async function handleThreadDigestSend() {
           LogStatus.SUCCESS,
           `Sent digest to ${channelMention(currentDigest.channel.id)}`
         );
+        sentDigests++;
       } catch (err) {
         logger.addLog(
           LogStatus.FAILURE,
@@ -205,5 +211,11 @@ export default async function handleThreadDigestSend() {
     }
   }
 
-  logger.sendLog(this);
+  const allSuccessful = sentDigests === totalDigests;
+  logger.addLog(
+    allSuccessful ? LogStatus.SUCCESS : LogStatus.INFO,
+    `${sentDigests} of ${totalDigests} successfully sent.`
+  );
+
+  logger.sendLog(client);
 }
