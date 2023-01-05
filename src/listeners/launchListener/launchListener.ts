@@ -13,8 +13,6 @@ import {
 } from "./helpers";
 import { RLLEvents } from "../../types/eventEnums";
 import EventEmitter = require("events");
-import { Logger, LogStatus } from "../../utilities/logger";
-import { LogInitiator } from "../../types/logEnums";
 
 const FIVE_MINS_IN_MS = 300000;
 
@@ -50,7 +48,7 @@ export default class LaunchListener extends EventEmitter {
       .catch((err) => {
         this.emit(
           RLLEvents.BOOT_ERROR,
-          "RLL Client failed to sync launch events."
+          `RLL Client failed to sync launch events.`
         );
       });
   }
