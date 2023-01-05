@@ -591,7 +591,7 @@ const bootChecker = setInterval(() => {
   }
 
   if (bootLogAttempts > 15) {
-    let failures: string;
+    let failures = "";
 
     for (const item in bootChecklist) {
       if (!bootChecklist[item]) {

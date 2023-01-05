@@ -55,11 +55,13 @@ export default async function handleThreadDigestSend(client: Client) {
       `${activeThreads.threads.size} active threads fetched from Discord.`
     );
     activePublicThreads = activeThreads.threads.filter(
-      (thread) => thread.type === ChannelType.PublicThread
+      (thread) =>
+        thread.type === ChannelType.PublicThread &&
+        thread.parent.type === ChannelType.GuildText
     );
     logger.addLog(
       LogStatus.INFO,
-      `${activePublicThreads.size} active threads after filtering non-public.`
+      `${activePublicThreads.size} active threads after filtering non-public threads and forum threads.`
     );
   } catch (err) {
     logger.addLog(
@@ -113,9 +115,16 @@ export default async function handleThreadDigestSend(client: Client) {
     };
   });
 
+  const filteredThreadData = threadData.filter((data) => data.messageCount > 0);
+
+  logger.addLog(
+    LogStatus.INFO,
+    `${filteredThreadData.length} actually active threads after filtering out ones with 0 messages.`
+  );
+
   const threadDigests: ThreadDigests = {};
 
-  threadData.forEach((threadData) => {
+  filteredThreadData.forEach((threadData) => {
     if (!threadDigests[threadData.thread.parentId]) {
       threadDigests[threadData.thread.parentId] = {
         channel: threadData.thread.parent,
