@@ -3,9 +3,9 @@ import { add, format } from "date-fns";
 import { LaunchesParams, LaunchesResponse } from "./types";
 
 type RLLError = {
-  type: "server" | "no-response" | "other";
-  status?: AxiosError["status"];
-  code?: AxiosError["code"];
+  type: "Server Responded" | "No Response from Server" | "other";
+  status?: AxiosError["response"]["status"];
+  axiosCode?: AxiosError["code"];
   method?: string;
   url?: string;
   name?: string;
@@ -17,9 +17,10 @@ const axiosErrorHandler = (err: Error | AxiosError) => {
   if (axios.isAxiosError(err)) {
     if (err.response) {
       const error: RLLError = {
-        type: "server",
-        status: err.status,
-        code: err.code,
+        type: "Server Responded",
+        status: err.response.status,
+        message: err.response.statusText,
+        axiosCode: err.code,
         method: err.config.method,
         url: err.config.url,
       };
@@ -27,8 +28,8 @@ const axiosErrorHandler = (err: Error | AxiosError) => {
       throw error;
     } else {
       const error: RLLError = {
-        type: "no-response",
-        code: err.code,
+        type: "No Response from Server",
+        axiosCode: err.code,
         method: err.config.method,
         url: err.config.url,
       };
