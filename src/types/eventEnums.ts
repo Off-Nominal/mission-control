@@ -58,5 +58,6 @@ export enum DevEvents {
 
 export enum RLLEvents {
   READY = "ready",
+  BOOT_ERROR = "boot_error",
   ERROR = "error",
 }

@@ -42,12 +42,17 @@ export default class LaunchListener extends EventEmitter {
 
     this.syncEvents()
       .then(() => {
-        this.monitor();
-        this.emit(RLLEvents.READY, "RLL Client synced and monitoring API.");
+        this.emit(RLLEvents.READY, "RLL Client synced successfully.");
       })
       .catch((err) => {
-        console.error(err);
-        this.emit(RLLEvents.ERROR, "RLL Client failed to sync launch events.");
+        this.emit(
+          RLLEvents.BOOT_ERROR,
+          `RLL Client failed to sync launch events on boot.`
+        );
+      })
+      .finally(() => {
+        this.monitor();
+        this.emit(RLLEvents.READY, "RLL Client monitoring API.");
       });
   }
 
@@ -114,7 +119,17 @@ export default class LaunchListener extends EventEmitter {
 
   private monitor() {
     setInterval(() => {
-      this.syncEvents();
+      this.syncEvents().catch((err) => {
+        let error = "API Call Error";
+        console.log(err);
+        for (const item in err) {
+          error += `\n${item}: ${err[item]}`;
+        }
+        this.emit(RLLEvents.ERROR, {
+          event: "Interval API Sync",
+          error,
+        });
+      });
     }, FIVE_MINS_IN_MS);
   }
 
