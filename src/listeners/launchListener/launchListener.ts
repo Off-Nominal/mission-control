@@ -13,6 +13,8 @@ import {
 } from "./helpers";
 import { RLLEvents } from "../../types/eventEnums";
 import EventEmitter = require("events");
+import { Logger, LogStatus } from "../../utilities/logger";
+import { LogInitiator } from "../../types/logEnums";
 
 const FIVE_MINS_IN_MS = 300000;
 
@@ -46,8 +48,10 @@ export default class LaunchListener extends EventEmitter {
         this.emit(RLLEvents.READY, "RLL Client synced and monitoring API.");
       })
       .catch((err) => {
-        console.error(err);
-        this.emit(RLLEvents.ERROR, "RLL Client failed to sync launch events.");
+        this.emit(
+          RLLEvents.BOOT_ERROR,
+          "RLL Client failed to sync launch events."
+        );
       });
   }
 
@@ -114,7 +118,16 @@ export default class LaunchListener extends EventEmitter {
 
   private monitor() {
     setInterval(() => {
-      this.syncEvents();
+      this.syncEvents().catch((err) => {
+        let error = "";
+        for (const item of err) {
+          error += `${item}: ${err[item]}`;
+        }
+        this.emit(RLLEvents.BOOT_ERROR, {
+          event: "Interval API Synch",
+          error,
+        });
+      });
     }, FIVE_MINS_IN_MS);
   }
 

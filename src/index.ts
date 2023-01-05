@@ -186,8 +186,17 @@ launchListener.on(RLLEvents.READY, (message) => {
   bootChecklist.rllClient = true;
   bootLog.addLog(LogStatus.SUCCESS, message);
 });
-launchListener.on(RLLEvents.ERROR, (message) => {
+launchListener.on(RLLEvents.BOOT_ERROR, (message) => {
   bootLog.addLog(LogStatus.FAILURE, message);
+});
+launchListener.on(RLLEvents.ERROR, (err) => {
+  const logger = new Logger(
+    "Rocketlaunch.live Client Error",
+    LogInitiator.RLL,
+    err.event
+  );
+  logger.addLog(LogStatus.FAILURE, err.error);
+  logger.sendLog(utilityBot);
 });
 
 /***********************************
