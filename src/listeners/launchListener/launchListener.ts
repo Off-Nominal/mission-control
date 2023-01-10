@@ -13,6 +13,7 @@ import {
 } from "./helpers";
 import { RLLEvents } from "../../types/eventEnums";
 import EventEmitter = require("events");
+import { truncateText } from "../../helpers/truncateText";
 
 const FIVE_MINS_IN_MS = 300000;
 
@@ -109,7 +110,7 @@ export default class LaunchListener extends EventEmitter {
           if (promise.status === "rejected") {
             this.emit(RLLEvents.ERROR, {
               event: "Event Edit/Create Failure for Rocket Launch",
-              error: promise.reason,
+              error: truncateText(promise.reason, 1000),
             });
             console.error(promise.reason);
           }
