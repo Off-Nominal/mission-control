@@ -107,10 +107,10 @@ export default class LaunchListener extends EventEmitter {
       .then((promises) => {
         promises.forEach((promise) => {
           if (promise.status === "rejected") {
-            this.emit(
-              RLLEvents.ERROR,
-              "Event Edit/Create Failure for Rocket Launch"
-            );
+            this.emit(RLLEvents.ERROR, {
+              event: "Event Edit/Create Failure for Rocket Launch",
+              error: promise.reason,
+            });
             console.error(promise.reason);
           }
         });
