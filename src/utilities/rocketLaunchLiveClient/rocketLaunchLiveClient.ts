@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import { add, format } from "date-fns";
 import { LaunchesParams, LaunchesResponse } from "./types";
 
-type RLLError = {
+export type RLLError = {
   type: "Server Responded" | "No Response from Server" | "other";
   status?: AxiosError["response"]["status"];
   axiosCode?: AxiosError["code"];
