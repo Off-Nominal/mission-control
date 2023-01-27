@@ -12,6 +12,7 @@ import {
   messageLink,
   hyperlink,
   Client,
+  ForumChannel,
 } from "discord.js";
 import { isFulfilled, isRejected } from "../../../helpers/allSettledTypeGuard";
 import { fillMessageCache } from "../../../helpers/fillMessageCache";
@@ -125,7 +126,10 @@ export default async function handleThreadDigestSend(client: Client) {
   const threadDigests: ThreadDigests = {};
 
   filteredThreadData.forEach((threadData) => {
-    if (!threadDigests[threadData.thread.parentId]) {
+    if (
+      threadData.thread.parent.type !== ChannelType.GuildForum &&
+      !threadDigests[threadData.thread.parentId]
+    ) {
       threadDigests[threadData.thread.parentId] = {
         channel: threadData.thread.parent,
         threads: [],
