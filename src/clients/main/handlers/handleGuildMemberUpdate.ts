@@ -55,13 +55,21 @@ export default async function handleGuildMemberUpdate(
     `${addedRoles.size} new Roles added for user ${newMember.displayName}`
   );
 
-  const isNewMember = !oldRoles.find(
-    (_, roleId) =>
-      roleId === roleIds[SpecificRole.PREMIUM] ||
-      roleId === roleIds[SpecificRole.YOUTUBE] ||
-      roleId === roleIds[SpecificRole.WEMARTIANS] ||
-      roleId === roleIds[SpecificRole.MECO]
-  );
+  const isNewMember =
+    !oldRoles.find(
+      (_, roleId) =>
+        roleId === roleIds[SpecificRole.PREMIUM] ||
+        roleId === roleIds[SpecificRole.YOUTUBE] ||
+        roleId === roleIds[SpecificRole.WEMARTIANS] ||
+        roleId === roleIds[SpecificRole.MECO]
+    ) &&
+    newRoles.find(
+      (_, roleId) =>
+        roleId === roleIds[SpecificRole.PREMIUM] ||
+        roleId === roleIds[SpecificRole.YOUTUBE] ||
+        roleId === roleIds[SpecificRole.WEMARTIANS] ||
+        roleId === roleIds[SpecificRole.MECO]
+    );
 
   logger.addLog(
     LogStatus.INFO,
