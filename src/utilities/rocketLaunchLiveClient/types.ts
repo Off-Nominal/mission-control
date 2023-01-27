@@ -1,5 +1,5 @@
 export type LaunchesParams = {
-  id?: string | string[];
+  id?: string;
   cospar_id?: string;
   after_date?: string;
   before_date?: string;
