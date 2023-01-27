@@ -1,7 +1,7 @@
 import { GuildMember, EmbedBuilder, ChannelType } from "discord.js";
 import { SpecificChannel, channelIds } from "../../../types/channelEnums";
 
-export default async function handleGuildMemberAdd(member: GuildMember) {
+export default async function handleGuildMemberUpdate(member: GuildMember) {
   const embed = new EmbedBuilder();
 
   embed

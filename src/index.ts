@@ -322,7 +322,7 @@ utilityBot.once("ready", () => {
   bootChecklist.utilityBot = true;
 });
 utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
-utilityBot.on("guildMemberAdd", mainBotHandlers.handleGuildMemberAdd);
+utilityBot.on("guildMemberUpdate", mainBotHandlers.handleGuildMemberUpdate);
 utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
 utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
 utilityBot.on("interactionCreate", (interaction) => {

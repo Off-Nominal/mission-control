@@ -1,6 +1,7 @@
 export enum SpecificChannel {
   MODS = "mods",
   BOTS = "bots",
+  SPLASHDOWN = "splashdown",
   WELCOME = "welcome",
   ANNOUNCEMENTS = "announcements",
   CONTENT = "content",
@@ -28,6 +29,7 @@ export enum SpecificChannel {
 }
 
 export const channelIds = {
+  [SpecificChannel.SPLASHDOWN]: process.env.SPLASHDOWN_CHANNEL_ID,
   [SpecificChannel.LIVECHAT]: process.env.LIVECHATCHANNELID,
   [SpecificChannel.BOCA_CHICA]: process.env.BOCACHICACHANNELID,
   [SpecificChannel.CONTENT]: process.env.CONTENTCHANNELID,
