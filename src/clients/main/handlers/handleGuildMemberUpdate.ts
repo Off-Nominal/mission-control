@@ -7,7 +7,9 @@ import {
   MessageCreateOptions,
 } from "discord.js";
 import { SpecificChannel, channelIds } from "../../../types/channelEnums";
+import { LogInitiator } from "../../../types/logEnums";
 import { roleIds, SpecificRole } from "../../../types/roleEnums";
+import { Logger, LogStatus } from "../../../utilities/logger";
 
 const roleLabels = {
   [roleIds[SpecificRole.ANOMALY]]: "Discord Anomaly",
@@ -21,6 +23,12 @@ export default async function handleGuildMemberUpdate(
   oldMember: GuildMember,
   newMember: GuildMember
 ) {
+  const logger = new Logger(
+    "New Role Add",
+    LogInitiator.DISCORD,
+    "guildMemberUpdate"
+  );
+
   const oldRoles = oldMember.roles.cache;
   const newRoles = newMember.roles.cache;
 
@@ -33,8 +41,19 @@ export default async function handleGuildMemberUpdate(
   }
 
   if (addedRoles.size < 1) {
+    logger.addLog(LogStatus.INFO, "No new roles added - command ignored.");
+    try {
+      await logger.sendLog(newMember.client);
+    } catch (err) {
+      console.error(err);
+    }
     return;
   }
+
+  logger.addLog(
+    LogStatus.INFO,
+    `${addedRoles.size} new Roles added for user ${newMember.displayName}`
+  );
 
   const isNewMember = !oldRoles.find(
     (_, roleId) =>
@@ -42,6 +61,11 @@ export default async function handleGuildMemberUpdate(
       roleId === roleIds[SpecificRole.YOUTUBE] ||
       roleId === roleIds[SpecificRole.WEMARTIANS] ||
       roleId === roleIds[SpecificRole.MECO]
+  );
+
+  logger.addLog(
+    LogStatus.INFO,
+    `${newMember.displayName} is ${isNewMember ? "" : "not "}a new member.`
   );
 
   const embeds: EmbedBuilder[] = [];
@@ -75,6 +99,7 @@ export default async function handleGuildMemberUpdate(
       );
 
     embeds.push(embed);
+    logger.addLog(LogStatus.SUCCESS, "New member Embed added!");
   } else {
     const embed = new EmbedBuilder();
 
@@ -90,6 +115,10 @@ export default async function handleGuildMemberUpdate(
             `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
           );
         embeds.push(embed);
+        logger.addLog(
+          LogStatus.SUCCESS,
+          "New pledge (Discord Anomaly) Embed added!"
+        );
       }
       if (v.id === roleIds[SpecificRole.NFRS]) {
         embed
@@ -98,6 +127,10 @@ export default async function handleGuildMemberUpdate(
             `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
           );
         embeds.push(embed);
+        logger.addLog(
+          LogStatus.SUCCESS,
+          "New pledge (Discord #NeverFlyRideShare) Embed added!"
+        );
       }
       if (v.id === roleIds[SpecificRole.MECO]) {
         embed
@@ -106,6 +139,10 @@ export default async function handleGuildMemberUpdate(
             `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
           );
         embeds.push(embed);
+        logger.addLog(
+          LogStatus.SUCCESS,
+          "New pledge (MECO Patron) Embed added!"
+        );
       }
       if (v.id === roleIds[SpecificRole.WEMARTIANS]) {
         embed
@@ -114,6 +151,10 @@ export default async function handleGuildMemberUpdate(
             `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
           );
         embeds.push(embed);
+        logger.addLog(
+          LogStatus.SUCCESS,
+          "New pledge (WeMartians Patron) Embed added!"
+        );
       }
       if (v.id === roleIds[SpecificRole.YT_ANOMALY]) {
         embed
@@ -122,6 +163,10 @@ export default async function handleGuildMemberUpdate(
             `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
           );
         embeds.push(embed);
+        logger.addLog(
+          LogStatus.SUCCESS,
+          "New pledge (YouTube Anomaly) Embed added!"
+        );
       }
     }
   }
@@ -140,7 +185,9 @@ export default async function handleGuildMemberUpdate(
       message.content = `Attention <@${newMember.user.id}>!`;
     }
 
-    channel.send(message);
+    await channel.send(message);
+    logger.addLog(LogStatus.SUCCESS, "New Role Update Complete!");
+    logger.sendLog(newMember.client);
   } catch (err) {
     console.error(err);
   }
