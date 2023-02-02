@@ -1,11 +1,9 @@
-import RocketLaunchLiveClient from "../../utilities/rocketLaunchLiveClient/rocketLaunchLiveClient";
 import {
   Collection,
   GuildScheduledEvent,
   GuildScheduledEventManager,
 } from "discord.js";
-import { isBefore } from "date-fns";
-import { Launch } from "../../utilities/rocketLaunchLiveClient/types";
+import { add, isBefore } from "date-fns";
 import {
   fetchBannerUrl,
   generateEventCreateOptionsFromLaunch,
@@ -15,18 +13,19 @@ import { RLLEvents } from "../../types/eventEnums";
 import EventEmitter = require("events");
 import { truncateText } from "../../helpers/truncateText";
 import { isRejected } from "../../helpers/allSettledTypeGuard";
+import { rllc, RLLClient, RLLEntity } from "rocket-launch-live-client";
 
 const FIVE_MINS_IN_MS = 300000;
 
 export default class LaunchListener extends EventEmitter {
   private events: Map<number, GuildScheduledEvent>;
-  private client: RocketLaunchLiveClient;
+  private client: RLLClient;
   private eventsManager: GuildScheduledEventManager;
 
   constructor(key) {
     super();
     this.events = new Map<number, GuildScheduledEvent>();
-    this.client = new RocketLaunchLiveClient(key);
+    this.client = rllc(key);
   }
 
   public initialize(
@@ -62,9 +61,11 @@ export default class LaunchListener extends EventEmitter {
     const now = new Date();
 
     return this.client
-      .fetchLaunchesInWindow(now, { days: 7 })
+      .launches({ after_date: now, before_date: add(now, { days: 7 }) })
       .then((response) => {
-        const promises: Promise<Launch | GuildScheduledEvent | void>[] = [];
+        const promises: Promise<
+          RLLEntity.Launch | GuildScheduledEvent | void
+        >[] = [];
 
         response.result.forEach((launch) => {
           if (launch.result !== -1) return;
@@ -97,7 +98,7 @@ export default class LaunchListener extends EventEmitter {
         this.events.forEach((event, rllId) => {
           if (!fetchedIds.includes(rllId)) {
             const promise = this.client
-              .fetchLaunches({ id: rllId.toString() })
+              .launches({ id: rllId })
               .then((response) => this.syncEvent(event, response.result[0]));
 
             promises.push(promise);
@@ -145,7 +146,7 @@ export default class LaunchListener extends EventEmitter {
     }, FIVE_MINS_IN_MS);
   }
 
-  private syncEvent(event: GuildScheduledEvent, launch: Launch) {
+  private syncEvent(event: GuildScheduledEvent, launch: RLLEntity.Launch) {
     if (!launch.win_open) {
       return event.delete();
     }

@@ -41,6 +41,7 @@
     "googleapis": "^92.0.0",
     "mars-date-utils": "^1.1.1",
     "pg": "^8.7.1",
+    "rocket-launch-live-client": "^0.2.0",
     "string-strip-html": "^8.2.9",
     "uuid": "^8.3.2"
   },
@@ -56,6 +57,6 @@
     "typescript": "^4.7.4"
   },
   "engines": {
-    "node": "16.15.0"
+    "node": "16.19.0"
   }
 }
