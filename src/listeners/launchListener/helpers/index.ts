@@ -9,11 +9,14 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import { Launch } from "../../../utilities/rocketLaunchLiveClient/types";
 
 import { sanityClient, sanityImageUrlBuilder } from "../../../cms/client";
+import { RLLEntity } from "rocket-launch-live-client";
 
-const generateDescription = (launch: Launch, credit: string | null): string => {
+const generateDescription = (
+  launch: RLLEntity.Launch,
+  credit: string | null
+): string => {
   const windowOpen = new Date(launch.win_open);
   const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
     windowOpen,
@@ -24,7 +27,7 @@ const generateDescription = (launch: Launch, credit: string | null): string => {
   return launch.launch_description + infoString + idString + creditString;
 };
 
-const getStreamUrl = (launch: Launch) => {
+const getStreamUrl = (launch: RLLEntity.Launch) => {
   const streamMedia = launch.media.find(
     (media) => media.ldfeatured || media.featured
   );
@@ -47,7 +50,7 @@ const generateScheduledEndTime = (winOpen: Date, winClose: string): Date =>
     : add(winOpen, { minutes: 60 });
 
 export const generateEventCreateOptionsFromLaunch = (
-  launch: Launch,
+  launch: RLLEntity.Launch,
   banner: {
     url: string;
     credit: string;
@@ -79,7 +82,7 @@ type EditOptions = GuildScheduledEventEditOptions<
 
 export const generateEventEditOptionsFromLaunch = (
   event: GuildScheduledEvent,
-  launch: Launch,
+  launch: RLLEntity.Launch,
   banner: {
     url: string;
     credit: string;
