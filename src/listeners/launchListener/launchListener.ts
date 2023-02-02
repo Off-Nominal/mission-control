@@ -93,7 +93,6 @@ export default class LaunchListener extends EventEmitter {
         });
 
         // Sync any events that are not in the API call (which may have moved)
-
         const fetchedIds = response.result.map((result) => result.id);
         this.events.forEach((event, rllId) => {
           if (!fetchedIds.includes(rllId)) {
