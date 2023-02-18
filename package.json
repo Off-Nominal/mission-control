@@ -41,7 +41,7 @@
     "googleapis": "^92.0.0",
     "mars-date-utils": "^1.1.1",
     "pg": "^8.7.1",
-    "rocket-launch-live-client": "^0.2.0",
+    "rocket-launch-live-client": "^0.3.0",
     "string-strip-html": "^8.2.9",
     "uuid": "^8.3.2"
   },

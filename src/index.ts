@@ -408,6 +408,7 @@ eventBot.on(
   eventBotHandlers.handleGuildScheduledEventCreate
 );
 eventBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
+eventBot.on("guildScheduledEventUpdate", launchListener.clearEvent);
 eventBot.on("guildScheduledEventCreate", eventsListener.addEvent);
 eventBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
 
