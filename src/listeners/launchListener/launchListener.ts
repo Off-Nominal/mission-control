@@ -92,7 +92,6 @@ export default class LaunchListener extends EventEmitter {
       this.syncEvents();
 
       this.watcher.on("call", (params) => {
-        console.log(params);
         this.syncEvents();
       });
     });
