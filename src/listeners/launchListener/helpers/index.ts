@@ -13,15 +13,28 @@ import {
 import { sanityClient, sanityImageUrlBuilder } from "../../../cms/client";
 import { RLLEntity } from "rocket-launch-live-client";
 
+export const getLaunchDate = (launch: RLLEntity.Launch): null | Date => {
+  if (!launch.t0 && !launch.win_open) {
+    return null;
+  }
+
+  if (launch.t0) {
+    return new Date(launch.t0);
+  } else {
+    return new Date(launch.win_open);
+  }
+};
+
 const generateDescription = (
   launch: RLLEntity.Launch,
   credit: string | null
 ): string => {
-  const windowOpen = new Date(launch.win_open);
+  const launchDate = getLaunchDate(launch);
+
   const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
-    windowOpen,
+    launchDate,
     TimestampStyles.LongDateTime
-  )}, ${time(windowOpen, TimestampStyles.RelativeTime)}`;
+  )}, ${time(launchDate, TimestampStyles.RelativeTime)}`;
   const idString = `\n\nrllId=[${launch.id.toString()}]\n\nData provided by RocketLaunch.live`;
   const creditString = credit ? `\n\nEvent banner courtesy of ${credit}` : "";
   return launch.launch_description + infoString + idString + creditString;
@@ -44,7 +57,10 @@ const getStreamUrl = (launch: RLLEntity.Launch) => {
 const generateScheduledStartTime = (winOpen: Date): Date =>
   sub(winOpen, { minutes: 15 });
 
-const generateScheduledEndTime = (winOpen: Date, winClose: string): Date =>
+const generateScheduledEndTime = (
+  winOpen: Date,
+  winClose: string | null
+): Date =>
   winClose
     ? add(new Date(winClose), { minutes: 15 })
     : add(winOpen, { minutes: 60 });
@@ -56,12 +72,12 @@ export const generateEventCreateOptionsFromLaunch = (
     credit: string;
   } | null
 ): GuildScheduledEventCreateOptions => {
-  const winOpen = new Date(launch.win_open);
+  const launchDate = getLaunchDate(launch);
 
   const options: GuildScheduledEventCreateOptions = {
     name: launch.name,
-    scheduledStartTime: generateScheduledStartTime(winOpen),
-    scheduledEndTime: generateScheduledEndTime(winOpen, launch.win_close),
+    scheduledStartTime: generateScheduledStartTime(launchDate),
+    scheduledEndTime: generateScheduledEndTime(launchDate, launch.win_close),
     privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
     entityType: GuildScheduledEventEntityType.External,
     description: generateDescription(launch, banner ? banner.credit : null),
@@ -107,15 +123,16 @@ export const generateEventEditOptionsFromLaunch = (
   }
 
   // Times
-  const winOpen = new Date(launch.win_open);
+  const launchDate = getLaunchDate(launch);
+
   const timesDoNotMatch =
     add(event.scheduledStartAt, { minutes: 15 }).toISOString() !==
-    winOpen.toISOString();
+    launchDate.toISOString();
 
   if (timesDoNotMatch && !event.isActive()) {
-    newData.scheduledStartTime = generateScheduledStartTime(winOpen);
+    newData.scheduledStartTime = generateScheduledStartTime(launchDate);
     newData.scheduledEndTime = generateScheduledEndTime(
-      winOpen,
+      launchDate,
       launch.win_close
     );
   }
@@ -137,14 +154,14 @@ export const fetchBannerUrl = (
   const query = `*[_type == "rocketBanner" && id == "${id.toString()}"]{banner, credit}`;
   return sanityClient
     .fetch<{ banner: string; credit: string }[]>(query)
-    .then((res) =>
+    .then((res) => {
       res[0]?.banner
         ? {
             url: sanityImageUrlBuilder.image(res[0].banner).url(),
             credit: res[0].credit,
           }
-        : null
-    )
+        : null;
+    })
     .catch((err) => {
       console.error(err);
       return null;

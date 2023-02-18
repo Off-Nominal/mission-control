@@ -78,7 +78,7 @@ export class EventsListener extends EventEmitter {
   ) {
     if (
       newEvent.status === GuildScheduledEventStatus.Active ||
-      GuildScheduledEventStatus.Completed
+      newEvent.status === GuildScheduledEventStatus.Completed
     ) {
       this.events.delete(newEvent.id);
     }
