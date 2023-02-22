@@ -152,18 +152,24 @@ export const fetchBannerUrl = (
   id: number
 ): Promise<{ url: string; credit: string } | null> => {
   const query = `*[_type == "rocketBanner" && id == "${id.toString()}"]{banner, credit}`;
+  // console.log(query);
   return sanityClient
     .fetch<{ banner: string; credit: string }[]>(query)
-    .then((res) => {
-      res[0]?.banner
-        ? {
-            url: sanityImageUrlBuilder.image(res[0].banner).url(),
-            credit: res[0].credit,
-          }
-        : null;
+    .then(([response]) => {
+      if (!response?.banner) {
+        return null;
+      }
+
+      const bannerObj = {
+        url: sanityImageUrlBuilder.image(response.banner).url(),
+        credit: response.credit,
+      };
+
+      return bannerObj;
     })
     .catch((err) => {
       console.error(err);
+
       return null;
     });
 };
