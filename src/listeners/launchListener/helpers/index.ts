@@ -152,7 +152,6 @@ export const fetchBannerUrl = (
   id: number
 ): Promise<{ url: string; credit: string } | null> => {
   const query = `*[_type == "rocketBanner" && id == "${id.toString()}"]{banner, credit}`;
-  // console.log(query);
   return sanityClient
     .fetch<{ banner: string; credit: string }[]>(query)
     .then(([response]) => {
