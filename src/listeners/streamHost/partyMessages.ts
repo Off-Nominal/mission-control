@@ -6,6 +6,12 @@ import {
 } from "discord.js";
 import { sanityClient } from "../../cms/client";
 
+type SanityMessage = {
+  message: string;
+  force: boolean;
+  timestamp: number;
+};
+
 export type PartyMessage = {
   text: string;
   waitTime: number;
@@ -26,17 +32,20 @@ export const generatePartyMessages = (
     },
   ];
 
-  const query = '*[_type == "eventPartyMessages"].message';
+  const query = '*[_type == "eventPartyMessages"]';
 
   return sanityClient
-    .fetch<string[]>(query)
+    .fetch<SanityMessage[]>(query)
     .then((messages) => {
-      const chosenMessages = messages.filter(() => Math.random() > 0.4);
+      const chosenMessages = messages.filter(
+        (msg) => msg.force || Math.random() > 0.4
+      );
 
       const timedChosenMessages: PartyMessage[] = chosenMessages.map((msg) => {
+        const waitTime = msg.timestamp || Math.random() * 50 + 5; // 5-55 minutes
         return {
-          text: msg,
-          waitTime: Math.random() * 50 + 5, // 5-55 minutes
+          text: msg.message,
+          waitTime,
         };
       });
 
