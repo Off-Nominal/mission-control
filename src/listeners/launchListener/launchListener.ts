@@ -193,11 +193,7 @@ export default class LaunchListener extends EventEmitter {
   // Removes completed events from the cache
   public clearEvent(
     _,
-    newEvent: GuildScheduledEvent<
-      | GuildScheduledEventStatus.Active
-      | GuildScheduledEventStatus.Completed
-      | GuildScheduledEventStatus.Scheduled
-    >
+    newEvent: GuildScheduledEvent<GuildScheduledEventStatus>
   ) {
     // Ignore events that recieved changes
     if (newEvent.status === GuildScheduledEventStatus.Scheduled) {
