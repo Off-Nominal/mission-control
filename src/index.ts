@@ -65,6 +65,7 @@ const bootChecklist = {
   bcBot: false,
   contentBot: false,
   eventBot: false,
+  ndb2Bot: false,
   starshipSiteChecker: false,
   wmFeedListener: false,
   mecoFeedListener: false,
@@ -76,6 +77,7 @@ const bootChecklist = {
   eventsListener: false,
   newsFeed: false,
   rllClient: false,
+  express: false,
 };
 
 // Database Config
@@ -193,7 +195,10 @@ const app = express();
 app.use(apiAuth);
 app.use("/api/users", usersRouter(ndb2Bot));
 app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
-app.listen(8080, () => console.log("API Endpoints Listening."));
+app.listen(8080, () => {
+  bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
+  bootChecklist.express = true;
+});
 
 /***********************************
  *  RLL Event Listener
@@ -335,9 +340,14 @@ starshipChecker.initialize();
  ************************************/
 
 ndb2Bot.once("ready", ndb2BotHandlers.handleReady);
+ndb2Bot.once("ready", () => {
+  bootLog.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
+  bootChecklist.ndb2Bot = true;
+});
 ndb2Bot.on(Events.InteractionCreate, (interaction) => {
   ndb2BotHandlers.handleInteractionCreate(interaction);
 });
+ndb2Bot.on("error", handleError);
 
 /***********************************
  *  Utility Bot Event Handlers
