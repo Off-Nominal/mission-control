@@ -1,20 +1,13 @@
 import { Message, EmbedBuilder } from "discord.js";
+import { roleIds, SpecificRole } from "../../../types/roleEnums";
 import fetchGuild from "../../actions/fetchGuild";
-
-const WM_ROLE_ID = process.env.WM_ROLE_ID;
-const MECO_ROLE_ID = process.env.MECO_ROLE_ID;
-const OFN_ROLE_ID = process.env.OFN_ROLE_ID;
-const BOT_ROLE_ID = process.env.BOT_ROLE_ID;
-const HOST_ROLE_ID = process.env.HOST_ROLE_ID;
-const GUEST_ROLE_ID = process.env.GUEST_ROLE_ID;
-const MOD_ROLE_ID = process.env.MODS_ROLE_ID;
 
 export default async function handleSendDelinquents(message: Message) {
   const guild = fetchGuild(message.client);
   const guildMemberManager = guild.members;
 
   const author = await guildMemberManager.fetch(message.author.id);
-  if (!author.roles.cache.has(MOD_ROLE_ID)) {
+  if (!author.roles.cache.has(roleIds[SpecificRole.MODS])) {
     return;
   }
 
@@ -24,12 +17,13 @@ export default async function handleSendDelinquents(message: Message) {
 
   const delinquents = allUsers.filter((member) => {
     const roleChecks = [
-      member.roles.cache.has(WM_ROLE_ID),
-      member.roles.cache.has(MECO_ROLE_ID),
-      member.roles.cache.has(OFN_ROLE_ID),
-      member.roles.cache.has(BOT_ROLE_ID),
-      member.roles.cache.has(HOST_ROLE_ID),
-      member.roles.cache.has(GUEST_ROLE_ID),
+      member.roles.cache.has(roleIds[SpecificRole.WEMARTIANS]),
+      member.roles.cache.has(roleIds[SpecificRole.MECO]),
+      member.roles.cache.has(roleIds[SpecificRole.YOUTUBE]),
+      member.roles.cache.has(roleIds[SpecificRole.PREMIUM]),
+      member.roles.cache.has(roleIds[SpecificRole.BOTS]),
+      member.roles.cache.has(roleIds[SpecificRole.HOSTS]),
+      member.roles.cache.has(roleIds[SpecificRole.GUESTS]),
     ];
     return !roleChecks.includes(true);
   });

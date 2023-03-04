@@ -1,6 +1,5 @@
 import { Channel, ChannelType, Client } from "discord.js";
 import { channelIds, SpecificChannel } from "../../../types/channelEnums";
-import fetchChannel from "../../actions/fetchChannel";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 
 export type ContentFeedItem = {
@@ -29,7 +28,7 @@ export default async function handleNewContent(
   let channel: Channel;
 
   try {
-    channel = await fetchChannel(client.channels, target);
+    channel = await client.channels.fetch(channelIds[target]);
   } catch (err) {
     console.error(err);
   }

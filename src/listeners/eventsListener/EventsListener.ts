@@ -31,14 +31,11 @@ export class EventsListener extends EventEmitter {
 
   public initialize(events: Collection<string, GuildScheduledEvent>) {
     this.events = events;
-    console.log(
-      `EventsListener loaded with ${events.size} event(s) being monitored`
-    );
     this.monitor();
   }
 
   private monitor() {
-    const interval = setInterval(() => {
+    setInterval(() => {
       const eventWindows = this.events.map((event): EventWindow => {
         const eventStartTimeStamp = event.scheduledStartAt.getTime();
         const now = Date.now();
@@ -55,6 +52,10 @@ export class EventsListener extends EventEmitter {
       });
       this.emit(EventListenerEvents.MONITOR, eventWindows);
     }, this.listenInterval);
+    this.emit(
+      EventListenerEvents.READY,
+      `EventsListener loaded with ${this.events.size} event(s) being monitored`
+    );
   }
 
   public addEvent(
@@ -77,7 +78,7 @@ export class EventsListener extends EventEmitter {
   ) {
     if (
       newEvent.status === GuildScheduledEventStatus.Active ||
-      GuildScheduledEventStatus.Completed
+      newEvent.status === GuildScheduledEventStatus.Completed
     ) {
       this.events.delete(newEvent.id);
     }

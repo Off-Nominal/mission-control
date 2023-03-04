@@ -1,6 +1,6 @@
 import handleMessageCreate from "./handleMessageCreate";
 import handleThreadCreate from "./handleThreadCreate";
-import handleGuildMemberAdd from "./handleGuildMemberAdd";
+import handleGuildMemberUpdate from "./handleGuildMemberUpdate";
 import handleMessageReactionAdd from "./handleMessageReactionAdd";
 import handleReady from "./handleReady";
 import handleInteractionCreate from "./handleInteractionCreate";
@@ -13,7 +13,7 @@ export default function generateMainBotHandlers(db: Client) {
   return {
     handleMessageCreate,
     handleThreadCreate,
-    handleGuildMemberAdd,
+    handleGuildMemberUpdate,
     handleMessageReactionAdd,
     handleReady,
     handleInteractionCreate,

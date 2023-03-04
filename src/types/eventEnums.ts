@@ -1,5 +1,7 @@
 export enum NewsManagerEvents {
   NEW = "newNews",
+  READY = "ready",
+  ERROR = "error",
 }
 
 export enum MemberManagerEvents {
@@ -20,12 +22,15 @@ export enum EventBotEvents {
 
 export enum EventListenerEvents {
   MONITOR = "eventsMonitored",
+  READY = "ready",
 }
 
 export enum ContentListnerEvents {
   NEW = "newContent",
   STREAM_START = "streamStarted",
   STREAM_END = "streamEnded",
+  READY = "ready",
+  ERROR = "error",
 }
 
 export enum UtilityBotEvents {
@@ -38,6 +43,7 @@ export enum UtilityBotEvents {
 
 export enum SiteListenerEvents {
   UPDATE = "siteUpdate",
+  READY = "ready",
 }
 
 export enum StreamHostEvents {
@@ -48,4 +54,10 @@ export enum DevEvents {
   NEW_ENTRIES = "dev_new entries",
   DB_TEST = "dev_dbtest",
   THREAD_DIGEST_SEND = "dev_threadDigestSend",
+}
+
+export enum RLLEvents {
+  READY = "ready",
+  BOOT_ERROR = "boot_error",
+  ERROR = "error",
 }
