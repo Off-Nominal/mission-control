@@ -10,6 +10,7 @@ import {
   GatewayIntentBits,
   GuildScheduledEvent,
   GuildScheduledEventManager,
+  ModalSubmitInteraction,
   Partials,
 } from "discord.js";
 
@@ -39,6 +40,7 @@ import {
   EventBotEvents,
   EventListenerEvents,
   MemberManagerEvents,
+  Ndb2Events,
   NewsManagerEvents,
   RLLEvents,
   SiteListenerEvents,
@@ -348,6 +350,9 @@ ndb2Bot.on(Events.InteractionCreate, (interaction) => {
   ndb2BotHandlers.handleInteractionCreate(interaction);
 });
 ndb2Bot.on("error", handleError);
+ndb2Bot.on(Ndb2Events.NEW, (interaction: ModalSubmitInteraction) => {
+  ndb2BotHandlers.handleNewPrediction(interaction);
+});
 
 /***********************************
  *  Utility Bot Event Handlers
