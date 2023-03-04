@@ -205,7 +205,7 @@ export default class LaunchListener extends EventEmitter {
     );
 
     // Ignore events that aren't synced launches
-    if (rllIds?.length === 0) {
+    if (!rllIds || rllIds.length === 0) {
       return;
     }
 
