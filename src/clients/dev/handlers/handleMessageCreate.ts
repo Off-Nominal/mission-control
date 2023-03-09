@@ -8,6 +8,12 @@ export default function handleMessageCreate(message: Message) {
   const [prefix, show] = parseCommands(message);
 
   if (prefix === "!content") {
+    if (!show) {
+      message.reply({
+        content: "Please add a show title as an argument",
+      });
+      return;
+    }
     message.client.emit(DevEvents.NEW_ENTRIES, show);
   }
 
