@@ -98,6 +98,16 @@ export default async function handleInteractionCreate(
 
   if (!interaction.isChatInputCommand()) return;
 
+  if (
+    process.env.NODE_ENV !== "dev" &&
+    interaction.channelId !== "1084942074991878174"
+  ) {
+    return interaction.reply({
+      content: "The new NDB2 is only available in the testing thread for now",
+      ephemeral: true,
+    });
+  }
+
   const { options, commandName } = interaction;
   const subCommand = options.getSubcommand(false);
 
@@ -319,4 +329,8 @@ export default async function handleInteractionCreate(
   //     console.error(err);
   //   }
   // }
+  return interaction.reply({
+    content:
+      "Something went wrong and I didn't now how to handle this request, please tell Jake",
+  });
 }
