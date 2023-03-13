@@ -1,13 +1,16 @@
 require("dotenv").config();
+import express from "express";
 import { Client as DbClient } from "pg";
 
 import {
   ChatInputCommandInteraction,
   Client,
   Collection,
+  Events,
   GatewayIntentBits,
   GuildScheduledEvent,
   GuildScheduledEventManager,
+  ModalSubmitInteraction,
   Partials,
 } from "discord.js";
 
@@ -37,6 +40,7 @@ import {
   EventBotEvents,
   EventListenerEvents,
   MemberManagerEvents,
+  Ndb2Events,
   NewsManagerEvents,
   RLLEvents,
   SiteListenerEvents,
@@ -63,6 +67,7 @@ const bootChecklist = {
   bcBot: false,
   contentBot: false,
   eventBot: false,
+  ndb2Bot: false,
   starshipSiteChecker: false,
   wmFeedListener: false,
   mecoFeedListener: false,
@@ -74,6 +79,7 @@ const bootChecklist = {
   eventsListener: false,
   newsFeed: false,
   rllClient: false,
+  // express: false,
 };
 
 // Database Config
@@ -95,6 +101,7 @@ const {
   devHandlers,
   eventBotHandlers,
   mainBotHandlers,
+  ndb2BotHandlers,
 } = generateHandlers(db);
 
 const searchOptions = require("../config/searchOptions.json");
@@ -113,6 +120,7 @@ const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
 const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
 const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
 const EVENT_TOKEN = process.env.EVENT_BOT_TOKEN_ID;
+const NDB2_TOKEN = process.env.NDB2_BOT_TOKEN_ID;
 
 const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
 const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
@@ -176,6 +184,23 @@ const contentBot = new Client({
 const eventBot = new Client({
   intents: [simpleIntents, eventIntents],
 });
+const ndb2Bot = new Client({ intents: [simpleIntents] });
+
+/***********************************
+ *  Express Server Setup
+ ************************************/
+
+import usersRouter from "./routers/users";
+import apiAuth from "./middleware/auth";
+
+// const app = express();
+// app.use(apiAuth);
+// // app.use("/api/users", usersRouter(ndb2Bot));
+// app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
+// app.listen(8080, () => {
+//   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
+//   bootChecklist.express = true;
+// });
 
 /***********************************
  *  RLL Event Listener
@@ -300,6 +325,7 @@ utilityBot.login(UTILITY_TOKEN);
 bcBot.login(BC_TOKEN);
 contentBot.login(CONTENT_TOKEN);
 eventBot.login(EVENT_TOKEN);
+ndb2Bot.login(NDB2_TOKEN);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
@@ -310,6 +336,23 @@ hhFeedListener.initialize();
 ytFeedListener.initialize();
 
 starshipChecker.initialize();
+
+/***********************************
+ *  NDB2 Bot Event Handlers
+ ************************************/
+
+ndb2Bot.once("ready", ndb2BotHandlers.handleReady);
+ndb2Bot.once("ready", () => {
+  bootLog.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
+  bootChecklist.ndb2Bot = true;
+});
+ndb2Bot.on(Events.InteractionCreate, (interaction) => {
+  ndb2BotHandlers.handleInteractionCreate(interaction);
+});
+ndb2Bot.on("error", handleError);
+ndb2Bot.on(Ndb2Events.NEW, (interaction: ModalSubmitInteraction) => {
+  ndb2BotHandlers.handleNewPrediction(interaction);
+});
 
 /***********************************
  *  Utility Bot Event Handlers

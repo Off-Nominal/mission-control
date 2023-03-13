@@ -61,3 +61,7 @@ export enum RLLEvents {
   BOOT_ERROR = "boot_error",
   ERROR = "error",
 }
+
+export enum Ndb2Events {
+  NEW = "new",
+}
