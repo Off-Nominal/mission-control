@@ -22,8 +22,6 @@ export const generatePredictionEmbed = (
     isClosed ? (wasSuccessful ? "✅" : "❌") : "❓"
   } ${displayName} ${adverb}predict${isClosed ? "ed" : "s"}...`;
 
-  console.log(prediction);
-
   const embed = new EmbedBuilder({
     title,
     description: codeBlock(`[#${prediction.id}]: ${prediction.text}`),
@@ -44,7 +42,9 @@ export const generatePredictionEmbed = (
       },
       {
         name: "Stats",
-        value: `✅ ${endorsements.length} (${prediction.payouts.endorse}) \u200B \u200B \u200B \u200B \u200B ❌ ${undorsements.length} (${prediction.payouts.undorse})`,
+        value: `
+          ✅ ${endorsements.length} (${prediction.payouts.endorse}) \u200B \u200B \u200B \u200B \u200B
+          ❌ ${undorsements.length} (${prediction.payouts.undorse})`,
       },
     ],
   });
