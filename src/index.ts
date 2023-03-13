@@ -79,7 +79,7 @@ const bootChecklist = {
   eventsListener: false,
   newsFeed: false,
   rllClient: false,
-  express: false,
+  // express: false,
 };
 
 // Database Config
@@ -193,14 +193,14 @@ const ndb2Bot = new Client({ intents: [simpleIntents] });
 import usersRouter from "./routers/users";
 import apiAuth from "./middleware/auth";
 
-const app = express();
-app.use(apiAuth);
-app.use("/api/users", usersRouter(ndb2Bot));
-app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
-app.listen(8080, () => {
-  bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
-  bootChecklist.express = true;
-});
+// const app = express();
+// app.use(apiAuth);
+// // app.use("/api/users", usersRouter(ndb2Bot));
+// app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
+// app.listen(8080, () => {
+//   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
+//   bootChecklist.express = true;
+// });
 
 /***********************************
  *  RLL Event Listener
