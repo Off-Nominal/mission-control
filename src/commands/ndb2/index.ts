@@ -19,64 +19,64 @@ const predictCommand = new SlashCommandBuilder()
     command
       .setName(Ndb2Subcommand.NEW)
       .setDescription("Create a new Prediction")
-  )
-  .addSubcommand((command) =>
-    command
-      .setName(Ndb2Subcommand.VIEW)
-      .setDescription("View a Prediction")
-      .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
-      )
-  )
-  .addSubcommand((command) =>
-    command
-      .setName(Ndb2Subcommand.ENDORSE)
-      .setDescription("Endorse a Prediction")
-      .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
-      )
-  )
-  .addSubcommand((command) =>
-    command
-      .setName(Ndb2Subcommand.UNDORSE)
-      .setDescription("Undorse a Prediction")
-      .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
-      )
-  )
-  .addSubcommand((command) =>
-    command
-      .setName(Ndb2Subcommand.CANCEL)
-      .setDescription("Cancel a Prediction you just made")
-      .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
-      )
-  )
-  .addSubcommand((command) =>
-    command
-      .setName(Ndb2Subcommand.TRIGGER)
-      .setDescription("Trigger a prediction to be judged")
-      .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
-      )
-      .addStringOption((option) =>
-        option
-          .setName("closed")
-          .setDescription(
-            "Effective Date of close (if this prediction is being triggered late). Format YYYY-MM-DD"
-          )
-          .setMinLength(10)
-          .setMaxLength(10)
-      )
-  )
-  .addSubcommand((command) =>
-    command
-      .setName(Ndb2Subcommand.SCORE)
-      .setDescription("View your Nostradambot Scores")
-  )
-  .addSubcommand((group) =>
-    group.setName(Ndb2Subcommand.HELP).setDescription("Help with Nostradambot2")
   );
+// .addSubcommand((command) =>
+//   command
+//     .setName(Ndb2Subcommand.VIEW)
+//     .setDescription("View a Prediction")
+//     .addIntegerOption((option) =>
+//       option.setName("id").setDescription("Prediction ID").setRequired(true)
+//     )
+// )
+// .addSubcommand((command) =>
+//   command
+//     .setName(Ndb2Subcommand.ENDORSE)
+//     .setDescription("Endorse a Prediction")
+//     .addIntegerOption((option) =>
+//       option.setName("id").setDescription("Prediction ID").setRequired(true)
+//     )
+// )
+// .addSubcommand((command) =>
+//   command
+//     .setName(Ndb2Subcommand.UNDORSE)
+//     .setDescription("Undorse a Prediction")
+//     .addIntegerOption((option) =>
+//       option.setName("id").setDescription("Prediction ID").setRequired(true)
+//     )
+// )
+// .addSubcommand((command) =>
+//   command
+//     .setName(Ndb2Subcommand.CANCEL)
+//     .setDescription("Cancel a Prediction you just made")
+//     .addIntegerOption((option) =>
+//       option.setName("id").setDescription("Prediction ID").setRequired(true)
+//     )
+// )
+// .addSubcommand((command) =>
+//   command
+//     .setName(Ndb2Subcommand.TRIGGER)
+//     .setDescription("Trigger a prediction to be judged")
+//     .addIntegerOption((option) =>
+//       option.setName("id").setDescription("Prediction ID").setRequired(true)
+//     )
+//     .addStringOption((option) =>
+//       option
+//         .setName("closed")
+//         .setDescription(
+//           "Effective Date of close (if this prediction is being triggered late). Format YYYY-MM-DD"
+//         )
+//         .setMinLength(10)
+//         .setMaxLength(10)
+//     )
+// )
+// .addSubcommand((command) =>
+//   command
+//     .setName(Ndb2Subcommand.SCORE)
+//     .setDescription("View your Nostradambot Scores")
+// )
+// .addSubcommand((group) =>
+//   group.setName(Ndb2Subcommand.HELP).setDescription("Help with Nostradambot2")
+// );
 
 const commands = [predictCommand].map((command) => command.toJSON());
 

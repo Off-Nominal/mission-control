@@ -1,23 +1,28 @@
 import { codeBlock, EmbedBuilder, time, TimestampStyles } from "discord.js";
-import { APIEnhancedPrediction } from "../../../utilities/ndb2Client/types";
-import { formatOdds } from "./helpers";
+import { NDB2API } from "../../../utilities/ndb2Client/types";
+// import { formatOdds } from "./helpers";
 
 export const generatePredictionEmbed = (
   displayName: string,
-  prediction: APIEnhancedPrediction
+  prediction: NDB2API.EnhancedPrediction
 ) => {
-  const isClosed = !!prediction.judged;
-  const created = new Date(prediction.created);
-  const due = new Date(prediction.due);
-  const closed = new Date(prediction.closed);
+  const isClosed = !!prediction.judged_date;
+  const created = new Date(prediction.created_date);
+  const due = new Date(prediction.due_date);
+  const closed = new Date(prediction.closed_date);
+
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
+
   const wasSuccessful = prediction.successful;
 
   const adverb = isClosed ? (wasSuccessful ? "" : "un") + "successfully " : "";
+
   const title = `${
     isClosed ? (wasSuccessful ? "✅" : "❌") : "❓"
   } ${displayName} ${adverb}predict${isClosed ? "ed" : "s"}...`;
+
+  console.log(prediction);
 
   const embed = new EmbedBuilder({
     title,
@@ -39,11 +44,7 @@ export const generatePredictionEmbed = (
       },
       {
         name: "Stats",
-        value: `✅ ${
-          endorsements.length
-        }\u200B \u200B \u200B \u200B \u200B ❌ ${
-          undorsements.length
-        }\u200B \u200B \u200B \u200B \u200B 🎲 ${formatOdds(prediction.odds)}`,
+        value: `✅ ${endorsements.length} (${prediction.payouts.endorse}) \u200B \u200B \u200B \u200B \u200B ❌ ${undorsements.length} (${prediction.payouts.undorse})`,
       },
     ],
   });

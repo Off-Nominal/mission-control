@@ -12,25 +12,11 @@ import {
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
 import { Ndb2Events } from "../../../types/eventEnums";
-import queries from "../../../utilities/ndb2Client/queries/index";
-import {
-  APIEnhancedPrediction,
-  ClosePredictionResponse,
-} from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-import { generateUserEmbed } from "../actions/generateUserEmbed";
-import { generateVoteEmbed } from "../actions/generateVoteEmbed";
-import { generateVoteResponse } from "../actions/generateVoteResponse";
-const {
-  addBet,
-  addVote,
-  addPrediction,
-  getPrediction,
-  triggerPrediction,
-  getUser,
-  deletePrediction,
-} = queries;
+// import { generateUserEmbed } from "../actions/generateUserEmbed";
+// import { generateVoteEmbed } from "../actions/generateVoteEmbed";
+// import { generateVoteResponse } from "../actions/generateVoteResponse";
 
 enum ButtonCommand {
   ENDORSE = "Endorse",
@@ -47,68 +33,68 @@ export default async function handleInteractionCreate(
     return interaction.client.emit(Ndb2Events.NEW, interaction);
   }
 
-  // Handle Button Submissions for Endorsements and Undorsements
-  if (interaction.isButton()) {
-    const [command, predictionId] = interaction.customId.split(" ");
-    const discordId = interaction.member.user.id;
+  // // Handle Button Submissions for Endorsements and Undorsements
+  // if (interaction.isButton()) {
+  //   const [command, predictionId] = interaction.customId.split(" ");
+  //   const discordId = interaction.member.user.id;
 
-    const isBet =
-      command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
-    const isVote =
-      command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
+  //   const isBet =
+  //     command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
+  //   const isVote =
+  //     command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
 
-    if (isBet) {
-      const endorsed = command === ButtonCommand.ENDORSE;
+  //   if (isBet) {
+  //     const endorsed = command === ButtonCommand.ENDORSE;
 
-      // Add Bet
-      try {
-        await addBet(discordId, predictionId, endorsed);
-        interaction.reply({
-          content: `Prediction successfully ${command.toLowerCase()}d!`,
-          ephemeral: true,
-        });
-      } catch (err) {
-        return interaction.reply({
-          content: err.response.data.error,
-          ephemeral: true,
-        });
-      }
-    }
+  //     // Add Bet
+  //     try {
+  //       await addBet(discordId, predictionId, endorsed);
+  //       interaction.reply({
+  //         content: `Prediction successfully ${command.toLowerCase()}d!`,
+  //         ephemeral: true,
+  //       });
+  //     } catch (err) {
+  //       return interaction.reply({
+  //         content: err.response.data.error,
+  //         ephemeral: true,
+  //       });
+  //     }
+  //   }
 
-    if (isVote) {
-      const affirmed = command === ButtonCommand.AFFIRM;
+  //   if (isVote) {
+  //     const affirmed = command === ButtonCommand.AFFIRM;
 
-      // Add Vote
-      try {
-        await addVote(discordId, predictionId, affirmed);
-        interaction.reply({
-          content: `Prediction successfully ${command.toLowerCase()}d!`,
-          ephemeral: true,
-        });
-      } catch (err) {
-        return interaction.reply({
-          content: err.response.data.error,
-          ephemeral: true,
-        });
-      }
-    }
+  //     // Add Vote
+  //     try {
+  //       await addVote(discordId, predictionId, affirmed);
+  //       interaction.reply({
+  //         content: `Prediction successfully ${command.toLowerCase()}d!`,
+  //         ephemeral: true,
+  //       });
+  //     } catch (err) {
+  //       return interaction.reply({
+  //         content: err.response.data.error,
+  //         ephemeral: true,
+  //       });
+  //     }
+  //   }
 
-    // Update Embed with new stats
-    try {
-      const buttonMsg = await interaction.message;
-      const prediction = await getPrediction(predictionId);
-      const predictor = await interaction.guild.members.fetch(
-        prediction.predictor_discord_id
-      );
+  //   // Update Embed with new stats
+  //   try {
+  //     const buttonMsg = await interaction.message;
+  //     const prediction = await getPrediction(predictionId);
+  //     const predictor = await interaction.guild.members.fetch(
+  //       prediction.predictor_discord_id
+  //     );
 
-      const embed = isBet
-        ? generatePredictionEmbed(predictor.nickname, prediction)
-        : generateVoteEmbed(prediction);
-      return await buttonMsg.edit({ embeds: [embed] });
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  //     const embed = isBet
+  //       ? generatePredictionEmbed(predictor.nickname, prediction)
+  //       : generateVoteEmbed(prediction);
+  //     return await buttonMsg.edit({ embeds: [embed] });
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
   if (!interaction.isChatInputCommand()) return;
 
@@ -140,7 +126,7 @@ export default async function handleInteractionCreate(
 
     const dueInput = new TextInputBuilder()
       .setCustomId("due")
-      .setLabel("Prediction Due Date")
+      .setLabel("Prediction Due Date (in UTC)")
       .setPlaceholder("YYYY-MM-DD")
       .setMaxLength(10)
       .setMinLength(10)
@@ -157,180 +143,180 @@ export default async function handleInteractionCreate(
     return await interaction.showModal(modal);
   }
 
-  if (subCommand === Ndb2Subcommand.SCORE) {
-    const discordId = interaction.user.id;
-    const interactor = await interaction.guild.members.fetch(discordId);
+  // if (subCommand === Ndb2Subcommand.SCORE) {
+  //   const discordId = interaction.user.id;
+  //   const interactor = await interaction.guild.members.fetch(discordId);
 
-    try {
-      const user = await getUser(discordId);
-      const embed = generateUserEmbed(user, interactor.displayName);
-      return interaction.reply({ embeds: [embed] });
-    } catch (err) {
-      console.error(err);
-      return interaction.reply({
-        content: err.response.data.error,
-        ephemeral: true,
-      });
-    }
-  }
+  //   try {
+  //     const user = await getUser(discordId);
+  //     const embed = generateUserEmbed(user, interactor.displayName);
+  //     return interaction.reply({ embeds: [embed] });
+  //   } catch (err) {
+  //     console.error(err);
+  //     return interaction.reply({
+  //       content: err.response.data.error,
+  //       ephemeral: true,
+  //     });
+  //   }
+  // }
 
-  // Prediction specific commands
+  // // Prediction specific commands
 
-  const predictionId = options.getInteger("id");
-  let prediction: APIEnhancedPrediction;
+  // const predictionId = options.getInteger("id");
+  // let prediction: APIEnhancedPrediction;
 
-  try {
-    prediction = await getPrediction(predictionId);
-  } catch (err) {
-    return interaction.reply({
-      content: "No prediction exists with that id.",
-      ephemeral: true,
-    });
-  }
+  // try {
+  //   prediction = await getPrediction(predictionId);
+  // } catch (err) {
+  //   return interaction.reply({
+  //     content: "No prediction exists with that id.",
+  //     ephemeral: true,
+  //   });
+  // }
 
-  if (subCommand === Ndb2Subcommand.CANCEL) {
-    const deleterId = interaction.user.id;
-    if (deleterId !== prediction.predictor_discord_id) {
-      return interaction.reply({
-        content: "You cannot delete other people's predictions.",
-        ephemeral: true,
-      });
-    }
+  // if (subCommand === Ndb2Subcommand.CANCEL) {
+  //   const deleterId = interaction.user.id;
+  //   if (deleterId !== prediction.predictor_discord_id) {
+  //     return interaction.reply({
+  //       content: "You cannot delete other people's predictions.",
+  //       ephemeral: true,
+  //     });
+  //   }
 
-    if (isBefore(add(new Date(prediction.created), { days: 1 }), new Date())) {
-      return interaction.reply({
-        content: "Predictions can only be deleted within 24 hours of creation.",
-        ephemeral: true,
-      });
-    }
+  //   if (isBefore(add(new Date(prediction.created), { days: 1 }), new Date())) {
+  //     return interaction.reply({
+  //       content: "Predictions can only be deleted within 24 hours of creation.",
+  //       ephemeral: true,
+  //     });
+  //   }
 
-    try {
-      await deletePrediction(prediction.id);
-      return interaction.reply({
-        content: `Prediction #${prediction.id} has been cancelled. All bets against it are cancelled as well.`,
-      });
-    } catch (err) {
-      console.log(err);
-      return interaction.reply({
-        content: "Error deleting prediction.",
-        ephemeral: true,
-      });
-    }
-  }
+  //   try {
+  //     await deletePrediction(prediction.id);
+  //     return interaction.reply({
+  //       content: `Prediction #${prediction.id} has been cancelled. All bets against it are cancelled as well.`,
+  //     });
+  //   } catch (err) {
+  //     console.log(err);
+  //     return interaction.reply({
+  //       content: "Error deleting prediction.",
+  //       ephemeral: true,
+  //     });
+  //   }
+  // }
 
-  if (subCommand === Ndb2Subcommand.TRIGGER) {
-    const closer_discord_id = interaction.user.id;
-    const closed = new Date(options.getString("closed"));
+  // if (subCommand === Ndb2Subcommand.TRIGGER) {
+  //   const closer_discord_id = interaction.user.id;
+  //   const closed = new Date(options.getString("closed"));
 
-    // Validate date format
-    const isDueDateValid = isValid(closed);
-    if (!isDueDateValid) {
-      return interaction.reply({
-        content:
-          "Your close date format was invalid. Ensure it is entered as YYYY-MM-DD",
-        ephemeral: true,
-      });
-    }
+  //   // Validate date format
+  //   const isDueDateValid = isValid(closed);
+  //   if (!isDueDateValid) {
+  //     return interaction.reply({
+  //       content:
+  //         "Your close date format was invalid. Ensure it is entered as YYYY-MM-DD",
+  //       ephemeral: true,
+  //     });
+  //   }
 
-    // Validate date is in the past
-    if (isFuture(closed)) {
-      return interaction.reply({
-        content:
-          "Your close date is in the future. Either leave it blank to trigger effective now, or put in a past date.",
-        ephemeral: true,
-      });
-    }
+  //   // Validate date is in the past
+  //   if (isFuture(closed)) {
+  //     return interaction.reply({
+  //       content:
+  //         "Your close date is in the future. Either leave it blank to trigger effective now, or put in a past date.",
+  //       ephemeral: true,
+  //     });
+  //   }
 
-    // Trigger prediction
-    let triggeredPrediction: ClosePredictionResponse;
+  //   // Trigger prediction
+  //   let triggeredPrediction: ClosePredictionResponse;
 
-    try {
-      triggeredPrediction = await triggerPrediction(
-        predictionId,
-        closer_discord_id,
-        closed
-      );
-    } catch (err) {
-      return interaction.reply({
-        content: err.response.data.error,
-        ephemeral: true,
-      });
-    }
+  //   try {
+  //     triggeredPrediction = await triggerPrediction(
+  //       predictionId,
+  //       closer_discord_id,
+  //       closed
+  //     );
+  //   } catch (err) {
+  //     return interaction.reply({
+  //       content: err.response.data.error,
+  //       ephemeral: true,
+  //     });
+  //   }
 
-    // Fetch channel for Prediction Message
+  //   // Fetch channel for Prediction Message
 
-    let voteChannel: Channel;
-    try {
-      voteChannel = await interaction.client.channels.fetch(
-        triggeredPrediction.channel_id
-      );
-    } catch (err) {
-      console.log(err);
-      return interaction.reply({
-        content: "Error fetching channel for voting.",
-      });
-    }
+  //   let voteChannel: Channel;
+  //   try {
+  //     voteChannel = await interaction.client.channels.fetch(
+  //       triggeredPrediction.channel_id
+  //     );
+  //   } catch (err) {
+  //     console.log(err);
+  //     return interaction.reply({
+  //       content: "Error fetching channel for voting.",
+  //     });
+  //   }
 
-    if (voteChannel.type !== ChannelType.GuildText) {
-      return interaction.reply({
-        content: "Something went wrong. Tell Jake to check the logs.",
-        ephemeral: true,
-      });
-    }
+  //   if (voteChannel.type !== ChannelType.GuildText) {
+  //     return interaction.reply({
+  //       content: "Something went wrong. Tell Jake to check the logs.",
+  //       ephemeral: true,
+  //     });
+  //   }
 
-    // Send Voting Message
-    let voteMessage: Message;
+  //   // Send Voting Message
+  //   let voteMessage: Message;
 
-    try {
-      const vote = generateVoteResponse(prediction, { closer_discord_id });
-      voteMessage = await voteChannel.send(vote);
-    } catch (err) {
-      return interaction.reply({
-        content: "Error sending vote to voting channel.",
-        ephemeral: true,
-      });
-    }
+  //   try {
+  //     const vote = generateVoteResponse(prediction, { closer_discord_id });
+  //     voteMessage = await voteChannel.send(vote);
+  //   } catch (err) {
+  //     return interaction.reply({
+  //       content: "Error sending vote to voting channel.",
+  //       ephemeral: true,
+  //     });
+  //   }
 
-    try {
-      return interaction.reply({
-        content: `Prediction #${predictionId} has been triggered. Voting will now occur in ${channelMention(
-          voteChannel.id
-        )}`,
-      });
-    } catch (err) {
-      return interaction.reply({
-        content: err.response.data.error,
-      });
-    }
-  }
+  //   try {
+  //     return interaction.reply({
+  //       content: `Prediction #${predictionId} has been triggered. Voting will now occur in ${channelMention(
+  //         voteChannel.id
+  //       )}`,
+  //     });
+  //   } catch (err) {
+  //     return interaction.reply({
+  //       content: err.response.data.error,
+  //     });
+  //   }
+  // }
 
-  if (
-    subCommand === Ndb2Subcommand.ENDORSE ||
-    subCommand === Ndb2Subcommand.UNDORSE
-  ) {
-    const endorsed = subCommand === Ndb2Subcommand.ENDORSE;
-    const discordId = interaction.member.user.id;
+  // if (
+  //   subCommand === Ndb2Subcommand.ENDORSE ||
+  //   subCommand === Ndb2Subcommand.UNDORSE
+  // ) {
+  //   const endorsed = subCommand === Ndb2Subcommand.ENDORSE;
+  //   const discordId = interaction.member.user.id;
 
-    try {
-      await addBet(discordId, predictionId, endorsed);
-      interaction.reply({
-        content: `Prediction successfully ${subCommand}d!`,
-        ephemeral: true,
-      });
-    } catch (err) {
-      return interaction.reply({
-        content: err.response.data.error,
-        ephemeral: true,
-      });
-    }
-  }
+  //   try {
+  //     await addBet(discordId, predictionId, endorsed);
+  //     interaction.reply({
+  //       content: `Prediction successfully ${subCommand}d!`,
+  //       ephemeral: true,
+  //     });
+  //   } catch (err) {
+  //     return interaction.reply({
+  //       content: err.response.data.error,
+  //       ephemeral: true,
+  //     });
+  //   }
+  // }
 
-  if (subCommand === Ndb2Subcommand.VIEW) {
-    try {
-      const reply = await generatePredictionResponse(interaction, prediction);
-      return interaction.reply(reply);
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  // if (subCommand === Ndb2Subcommand.VIEW) {
+  //   try {
+  //     const reply = await generatePredictionResponse(interaction, prediction);
+  //     return interaction.reply(reply);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 }
