@@ -16,8 +16,7 @@ export default async function handleNewPrediction(
   const isDueDateValid = isValid(new Date(due));
   if (!isDueDateValid) {
     return interaction.reply({
-      content:
-        "Your Due date format was invalid. Ensure it is entered as YYYY-MM-DD",
+      content: `Your Due date format was invalid. Ensure it is entered as YYYY-MM-DD. If you need to reneter your prediction, you can copy and paste it from here:\n\n${text}`,
       ephemeral: true,
     });
   }
@@ -27,7 +26,7 @@ export default async function handleNewPrediction(
   // Validate date is in the future
   if (!isFuture(due_date)) {
     return interaction.reply({
-      content: `Your due date is in the past. Please adjust your date and try again.`,
+      content: `Your due date is in the past. Please adjust your date and try again. If you need to reneter your prediction, you can copy and paste it from here:\n\n${text}`,
       ephemeral: true,
     });
   }

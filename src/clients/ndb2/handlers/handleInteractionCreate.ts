@@ -12,6 +12,8 @@ import {
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
 import { Ndb2Events } from "../../../types/eventEnums";
+import { ndb2Client } from "../../../utilities/ndb2Client";
+import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 // import { generateUserEmbed } from "../actions/generateUserEmbed";
@@ -34,67 +36,68 @@ export default async function handleInteractionCreate(
   }
 
   // // Handle Button Submissions for Endorsements and Undorsements
-  // if (interaction.isButton()) {
-  //   const [command, predictionId] = interaction.customId.split(" ");
-  //   const discordId = interaction.member.user.id;
+  if (interaction.isButton()) {
+    const [command, predictionId] = interaction.customId.split(" ");
+    const discordId = interaction.member.user.id;
 
-  //   const isBet =
-  //     command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
-  //   const isVote =
-  //     command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
+    const isBet =
+      command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
+    // const isVote =
+    //   command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
 
-  //   if (isBet) {
-  //     const endorsed = command === ButtonCommand.ENDORSE;
+    let prediction: NDB2API.EnhancedPrediction;
 
-  //     // Add Bet
-  //     try {
-  //       await addBet(discordId, predictionId, endorsed);
-  //       interaction.reply({
-  //         content: `Prediction successfully ${command.toLowerCase()}d!`,
-  //         ephemeral: true,
-  //       });
-  //     } catch (err) {
-  //       return interaction.reply({
-  //         content: err.response.data.error,
-  //         ephemeral: true,
-  //       });
-  //     }
-  //   }
+    if (isBet) {
+      const endorsed = command === ButtonCommand.ENDORSE;
 
-  //   if (isVote) {
-  //     const affirmed = command === ButtonCommand.AFFIRM;
+      // Add Bet
+      try {
+        prediction = await ndb2Client.addBet(discordId, predictionId, endorsed);
+        interaction.reply({
+          content: `Prediction successfully ${command.toLowerCase()}d!`,
+          ephemeral: true,
+        });
+      } catch (err) {
+        return interaction.reply({
+          content: err.response.data.error,
+          ephemeral: true,
+        });
+      }
+    }
 
-  //     // Add Vote
-  //     try {
-  //       await addVote(discordId, predictionId, affirmed);
-  //       interaction.reply({
-  //         content: `Prediction successfully ${command.toLowerCase()}d!`,
-  //         ephemeral: true,
-  //       });
-  //     } catch (err) {
-  //       return interaction.reply({
-  //         content: err.response.data.error,
-  //         ephemeral: true,
-  //       });
-  //     }
-  //   }
+    // if (isVote) {
+    //   const affirmed = command === ButtonCommand.AFFIRM;
 
-  //   // Update Embed with new stats
-  //   try {
-  //     const buttonMsg = await interaction.message;
-  //     const prediction = await getPrediction(predictionId);
-  //     const predictor = await interaction.guild.members.fetch(
-  //       prediction.predictor_discord_id
-  //     );
+    //   // Add Vote
+    //   try {
+    //     await addVote(discordId, predictionId, affirmed);
+    //     interaction.reply({
+    //       content: `Prediction successfully ${command.toLowerCase()}d!`,
+    //       ephemeral: true,
+    //     });
+    //   } catch (err) {
+    //     return interaction.reply({
+    //       content: err.response.data.error,
+    //       ephemeral: true,
+    //     });
+    //   }
+    // }
 
-  //     const embed = isBet
-  //       ? generatePredictionEmbed(predictor.nickname, prediction)
-  //       : generateVoteEmbed(prediction);
-  //     return await buttonMsg.edit({ embeds: [embed] });
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // }
+    // Update Embed with new stats
+    try {
+      const buttonMsg = await interaction.message;
+      const predictor = await interaction.guild.members.fetch(
+        prediction.predictor.discord_id
+      );
+
+      const embed = generatePredictionEmbed(predictor.nickname, prediction);
+      // : generateVoteEmbed(prediction);
+
+      return await buttonMsg.edit({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   if (!interaction.isChatInputCommand()) return;
 

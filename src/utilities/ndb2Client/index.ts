@@ -58,21 +58,21 @@ export class Ndb2Client {
       .then((res) => res.data.data);
   }
 
-  // public newBet(
-  //   predictionId: string | number,
-  //   betterId: string | number,
-  //   endorsed: boolean
-  // ) {
-  //   const url = new URL(this.baseURL);
-  //   url.pathname = "api/bets";
-  //   return this.client
-  //     .post<Record>(url.toString(), {
-  //       predictionId,
-  //       betterId,
-  //       endorsed,
-  //     })
-  //     .then((res) => res.data);
-  // }
+  public addBet(
+    predictionId: string | number,
+    betterId: string | number,
+    endorsed: boolean
+  ): Promise<NDB2API.EnhancedPrediction> {
+    const url = new URL(this.baseURL);
+    url.pathname = "api/bets";
+    return this.client
+      .post<NDB2API.AddBet>(url.toString(), {
+        predictionId,
+        betterId,
+        endorsed,
+      })
+      .then((res) => res.data.data);
+  }
 
   // public newVote(
   //   predictionId: string | number,

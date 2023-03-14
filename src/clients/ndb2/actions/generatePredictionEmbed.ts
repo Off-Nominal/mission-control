@@ -24,7 +24,7 @@ export const generatePredictionEmbed = (
 
   const embed = new EmbedBuilder({
     title,
-    description: codeBlock(`[#${prediction.id}]: ${prediction.text}`),
+    description: `[#${prediction.id}]: ${prediction.text}`,
     fields: [
       {
         name: `Created`,
@@ -43,8 +43,7 @@ export const generatePredictionEmbed = (
       {
         name: "Stats",
         value: `
-          ✅ ${endorsements.length} (${prediction.payouts.endorse}) \u200B \u200B \u200B \u200B \u200B
-          ❌ ${undorsements.length} (${prediction.payouts.undorse})`,
+          ✅ ${endorsements.length} (${prediction.payouts.endorse}) \u200B \u200B ❌ ${undorsements.length} (${prediction.payouts.undorse})`,
       },
     ],
   });
