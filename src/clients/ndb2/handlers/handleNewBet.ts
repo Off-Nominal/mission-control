@@ -37,9 +37,9 @@ export default async function handleNewBet(
       `There was an error submitting the bet. ${err.response.data.message}`
     );
     console.error(err);
-    interaction.reply({
+    return interaction.reply({
       ephemeral: true,
-      content: "There was an error submitting the bet to NDB2.",
+      content: `There was an error submitting the bet to NDB2. ${err.response.data.message}`,
     });
   }
 

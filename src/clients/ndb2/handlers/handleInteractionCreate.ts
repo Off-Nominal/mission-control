@@ -329,6 +329,7 @@ export default async function handleInteractionCreate(
   // }
 
   if (subCommand === Ndb2Subcommand.VIEW) {
+    logger.addLog(LogStatus.INFO, `Request is a Prediction View request`);
     try {
       const reply = await generatePredictionResponse(interaction, prediction);
       logger.addLog(
