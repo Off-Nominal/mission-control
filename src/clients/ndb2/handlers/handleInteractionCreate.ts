@@ -12,6 +12,8 @@ import {
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
 import { Ndb2Events } from "../../../types/eventEnums";
+import { LogInitiator } from "../../../types/logEnums";
+import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
@@ -163,12 +165,26 @@ export default async function handleInteractionCreate(
 
   // // Prediction specific commands
 
+  const logger = new Logger(
+    "NDB2 Interaction",
+    LogInitiator.NDB2,
+    "Specific prediction request from user"
+  );
+
   const predictionId = options.getInteger("id");
   let prediction: NDB2API.EnhancedPrediction;
 
   try {
     prediction = await ndb2Client.getPrediction(predictionId);
+    logger.addLog(
+      LogStatus.SUCCESS,
+      `Prediction was successfully retrieved from NDB2.`
+    );
   } catch (err) {
+    logger.addLog(
+      LogStatus.WARNING,
+      `Prediction does not exist, interaction rejected.`
+    );
     return interaction.reply({
       content: "No prediction exists with that id.",
       ephemeral: true,
@@ -315,14 +331,34 @@ export default async function handleInteractionCreate(
   if (subCommand === Ndb2Subcommand.VIEW) {
     try {
       const reply = await generatePredictionResponse(interaction, prediction);
-      return interaction.reply(reply);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Prediction embed was successfully generated.`
+      );
+      interaction.reply(reply);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Prediction embed was successfully delivered to channel.`
+      );
     } catch (err) {
       console.error(err);
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error Retrieving a prediction for a user. ${err.response.data.message}`
+      );
     }
+    return logger.sendLog(interaction.client);
   }
 
-  return interaction.reply({
+  logger.addLog(
+    LogStatus.WARNING,
+    "This code should be unreachable, something weird happened."
+  );
+
+  interaction.reply({
     content:
       "Something went wrong and I didn't now how to handle this request, please tell Jake",
   });
+
+  logger.sendLog(interaction.client);
 }
