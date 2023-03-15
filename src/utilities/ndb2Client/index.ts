@@ -33,14 +33,16 @@ export class Ndb2Client {
   //     .then((res) => res.data);
   // }
 
-  // public fetchPrediction(id: string | number) {
-  //   const url = new URL(this.baseURL);
-  //   url.pathname = `api/predictions/${id}`;
+  public getPrediction(
+    id: string | number
+  ): Promise<NDB2API.EnhancedPrediction> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${id}`;
 
-  //   return this.client
-  //     .get<APIEnhancedPrediction>(url.toString())
-  //     .then((res) => res.data);
-  // }
+    return this.client
+      .get<NDB2API.GetPrediction>(url.toString())
+      .then((res) => res.data.data);
+  }
 
   public addPrediction(
     discord_id: string,
@@ -59,16 +61,16 @@ export class Ndb2Client {
   }
 
   public addBet(
-    predictionId: string | number,
-    betterId: string | number,
+    prediction_id: string | number,
+    discord_id: string | number,
     endorsed: boolean
   ): Promise<NDB2API.EnhancedPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = "api/bets";
     return this.client
       .post<NDB2API.AddBet>(url.toString(), {
-        predictionId,
-        betterId,
+        prediction_id,
+        discord_id,
         endorsed,
       })
       .then((res) => res.data.data);

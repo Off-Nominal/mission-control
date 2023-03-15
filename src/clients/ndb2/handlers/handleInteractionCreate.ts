@@ -20,7 +20,7 @@ import { generatePredictionResponse } from "../actions/generatePredictionRespons
 // import { generateVoteEmbed } from "../actions/generateVoteEmbed";
 // import { generateVoteResponse } from "../actions/generateVoteResponse";
 
-enum ButtonCommand {
+export enum ButtonCommand {
   ENDORSE = "Endorse",
   UNDORSE = "Undorse",
   AFFIRM = "Affirm",
@@ -32,37 +32,25 @@ export default async function handleInteractionCreate(
 ) {
   // Handle Modal Submissions for new Predictions
   if (interaction.isModalSubmit()) {
-    return interaction.client.emit(Ndb2Events.NEW, interaction);
+    return interaction.client.emit(Ndb2Events.NEW_PREDICTION, interaction);
   }
 
   // // Handle Button Submissions for Endorsements and Undorsements
   if (interaction.isButton()) {
     const [command, predictionId] = interaction.customId.split(" ");
-    const discordId = interaction.member.user.id;
 
     const isBet =
       command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
     // const isVote =
     //   command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
 
-    let prediction: NDB2API.EnhancedPrediction;
-
     if (isBet) {
-      const endorsed = command === ButtonCommand.ENDORSE;
-
-      // Add Bet
-      try {
-        prediction = await ndb2Client.addBet(discordId, predictionId, endorsed);
-        interaction.reply({
-          content: `Prediction successfully ${command.toLowerCase()}d!`,
-          ephemeral: true,
-        });
-      } catch (err) {
-        return interaction.reply({
-          content: err.response.data.error,
-          ephemeral: true,
-        });
-      }
+      interaction.client.emit(
+        Ndb2Events.NEW_BET,
+        interaction,
+        predictionId,
+        command
+      );
     }
 
     // if (isVote) {
@@ -83,20 +71,20 @@ export default async function handleInteractionCreate(
     //   }
     // }
 
-    // Update Embed with new stats
-    try {
-      const buttonMsg = await interaction.message;
-      const predictor = await interaction.guild.members.fetch(
-        prediction.predictor.discord_id
-      );
+    // // Update Embed with new stats
+    // try {
+    //   const buttonMsg = await interaction.message;
+    //   const predictor = await interaction.guild.members.fetch(
+    //     prediction.predictor.discord_id
+    //   );
 
-      const embed = generatePredictionEmbed(predictor.nickname, prediction);
-      // : generateVoteEmbed(prediction);
+    //   const embed = generatePredictionEmbed(predictor.nickname, prediction);
+    //   // : generateVoteEmbed(prediction);
 
-      return await buttonMsg.edit({ embeds: [embed] });
-    } catch (err) {
-      console.error(err);
-    }
+    //   return await buttonMsg.edit({ embeds: [embed] });
+    // } catch (err) {
+    //   console.error(err);
+    // }
   }
 
   if (!interaction.isChatInputCommand()) return;
@@ -175,17 +163,17 @@ export default async function handleInteractionCreate(
 
   // // Prediction specific commands
 
-  // const predictionId = options.getInteger("id");
-  // let prediction: APIEnhancedPrediction;
+  const predictionId = options.getInteger("id");
+  let prediction: NDB2API.EnhancedPrediction;
 
-  // try {
-  //   prediction = await getPrediction(predictionId);
-  // } catch (err) {
-  //   return interaction.reply({
-  //     content: "No prediction exists with that id.",
-  //     ephemeral: true,
-  //   });
-  // }
+  try {
+    prediction = await ndb2Client.getPrediction(predictionId);
+  } catch (err) {
+    return interaction.reply({
+      content: "No prediction exists with that id.",
+      ephemeral: true,
+    });
+  }
 
   // if (subCommand === Ndb2Subcommand.CANCEL) {
   //   const deleterId = interaction.user.id;
@@ -324,14 +312,15 @@ export default async function handleInteractionCreate(
   //   }
   // }
 
-  // if (subCommand === Ndb2Subcommand.VIEW) {
-  //   try {
-  //     const reply = await generatePredictionResponse(interaction, prediction);
-  //     return interaction.reply(reply);
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // }
+  if (subCommand === Ndb2Subcommand.VIEW) {
+    try {
+      const reply = await generatePredictionResponse(interaction, prediction);
+      return interaction.reply(reply);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return interaction.reply({
     content:
       "Something went wrong and I didn't now how to handle this request, please tell Jake",

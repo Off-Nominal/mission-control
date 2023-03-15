@@ -3,7 +3,7 @@
 export namespace NDB2API {
   export type GeneralResponse<T> = {
     success: boolean;
-    message?: string | string[];
+    message?: string;
     errorCode?: number;
     data: T | null;
   };
@@ -38,6 +38,8 @@ export namespace NDB2API {
   export type AddPrediction = GeneralResponse<EnhancedPrediction>;
 
   export type AddBet = GeneralResponse<EnhancedPrediction>;
+
+  export type GetPrediction = GeneralResponse<EnhancedPrediction>;
 }
 
 // export interface Record {

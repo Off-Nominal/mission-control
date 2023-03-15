@@ -19,15 +19,15 @@ const predictCommand = new SlashCommandBuilder()
     command
       .setName(Ndb2Subcommand.NEW)
       .setDescription("Create a new Prediction")
+  )
+  .addSubcommand((command) =>
+    command
+      .setName(Ndb2Subcommand.VIEW)
+      .setDescription("View a Prediction")
+      .addIntegerOption((option) =>
+        option.setName("id").setDescription("Prediction ID").setRequired(true)
+      )
   );
-// .addSubcommand((command) =>
-//   command
-//     .setName(Ndb2Subcommand.VIEW)
-//     .setDescription("View a Prediction")
-//     .addIntegerOption((option) =>
-//       option.setName("id").setDescription("Prediction ID").setRequired(true)
-//     )
-// )
 // .addSubcommand((command) =>
 //   command
 //     .setName(Ndb2Subcommand.ENDORSE)

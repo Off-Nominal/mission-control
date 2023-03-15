@@ -3,6 +3,7 @@ import express from "express";
 import { Client as DbClient } from "pg";
 
 import {
+  ButtonInteraction,
   ChatInputCommandInteraction,
   Client,
   Collection,
@@ -350,9 +351,15 @@ ndb2Bot.on(Events.InteractionCreate, (interaction) => {
   ndb2BotHandlers.handleInteractionCreate(interaction);
 });
 ndb2Bot.on("error", handleError);
-ndb2Bot.on(Ndb2Events.NEW, (interaction: ModalSubmitInteraction) => {
+ndb2Bot.on(Ndb2Events.NEW_PREDICTION, (interaction: ModalSubmitInteraction) => {
   ndb2BotHandlers.handleNewPrediction(interaction);
 });
+ndb2Bot.on(
+  Ndb2Events.NEW_BET,
+  (interaction: ButtonInteraction, predictionId: string, command: string) => {
+    ndb2BotHandlers.handleNewBet(interaction, predictionId, command);
+  }
+);
 
 /***********************************
  *  Utility Bot Event Handlers

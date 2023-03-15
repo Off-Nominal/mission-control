@@ -63,5 +63,6 @@ export enum RLLEvents {
 }
 
 export enum Ndb2Events {
-  NEW = "new",
+  NEW_PREDICTION = "new_prediction",
+  NEW_BET = "new_bet",
 }
