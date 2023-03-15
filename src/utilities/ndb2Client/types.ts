@@ -24,6 +24,10 @@ export namespace NDB2API {
       id: number;
       date: string;
       endorsed: boolean;
+      better: {
+        id: string;
+        discord_id: string;
+      };
     }[];
     payouts: {
       endorse: number;
@@ -32,6 +36,10 @@ export namespace NDB2API {
   };
 
   export type AddPrediction = GeneralResponse<EnhancedPrediction>;
+
+  export type AddBet = GeneralResponse<EnhancedPrediction>;
+
+  export type GetPrediction = GeneralResponse<EnhancedPrediction>;
 }
 
 // export interface Record {
