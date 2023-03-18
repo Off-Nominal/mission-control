@@ -27,10 +27,7 @@ export default async function handleNewBet(
   // Add Bet
   try {
     prediction = await ndb2Client.addBet(predictionId, discordId, endorsed);
-    logger.addLog(
-      LogStatus.SUCCESS,
-      `Prediction was successfully submitted to NDB2`
-    );
+    logger.addLog(LogStatus.SUCCESS, `Bet was successfully submitted to NDB2`);
   } catch (err) {
     logger.addLog(
       LogStatus.FAILURE,
@@ -45,7 +42,7 @@ export default async function handleNewBet(
 
   try {
     interaction.reply({
-      content: `Prediction successfully ${command.toLowerCase()}d!`,
+      content: `Prediction $${predictionId} successfully ${command.toLowerCase()}d!`,
       ephemeral: true,
     });
     logger.addLog(

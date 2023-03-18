@@ -14,11 +14,15 @@ export const generatePredictionResponse = async (
   interaction: Interaction,
   prediction: NDB2API.EnhancedPrediction
 ): Promise<MessagePayload | InteractionReplyOptions> => {
-  const predictorName = await interaction.guild.members.fetch(
+  const predictor = await interaction.guild.members.fetch(
     prediction.predictor.discord_id
   );
 
-  const embed = generatePredictionEmbed(predictorName.displayName, prediction);
+  const embed = generatePredictionEmbed(
+    predictor.displayName,
+    predictor.displayAvatarURL(),
+    prediction
+  );
 
   const components = prediction.closed_date
     ? []
