@@ -139,7 +139,7 @@ export default function generateHandleInteractionCreate(db: Client) {
 
       const dueInput = new TextInputBuilder()
         .setCustomId("due")
-        .setLabel("Prediction Due Date (in UTC)")
+        .setLabel("Prediction Due Date (UTC, format YYYY-MM-DD)")
         .setPlaceholder("YYYY-MM-DD")
         .setMaxLength(10)
         .setMinLength(10)

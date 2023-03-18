@@ -18,7 +18,7 @@ import { isFulfilled, isRejected } from "../../../helpers/allSettledTypeGuard";
 import { fillMessageCache } from "../../../helpers/fillMessageCache";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
-import fetchGuild from "../../actions/fetchGuild";
+import fetchGuild from "../../../utilities/fetchGuild";
 
 type ThreadData = {
   thread: ThreadChannel;

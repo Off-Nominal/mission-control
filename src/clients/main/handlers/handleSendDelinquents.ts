@@ -1,6 +1,6 @@
 import { Message, EmbedBuilder } from "discord.js";
 import { roleIds, SpecificRole } from "../../../types/roleEnums";
-import fetchGuild from "../../actions/fetchGuild";
+import fetchGuild from "../../../utilities/fetchGuild";
 
 export default async function handleSendDelinquents(message: Message) {
   const guild = fetchGuild(message.client);

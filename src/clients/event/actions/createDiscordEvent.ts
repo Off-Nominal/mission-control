@@ -1,5 +1,5 @@
 import { Client, GuildScheduledEventCreateOptions } from "discord.js";
-import fetchGuild from "../../actions/fetchGuild";
+import fetchGuild from "../../../utilities/fetchGuild";
 
 export default async function createDiscordEvent(
   options: GuildScheduledEventCreateOptions,

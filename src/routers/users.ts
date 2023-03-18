@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
 import express from "express";
-import fetchGuild from "../clients/actions/fetchGuild";
+import fetchGuild from "../utilities/fetchGuild";
 
 const generateRouter = (client: Client) => {
   const router = express.Router();

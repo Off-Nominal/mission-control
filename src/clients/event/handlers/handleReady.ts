@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
 import { generatePresenceData } from "../../../helpers/generatePresenceData";
-import fetchGuild from "../../actions/fetchGuild";
+import fetchGuild from "../../../utilities/fetchGuild";
 import { EventBotEvents } from "../../../types/eventEnums";
 
 export default async function handleReady(client: Client) {

@@ -35,6 +35,7 @@ export default function generateHandleViewDetails(db: Client) {
         `There was an error fetching the prediction ${err.response.data.message}`
       );
       console.error(err);
+      logger.sendLog(interaction.client);
       return interaction.reply({
         ephemeral: true,
         content: `There was an error fetching this subscription detail. ${err.response.data.message}`,

@@ -205,7 +205,7 @@ const morganOutput = process.env.NODE_ENV === "dev" ? "dev" : "combined";
 app.use(morgan(morganOutput));
 app.use(express.json());
 
-app.use("/webhooks", webhooksRouter);
+app.use("/webhooks", webhooksRouter(ndb2Bot, db));
 app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
 app.listen(PORT, () => {
   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");

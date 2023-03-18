@@ -2,7 +2,7 @@ import { channelMention, ThreadChannel } from "discord.js";
 import { LogInitiator } from "../../../types/logEnums";
 import { roleIds, SpecificRole } from "../../../types/roleEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
-import fetchGuild from "../../actions/fetchGuild";
+import fetchGuild from "../../../utilities/fetchGuild";
 import joinThread from "../../actions/joinThread";
 
 export default async function handleThreadCreate(thread: ThreadChannel) {

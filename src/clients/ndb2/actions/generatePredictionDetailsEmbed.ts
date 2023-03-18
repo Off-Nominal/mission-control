@@ -15,7 +15,7 @@ const getRiskMessage = (endorsePayout: number, betCount: number) => {
 };
 
 const getOddsMessage = (endorsePayout: number, undorsePayout: number) => {
-  return `A succesful prediction would pay current endorsers at ${endorsePayout} times their wager (days). Undorsers woud lose that ${undorsePayout} times their wager.\n\nA failed prediction would pay out current undorsers at ${undorsePayout} their wager (days), and endorsers would lose ${endorsePayout} times their wager.`;
+  return `A succesful prediction would pay current endorsers at ${endorsePayout} times their wager (days). Undorsers woud lose ${undorsePayout} times their wager.\n\nA failed prediction would pay out current undorsers at ${undorsePayout} their wager (days), and endorsers would lose ${endorsePayout} times their wager.`;
 };
 
 const getBaseWager = (predictionDate: Date, betDate: Date) => {
