@@ -1,11 +1,6 @@
-import { add, isBefore, isFuture, isValid } from "date-fns";
 import {
   ActionRowBuilder,
-  Channel,
-  channelMention,
-  ChannelType,
   Interaction,
-  Message,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -16,7 +11,6 @@ import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 // import { generateUserEmbed } from "../actions/generateUserEmbed";
 // import { generateVoteEmbed } from "../actions/generateVoteEmbed";
