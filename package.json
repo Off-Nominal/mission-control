@@ -12,7 +12,8 @@
     "start": "node ./dist/index.js",
     "log": "heroku logs -a onbc-bot --tail",
     "log:all": "heroku logs -a onbc-bot -n 1500",
-    "deploy": "git push heroku master"
+    "deploy": "git push heroku master",
+    "db:reset": "node seeds/seed.js"
   },
   "repository": {
     "type": "git",

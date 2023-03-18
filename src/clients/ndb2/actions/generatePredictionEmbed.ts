@@ -1,9 +1,29 @@
-import { codeBlock, EmbedBuilder, time, TimestampStyles } from "discord.js";
+import { EmbedBuilder, time, TimestampStyles } from "discord.js";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-// import { formatOdds } from "./helpers";
+
+const thumbnails = {
+  open: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134394/Discord%20Assets/4236484_aggyej.png",
+  success:
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134400/Discord%20Assets/4789514_yqcukf.png",
+  failure:
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134579/Discord%20Assets/4789514_czvljj.png",
+};
+
+const getThumbnail = (successful: boolean | null) => {
+  if (successful === true) {
+    return thumbnails.success;
+  }
+
+  if (successful === false) {
+    return thumbnails.failure;
+  }
+
+  return thumbnails.open;
+};
 
 export const generatePredictionEmbed = (
   displayName: string,
+  avatarUrl: string,
   prediction: NDB2API.EnhancedPrediction
 ) => {
   const isClosed = !!prediction.judged_date;
@@ -14,17 +34,21 @@ export const generatePredictionEmbed = (
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
 
-  const wasSuccessful = prediction.successful;
-
-  const adverb = isClosed ? (wasSuccessful ? "" : "un") + "successfully " : "";
-
-  const title = `${
-    isClosed ? (wasSuccessful ? "✅" : "❌") : "❓"
-  } ${displayName} ${adverb}predict${isClosed ? "ed" : "s"}...`;
+  const adverb = prediction.successful !== null ? "ed" : "s";
 
   const embed = new EmbedBuilder({
-    title,
-    description: `[#${prediction.id}]: ${prediction.text}`,
+    author: {
+      name: `${displayName} predict${adverb}...`,
+      icon_url: avatarUrl,
+    },
+    // title: getTitle(prediction.successful),
+    description: prediction.text,
+    thumbnail: {
+      url: getThumbnail(prediction.successful),
+    },
+    footer: {
+      text: `Prediction ID: ${prediction.id}`,
+    },
     fields: [
       {
         name: `Created`,
@@ -34,7 +58,7 @@ export const generatePredictionEmbed = (
         )})`,
       },
       {
-        name: `${isClosed ? "Closed" : "Due"}:`,
+        name: `${isClosed ? "Closed" : "Judgement Day"}`,
         value: `🗓️ ${time(
           isClosed ? closed : due,
           TimestampStyles.LongDate
@@ -43,7 +67,11 @@ export const generatePredictionEmbed = (
       {
         name: "Stats",
         value: `
-          ✅ ${endorsements.length} (${prediction.payouts.endorse}) \u200B \u200B ❌ ${undorsements.length} (${prediction.payouts.undorse})`,
+          ✅ ${endorsements.length} (${prediction.payouts.endorse.toFixed(
+          2
+        )}) \u200B \u200B ❌ ${
+          undorsements.length
+        } (${prediction.payouts.undorse.toFixed(2)})`,
       },
     ],
   });

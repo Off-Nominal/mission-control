@@ -4,6 +4,7 @@ import { Client as DbClient } from "pg";
 
 import {
   ButtonInteraction,
+  CacheType,
   ChatInputCommandInteraction,
   Client,
   Collection,
@@ -193,6 +194,7 @@ const ndb2Bot = new Client({ intents: [simpleIntents] });
 
 import usersRouter from "./routers/users";
 import apiAuth from "./middleware/auth";
+import { NDB2API } from "./utilities/ndb2Client/types";
 
 // const app = express();
 // app.use(apiAuth);
@@ -354,6 +356,21 @@ ndb2Bot.on("error", handleError);
 ndb2Bot.on(Ndb2Events.NEW_PREDICTION, (interaction: ModalSubmitInteraction) => {
   ndb2BotHandlers.handleNewPrediction(interaction);
 });
+ndb2Bot.on(
+  Ndb2Events.VIEW_PREDICTION,
+  (
+    interaction: ChatInputCommandInteraction<CacheType>,
+    prediction: NDB2API.EnhancedPrediction
+  ) => {
+    ndb2BotHandlers.handleViewPrediction(interaction, prediction);
+  }
+);
+ndb2Bot.on(
+  Ndb2Events.VIEW_DETAILS,
+  (interaction: ButtonInteraction, predictionId: string) => {
+    ndb2BotHandlers.handleViewDetails(interaction, predictionId);
+  }
+);
 ndb2Bot.on(
   Ndb2Events.NEW_BET,
   (interaction: ButtonInteraction, predictionId: string, command: string) => {

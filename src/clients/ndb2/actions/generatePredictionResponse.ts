@@ -1,4 +1,3 @@
-import { add, isAfter, isBefore } from "date-fns";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -14,11 +13,15 @@ export const generatePredictionResponse = async (
   interaction: Interaction,
   prediction: NDB2API.EnhancedPrediction
 ): Promise<MessagePayload | InteractionReplyOptions> => {
-  const predictorName = await interaction.guild.members.fetch(
+  const predictor = await interaction.guild.members.fetch(
     prediction.predictor.discord_id
   );
 
-  const embed = generatePredictionEmbed(predictorName.displayName, prediction);
+  const embed = generatePredictionEmbed(
+    predictor.displayName,
+    predictor.displayAvatarURL(),
+    prediction
+  );
 
   const components = prediction.closed_date
     ? []
@@ -35,7 +38,19 @@ export const generatePredictionResponse = async (
               .setCustomId(`Undorse ${prediction.id}`)
               .setLabel("Undorse")
               .setStyle(ButtonStyle.Danger)
+          )
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(`Details ${prediction.id}`)
+              .setLabel("Details")
+              .setStyle(ButtonStyle.Secondary)
           ),
+        // .addComponents(
+        //   new ButtonBuilder()
+        //     .setLabel("Web")
+        //     .setURL("https://www.offnom.com")
+        //     .setStyle(ButtonStyle.Link)
+        // ),
       ];
 
   return { embeds: [embed], components };

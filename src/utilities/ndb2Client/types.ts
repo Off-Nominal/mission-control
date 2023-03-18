@@ -17,9 +17,9 @@ export namespace NDB2API {
     text: string;
     created_date: string;
     due_date: string;
-    closed_date: string;
-    judged_date: string;
-    successful: boolean;
+    closed_date: string | null;
+    judged_date: string | null;
+    successful: boolean | null;
     bets: {
       id: number;
       date: string;
