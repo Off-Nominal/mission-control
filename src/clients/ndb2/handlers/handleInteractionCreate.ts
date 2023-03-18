@@ -24,6 +24,7 @@ import { generatePredictionResponse } from "../actions/generatePredictionRespons
 export enum ButtonCommand {
   ENDORSE = "Endorse",
   UNDORSE = "Undorse",
+  DETAILS = "Details",
   AFFIRM = "Affirm",
   NEGATE = "Negate",
 }
@@ -36,12 +37,14 @@ export default function generateHandleInteractionCreate(db: Client) {
       return interaction.client.emit(Ndb2Events.NEW_PREDICTION, interaction);
     }
 
-    // // Handle Button Submissions for Endorsements and Undorsements
+    // // Handle Button Submissions for Endorsements, Undorsements and Details
     if (interaction.isButton()) {
       const [command, predictionId] = interaction.customId.split(" ");
 
       const isBet =
         command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
+      const isDetails = command === ButtonCommand.DETAILS;
+
       // const isVote =
       //   command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
 
@@ -51,6 +54,14 @@ export default function generateHandleInteractionCreate(db: Client) {
           interaction,
           predictionId,
           command
+        );
+      }
+
+      if (isDetails) {
+        interaction.client.emit(
+          Ndb2Events.VIEW_DETAILS,
+          interaction,
+          predictionId
         );
       }
 

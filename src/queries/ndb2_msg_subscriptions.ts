@@ -3,7 +3,6 @@ import { Client } from "pg";
 export enum Ndb2MsgSubscriptionType {
   CONTEXT = "context",
   VIEW = "view",
-  VIEW_DETAIL = "view_detail",
 }
 
 type Ndb2MsgSubscription = {

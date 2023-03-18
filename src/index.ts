@@ -366,6 +366,12 @@ ndb2Bot.on(
   }
 );
 ndb2Bot.on(
+  Ndb2Events.VIEW_DETAILS,
+  (interaction: ButtonInteraction, predictionId: string) => {
+    ndb2BotHandlers.handleViewDetails(interaction, predictionId);
+  }
+);
+ndb2Bot.on(
   Ndb2Events.NEW_BET,
   (interaction: ButtonInteraction, predictionId: string, command: string) => {
     ndb2BotHandlers.handleNewBet(interaction, predictionId, command);

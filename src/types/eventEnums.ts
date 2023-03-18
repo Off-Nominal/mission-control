@@ -66,4 +66,5 @@ export enum Ndb2Events {
   NEW_PREDICTION = "new_prediction",
   NEW_BET = "new_bet",
   VIEW_PREDICTION = "view_prediction",
+  VIEW_DETAILS = "view_details",
 }

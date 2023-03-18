@@ -14,6 +14,7 @@ import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
+import { generatePredictionDetailsEmbed } from "../actions/generatePredictionDetailsEmbed";
 import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { ButtonCommand } from "./handleInteractionCreate";
 
@@ -86,27 +87,27 @@ export default function generateHandleNewBet(db: Client) {
       const updates = [];
 
       for (const sub of subs) {
-        if (sub.type === Ndb2MsgSubscriptionType.VIEW) {
-          const viewUpdate = [];
+        const viewUpdate = [];
 
+        const message = interaction.guild.channels
+          .fetch(sub.channel_id)
+          .then((channel) => {
+            if (channel.isTextBased()) {
+              return channel.messages.fetch(sub.message_id);
+            }
+          });
+
+        viewUpdate.push(message);
+
+        if (sub.type === Ndb2MsgSubscriptionType.VIEW) {
           const predictor = interaction.guild.members.fetch(
             prediction.predictor.discord_id
           );
 
           viewUpdate.push(predictor);
 
-          const message = interaction.guild.channels
-            .fetch(sub.channel_id)
-            .then((channel) => {
-              if (channel.isTextBased()) {
-                return channel.messages.fetch(sub.message_id);
-              }
-            });
-
-          viewUpdate.push(message);
-
           const update = Promise.all(viewUpdate)
-            .then(([predictor, message]) => {
+            .then(([message, predictor]) => {
               const embed = generatePredictionEmbed(
                 predictor.displayName,
                 predictor.displayAvatarURL(),
