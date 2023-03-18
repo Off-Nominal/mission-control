@@ -1,13 +1,13 @@
 import { Client } from "pg";
 import handleReady from "./handleReady";
-import handleInteractionCreate from "./handleInteractionCreate";
+import generateHandleInteractionCreate from "./handleInteractionCreate";
 import generateHandleNewPrediction from "./handleNewPrediction";
 import handleNewBet from "./handleNewBet";
 
 export default function generateNdb2BotHandlers(db: Client) {
   return {
     handleReady,
-    handleInteractionCreate,
+    handleInteractionCreate: generateHandleInteractionCreate(db),
     handleNewPrediction: generateHandleNewPrediction(db),
     handleNewBet,
   };
