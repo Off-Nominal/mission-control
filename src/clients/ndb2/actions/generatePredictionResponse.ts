@@ -1,4 +1,3 @@
-import { add, isAfter, isBefore } from "date-fns";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -40,6 +39,18 @@ export const generatePredictionResponse = async (
               .setLabel("Undorse")
               .setStyle(ButtonStyle.Danger)
           ),
+        // .addComponents(
+        //   new ButtonBuilder()
+        //     .setCustomId(`Details ${prediction.id}`)
+        //     .setLabel("Details")
+        //     .setStyle(ButtonStyle.Secondary)
+        // )
+        // .addComponents(
+        //   new ButtonBuilder()
+        //     .setLabel("Web")
+        //     .setURL("https://www.offnom.com")
+        //     .setStyle(ButtonStyle.Link)
+        // ),
       ];
 
   return { embeds: [embed], components };

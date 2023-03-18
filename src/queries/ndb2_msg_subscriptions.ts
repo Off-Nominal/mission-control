@@ -29,7 +29,17 @@ export default function ndb2MsgSubscriptionQueries(db: Client) {
     );
   };
 
+  const fetchSubs = async (prediction_id: number) => {
+    return await db
+      .query<Ndb2MsgSubscription>(
+        "SELECT id, type, prediction_id, channel_id, message_id, expiry FROM ndb2_msg_subscriptions WHERE prediction_id = $1",
+        [prediction_id]
+      )
+      .then((response) => response.rows);
+  };
+
   return {
+    fetchSubs,
     addSubscription,
   };
 }

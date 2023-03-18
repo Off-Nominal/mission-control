@@ -21,18 +21,6 @@ const getThumbnail = (successful: boolean | null) => {
   return thumbnails.open;
 };
 
-const getTitle = (successful: boolean | null) => {
-  if (successful === true) {
-    return "Successful Prediction";
-  }
-
-  if (successful === false) {
-    return "Unsuccessful Prediction";
-  }
-
-  return "Open Prediction";
-};
-
 export const generatePredictionEmbed = (
   displayName: string,
   avatarUrl: string,
@@ -79,7 +67,11 @@ export const generatePredictionEmbed = (
       {
         name: "Stats",
         value: `
-          ✅ ${endorsements.length} (${prediction.payouts.endorse}) \u200B \u200B ❌ ${undorsements.length} (${prediction.payouts.undorse})`,
+          ✅ ${endorsements.length} (${prediction.payouts.endorse.toFixed(
+          2
+        )}) \u200B \u200B ❌ ${
+          undorsements.length
+        } (${prediction.payouts.undorse.toFixed(2)})`,
       },
     ],
   });

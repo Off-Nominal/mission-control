@@ -1,61 +1,121 @@
-import { ButtonInteraction, time, userMention } from "discord.js";
+import { ButtonInteraction, GuildMember, time, userMention } from "discord.js";
+import { Client } from "pg";
+import ndb2MsgSubscriptionQueries, {
+  Ndb2MsgSubscriptionType,
+} from "../../../queries/ndb2_msg_subscriptions";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
+import { generatePredictionEmbed } from "../actions/generatePredictionEmbed";
 import { ButtonCommand } from "./handleInteractionCreate";
 
-export default async function handleNewBet(
-  interaction: ButtonInteraction,
-  predictionId: string,
-  command: string
-) {
-  const logger = new Logger("NDB2 Interaction", LogInitiator.NDB2, "New Bet");
+export default function generateHandleNewBet(db: Client) {
+  const { fetchSubs } = ndb2MsgSubscriptionQueries(db);
 
-  const discordId = interaction.member.user.id;
-  const endorsed = command === ButtonCommand.ENDORSE;
+  return async function handleNewBet(
+    interaction: ButtonInteraction,
+    predictionId: string,
+    command: string
+  ) {
+    const logger = new Logger("NDB2 Interaction", LogInitiator.NDB2, "New Bet");
 
-  logger.addLog(
-    LogStatus.INFO,
-    `New ${command} made by ${userMention(
-      discordId
-    )} on prediction #${predictionId}`
-  );
+    const discordId = interaction.member.user.id;
+    const endorsed = command === ButtonCommand.ENDORSE;
 
-  let prediction: NDB2API.EnhancedPrediction;
-
-  // Add Bet
-  try {
-    prediction = await ndb2Client.addBet(predictionId, discordId, endorsed);
-    logger.addLog(LogStatus.SUCCESS, `Bet was successfully submitted to NDB2`);
-  } catch (err) {
     logger.addLog(
-      LogStatus.FAILURE,
-      `There was an error submitting the bet. ${err.response.data.message}`
+      LogStatus.INFO,
+      `New ${command} made by ${userMention(
+        discordId
+      )} on prediction #${predictionId}`
     );
-    console.error(err);
-    return interaction.reply({
-      ephemeral: true,
-      content: `There was an error submitting the bet to NDB2. ${err.response.data.message}`,
-    });
-  }
 
-  try {
-    interaction.reply({
-      content: `Prediction $${predictionId} successfully ${command.toLowerCase()}d!`,
-      ephemeral: true,
-    });
-    logger.addLog(
-      LogStatus.SUCCESS,
-      `Successfully notified user of bet success.`
-    );
-  } catch (err) {
-    console.log(err);
-    logger.addLog(
-      LogStatus.FAILURE,
-      `There was an error responding to the prediction in the channel, but the prediction was submitted. ${err.response.data.message}`
-    );
-  }
+    let prediction: NDB2API.EnhancedPrediction;
 
-  logger.sendLog(interaction.client);
+    // Add Bet
+    try {
+      prediction = await ndb2Client.addBet(predictionId, discordId, endorsed);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Bet was successfully submitted to NDB2`
+      );
+    } catch (err) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error submitting the bet. ${err.response.data.message}`
+      );
+      console.error(err);
+      return interaction.reply({
+        ephemeral: true,
+        content: `There was an error submitting the bet to NDB2. ${err.response.data.message}`,
+      });
+    }
+
+    try {
+      interaction.reply({
+        content: `Prediction $${predictionId} successfully ${command.toLowerCase()}d!`,
+        ephemeral: true,
+      });
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Successfully notified user of bet success.`
+      );
+    } catch (err) {
+      console.log(err);
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error responding to the prediction in the channel, but the prediction was submitted. ${err.response.data.message}`
+      );
+    }
+
+    // Fetch subscriptions and update any embeds
+    try {
+      const subs = await fetchSubs(prediction.id);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Fetched ${subs.length} message subscriptions to update.`
+      );
+
+      const updates = [];
+
+      for (const sub of subs) {
+        if (sub.type === Ndb2MsgSubscriptionType.VIEW) {
+          const viewUpdate = [];
+
+          const predictor = interaction.guild.members.fetch(
+            prediction.predictor.discord_id
+          );
+
+          viewUpdate.push(predictor);
+
+          const message = interaction.guild.channels
+            .fetch(sub.channel_id)
+            .then((channel) => {
+              if (channel.isTextBased()) {
+                return channel.messages.fetch(sub.message_id);
+              }
+            });
+
+          viewUpdate.push(message);
+
+          const update = Promise.all(viewUpdate).then(
+            ([predictor, message]) => {
+              const embed = generatePredictionEmbed(
+                predictor.displayName,
+                predictor.displayAvatarURL(),
+                prediction
+              );
+              message.edit({ embeds: [embed] });
+            }
+          );
+
+          updates.push(update);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    logger.sendLog(interaction.client);
+  };
 }

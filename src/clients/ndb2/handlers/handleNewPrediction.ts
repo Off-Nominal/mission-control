@@ -97,6 +97,21 @@ export default function generateNewPredictionHandler(db: Client) {
       });
     }
 
+    try {
+      const reply = await generatePredictionResponse(interaction, prediction);
+      interaction.reply(reply);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Prediction embed was sent to the channel.`
+      );
+    } catch (err) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error responding to the prediction in the channel, but the prediction was submitted.`
+      );
+      console.error(err);
+    }
+
     // Add subscription for message context
     try {
       await addSubscription(
@@ -113,21 +128,6 @@ export default function generateNewPredictionHandler(db: Client) {
       logger.addLog(
         LogStatus.FAILURE,
         `Prediction context message subscription log failure`
-      );
-      console.error(err);
-    }
-
-    try {
-      const reply = await generatePredictionResponse(interaction, prediction);
-      interaction.reply(reply);
-      logger.addLog(
-        LogStatus.SUCCESS,
-        `Prediction embed was sent to the channel.`
-      );
-    } catch (err) {
-      logger.addLog(
-        LogStatus.FAILURE,
-        `There was an error responding to the prediction in the channel, but the prediction was submitted.`
       );
       console.error(err);
     }
