@@ -30,6 +30,8 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
   return router.post("/ndb2", async (req, res) => {
     // verify source of webhook
     const refHost = new URL(process.env.NDB2_API_BASEURL);
+    console.log(process.env.NDB2_API_BASEURL);
+    console.log(refHost);
     if (req.hostname !== refHost.hostname) {
       return res.status(401).json("UNAUTHORIZED");
     }
