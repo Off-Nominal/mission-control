@@ -1,4 +1,11 @@
-import { ButtonInteraction, GuildMember, time, userMention } from "discord.js";
+import {
+  ButtonInteraction,
+  channelMention,
+  GuildMember,
+  messageLink,
+  time,
+  userMention,
+} from "discord.js";
 import { Client } from "pg";
 import ndb2MsgSubscriptionQueries, {
   Ndb2MsgSubscriptionType,
@@ -72,7 +79,7 @@ export default function generateHandleNewBet(db: Client) {
     try {
       const subs = await fetchSubs(prediction.id);
       logger.addLog(
-        LogStatus.SUCCESS,
+        LogStatus.INFO,
         `Fetched ${subs.length} message subscriptions to update.`
       );
 
@@ -98,20 +105,38 @@ export default function generateHandleNewBet(db: Client) {
 
           viewUpdate.push(message);
 
-          const update = Promise.all(viewUpdate).then(
-            ([predictor, message]) => {
+          const update = Promise.all(viewUpdate)
+            .then(([predictor, message]) => {
               const embed = generatePredictionEmbed(
                 predictor.displayName,
                 predictor.displayAvatarURL(),
                 prediction
               );
-              message.edit({ embeds: [embed] });
-            }
-          );
+              return message.edit({ embeds: [embed] });
+            })
+            .catch((err) => {
+              logger.addLog(
+                LogStatus.FAILURE,
+                `Message subscription in channel ${channelMention(
+                  sub.channel_id
+                )} message ${messageLink(
+                  sub.channel_id,
+                  sub.message_id
+                )} failed to update.`
+              );
+              console.error(err);
+            });
 
           updates.push(update);
         }
       }
+
+      Promise.all(updates).then(() => {
+        logger.addLog(
+          LogStatus.INFO,
+          `All ${subs.length} message subscriptions successfully updated.`
+        );
+      });
     } catch (err) {
       console.error(err);
     }
