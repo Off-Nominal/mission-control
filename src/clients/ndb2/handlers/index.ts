@@ -3,6 +3,7 @@ import handleReady from "./handleReady";
 import generateHandleInteractionCreate from "./handleInteractionCreate";
 import generateHandleNewPrediction from "./handleNewPrediction";
 import generateHandleNewBet from "./handleNewBet";
+import generateHandleViewPrediction from "./handleViewPrediction";
 
 export default function generateNdb2BotHandlers(db: Client) {
   return {
@@ -10,5 +11,6 @@ export default function generateNdb2BotHandlers(db: Client) {
     handleInteractionCreate: generateHandleInteractionCreate(db),
     handleNewPrediction: generateHandleNewPrediction(db),
     handleNewBet: generateHandleNewBet(db),
+    handleViewPrediction: generateHandleViewPrediction(db),
   };
 }

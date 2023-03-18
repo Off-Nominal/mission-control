@@ -38,13 +38,13 @@ export const generatePredictionResponse = async (
               .setCustomId(`Undorse ${prediction.id}`)
               .setLabel("Undorse")
               .setStyle(ButtonStyle.Danger)
+          )
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId(`Details ${prediction.id}`)
+              .setLabel("Details")
+              .setStyle(ButtonStyle.Secondary)
           ),
-        // .addComponents(
-        //   new ButtonBuilder()
-        //     .setCustomId(`Details ${prediction.id}`)
-        //     .setLabel("Details")
-        //     .setStyle(ButtonStyle.Secondary)
-        // )
         // .addComponents(
         //   new ButtonBuilder()
         //     .setLabel("Web")

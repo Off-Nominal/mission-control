@@ -328,49 +328,11 @@ export default function generateHandleInteractionCreate(db: Client) {
     // }
 
     if (subCommand === Ndb2Subcommand.VIEW) {
-      logger.addLog(LogStatus.INFO, `Request is a Prediction View request`);
-      try {
-        const reply = await generatePredictionResponse(interaction, prediction);
-        logger.addLog(
-          LogStatus.SUCCESS,
-          `Prediction embed was successfully generated.`
-        );
-        interaction.reply(reply);
-        logger.addLog(
-          LogStatus.SUCCESS,
-          `Prediction embed was successfully delivered to channel.`
-        );
-      } catch (err) {
-        console.error(err);
-        logger.addLog(
-          LogStatus.FAILURE,
-          `There was an error Retrieving a prediction for a user. ${err.response.data.message}`
-        );
-      }
-
-      // Add subscription for embed
-      try {
-        const reply = await interaction.fetchReply();
-        const channelId = interaction.channelId;
-        await addSubscription(
-          Ndb2MsgSubscriptionType.VIEW,
-          prediction.id,
-          channelId,
-          reply.id,
-          add(new Date(), { hours: 36 })
-        );
-        logger.addLog(
-          LogStatus.SUCCESS,
-          `Prediction view embed message subscription logged`
-        );
-      } catch (err) {
-        logger.addLog(
-          LogStatus.FAILURE,
-          `Prediction view message subscription log failure.`
-        );
-        console.error(err);
-      }
-      return logger.sendLog(interaction.client);
+      return interaction.client.emit(
+        Ndb2Events.VIEW_PREDICTION,
+        interaction,
+        prediction
+      );
     }
 
     logger.addLog(

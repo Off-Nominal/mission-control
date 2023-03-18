@@ -53,7 +53,7 @@ export default function generateHandleNewBet(db: Client) {
 
     try {
       interaction.reply({
-        content: `Prediction $${predictionId} successfully ${command.toLowerCase()}d!`,
+        content: `Prediction #${predictionId} successfully ${command.toLowerCase()}d!`,
         ephemeral: true,
       });
       logger.addLog(
