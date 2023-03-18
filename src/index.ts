@@ -81,7 +81,7 @@ const bootChecklist = {
   eventsListener: false,
   newsFeed: false,
   rllClient: false,
-  // express: false,
+  express: false,
 };
 
 // Database Config
@@ -193,17 +193,24 @@ const ndb2Bot = new Client({ intents: [simpleIntents] });
  ************************************/
 
 import usersRouter from "./routers/users";
+import webhooksRouter from "./routers/webhooks";
 import apiAuth from "./middleware/auth";
 import { NDB2API } from "./utilities/ndb2Client/types";
+const morgan = require("morgan");
 
-// const app = express();
+const app = express();
 // app.use(apiAuth);
-// // app.use("/api/users", usersRouter(ndb2Bot));
-// app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
-// app.listen(8080, () => {
-//   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
-//   bootChecklist.express = true;
-// });
+const PORT = process.env.PORT || 8080;
+const morganOutput = process.env.NODE_ENV === "dev" ? "dev" : "combined";
+app.use(morgan(morganOutput));
+app.use(express.json());
+
+app.use("/webhooks", webhooksRouter);
+app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
+app.listen(PORT, () => {
+  bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
+  bootChecklist.express = true;
+});
 
 /***********************************
  *  RLL Event Listener

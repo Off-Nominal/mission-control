@@ -43,6 +43,7 @@
     "fuse.js": "^6.4.6",
     "googleapis": "^92.0.0",
     "mars-date-utils": "^1.1.1",
+    "morgan": "^1.10.0",
     "pg": "^8.7.1",
     "rocket-launch-live-client": "^0.3.0",
     "string-strip-html": "^8.2.9",
@@ -51,9 +52,9 @@
   "devDependencies": {
     "@types/db-migrate-base": "^0.0.10",
     "@types/db-migrate-pg": "^0.0.10",
+    "@types/express": "^4.17.14",
     "@types/node": "^18.7.6",
     "@types/pg": "^8.6.4",
-    "@types/express": "^4.17.14",
     "db-migrate": "^0.11.13",
     "db-migrate-pg": "^1.2.2",
     "nodemon": "^2.0.16",
