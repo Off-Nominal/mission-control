@@ -17,9 +17,9 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db) {
   return db.createTable("ndb2_msg_subscriptions", {
     id: { type: "int", primaryKey: true, autoIncrement: true, notNull: true },
-    prediction_id: { type: "int", notNull: true },
-    type: { type: "string", notNull: true },
-    channel_id: { type: "string", notNull: true },
+    prediction_id: "number",
+    type: "string",
+    channel_id: "string",
     message_id: "string",
     expiry: "timestamp",
   });
