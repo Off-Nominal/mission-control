@@ -1,11 +1,4 @@
-import {
-  channelMention,
-  Client,
-  Guild,
-  GuildMember,
-  messageLink,
-  MessageType,
-} from "discord.js";
+import { channelMention, Client, GuildMember, messageLink } from "discord.js";
 import { Client as DbClient } from "pg";
 import ndb2MsgSubscriptionQueries, {
   Ndb2MsgSubscription,

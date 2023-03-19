@@ -2,6 +2,7 @@ import { Client } from "discord.js";
 import { Client as DbClient } from "pg";
 import express from "express";
 import { updatePredictionEmbeds } from "../clients/ndb2/actions/updatePredictionEmbeds";
+import { generateRetirementNotice } from "../clients/ndb2/actions/generateRetirementNotice";
 const router = express.Router();
 
 enum NDB2WebhookEvent {
@@ -43,6 +44,8 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
 
     if (event_name === NDB2WebhookEvent.RETIRED_PREDICTION) {
       updatePredictionEmbeds(client, db, data);
+      generateRetirementNotice(client, db, data);
+      // unsubscribe embeds
     }
 
     if (event_name === NDB2WebhookEvent.NEW_BET) {

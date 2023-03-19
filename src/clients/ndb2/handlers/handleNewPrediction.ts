@@ -1,4 +1,4 @@
-import { add, format, isFuture, isValid } from "date-fns";
+import { add, isFuture } from "date-fns";
 import {
   ModalSubmitInteraction,
   time,
@@ -27,7 +27,8 @@ export default function generateNewPredictionHandler(db: Client) {
       "New Prediction"
     );
     const text = interaction.fields.getTextInputValue("text");
-    const due = new Date(interaction.fields.getTextInputValue("due"));
+    const due = interaction.fields.getTextInputValue("due");
+    const dueDate = new Date(due);
     const discordId = interaction.member.user.id;
     const messageId = interaction.channel.lastMessageId;
     const channelId = interaction.channelId;
@@ -35,13 +36,13 @@ export default function generateNewPredictionHandler(db: Client) {
     logger.addLog(
       LogStatus.INFO,
       `New prediction made by ${userMention(discordId)} due ${time(
-        due,
+        dueDate,
         TimestampStyles.RelativeTime
       )}: ${text}`
     );
 
     // Validate date format
-    const isDueDateValid = isValid(new Date(due));
+    const isDueDateValid = due.match(/^\d{4}\-\d{2}\-\d{2}$/g);
     if (!isDueDateValid) {
       logger.addLog(
         LogStatus.WARNING,
@@ -56,7 +57,7 @@ export default function generateNewPredictionHandler(db: Client) {
 
     logger.addLog(LogStatus.INFO, `Due date is properly formed!`);
 
-    const due_date = add(due, { days: 1 });
+    const due_date = add(dueDate, { days: 1 });
 
     // Validate date is in the future
     if (!isFuture(due_date)) {
