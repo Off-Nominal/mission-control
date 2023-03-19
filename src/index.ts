@@ -384,6 +384,12 @@ ndb2Bot.on(
     ndb2BotHandlers.handleNewBet(interaction, predictionId, command);
   }
 );
+ndb2Bot.on(
+  Ndb2Events.RETIRE_PREDICTION,
+  (interaction: ButtonInteraction, predictionId: string) => {
+    ndb2BotHandlers.handleRetirePrediction(interaction, predictionId);
+  }
+);
 
 /***********************************
  *  Utility Bot Event Handlers

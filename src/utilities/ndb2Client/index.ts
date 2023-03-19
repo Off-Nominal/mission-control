@@ -107,11 +107,13 @@ export class Ndb2Client {
   //     .then((res) => res.data[0]);
   // }
 
-  // public deletePrediction(id: string | number) {
-  //   const url = new URL(this.baseURL);
-  //   url.pathname = `api/predictions/${id}`;
-  //   return this.client.delete(url.toString()).then((res) => res.data);
-  // }
+  public retirePrediction(id: string | number, discord_id: string) {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${id}`;
+    return this.client
+      .patch<NDB2API.EnhancedPrediction>(url.toString(), { discord_id })
+      .then((res) => res.data);
+  }
 }
 
 const ndbKey = process.env.NDB2_CLIENT_ID;
