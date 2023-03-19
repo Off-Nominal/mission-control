@@ -2,7 +2,7 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  Interaction,
+  GuildMember,
   InteractionReplyOptions,
   MessagePayload,
 } from "discord.js";
@@ -13,13 +13,9 @@ import {
 import { generatePredictionEmbed } from "./generatePredictionEmbed";
 
 export const generatePredictionResponse = async (
-  interaction: Interaction,
+  predictor: GuildMember,
   prediction: NDB2API.EnhancedPrediction
 ): Promise<MessagePayload | InteractionReplyOptions> => {
-  const predictor = await interaction.guild.members.fetch(
-    prediction.predictor.discord_id
-  );
-
   const embed = generatePredictionEmbed(
     predictor.displayName,
     predictor.displayAvatarURL(),

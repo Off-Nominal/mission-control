@@ -1,4 +1,3 @@
-import { add, isBefore } from "date-fns";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -10,15 +9,11 @@ import {
 } from "discord.js";
 import { Client } from "pg";
 import { Ndb2Subcommand } from "../../../commands/ndb2";
-import ndb2MsgSubscriptionQueries, {
-  Ndb2MsgSubscriptionType,
-} from "../../../queries/ndb2_msg_subscriptions";
 import { Ndb2Events } from "../../../types/eventEnums";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 // import { generateUserEmbed } from "../actions/generateUserEmbed";
 // import { generateVoteEmbed } from "../actions/generateVoteEmbed";
 // import { generateVoteResponse } from "../actions/generateVoteResponse";

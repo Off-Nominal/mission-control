@@ -1,13 +1,7 @@
-import { channelMention, Client, messageLink } from "discord.js";
+import { Client } from "discord.js";
 import { Client as DbClient } from "pg";
 import express from "express";
-import { LogInitiator } from "../types/logEnums";
-import { Logger, LogStatus } from "../utilities/logger";
-import ndb2MsgSubscriptionQueries, {
-  Ndb2MsgSubscriptionType,
-} from "../queries/ndb2_msg_subscriptions";
-import fetchGuild from "../utilities/fetchGuild";
-import { generatePredictionEmbed } from "../clients/ndb2/actions/generatePredictionEmbed";
+import { updatePredictionEmbeds } from "../clients/ndb2/actions/updatePredictionEmbeds";
 const router = express.Router();
 
 enum NDB2WebhookEvent {
@@ -25,8 +19,6 @@ const isNdb2WebhookEvent = (event: any): event is NDB2WebhookEvent => {
 };
 
 const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
-  const { fetchSubs } = ndb2MsgSubscriptionQueries(db);
-
   return router.post("/ndb2", async (req, res) => {
     // verify source of webhook
 
@@ -50,85 +42,11 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
     }
 
     if (event_name === NDB2WebhookEvent.RETIRED_PREDICTION) {
-      console.log("retired prediction");
+      updatePredictionEmbeds(client, db, data);
     }
 
     if (event_name === NDB2WebhookEvent.NEW_BET) {
-      const prediction = data;
-
-      // Fetch subscriptions and update any embeds
-      try {
-        const logger = new Logger(
-          "Webhook Response",
-          LogInitiator.NDB2,
-          "Webhook - New Bet"
-        );
-
-        const subs = await fetchSubs(prediction.id);
-        logger.addLog(
-          LogStatus.INFO,
-          `Fetched ${subs.length} message subscriptions to update.`
-        );
-
-        const updates = [];
-
-        const guild = fetchGuild(client);
-
-        for (const sub of subs) {
-          const viewUpdate = [];
-
-          const message = guild.channels
-            .fetch(sub.channel_id)
-            .then((channel) => {
-              if (channel.isTextBased()) {
-                return channel.messages.fetch(sub.message_id);
-              }
-            });
-
-          viewUpdate.push(message);
-
-          if (sub.type === Ndb2MsgSubscriptionType.VIEW) {
-            const predictor = guild.members.fetch(
-              prediction.predictor.discord_id
-            );
-
-            viewUpdate.push(predictor);
-
-            const update = Promise.all(viewUpdate)
-              .then(([message, predictor]) => {
-                const embed = generatePredictionEmbed(
-                  predictor.displayName,
-                  predictor.displayAvatarURL(),
-                  prediction
-                );
-                return message.edit({ embeds: [embed] });
-              })
-              .catch((err) => {
-                logger.addLog(
-                  LogStatus.FAILURE,
-                  `Message subscription in channel ${channelMention(
-                    sub.channel_id
-                  )} message ${messageLink(
-                    sub.channel_id,
-                    sub.message_id
-                  )} failed to update.`
-                );
-                console.error(err);
-              });
-
-            updates.push(update);
-          }
-        }
-
-        Promise.all(updates).then(() => {
-          logger.addLog(
-            LogStatus.INFO,
-            `All ${subs.length} message subscriptions successfully updated.`
-          );
-        });
-      } catch (err) {
-        console.error(err);
-      }
+      updatePredictionEmbeds(client, db, data);
     }
 
     res.json("thank u");

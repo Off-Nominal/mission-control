@@ -98,7 +98,11 @@ export default function generateNewPredictionHandler(db: Client) {
     }
 
     try {
-      const reply = await generatePredictionResponse(interaction, prediction);
+      const predictor = await interaction.guild.members.fetch(
+        prediction.predictor.discord_id
+      );
+
+      const reply = await generatePredictionResponse(predictor, prediction);
       interaction.reply(reply);
       logger.addLog(
         LogStatus.SUCCESS,

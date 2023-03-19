@@ -11,7 +11,7 @@ const thumbnails = {
   failure:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134579/Discord%20Assets/4789514_czvljj.png",
   retired:
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679231451/Discord%20Assets/5267928_ohcsdq.png",
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679235409/Discord%20Assets/9826793_randif.png",
 };
 
 const getThumbnail = (status: PredictionLifeCycle): string => {

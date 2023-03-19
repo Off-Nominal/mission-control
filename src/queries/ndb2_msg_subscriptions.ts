@@ -5,7 +5,7 @@ export enum Ndb2MsgSubscriptionType {
   VIEW = "view",
 }
 
-type Ndb2MsgSubscription = {
+export type Ndb2MsgSubscription = {
   id: number;
   type: Ndb2MsgSubscriptionType;
   prediction_id: number;

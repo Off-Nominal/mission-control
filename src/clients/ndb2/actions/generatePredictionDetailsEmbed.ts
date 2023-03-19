@@ -1,5 +1,8 @@
 import { EmbedBuilder, time, TimestampStyles, userMention } from "discord.js";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
+import {
+  NDB2API,
+  PredictionLifeCycle,
+} from "../../../utilities/ndb2Client/types";
 
 const MS_IN_A_DAY = 1000 * 60 * 60 * 24;
 
@@ -27,8 +30,6 @@ const getBaseWager = (predictionDate: Date, betDate: Date) => {
 export const generatePredictionDetailsEmbed = (
   prediction: NDB2API.EnhancedPrediction
 ) => {
-  const isClosed = !!prediction.judged_date;
-
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
 
@@ -42,7 +43,7 @@ export const generatePredictionDetailsEmbed = (
 
   const fields = [];
 
-  if (!isClosed) {
+  if (prediction.status === PredictionLifeCycle.OPEN) {
     fields.push({
       name: "Risk Assessment",
       value: getRiskMessage(prediction.payouts.endorse, prediction.bets.length),
@@ -53,6 +54,14 @@ export const generatePredictionDetailsEmbed = (
         prediction.payouts.endorse,
         prediction.payouts.undorse
       ),
+    });
+  }
+
+  if (prediction.status === PredictionLifeCycle.RETIRED) {
+    fields.push({
+      name: "Status",
+      value:
+        "This prediction was retired by the predictor within the allowable edit period for predictions.",
     });
   }
 

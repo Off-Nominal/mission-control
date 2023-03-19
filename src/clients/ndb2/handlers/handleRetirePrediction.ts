@@ -70,7 +70,7 @@ export default function generateHandleRetirePrediction(db: Client) {
       await ndb2Client.retirePrediction(prediction.id, deleterId);
       logger.addLog(LogStatus.SUCCESS, `Prediction retired successfully.`);
       interaction.reply({
-        content: `Prediction #${prediction.id} has been cancelled. All bets against it are cancelled as well.`,
+        content: `Prediction #${prediction.id} has been cancelled and all bets on it will not count.`,
       });
     } catch (err) {
       console.log(err);
