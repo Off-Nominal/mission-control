@@ -1,6 +1,8 @@
-import { add } from "date-fns";
+import { add, isBefore } from "date-fns";
 import {
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   Interaction,
   ModalBuilder,
   TextInputBuilder,
@@ -27,13 +29,25 @@ export enum ButtonCommand {
   DETAILS = "Details",
   AFFIRM = "Affirm",
   NEGATE = "Negate",
+  RETIRE = "Retire",
 }
 export default function generateHandleInteractionCreate(db: Client) {
-  const { addSubscription } = ndb2MsgSubscriptionQueries(db);
+  // const { addSubscription } = ndb2MsgSubscriptionQueries(db);
 
   return async function handleInteractionCreate(interaction: Interaction) {
+    const logger = new Logger(
+      "NDB2 Interaction",
+      LogInitiator.NDB2,
+      "NDB2 Interaction Handler"
+    );
+
     // Handle Modal Submissions for new Predictions
     if (interaction.isModalSubmit()) {
+      logger.addLog(
+        LogStatus.INFO,
+        `Interaction is a Modal Submit - handing off to NEW_PREDICTION handler.`
+      );
+      logger.sendLog(interaction.client);
       return interaction.client.emit(Ndb2Events.NEW_PREDICTION, interaction);
     }
 
@@ -41,15 +55,44 @@ export default function generateHandleInteractionCreate(db: Client) {
     if (interaction.isButton()) {
       const [command, predictionId] = interaction.customId.split(" ");
 
+      logger.addLog(
+        LogStatus.INFO,
+        `Interaction is a Button Submit - Command: ${command}, Prediction ID: ${predictionId}`
+      );
+
       const isBet =
         command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
-      const isDetails = command === ButtonCommand.DETAILS;
 
       // const isVote =
       //   command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
 
+      let prediction: NDB2API.EnhancedPrediction;
+
+      try {
+        prediction = await ndb2Client.getPrediction(predictionId);
+        logger.addLog(
+          LogStatus.SUCCESS,
+          `Prediction was successfully retrieved from NDB2.`
+        );
+      } catch (err) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `Prediction does not exist, interaction rejected.`
+        );
+        logger.sendLog(interaction.client);
+        return interaction.reply({
+          content: "No prediction exists with that id.",
+          ephemeral: true,
+        });
+      }
+
       if (isBet) {
-        interaction.client.emit(
+        logger.addLog(
+          LogStatus.INFO,
+          `Interaction is a Bet Submit - handing off to NEW_BET handler.`
+        );
+        logger.sendLog(interaction.client);
+        return interaction.client.emit(
           Ndb2Events.NEW_BET,
           interaction,
           predictionId,
@@ -57,9 +100,27 @@ export default function generateHandleInteractionCreate(db: Client) {
         );
       }
 
-      if (isDetails) {
-        interaction.client.emit(
+      if (command === ButtonCommand.DETAILS) {
+        logger.addLog(
+          LogStatus.INFO,
+          `Interaction is a View Details request - handing off to VIEW_DETAILS handler.`
+        );
+        logger.sendLog(interaction.client);
+        return interaction.client.emit(
           Ndb2Events.VIEW_DETAILS,
+          interaction,
+          predictionId
+        );
+      }
+
+      if (command === ButtonCommand.RETIRE) {
+        logger.addLog(
+          LogStatus.INFO,
+          `Interaction is a Retire Prediction request - handing off to RETIRE_PREDICTION handler.`
+        );
+        logger.sendLog(interaction.client);
+        return interaction.client.emit(
+          Ndb2Events.RETIRE_PREDICTION,
           interaction,
           predictionId
         );
@@ -99,12 +160,23 @@ export default function generateHandleInteractionCreate(db: Client) {
       // }
     }
 
-    if (!interaction.isChatInputCommand()) return;
+    if (!interaction.isChatInputCommand()) {
+      logger.addLog(
+        LogStatus.WARNING,
+        `Received a Chat Input Command interaction, which is not supported.`
+      );
+      return logger.sendLog(interaction.client);
+    }
 
     if (
       process.env.NODE_ENV !== "dev" &&
       interaction.channelId !== "1084942074991878174"
     ) {
+      logger.addLog(
+        LogStatus.WARNING,
+        `User tried to invoke NDB2 outside the playground channel, which is not supported.`
+      );
+      logger.sendLog(interaction.client);
       return interaction.reply({
         content: "The new NDB2 is only available in the testing thread for now",
         ephemeral: true,
@@ -115,6 +187,11 @@ export default function generateHandleInteractionCreate(db: Client) {
     const subCommand = options.getSubcommand(false);
 
     if (commandName !== "predict") {
+      logger.addLog(
+        LogStatus.WARNING,
+        `User invoked a command other than predict, which is not supported.`
+      );
+      logger.sendLog(interaction.client);
       return interaction.reply({
         content: "Invalid Command. Try `/predict help` to see how I work.",
         ephemeral: true,
@@ -153,6 +230,12 @@ export default function generateHandleInteractionCreate(db: Client) {
 
       modal.addComponents(firstActionRow, secondActionRow);
 
+      logger.addLog(
+        LogStatus.WARNING,
+        `Received a NEW PREDICTION request, handing off to NEW PREDICTION handler.`
+      );
+      logger.sendLog(interaction.client);
+
       return await interaction.showModal(modal);
     }
 
@@ -173,15 +256,31 @@ export default function generateHandleInteractionCreate(db: Client) {
     //   }
     // }
 
-    // // Prediction specific commands
-
-    const logger = new Logger(
-      "NDB2 Interaction",
-      LogInitiator.NDB2,
-      "Specific prediction request from user"
-    );
+    // Prediction specific commands
 
     const predictionId = options.getInteger("id");
+
+    if (subCommand === Ndb2Subcommand.RETIRE) {
+      logger.addLog(
+        LogStatus.WARNING,
+        `Received a RETIRE Prediction request, handing off to NEW PREDICTION handler.`
+      );
+      logger.sendLog(interaction.client);
+
+      const components = [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId(`Retire ${predictionId}`)
+            .setLabel("Retire")
+            .setStyle(ButtonStyle.Danger)
+        ),
+      ];
+
+      const content = `Retiring a prediction can only be done in the first ${process.env.GM_PREDICTION_UPDATE_WINDOW_HOURS} hours of its creation. If you decide to proceed with the cancellation, a public notice of the cancellation will be posted, and all bets against it will be cancelled as well. If you understand and still want to continue, click the button below.`;
+
+      return interaction.reply({ content, components, ephemeral: true });
+    }
+
     let prediction: NDB2API.EnhancedPrediction;
 
     try {
@@ -200,36 +299,6 @@ export default function generateHandleInteractionCreate(db: Client) {
         ephemeral: true,
       });
     }
-
-    // if (subCommand === Ndb2Subcommand.CANCEL) {
-    //   const deleterId = interaction.user.id;
-    //   if (deleterId !== prediction.predictor_discord_id) {
-    //     return interaction.reply({
-    //       content: "You cannot delete other people's predictions.",
-    //       ephemeral: true,
-    //     });
-    //   }
-
-    //   if (isBefore(add(new Date(prediction.created), { days: 1 }), new Date())) {
-    //     return interaction.reply({
-    //       content: "Predictions can only be deleted within 24 hours of creation.",
-    //       ephemeral: true,
-    //     });
-    //   }
-
-    //   try {
-    //     await deletePrediction(prediction.id);
-    //     return interaction.reply({
-    //       content: `Prediction #${prediction.id} has been cancelled. All bets against it are cancelled as well.`,
-    //     });
-    //   } catch (err) {
-    //     console.log(err);
-    //     return interaction.reply({
-    //       content: "Error deleting prediction.",
-    //       ephemeral: true,
-    //     });
-    //   }
-    // }
 
     // if (subCommand === Ndb2Subcommand.TRIGGER) {
     //   const closer_discord_id = interaction.user.id;

@@ -5,6 +5,7 @@ import generateHandleNewPrediction from "./handleNewPrediction";
 import generateHandleNewBet from "./handleNewBet";
 import generateHandleViewPrediction from "./handleViewPrediction";
 import generateHandleViewDetails from "./handleViewDetails";
+import generateHandleRetirePrediction from "./handleRetirePrediction";
 
 export default function generateNdb2BotHandlers(db: Client) {
   return {
@@ -14,5 +15,6 @@ export default function generateNdb2BotHandlers(db: Client) {
     handleNewBet: generateHandleNewBet(db),
     handleViewPrediction: generateHandleViewPrediction(db),
     handleViewDetails: generateHandleViewDetails(db),
+    handleRetirePrediction: generateHandleRetirePrediction(db),
   };
 }

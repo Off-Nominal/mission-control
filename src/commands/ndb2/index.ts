@@ -5,7 +5,7 @@ export enum Ndb2Subcommand {
   VIEW = "view",
   ENDORSE = "endorse",
   UNDORSE = "undorse",
-  CANCEL = "cancel",
+  RETIRE = "retire",
   TRIGGER = "trigger",
   SCORE = "score",
   HELP = "help",
@@ -27,31 +27,31 @@ const predictCommand = new SlashCommandBuilder()
       .addIntegerOption((option) =>
         option.setName("id").setDescription("Prediction ID").setRequired(true)
       )
+  )
+  // .addSubcommand((command) =>
+  //   command
+  //     .setName(Ndb2Subcommand.ENDORSE)
+  //     .setDescription("Endorse a Prediction")
+  //     .addIntegerOption((option) =>
+  //       option.setName("id").setDescription("Prediction ID").setRequired(true)
+  //     )
+  // )
+  // .addSubcommand((command) =>
+  //   command
+  //     .setName(Ndb2Subcommand.UNDORSE)
+  //     .setDescription("Undorse a Prediction")
+  //     .addIntegerOption((option) =>
+  //       option.setName("id").setDescription("Prediction ID").setRequired(true)
+  //     )
+  // )
+  .addSubcommand((command) =>
+    command
+      .setName(Ndb2Subcommand.RETIRE)
+      .setDescription("Cancel a Prediction you made within last 12 hours")
+      .addIntegerOption((option) =>
+        option.setName("id").setDescription("Prediction ID").setRequired(true)
+      )
   );
-// .addSubcommand((command) =>
-//   command
-//     .setName(Ndb2Subcommand.ENDORSE)
-//     .setDescription("Endorse a Prediction")
-//     .addIntegerOption((option) =>
-//       option.setName("id").setDescription("Prediction ID").setRequired(true)
-//     )
-// )
-// .addSubcommand((command) =>
-//   command
-//     .setName(Ndb2Subcommand.UNDORSE)
-//     .setDescription("Undorse a Prediction")
-//     .addIntegerOption((option) =>
-//       option.setName("id").setDescription("Prediction ID").setRequired(true)
-//     )
-// )
-// .addSubcommand((command) =>
-//   command
-//     .setName(Ndb2Subcommand.CANCEL)
-//     .setDescription("Cancel a Prediction you just made")
-//     .addIntegerOption((option) =>
-//       option.setName("id").setDescription("Prediction ID").setRequired(true)
-//     )
-// )
 // .addSubcommand((command) =>
 //   command
 //     .setName(Ndb2Subcommand.TRIGGER)
