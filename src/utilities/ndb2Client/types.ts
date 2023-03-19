@@ -1,5 +1,13 @@
 // // Basic Schema Records
 
+export enum PredictionLifeCycle {
+  OPEN = "open",
+  RETIRED = "retired",
+  CLOSED = "closed",
+  SUCCESSFUL = "successful",
+  FAILED = "failed",
+}
+
 export namespace NDB2API {
   export type GeneralResponse<T> = {
     success: boolean;
@@ -19,7 +27,8 @@ export namespace NDB2API {
     due_date: string;
     closed_date: string | null;
     judged_date: string | null;
-    successful: boolean | null;
+    retired_date: string | null;
+    status: PredictionLifeCycle;
     bets: {
       id: number;
       date: string;

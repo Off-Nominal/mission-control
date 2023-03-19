@@ -35,14 +35,14 @@ export default function generateHandleInteractionCreate(db: Client) {
   // const { addSubscription } = ndb2MsgSubscriptionQueries(db);
 
   return async function handleInteractionCreate(interaction: Interaction) {
-    const logger = new Logger(
-      "NDB2 Interaction",
-      LogInitiator.NDB2,
-      "NDB2 Interaction Handler"
-    );
-
     // Handle Modal Submissions for new Predictions
     if (interaction.isModalSubmit()) {
+      const logger = new Logger(
+        "NDB2 Interaction",
+        LogInitiator.NDB2,
+        "NDB2 Modal Interaction Handler"
+      );
+
       logger.addLog(
         LogStatus.INFO,
         `Interaction is a Modal Submit - handing off to NEW_PREDICTION handler.`
@@ -53,6 +53,11 @@ export default function generateHandleInteractionCreate(db: Client) {
 
     // // Handle Button Submissions for Endorsements, Undorsements and Details
     if (interaction.isButton()) {
+      const logger = new Logger(
+        "NDB2 Interaction",
+        LogInitiator.NDB2,
+        "NDB2 Button Interaction Handler"
+      );
       const [command, predictionId] = interaction.customId.split(" ");
 
       logger.addLog(
@@ -161,12 +166,24 @@ export default function generateHandleInteractionCreate(db: Client) {
     }
 
     if (!interaction.isChatInputCommand()) {
+      const logger = new Logger(
+        "NDB2 Interaction",
+        LogInitiator.NDB2,
+        "NDB2 Chat Input Command Interaction Handler"
+      );
+
       logger.addLog(
         LogStatus.WARNING,
         `Received a Chat Input Command interaction, which is not supported.`
       );
       return logger.sendLog(interaction.client);
     }
+
+    const logger = new Logger(
+      "NDB2 Interaction",
+      LogInitiator.NDB2,
+      "NDB2 Slash Command Interaction Handler"
+    );
 
     if (
       process.env.NODE_ENV !== "dev" &&
@@ -262,8 +279,8 @@ export default function generateHandleInteractionCreate(db: Client) {
 
     if (subCommand === Ndb2Subcommand.RETIRE) {
       logger.addLog(
-        LogStatus.WARNING,
-        `Received a RETIRE Prediction request, handing off to NEW PREDICTION handler.`
+        LogStatus.INFO,
+        `Received a RETIRE Prediction request, initiating confirmation message.`
       );
       logger.sendLog(interaction.client);
 
@@ -294,6 +311,8 @@ export default function generateHandleInteractionCreate(db: Client) {
         LogStatus.WARNING,
         `Prediction does not exist, interaction rejected.`
       );
+      logger.sendLog(interaction.client);
+
       return interaction.reply({
         content: "No prediction exists with that id.",
         ephemeral: true,
@@ -408,6 +427,11 @@ export default function generateHandleInteractionCreate(db: Client) {
     // }
 
     if (subCommand === Ndb2Subcommand.VIEW) {
+      logger.addLog(
+        LogStatus.INFO,
+        `Received a View Prediction request, handing off to View Prediction handler.`
+      );
+      logger.sendLog(interaction.client);
       return interaction.client.emit(
         Ndb2Events.VIEW_PREDICTION,
         interaction,

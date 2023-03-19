@@ -36,7 +36,7 @@ export const generatePredictionDetailsEmbed = (
     title: "Detailed Prediction View",
     description: prediction.text,
     thumbnail: {
-      url: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679143144/Discord%20Assets/7839958_ypjojp.png",
+      url: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679231457/Discord%20Assets/5067685_evmy8z.png",
     },
   });
 
