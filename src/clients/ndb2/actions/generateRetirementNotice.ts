@@ -7,6 +7,7 @@ import {
 import { Client as DbClient } from "pg";
 import { Client, GuildMember } from "discord.js";
 import ndb2MsgSubscriptionQueries, {
+  Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
 import { LogInitiator } from "../../../types/logEnums";
@@ -68,17 +69,24 @@ export const generateRetirementNotice = async (
       throw err;
     })
     .then((subs) => {
-      const contextSubscription = subs.find(
-        (sub) => sub.type === Ndb2MsgSubscriptionType.CONTEXT
+      let context: Ndb2MsgSubscription;
+
+      context = subs.find(
+        (sub) => sub.type === Ndb2MsgSubscriptionType.RETIREMENT
       );
-      if (!contextSubscription) {
+      if (!context) {
+        context = subs.find(
+          (sub) => sub.type === Ndb2MsgSubscriptionType.CONTEXT
+        );
+      }
+      if (!context) {
         logger.addLog(
           LogStatus.FAILURE,
           `No context subscription found, using fallback`
         );
         return fallbackContextChannelId;
       } else {
-        return contextSubscription;
+        return context;
       }
     })
     .then((context) => {
@@ -112,7 +120,9 @@ export const generateRetirementNotice = async (
 
       const fetchedBetters = betters.filter(isFulfilled).map((p) => p.value);
 
-      const content = fetchedBetters.map((b) => userMention(b.id)).join("\n");
+      const content =
+        "Notice to affected parties who have bets on this prediction: " +
+        fetchedBetters.map((b) => userMention(b.id)).join(", ");
 
       const created = new Date(prediction.created_date);
       const retired = new Date(prediction.retired_date);

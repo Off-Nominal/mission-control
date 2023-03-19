@@ -111,7 +111,7 @@ export class Ndb2Client {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${id}`;
     return this.client
-      .patch(url.toString(), { discord_id })
+      .patch<NDB2API.EnhancedPrediction>(url.toString(), { discord_id })
       .then((res) => res.data);
   }
 }

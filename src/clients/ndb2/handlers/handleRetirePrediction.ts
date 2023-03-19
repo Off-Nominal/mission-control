@@ -1,12 +1,17 @@
-import { add, isBefore } from "date-fns";
-import { ButtonInteraction } from "discord.js";
+import { add, isBefore, sub } from "date-fns";
+import { ButtonInteraction, InteractionResponse } from "discord.js";
 import { Client } from "pg";
+import ndb2MsgSubscriptionQueries, {
+  Ndb2MsgSubscriptionType,
+} from "../../../queries/ndb2_msg_subscriptions";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 
 export default function generateHandleRetirePrediction(db: Client) {
+  const { addSubscription, deleteSubById } = ndb2MsgSubscriptionQueries(db);
+
   const handleRetirePrediction = async (
     interaction: ButtonInteraction,
     predictionId: string
@@ -66,18 +71,57 @@ export default function generateHandleRetirePrediction(db: Client) {
       });
     }
 
+    let subId: number;
+
+    // Add and await retirement subscription so that webhook has something to operate on
+    try {
+      subId = await addSubscription(
+        Ndb2MsgSubscriptionType.RETIREMENT,
+        prediction.id,
+        interaction.channelId
+      );
+      console.log(subId);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Prediction retirement context logged successfully.`
+      );
+    } catch (err) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `Prediction retirement context could not be logged..`
+      );
+      return logger.sendLog(interaction.client);
+    }
+
     try {
       await ndb2Client.retirePrediction(prediction.id, deleterId);
       logger.addLog(LogStatus.SUCCESS, `Prediction retired successfully.`);
-      interaction.reply({
-        content: `Prediction #${prediction.id} has been cancelled and all bets on it will not count.`,
+    } catch (err) {
+      // Remove subscription since retirement failed
+      deleteSubById(subId);
+
+      console.log(err);
+      logger.addLog(
+        LogStatus.FAILURE,
+        `Error sending retirement request to API.`
+      );
+      return logger.sendLog(interaction.client);
+    }
+
+    let interactionResponse: InteractionResponse;
+
+    try {
+      interactionResponse = await interaction.reply({
+        content: `Prediction #${prediction.id} has been cancelled and all bets on it will not count. A prediction cancellation notice will be posted here`,
+        ephemeral: true,
       });
     } catch (err) {
       console.log(err);
-      interaction.reply({
-        content: "Error deleting prediction.",
-        ephemeral: true,
-      });
+      logger.addLog(
+        LogStatus.FAILURE,
+        `Error sending interaction response to user.`
+      );
+      return logger.sendLog(interaction.client);
     }
 
     logger.sendLog(interaction.client);

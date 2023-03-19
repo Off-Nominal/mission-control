@@ -45,7 +45,6 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
     if (event_name === NDB2WebhookEvent.RETIRED_PREDICTION) {
       updatePredictionEmbeds(client, db, data);
       generateRetirementNotice(client, db, data);
-      // unsubscribe embeds
     }
 
     if (event_name === NDB2WebhookEvent.NEW_BET) {
