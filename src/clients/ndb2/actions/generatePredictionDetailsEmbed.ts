@@ -33,6 +33,8 @@ export const generatePredictionDetailsEmbed = (
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
 
+  const retired = new Date(prediction.retired_date);
+
   const embed = new EmbedBuilder({
     title: "Detailed Prediction View",
     description: prediction.text,
@@ -60,8 +62,10 @@ export const generatePredictionDetailsEmbed = (
   if (prediction.status === PredictionLifeCycle.RETIRED) {
     fields.push({
       name: "Status",
-      value:
-        "This prediction was retired by the predictor within the allowable edit period for predictions.",
+      value: `This prediction was retired by the predictor at ${time(
+        retired,
+        TimestampStyles.LongDateTime
+      )} (${time(retired, TimestampStyles.RelativeTime)}.`,
     });
   }
 

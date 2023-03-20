@@ -119,7 +119,8 @@ export default function generateHandleInteractionCreate(db: Client) {
           `Interaction is a Retire Prediction request - handing off to RETIRE_PREDICTION handler.`
         );
         logger.sendLog(interaction.client);
-        return interaction.client.emit(
+
+        interaction.client.emit(
           Ndb2Events.RETIRE_PREDICTION,
           interaction,
           predictionId
@@ -164,12 +165,12 @@ export default function generateHandleInteractionCreate(db: Client) {
       const logger = new Logger(
         "NDB2 Interaction",
         LogInitiator.NDB2,
-        "NDB2 Chat Input Command Interaction Handler"
+        "NDB2 Interaction Handler"
       );
 
       logger.addLog(
         LogStatus.WARNING,
-        `Received a Chat Input Command interaction, which is not supported.`
+        `Received a something other than Chat Input Command interaction, which is not supported.`
       );
       return logger.sendLog(interaction.client);
     }
@@ -243,7 +244,7 @@ export default function generateHandleInteractionCreate(db: Client) {
       modal.addComponents(firstActionRow, secondActionRow);
 
       logger.addLog(
-        LogStatus.WARNING,
+        LogStatus.INFO,
         `Received a NEW PREDICTION request, handing off to NEW PREDICTION handler.`
       );
       logger.sendLog(interaction.client);
