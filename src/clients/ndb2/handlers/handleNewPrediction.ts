@@ -42,7 +42,9 @@ export default function generateNewPredictionHandler(db: Client) {
     );
 
     // Validate date format
-    const isDueDateValid = due.match(/^\d{4}\-\d{2}\-\d{2}$/g);
+    const isDueDateValid = due.match(
+      /^\d{4}[\/\-\.](0?[1-9]|1[012])[\/\-\.](0?[1-9]|[12][0-9]|3[01])$/g
+    );
     if (!isDueDateValid) {
       logger.addLog(
         LogStatus.WARNING,
@@ -50,7 +52,7 @@ export default function generateNewPredictionHandler(db: Client) {
       );
       logger.sendLog(interaction.client);
       return interaction.reply({
-        content: `Your Due date format was invalid. Ensure it is entered as YYYY-MM-DD. If you need to reneter your prediction, you can copy and paste it from here:\n\n${text}`,
+        content: `Your due date format was invalid. Ensure it is entered as YYYY-MM-DD. If you need to re-enter your prediction, you can copy and paste it from here:\n\n${text}`,
         ephemeral: true,
       });
     }

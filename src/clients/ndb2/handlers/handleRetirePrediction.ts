@@ -8,6 +8,7 @@ import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
+import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionCache";
 
 export default function generateHandleRetirePrediction(db: Client) {
   const { addSubscription, deleteSubById } = ndb2MsgSubscriptionQueries(db);
@@ -80,7 +81,6 @@ export default function generateHandleRetirePrediction(db: Client) {
         prediction.id,
         interaction.channelId
       );
-      console.log(subId);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction retirement context logged successfully.`
@@ -95,6 +95,8 @@ export default function generateHandleRetirePrediction(db: Client) {
 
     try {
       await ndb2Client.retirePrediction(prediction.id, deleterId);
+      ndb2InteractionCache.retirements[prediction.id].deleteReply();
+      delete ndb2InteractionCache.retirements[prediction.id];
       logger.addLog(LogStatus.SUCCESS, `Prediction retired successfully.`);
     } catch (err) {
       // Remove subscription since retirement failed
