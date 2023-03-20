@@ -1,6 +1,5 @@
 import { ButtonInteraction, userMention } from "discord.js";
 import { Client } from "pg";
-
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
