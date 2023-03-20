@@ -5,7 +5,7 @@ import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { ButtonCommand } from "./handleInteractionCreate";
+import { ButtonCommand } from "./handleInteractionCreate/button";
 
 export default function generateHandleNewBet(db: Client) {
   return async function handleNewBet(
