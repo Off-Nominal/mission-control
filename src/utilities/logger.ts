@@ -60,13 +60,18 @@ export class Logger {
   public async sendLog(client: Client) {
     const embed = this.generateEmbed();
 
-    const channel = await client.channels.fetch(
-      channelIds[SpecificChannel.BOTS]
-    );
-    if (channel.type === ChannelType.GuildText) {
-      channel.send({ embeds: [embed] });
-    } else {
-      console.error("Tried to send log to non-text based channel.");
+    try {
+      const channel = await client.channels.fetch(
+        channelIds[SpecificChannel.BOTS]
+      );
+      if (channel.type === ChannelType.GuildText) {
+        return channel.send({ embeds: [embed] });
+      } else {
+        throw new Error("Tried to send log to non-text based channel.");
+      }
+    } catch (err) {
+      console.error("Failed to Send Log");
+      console.error(err);
     }
   }
 }
