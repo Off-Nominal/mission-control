@@ -33,9 +33,14 @@ export class Logger {
     inline: boolean = false,
     timestamp: Date = new Date()
   ) {
+    const text = `${status} ${time(
+      timestamp,
+      TimestampStyles.LongTime
+    )}: ${value}`;
+
     const field: EmbedField = {
       name: "\u200B",
-      value: `${status} ${time(timestamp, TimestampStyles.LongTime)}: ${value}`,
+      value: text.slice(0, 1023),
       inline,
     };
 
