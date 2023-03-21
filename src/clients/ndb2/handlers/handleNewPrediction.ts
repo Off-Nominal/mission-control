@@ -91,7 +91,7 @@ export default function generateNewPredictionHandler(db: Client) {
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error submitting the prediction. ${err.response.data.message}`
+        `There was an error submitting the prediction.`
       );
       console.error(err);
       interaction.reply({

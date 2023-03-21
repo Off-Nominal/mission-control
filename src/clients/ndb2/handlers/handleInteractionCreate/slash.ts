@@ -54,6 +54,7 @@ export const handleSlashCommandInteraction = async (
       .setCustomId("text")
       .setLabel("Prediction")
       .setPlaceholder("The Sun will rise tomorrow")
+      .setMaxLength(2048)
       .setRequired(true)
       .setStyle(TextInputStyle.Paragraph);
 
