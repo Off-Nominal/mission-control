@@ -112,15 +112,15 @@ export const handleSlashCommandInteraction = async (
       LogStatus.SUCCESS,
       `Prediction was successfully retrieved from NDB2.`
     );
-  } catch (err) {
+  } catch ([userError, logError]) {
     logger.addLog(
       LogStatus.WARNING,
-      `Prediction does not exist, interaction rejected.`
+      `There was an error fetching this prediction. ${logError}`
     );
     logger.sendLog(interaction.client);
 
     return interaction.reply({
-      content: "No prediction exists with that id.",
+      content: `There was an error fetching this prediction. ${userError}`,
       ephemeral: true,
     });
   }

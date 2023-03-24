@@ -8,12 +8,19 @@ export enum PredictionLifeCycle {
   FAILED = "failed",
 }
 
+const ErrorCode = {
+  SERVER_ERROR: 0,
+  AUTHENTICATION_ERROR: 1,
+  BAD_REQUEST: 2,
+  MALFORMED_BODY_DATA: 3,
+};
+
 export namespace NDB2API {
-  export type GeneralResponse<T> = {
+  export type GeneralResponse<T = null> = {
     success: boolean;
-    message?: string;
-    errorCode?: number;
-    data: T | null;
+    errorCode?: keyof typeof ErrorCode;
+    message: string | null;
+    data: T;
   };
 
   export type EnhancedPrediction = {

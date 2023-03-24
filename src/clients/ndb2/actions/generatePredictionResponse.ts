@@ -1,10 +1,9 @@
 import {
   ActionRowBuilder,
+  BaseMessageOptions,
   ButtonBuilder,
   ButtonStyle,
   GuildMember,
-  InteractionReplyOptions,
-  MessagePayload,
 } from "discord.js";
 import {
   NDB2API,
@@ -12,10 +11,10 @@ import {
 } from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "./generatePredictionEmbed";
 
-export const generatePredictionResponse = async (
+export const generatePredictionResponse = (
   predictor: GuildMember,
   prediction: NDB2API.EnhancedPrediction
-): Promise<MessagePayload | InteractionReplyOptions> => {
+): BaseMessageOptions => {
   const embed = generatePredictionEmbed(
     predictor.displayName,
     predictor.displayAvatarURL(),

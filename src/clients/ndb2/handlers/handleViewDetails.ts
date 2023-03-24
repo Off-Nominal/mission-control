@@ -11,8 +11,6 @@ import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionDetailsEmbed } from "../actions/generatePredictionDetailsEmbed";
 
 export default function generateHandleViewDetails(db: Client) {
-  const { addSubscription } = ndb2MsgSubscriptionQueries(db);
-
   return async function handleViewDetails(
     interaction: ButtonInteraction,
     predictionId: string
@@ -29,17 +27,16 @@ export default function generateHandleViewDetails(db: Client) {
     try {
       prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(LogStatus.SUCCESS, "Prediction successfully fetched");
-    } catch (err) {
+    } catch ([userError, logError]) {
+      interaction.reply({
+        ephemeral: true,
+        content: `There was an error fetching this subscription detail. ${userError}`,
+      });
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error fetching the prediction ${err.response.data.message}`
+        `There was an error fetching the prediction ${logError}`
       );
-      console.error(err);
-      logger.sendLog(interaction.client);
-      return interaction.reply({
-        ephemeral: true,
-        content: `There was an error fetching this subscription detail. ${err.response.data.message}`,
-      });
+      return logger.sendLog(interaction.client);
     }
 
     const embed = generatePredictionDetailsEmbed(prediction);

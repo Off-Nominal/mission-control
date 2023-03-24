@@ -1,6 +1,104 @@
 import axios, { AxiosInstance } from "axios";
 import { NDB2API } from "./types";
 
+const isNdb2ApiResponse = (
+  response: any
+): response is NDB2API.GeneralResponse => {
+  if (typeof response !== "object") {
+    return false;
+  }
+
+  if (
+    !("success" in response) ||
+    !("errorCode" in response) ||
+    !("message" in response) ||
+    !("data" in response)
+  ) {
+    return false;
+  }
+
+  const { success, errorCode, message } = response;
+
+  if (
+    typeof success !== "boolean" ||
+    typeof errorCode !== "string" ||
+    (typeof message !== "string" && message !== null)
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+const handleError = (err: any): [string, string] => {
+  // returns user friendly message and full message in array
+  if (axios.isAxiosError(err)) {
+    if (err.response) {
+      const statusCode = err.response.status;
+
+      const ndb2ApiResponse = err.response.data;
+      console.log(ndb2ApiResponse);
+      if (isNdb2ApiResponse(ndb2ApiResponse)) {
+        const errorCode = ndb2ApiResponse.errorCode;
+        const message =
+          ndb2ApiResponse.message || "No error message indicated.";
+        return [
+          message,
+          `HTTP Status: ${statusCode}. Error response: ${errorCode}. ${message}`,
+        ];
+      }
+
+      return [
+        "We received a response from NDB2 but it doesn't look right.",
+        `HTTP Status ${statusCode} from NDB2 API but response failed type predicate.`,
+      ];
+    }
+
+    return [
+      "We didn't receive a response from the NDB2 server.",
+      "Axios reports no response.",
+    ];
+  }
+
+  const defaultUserMessage = "We received some kind of unknown error.";
+
+  if (err instanceof TypeError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof RangeError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof EvalError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof ReferenceError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof SyntaxError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof URIError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof Error) {
+    return [defaultUserMessage, err.message];
+  }
+
+  // Error passthrough for strings
+  if (typeof err === "string") {
+    return [defaultUserMessage, err];
+  }
+
+  // Final fallback
+  return [defaultUserMessage, "Unknown error."];
+};
+
 export class Ndb2Client {
   private baseURL = process.env.NDB2_API_BASEURL;
   private client: AxiosInstance;
@@ -41,7 +139,10 @@ export class Ndb2Client {
 
     return this.client
       .get<NDB2API.GetPrediction>(url.toString())
-      .then((res) => res.data.data);
+      .then((res) => res.data.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
   }
 
   public addPrediction(
@@ -57,7 +158,10 @@ export class Ndb2Client {
         due_date,
         discord_id,
       })
-      .then((res) => res.data.data);
+      .then((res) => res.data.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
   }
 
   public addBet(
@@ -73,7 +177,10 @@ export class Ndb2Client {
         discord_id,
         endorsed,
       })
-      .then((res) => res.data.data);
+      .then((res) => res.data.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
   }
 
   // public newVote(
@@ -112,7 +219,10 @@ export class Ndb2Client {
     url.pathname = `api/predictions/${id}`;
     return this.client
       .patch<NDB2API.EnhancedPrediction>(url.toString(), { discord_id })
-      .then((res) => res.data);
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
   }
 }
 

@@ -88,16 +88,16 @@ export default function generateNewPredictionHandler(db: Client) {
         LogStatus.SUCCESS,
         `Prediction was successfully submitted to NDB2`
       );
-    } catch (err) {
-      logger.addLog(
-        LogStatus.FAILURE,
-        `There was an error submitting the prediction.`
-      );
-      console.error(err);
+    } catch ([userError, LogError]) {
       interaction.reply({
         ephemeral: true,
-        content: "There was an error submitting the prediction to NDB2.",
+        content: `There was an error submitting the prediction to NDB2. ${userError}`,
       });
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error submitting the prediction. ${LogError}`
+      );
+      return logger.sendLog(interaction.client);
     }
 
     try {
@@ -105,7 +105,7 @@ export default function generateNewPredictionHandler(db: Client) {
         prediction.predictor.discord_id
       );
 
-      const reply = await generatePredictionResponse(predictor, prediction);
+      const reply = generatePredictionResponse(predictor, prediction);
       interaction.reply(reply);
       logger.addLog(
         LogStatus.SUCCESS,
@@ -134,7 +134,7 @@ export default function generateNewPredictionHandler(db: Client) {
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `Prediction context message subscription log failure`
+        `Prediction context message subscription log failure.`
       );
       console.error(err);
     }

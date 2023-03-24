@@ -1,4 +1,10 @@
-import { channelMention, Client, GuildMember, messageLink } from "discord.js";
+import {
+  channelMention,
+  Client,
+  GuildMember,
+  messageLink,
+  userMention,
+} from "discord.js";
 import { Client as DbClient } from "pg";
 import ndb2MsgSubscriptionQueries, {
   Ndb2MsgSubscription,
@@ -30,7 +36,7 @@ export const updatePredictionEmbeds = async (
   try {
     subs = await fetchSubs(prediction.id);
     logger.addLog(
-      LogStatus.INFO,
+      LogStatus.SUCCESS,
       `Fetched ${subs.length} message subscriptions to update.`
     );
   } catch (err) {
@@ -42,6 +48,8 @@ export const updatePredictionEmbeds = async (
     return logger.sendLog(client);
   }
 
+  console.table(subs);
+
   // Fetch subscriptions and update messages as needed
   const updates = [];
 
@@ -49,6 +57,10 @@ export const updatePredictionEmbeds = async (
 
   try {
     predictor = await guild.members.fetch(prediction.predictor.discord_id);
+    logger.addLog(
+      LogStatus.SUCCESS,
+      `Fetched predictor data for ${userMention(predictor.id)} successfully`
+    );
   } catch (err) {
     console.error(err);
     logger.addLog(
@@ -59,7 +71,9 @@ export const updatePredictionEmbeds = async (
   }
 
   for (const sub of subs) {
-    const viewUpdate = [];
+    if (sub.type !== Ndb2MsgSubscriptionType.VIEW) {
+      continue;
+    }
 
     const message = guild.channels
       .fetch(sub.channel_id)
@@ -75,45 +89,38 @@ export const updatePredictionEmbeds = async (
           LogStatus.SUCCESS,
           `Message (id: ${message.id}) fetched succesfully `
         );
-        return message;
+        const response = generatePredictionResponse(predictor, prediction);
+        return message.edit(response);
+      })
+      .then((message) => {
+        logger.addLog(
+          LogStatus.SUCCESS,
+          `Message (id: ${message.id}) edited succesfully `
+        );
+      })
+      .catch((err) => {
+        logger.addLog(
+          LogStatus.FAILURE,
+          `Message subscription in channel ${channelMention(
+            sub.channel_id
+          )} message ${messageLink(
+            sub.channel_id,
+            sub.message_id
+          )} failed to update.`
+        );
+        console.error(err);
       });
 
-    viewUpdate.push(message);
-
-    if (sub.type === Ndb2MsgSubscriptionType.VIEW) {
-      const response = generatePredictionResponse(predictor, prediction);
-
-      viewUpdate.push(response);
-
-      const update = Promise.all(viewUpdate)
-        .then(([message, response]) => {
-          return message.edit(response);
-        })
-        .catch((err) => {
-          logger.addLog(
-            LogStatus.FAILURE,
-            `Message subscription in channel ${channelMention(
-              sub.channel_id
-            )} message ${messageLink(
-              sub.channel_id,
-              sub.message_id
-            )} failed to update.`
-          );
-          console.error(err);
-        });
-
-      updates.push(update);
-    }
+    updates.push(message);
   }
 
-  Promise.all(updates)
-    .then(() => {
+  Promise.allSettled(updates)
+    .finally(() => {
       logger.addLog(
         LogStatus.INFO,
-        `All message subscription update sent. See above for any errors.`
+        `All message subscription update processed. See above for any errors.`
       );
-    })
-    .finally(() => {
       logger.sendLog(client);
-    });
+    })
+    .catch((err) => console.error(err));
 };

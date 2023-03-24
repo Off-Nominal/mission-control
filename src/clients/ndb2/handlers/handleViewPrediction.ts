@@ -35,12 +35,7 @@ export default function generateHandleViewPrediction(db: Client) {
       const predictor = await interaction.guild.members.fetch(
         prediction.predictor.discord_id
       );
-
-      const reply = await generatePredictionResponse(predictor, prediction);
-      logger.addLog(
-        LogStatus.SUCCESS,
-        `Prediction embed was successfully generated.`
-      );
+      const reply = generatePredictionResponse(predictor, prediction);
       interaction.reply(reply);
       logger.addLog(
         LogStatus.SUCCESS,

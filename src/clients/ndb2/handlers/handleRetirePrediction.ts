@@ -31,16 +31,24 @@ export default function generateHandleRetirePrediction(db: Client) {
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch (err) {
-      logger.addLog(
-        LogStatus.WARNING,
-        `Prediction does not exist, interaction rejected.`
-      );
-      return interaction.reply({
-        content: "No prediction exists with that id.",
+    } catch ([userError, LogError]) {
+      interaction.reply({
+        content: `There was an error fetching the prediction for this retirement. ${userError}`,
         ephemeral: true,
       });
+      return logger.addLog(
+        LogStatus.WARNING,
+        `There was an error fetching the prediction for this retirement. ${LogError}`
+      );
     }
+
+    // Clear the confirmation dialog
+    ndb2InteractionCache.retirements[prediction.id]
+      .deleteReply()
+      .then(() => {
+        delete ndb2InteractionCache.retirements[prediction.id];
+      })
+      .catch((err) => console.error(err));
 
     const deleterId = interaction.user.id;
 
@@ -73,14 +81,17 @@ export default function generateHandleRetirePrediction(db: Client) {
     }
 
     let subId: number;
+    let subSuccess = false;
 
     // Add and await retirement subscription so that webhook has something to operate on
+    // This is an anchor so it knows where to post the retirement notice
     try {
       subId = await addSubscription(
         Ndb2MsgSubscriptionType.RETIREMENT,
         prediction.id,
         interaction.channelId
       );
+      subSuccess = true;
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction retirement context logged successfully.`
@@ -88,35 +99,42 @@ export default function generateHandleRetirePrediction(db: Client) {
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `Prediction retirement context could not be logged..`
+        `Prediction retirement context could not be logged. Fallback will be used for location of retirement notice.`
       );
-      return logger.sendLog(interaction.client);
     }
 
     try {
       await ndb2Client.retirePrediction(prediction.id, deleterId);
-      ndb2InteractionCache.retirements[prediction.id].deleteReply();
-      delete ndb2InteractionCache.retirements[prediction.id];
       logger.addLog(LogStatus.SUCCESS, `Prediction retired successfully.`);
-    } catch (err) {
-      // Remove subscription since retirement failed
-      deleteSubById(subId);
+    } catch ([userError, LogError]) {
+      interaction.reply({
+        content: `Retiring this prediction failed. ${userError}`,
+        ephemeral: true,
+      });
 
-      console.log(err);
+      // Remove subscription since retirement failed
+      deleteSubById(subId).catch((err) => console.error(err));
+
       logger.addLog(
         LogStatus.FAILURE,
-        `Error sending retirement request to API.`
+        `Error sending retirement request to API. ${LogError}`
       );
+
       return logger.sendLog(interaction.client);
     }
 
-    let interactionResponse: InteractionResponse;
-
     try {
-      interactionResponse = await interaction.reply({
-        content: `Prediction #${prediction.id} has been cancelled and all bets on it will not count. A prediction cancellation notice will be posted here`,
+      const noticeMessage = subSuccess
+        ? `A cancellation notice will be posted here.`
+        : `There was an error capturing the current channel, so the cancellation notice may be posted in a different channel.`;
+      await interaction.reply({
+        content: `Prediction #${prediction.id} has been cancelled and all bets on it will not count. ${noticeMessage}`,
         ephemeral: true,
       });
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `User successfully notified of prediction retirement.`
+      );
     } catch (err) {
       console.log(err);
       logger.addLog(

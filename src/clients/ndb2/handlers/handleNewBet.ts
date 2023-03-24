@@ -33,15 +33,17 @@ export default function generateHandleNewBet(db: Client) {
         LogStatus.SUCCESS,
         `Bet was successfully submitted to NDB2`
       );
-    } catch (err) {
+    } catch ([userError, LogError]) {
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error submitting the bet. ${err.response.data.message}`
+        `There was an error submitting the bet. ${LogError}`
       );
-      return interaction.reply({
+
+      interaction.reply({
         ephemeral: true,
-        content: `There was an error submitting the bet to NDB2. ${err.response.data.message}`,
+        content: `There was an error submitting the bet to NDB2. ${userError}`,
       });
+      return logger.sendLog(interaction.client);
     }
 
     // Reply to Discord
