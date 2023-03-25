@@ -31,7 +31,7 @@ const isNdb2WebhookEvent = (event: any): event is NDB2WebhookEvent => {
 };
 
 const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
-  const { fetchSubs } = ndb2MsgSubscriptionQueries(db);
+  const { fetchActiveSubs } = ndb2MsgSubscriptionQueries(db);
 
   return router.post("/ndb2", async (req, res) => {
     const logger = new Logger(
@@ -84,7 +84,7 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
     // Fetch subscriptions to events
     let subs: Ndb2MsgSubscription[];
     try {
-      subs = await fetchSubs(data.id);
+      subs = await fetchActiveSubs(data.id);
       logger.addLog(
         LogStatus.SUCCESS,
         `Successfully fetched ${subs.length} subscriptions to process for this event.`

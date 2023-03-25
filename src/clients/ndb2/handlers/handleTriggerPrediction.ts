@@ -10,7 +10,7 @@ import ndb2MsgSubscriptionQueries, {
 } from "../../../queries/ndb2_msg_subscriptions";
 
 export default function generateHandleTriggerPrediction(db: Client) {
-  const { fetchSubs } = ndb2MsgSubscriptionQueries(db);
+  const { fetchSubByType } = ndb2MsgSubscriptionQueries(db);
 
   const handleTriggerPrediction = async (
     interaction: ButtonInteraction,
@@ -78,14 +78,11 @@ export default function generateHandleTriggerPrediction(db: Client) {
     let channelId: string;
 
     try {
-      const subs = await fetchSubs(prediction.id);
-      logger.addLog(
-        LogStatus.INFO,
-        `Fetched ${subs.length} message subscriptions.`
+      const [contextSub] = await fetchSubByType(
+        prediction.id,
+        Ndb2MsgSubscriptionType.CONTEXT
       );
-      const contextSub = subs.find(
-        (sub) => sub.type === Ndb2MsgSubscriptionType.CONTEXT
-      );
+      logger.addLog(LogStatus.INFO, `Fetched context message subscriptions.`);
       channelId = contextSub.channel_id;
     } catch (err) {
       logger.addLog(

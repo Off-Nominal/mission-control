@@ -35,11 +35,25 @@ export default function ndb2MsgSubscriptionQueries(db: Client) {
       });
   };
 
-  const fetchSubs = (prediction_id: number): Promise<Ndb2MsgSubscription[]> => {
+  const fetchActiveSubs = (
+    prediction_id: number
+  ): Promise<Ndb2MsgSubscription[]> => {
     return db
       .query<Ndb2MsgSubscription>(
         "SELECT id, type, prediction_id, channel_id, message_id, expiry FROM ndb2_msg_subscriptions WHERE prediction_id = $1 AND expiry > NOW() ORDER BY id DESC",
         [prediction_id]
+      )
+      .then((response) => response.rows);
+  };
+
+  const fetchSubByType = (
+    prediction_id: number,
+    type: Ndb2MsgSubscriptionType
+  ): Promise<Ndb2MsgSubscription[]> => {
+    return db
+      .query<Ndb2MsgSubscription>(
+        "SELECT id, type, prediction_id, channel_id, message_id, expiry FROM ndb2_msg_subscriptions WHERE prediction_id = $1 AND type = $2 ORDER BY id DESC LIMIT 1 ",
+        [prediction_id, type]
       )
       .then((response) => response.rows);
   };
@@ -51,7 +65,8 @@ export default function ndb2MsgSubscriptionQueries(db: Client) {
   };
 
   return {
-    fetchSubs,
+    fetchActiveSubs,
+    fetchSubByType,
     addSubscription,
     deleteSubById,
   };

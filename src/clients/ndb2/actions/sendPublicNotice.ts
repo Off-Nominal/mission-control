@@ -9,7 +9,6 @@ import { LogInitiator } from "../../../types/logEnums";
 import fetchGuild from "../../../utilities/fetchGuild";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { isFulfilled } from "../../../helpers/allSettledTypeGuard";
 import { channelIds } from "../../../types/channelEnums";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
@@ -47,7 +46,7 @@ export const sendPublicNotice = async (
   prediction: NDB2API.EnhancedPrediction,
   type: NoticeType
 ) => {
-  const { addSubscription } = ndb2MsgSubscriptionQueries(db);
+  const { addSubscription, fetchSubByType } = ndb2MsgSubscriptionQueries(db);
 
   const [loggerTitle, loggerMessage] = getLoggerFields(
     type,
@@ -79,32 +78,27 @@ export const sendPublicNotice = async (
     : Promise.resolve(null);
 
   let channelId: string;
-  let context: Ndb2MsgSubscription;
+  let context: Promise<Ndb2MsgSubscription[]>;
 
   // Retired predictions post notice in the channel they are retired
   if (type === NoticeType.RETIRED) {
-    context = subs.find(
-      (sub) => sub.type === Ndb2MsgSubscriptionType.RETIREMENT
-    );
-  }
-
-  // Otherwise we go to the channel it was created
-  if (!context) {
-    context = subs.find((sub) => sub.type === Ndb2MsgSubscriptionType.CONTEXT);
-  }
-
-  // Or we fallback to General
-  if (!context) {
-    logger.addLog(
-      LogStatus.FAILURE,
-      `No context subscription found, using fallback`
-    );
-    channelId = fallbackContextChannelId;
+    context = fetchSubByType(prediction.id, Ndb2MsgSubscriptionType.RETIREMENT);
   } else {
-    channelId = context.channel_id;
+    context = fetchSubByType(prediction.id, Ndb2MsgSubscriptionType.CONTEXT);
   }
 
-  const channel = guild.channels.fetch(channelId);
+  const channel = context.then(([contextSub]) => {
+    if (!contextSub) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `No context subscription found, using fallback`
+      );
+      channelId = fallbackContextChannelId;
+    } else {
+      channelId = contextSub.channel_id;
+    }
+    return guild.channels.fetch(channelId);
+  });
 
   Promise.all([predictor, channel, triggerer])
     .then(([predictor, channel, triggerer]) => {
