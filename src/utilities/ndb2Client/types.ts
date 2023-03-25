@@ -1,4 +1,4 @@
-// // Basic Schema Records
+// Basic Schema Records
 
 export enum PredictionLifeCycle {
   OPEN = "open",
@@ -46,6 +46,15 @@ export namespace NDB2API {
       date: string;
       endorsed: boolean;
       better: {
+        id: string;
+        discord_id: string;
+      };
+    }[];
+    votes: {
+      id: string;
+      vote: boolean;
+      voted_date: string;
+      voter: {
         id: string;
         discord_id: string;
       };

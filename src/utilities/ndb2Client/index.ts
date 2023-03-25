@@ -181,21 +181,23 @@ export class Ndb2Client {
       });
   }
 
-  // public newVote(
-  //   predictionId: string | number,
-  //   voterId: string | number,
-  //   affirmative: boolean
-  // ) {
-  //   const url = new URL(this.baseURL);
-  //   url.pathname = "api/votes";
-  //   return this.client
-  //     .post<Record>(url.toString(), {
-  //       predictionId,
-  //       voterId,
-  //       affirmative,
-  //     })
-  //     .then((res) => res.data);
-  // }
+  public addVote(
+    predictionId: string | number,
+    discord_id: string | number,
+    vote: boolean
+  ) {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${predictionId}/votes`;
+    return this.client
+      .post<NDB2API.EnhancedPrediction>(url.toString(), {
+        discord_id,
+        vote,
+      })
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
 
   public triggerPrediction(
     id: string | number,

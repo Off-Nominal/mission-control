@@ -69,6 +69,9 @@ export const generatePredictionEmbed = (
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
 
+  const yesVotes = prediction.votes.filter((vote) => vote.vote);
+  const noVotes = prediction.votes.filter((vote) => !vote.vote);
+
   const embed = new EmbedBuilder({
     author: {
       name: `${displayName} ${getAuthor(prediction.status)}`,
@@ -125,7 +128,7 @@ export const generatePredictionEmbed = (
       value: `
       ✅ ${endorsements.length} (${prediction.payouts.endorse.toFixed(
         2
-      )}) \u200B \u200B ❌ ${
+      )}) \u200B \u200B \u200B \u200B ❌ ${
         undorsements.length
       } (${prediction.payouts.undorse.toFixed(2)})`,
     });
@@ -137,15 +140,11 @@ export const generatePredictionEmbed = (
       value:
         "Voting on the outcome of this prediction is now active. Click Yes if you believe this prediction has come true and No if you think this prediction did not come true.",
     });
-    // fields.push({
-    //   name: "Votes",
-    //   value: `
-    //   ✅ ${endorsements.length} (${prediction.payouts.endorse.toFixed(
-    //     2
-    //   )}) \u200B \u200B ❌ ${
-    //     undorsements.length
-    //   } (${prediction.payouts.undorse.toFixed(2)})`,
-    // });
+    fields.push({
+      name: "Votes",
+      value: `
+      ✅ ${yesVotes.length} \u200B \u200B \u200B \u200B ❌ ${noVotes.length}`,
+    });
   }
 
   embed.setFields(fields);

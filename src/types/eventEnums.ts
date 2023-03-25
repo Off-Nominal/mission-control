@@ -69,4 +69,5 @@ export enum Ndb2Events {
   VIEW_DETAILS = "view_details",
   RETIRE_PREDICTION = "retire_prediction",
   TRIGGER_PREDICTION = "trigger_prediction",
+  NEW_VOTE = "new_vote",
 }

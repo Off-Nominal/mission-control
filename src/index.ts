@@ -404,6 +404,12 @@ ndb2Bot.on(
     );
   }
 );
+ndb2Bot.on(
+  Ndb2Events.NEW_VOTE,
+  (interaction: ButtonInteraction, predictionId: string, command: string) => {
+    ndb2BotHandlers.handleNewVote(interaction, predictionId, command);
+  }
+);
 
 /***********************************
  *  Utility Bot Event Handlers

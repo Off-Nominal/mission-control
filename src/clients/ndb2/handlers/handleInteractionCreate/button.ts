@@ -32,8 +32,8 @@ export const handleButtonInteraction = (
   const isBet =
     command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
 
-  // const isVote =
-  //   command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
+  const isVote =
+    command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
 
   if (isBet) {
     logger.addLog(
@@ -90,6 +90,21 @@ export const handleButtonInteraction = (
       interaction,
       predictionId,
       close_date
+    );
+  }
+
+  if (isVote) {
+    logger.addLog(
+      LogStatus.INFO,
+      `Interaction is a Prediction Vote request - handing off to VOTE handler.`
+    );
+    logger.sendLog(interaction.client);
+
+    return interaction.client.emit(
+      Ndb2Events.NEW_VOTE,
+      interaction,
+      predictionId,
+      command
     );
   }
 
