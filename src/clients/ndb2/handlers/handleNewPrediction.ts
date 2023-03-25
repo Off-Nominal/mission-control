@@ -14,6 +14,7 @@ import ndb2MsgSubscriptionQueries, {
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
 import { Client } from "pg";
+import { validateUserDateInput } from "../helpers/validateUserDateInput";
 
 export default function generateNewPredictionHandler(db: Client) {
   const { addSubscription } = ndb2MsgSubscriptionQueries(db);
@@ -42,9 +43,7 @@ export default function generateNewPredictionHandler(db: Client) {
     );
 
     // Validate date format
-    const isDueDateValid = due.match(
-      /^\d{4}[\/\-\.](0?[1-9]|1[012])[\/\-\.](0?[1-9]|[12][0-9]|3[01])$/g
-    );
+    const isDueDateValid = validateUserDateInput(due);
     if (!isDueDateValid) {
       logger.addLog(
         LogStatus.WARNING,

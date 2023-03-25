@@ -39,6 +39,22 @@ export const generatePredictionResponse = (
       );
   }
 
+  if (prediction.status === PredictionLifeCycle.CLOSED) {
+    actionRow
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(`Affirm ${prediction.id}`)
+          .setLabel("Yes 👍")
+          .setStyle(ButtonStyle.Success)
+      )
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(`Negate ${prediction.id}`)
+          .setLabel("No 👎")
+          .setStyle(ButtonStyle.Danger)
+      );
+  }
+
   actionRow.addComponents(
     new ButtonBuilder()
       .setCustomId(`Details ${prediction.id}`)

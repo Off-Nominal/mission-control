@@ -9,6 +9,8 @@ enum NDB2WebhookEvent {
   NEW_PREDICTION = "new_prediction",
   NEW_BET = "new_bet",
   RETIRED_PREDICTION = "retired_prediction",
+  TRIGGERED_PREDICTION = "triggered_prediction",
+  NEW_VOTE = "new_vote",
 }
 
 const isNdb2WebhookEvent = (event: any): event is NDB2WebhookEvent => {
@@ -33,9 +35,10 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
 
     // verify body
     if (!isNdb2WebhookEvent(event_name)) {
-      return res.status(400).json({
-        error: "Body params missing valid event name",
-      });
+      console.error(
+        "Received NDB2 Webhook with unrecognized event name: ",
+        event_name
+      );
     }
 
     if (event_name === NDB2WebhookEvent.NEW_PREDICTION) {
@@ -48,6 +51,14 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
     }
 
     if (event_name === NDB2WebhookEvent.NEW_BET) {
+      updatePredictionEmbeds(client, db, data);
+    }
+
+    if (event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
+      updatePredictionEmbeds(client, db, data);
+    }
+
+    if (event_name === NDB2WebhookEvent.NEW_VOTE) {
       updatePredictionEmbeds(client, db, data);
     }
 

@@ -51,24 +51,24 @@ const predictCommand = new SlashCommandBuilder()
       .addIntegerOption((option) =>
         option.setName("id").setDescription("Prediction ID").setRequired(true)
       )
+  )
+  .addSubcommand((command) =>
+    command
+      .setName(Ndb2Subcommand.TRIGGER)
+      .setDescription("Trigger a prediction to be voted on")
+      .addIntegerOption((option) =>
+        option.setName("id").setDescription("Prediction ID").setRequired(true)
+      )
+      .addStringOption((option) =>
+        option
+          .setName("closed")
+          .setDescription(
+            "Effective Date of close (if this prediction is being triggered late). Format YYYY-MM-DD"
+          )
+          .setMinLength(10)
+          .setMaxLength(10)
+      )
   );
-// .addSubcommand((command) =>
-//   command
-//     .setName(Ndb2Subcommand.TRIGGER)
-//     .setDescription("Trigger a prediction to be judged")
-//     .addIntegerOption((option) =>
-//       option.setName("id").setDescription("Prediction ID").setRequired(true)
-//     )
-//     .addStringOption((option) =>
-//       option
-//         .setName("closed")
-//         .setDescription(
-//           "Effective Date of close (if this prediction is being triggered late). Format YYYY-MM-DD"
-//         )
-//         .setMinLength(10)
-//         .setMaxLength(10)
-//     )
-// )
 // .addSubcommand((command) =>
 //   command
 //     .setName(Ndb2Subcommand.SCORE)

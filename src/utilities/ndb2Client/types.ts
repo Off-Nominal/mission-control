@@ -33,6 +33,11 @@ export namespace NDB2API {
     created_date: string;
     due_date: string;
     closed_date: string | null;
+    triggered_date: string | null;
+    triggerer: {
+      id: string;
+      discord_id: string;
+    };
     judged_date: string | null;
     retired_date: string | null;
     status: PredictionLifeCycle;
@@ -56,6 +61,8 @@ export namespace NDB2API {
   export type AddBet = GeneralResponse<EnhancedPrediction>;
 
   export type GetPrediction = GeneralResponse<EnhancedPrediction>;
+
+  export type TriggerPrediction = GeneralResponse<EnhancedPrediction>;
 }
 
 // export interface Record {

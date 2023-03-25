@@ -43,42 +43,18 @@ export default function generateHandleRetirePrediction(db: Client) {
     }
 
     // Clear the confirmation dialog
-    ndb2InteractionCache.retirements[prediction.id]
-      .deleteReply()
-      .then(() => {
-        delete ndb2InteractionCache.retirements[prediction.id];
-      })
-      .catch((err) => console.error(err));
+    try {
+      ndb2InteractionCache.retirements[prediction.id]
+        ?.deleteReply()
+        .then(() => {
+          delete ndb2InteractionCache.retirements[prediction.id];
+        });
+    } catch (err) {
+      logger.addLog(LogStatus.FAILURE, `Could not clear confirmation dialog.`);
+      console.error(err);
+    }
 
     const deleterId = interaction.user.id;
-
-    if (deleterId !== prediction.predictor.discord_id) {
-      logger.addLog(
-        LogStatus.WARNING,
-        `User tried to retire another user's predition.`
-      );
-      logger.sendLog(interaction.client);
-      return interaction.reply({
-        content: "You cannot retire other people's predictions.",
-        ephemeral: true,
-      });
-    }
-
-    const now = new Date();
-    const createDate = new Date(prediction.created_date);
-    const editWindow = add(createDate, { hours: 12 });
-
-    if (isBefore(editWindow, now)) {
-      logger.addLog(
-        LogStatus.WARNING,
-        `User tried to retire prediction after edit window.`
-      );
-      logger.sendLog(interaction.client);
-      return interaction.reply({
-        content: "Predictions can only be deleted within 12 hours of creation.",
-        ephemeral: true,
-      });
-    }
 
     let subId: number;
     let subSuccess = false;

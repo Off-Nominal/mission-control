@@ -140,7 +140,9 @@ export const generateRetirementNotice = async (
           prediction.id
         } has been retired by ${userMention(
           predictor.id
-        )} within the allowable adjustment period since the prediction was made.`,
+        )} within the allowable adjustment period (${
+          process.env.GM_PREDICTION_UPDATE_WINDOW_HOURS
+        } hours) since the prediction was made.`,
         fields: [
           {
             name: "Original text",

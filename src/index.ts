@@ -390,6 +390,20 @@ ndb2Bot.on(
     ndb2BotHandlers.handleRetirePrediction(interaction, predictionId);
   }
 );
+ndb2Bot.on(
+  Ndb2Events.TRIGGER_PREDICTION,
+  (
+    interaction: ButtonInteraction,
+    predictionId: string,
+    closed_date?: string
+  ) => {
+    ndb2BotHandlers.handleTriggerPrediction(
+      interaction,
+      predictionId,
+      closed_date
+    );
+  }
+);
 
 /***********************************
  *  Utility Bot Event Handlers

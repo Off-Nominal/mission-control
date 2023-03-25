@@ -103,6 +103,12 @@ export const generatePredictionDetailsEmbed = (
         .join("\n") || "None",
   });
 
+  if (prediction.status === PredictionLifeCycle.CLOSED) {
+    // fields.push({
+    // votes
+    // })
+  }
+
   fields.push({
     name: "Notes",
     value:

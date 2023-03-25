@@ -48,8 +48,6 @@ export const updatePredictionEmbeds = async (
     return logger.sendLog(client);
   }
 
-  console.table(subs);
-
   // Fetch subscriptions and update messages as needed
   const updates = [];
 
