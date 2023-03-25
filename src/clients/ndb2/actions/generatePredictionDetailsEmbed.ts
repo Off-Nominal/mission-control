@@ -136,7 +136,7 @@ export const generatePredictionDetailsEmbed = (
   fields.push({
     name: "Notes",
     value:
-      "Note that the data in this detail reply is current at the time of click but will change if future bets are made. These kinds of replies (ephemeral replies, that only you can see) cannot be edited after the fact, so to ensure you are getting the most up to date info, click the Details button again to get a new reply as needed.",
+      "The data in this detail reply is current at the time of click but could become out of date as different bets or votes are made. These kinds of replies (ephemeral replies, that only you can see) cannot be edited after the fact, so to ensure you are getting the most up to date info, click the Details button again to get a new reply as needed.",
   });
 
   embed.setFields(fields);

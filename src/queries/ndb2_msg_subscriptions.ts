@@ -4,6 +4,7 @@ export enum Ndb2MsgSubscriptionType {
   CONTEXT = "context",
   VIEW = "view",
   RETIREMENT = "retirement",
+  TRIGGER_NOTICE = "trigger_notice",
 }
 
 export type Ndb2MsgSubscription = {
@@ -37,7 +38,7 @@ export default function ndb2MsgSubscriptionQueries(db: Client) {
   const fetchSubs = (prediction_id: number): Promise<Ndb2MsgSubscription[]> => {
     return db
       .query<Ndb2MsgSubscription>(
-        "SELECT id, type, prediction_id, channel_id, message_id, expiry FROM ndb2_msg_subscriptions WHERE prediction_id = $1",
+        "SELECT id, type, prediction_id, channel_id, message_id, expiry FROM ndb2_msg_subscriptions WHERE prediction_id = $1 AND expiry > NOW() ORDER BY id DESC",
         [prediction_id]
       )
       .then((response) => response.rows);

@@ -102,7 +102,7 @@ export default function generateHandleTriggerPrediction(db: Client) {
       await interaction.reply({
         content: `Prediction #${
           prediction.id
-        } has been triggered; voting can now begin. A voting notice has been posted in ${channelMention(
+        } has been triggered; voting can now begin. A voting notice will be posted in ${channelMention(
           channelId
         )}`,
       });

@@ -37,7 +37,7 @@ export namespace NDB2API {
     triggerer: {
       id: string;
       discord_id: string;
-    };
+    } | null;
     judged_date: string | null;
     retired_date: string | null;
     status: PredictionLifeCycle;
