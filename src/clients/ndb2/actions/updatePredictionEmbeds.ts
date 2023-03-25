@@ -1,12 +1,11 @@
 import {
+  BaseMessageOptions,
   channelMention,
   Client,
   GuildMember,
   messageLink,
-  userMention,
 } from "discord.js";
-import { Client as DbClient } from "pg";
-import ndb2MsgSubscriptionQueries, {
+import {
   Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
@@ -15,14 +14,15 @@ import fetchGuild from "../../../utilities/fetchGuild";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionResponse } from "./generatePredictionResponse";
+import { generatePublicNotice } from "./generatePublicNotice";
+import { NoticeType } from "./sendPublicNotice";
 
 export const updatePredictionEmbeds = async (
   client: Client,
-  db: DbClient,
+  subs: Ndb2MsgSubscription[],
+  predictor: GuildMember,
   prediction: NDB2API.EnhancedPrediction
 ) => {
-  const { fetchSubs } = ndb2MsgSubscriptionQueries(db);
-
   const logger = new Logger(
     "Webhook Response",
     LogInitiator.NDB2,
@@ -31,71 +31,94 @@ export const updatePredictionEmbeds = async (
 
   const guild = fetchGuild(client);
 
-  let subs: Ndb2MsgSubscription[];
-
-  try {
-    subs = await fetchSubs(prediction.id);
-    logger.addLog(
-      LogStatus.SUCCESS,
-      `Fetched ${subs.length} message subscriptions to update.`
-    );
-  } catch (err) {
-    console.error(err);
-    logger.addLog(
-      LogStatus.FAILURE,
-      `Failed to fetch message subscriptions from database.`
-    );
-    return logger.sendLog(client);
-  }
-
-  console.table(subs);
-
-  // Fetch subscriptions and update messages as needed
   const updates = [];
 
-  let predictor: GuildMember;
-
-  try {
-    predictor = await guild.members.fetch(prediction.predictor.discord_id);
-    logger.addLog(
-      LogStatus.SUCCESS,
-      `Fetched predictor data for ${userMention(predictor.id)} successfully`
-    );
-  } catch (err) {
-    console.error(err);
-    logger.addLog(
-      LogStatus.FAILURE,
-      `Failed to fetch predictor from Discord, cannot update embeds.`
-    );
-    return logger.sendLog(client);
-  }
+  let triggerer: Promise<GuildMember | null>;
+  let viewResponse: BaseMessageOptions;
+  let triggerResponse: BaseMessageOptions;
 
   for (const sub of subs) {
-    if (sub.type !== Ndb2MsgSubscriptionType.VIEW) {
+    if (
+      sub.type !== Ndb2MsgSubscriptionType.VIEW &&
+      sub.type !== Ndb2MsgSubscriptionType.TRIGGER_NOTICE
+    ) {
       continue;
     }
 
-    const message = guild.channels
-      .fetch(sub.channel_id)
-      .then((channel) => {
-        if (channel.isTextBased()) {
-          return channel.messages.fetch(sub.message_id);
+    const message = guild.channels.fetch(sub.channel_id).then((channel) => {
+      if (channel.isTextBased()) {
+        return channel.messages.fetch(sub.message_id);
+      } else {
+        throw new Error("Not a text based channel");
+      }
+    });
+
+    if (sub.type === Ndb2MsgSubscriptionType.TRIGGER_NOTICE && !triggerer) {
+      triggerer = prediction.triggerer
+        ? guild.members
+            .fetch(prediction.triggerer.discord_id)
+            .then((triggerer) => {
+              logger.addLog(
+                LogStatus.SUCCESS,
+                "Triggerer Discord profile successfully fetched"
+              );
+              return triggerer;
+            })
+            .catch((err) => {
+              console.error(err);
+              logger.addLog(
+                LogStatus.FAILURE,
+                `Failed to fetch triggerer from Discord, cannot post notice.`
+              );
+              throw err;
+            })
+        : Promise.resolve(null);
+    }
+
+    Promise.all([message, triggerer])
+      .then(([message, triggerer]) => {
+        logger.addLog(
+          LogStatus.SUCCESS,
+          `Message (id: ${messageLink(
+            message.channelId,
+            message.id
+          )}) fetched succesfully `
+        );
+
+        if (sub.type === Ndb2MsgSubscriptionType.VIEW) {
+          if (!viewResponse) {
+            viewResponse = generatePredictionResponse(predictor, prediction);
+            logger.addLog(
+              LogStatus.SUCCESS,
+              "Generated View Prediction Response"
+            );
+          }
+          return message.edit(viewResponse);
         } else {
-          throw new Error("Not a text based channel");
+          if (!triggerResponse) {
+            triggerResponse = generatePublicNotice(
+              prediction,
+              NoticeType.TRIGGERED,
+              prediction.bets.map((bet) => bet.better.discord_id),
+              predictor,
+              triggerer,
+              client
+            );
+            logger.addLog(
+              LogStatus.SUCCESS,
+              "Generated Trigger Prediction Response"
+            );
+          }
+          return message.edit(triggerResponse);
         }
       })
       .then((message) => {
         logger.addLog(
           LogStatus.SUCCESS,
-          `Message (id: ${message.id}) fetched succesfully `
-        );
-        const response = generatePredictionResponse(predictor, prediction);
-        return message.edit(response);
-      })
-      .then((message) => {
-        logger.addLog(
-          LogStatus.SUCCESS,
-          `Message (id: ${message.id}) edited succesfully `
+          `Message (id: ${messageLink(
+            message.channelId,
+            message.id
+          )}) edited succesfully `
         );
       })
       .catch((err) => {

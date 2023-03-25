@@ -12,6 +12,8 @@ const thumbnails = {
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134579/Discord%20Assets/4789514_czvljj.png",
   retired:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679235409/Discord%20Assets/9826793_randif.png",
+  closed:
+    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679692889/Discord%20Assets/3468568_cqtnle.png",
 };
 
 const getThumbnail = (status: PredictionLifeCycle): string => {
@@ -27,23 +29,31 @@ const getThumbnail = (status: PredictionLifeCycle): string => {
     return thumbnails.failure;
   }
 
+  if (status === PredictionLifeCycle.CLOSED) {
+    return thumbnails.closed;
+  }
+
   return thumbnails.open;
 };
 
 const getAuthor = (status: PredictionLifeCycle): string => {
   if (status === PredictionLifeCycle.RETIRED) {
-    return `had predicted...`;
+    return `had predicted that...`;
+  }
+
+  if (status === PredictionLifeCycle.CLOSED) {
+    return `predicted that...`;
   }
 
   if (status === PredictionLifeCycle.SUCCESSFUL) {
-    return `successfully predicted...`;
+    return `successfully predicted that...`;
   }
 
   if (status === PredictionLifeCycle.FAILED) {
-    return `unsuccessfully predicted...`;
+    return `unsuccessfully predicted that...`;
   }
 
-  return `predicts...`;
+  return `predicts that...`;
 };
 
 export const generatePredictionEmbed = (
@@ -52,11 +62,15 @@ export const generatePredictionEmbed = (
   prediction: NDB2API.EnhancedPrediction
 ) => {
   const created = new Date(prediction.created_date);
-  const judgement = new Date(prediction.closed_date ?? prediction.due_date);
+  const closed = new Date(prediction.closed_date);
+  const judgement = new Date(prediction.due_date);
   const retired = new Date(prediction.retired_date);
 
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
+
+  const yesVotes = prediction.votes.filter((vote) => vote.vote);
+  const noVotes = prediction.votes.filter((vote) => !vote.vote);
 
   const embed = new EmbedBuilder({
     author: {
@@ -80,14 +94,25 @@ export const generatePredictionEmbed = (
         TimestampStyles.RelativeTime
       )})`,
     },
-    {
-      name: "Judgement Day",
-      value: `🗓️ ${time(judgement, TimestampStyles.LongDate)} (${time(
-        judgement,
+  ];
+
+  if (prediction.status === PredictionLifeCycle.CLOSED) {
+    fields.push({
+      name: "Vote triggered",
+      value: `🗓️ ${time(closed, TimestampStyles.LongDate)} (${time(
+        closed,
         TimestampStyles.RelativeTime
       )}) `,
-    },
-  ];
+    });
+  }
+
+  fields.push({
+    name: "Original Judgement Day",
+    value: `🗓️ ${time(judgement, TimestampStyles.LongDate)} (${time(
+      judgement,
+      TimestampStyles.RelativeTime
+    )}) `,
+  });
 
   if (prediction.status === PredictionLifeCycle.RETIRED) {
     fields.push({
@@ -99,13 +124,26 @@ export const generatePredictionEmbed = (
     });
   } else {
     fields.push({
-      name: "Stats",
+      name: "Bets (Odds)",
       value: `
       ✅ ${endorsements.length} (${prediction.payouts.endorse.toFixed(
         2
-      )}) \u200B \u200B ❌ ${
+      )}) \u200B \u200B \u200B \u200B ❌ ${
         undorsements.length
       } (${prediction.payouts.undorse.toFixed(2)})`,
+    });
+  }
+
+  if (prediction.status === PredictionLifeCycle.CLOSED) {
+    fields.push({
+      name: "Voting",
+      value:
+        "Voting on the outcome of this prediction is now active. Click Yes if you believe this prediction has come true and No if you think this prediction did not come true.",
+    });
+    fields.push({
+      name: "Votes",
+      value: `
+      ✅ ${yesVotes.length} \u200B \u200B \u200B \u200B ❌ ${noVotes.length}`,
     });
   }
 

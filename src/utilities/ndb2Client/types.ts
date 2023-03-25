@@ -1,4 +1,4 @@
-// // Basic Schema Records
+// Basic Schema Records
 
 export enum PredictionLifeCycle {
   OPEN = "open",
@@ -33,6 +33,11 @@ export namespace NDB2API {
     created_date: string;
     due_date: string;
     closed_date: string | null;
+    triggered_date: string | null;
+    triggerer: {
+      id: string;
+      discord_id: string;
+    } | null;
     judged_date: string | null;
     retired_date: string | null;
     status: PredictionLifeCycle;
@@ -41,6 +46,15 @@ export namespace NDB2API {
       date: string;
       endorsed: boolean;
       better: {
+        id: string;
+        discord_id: string;
+      };
+    }[];
+    votes: {
+      id: string;
+      vote: boolean;
+      voted_date: string;
+      voter: {
         id: string;
         discord_id: string;
       };
@@ -56,6 +70,8 @@ export namespace NDB2API {
   export type AddBet = GeneralResponse<EnhancedPrediction>;
 
   export type GetPrediction = GeneralResponse<EnhancedPrediction>;
+
+  export type TriggerPrediction = GeneralResponse<EnhancedPrediction>;
 }
 
 // export interface Record {

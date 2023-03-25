@@ -2,6 +2,7 @@ import { ButtonInteraction, CacheType } from "discord.js";
 import { Ndb2Events } from "../../../../types/eventEnums";
 import { LogInitiator } from "../../../../types/logEnums";
 import { Logger, LogStatus } from "../../../../utilities/logger";
+import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2InteractionCache";
 
 export enum ButtonCommand {
   ENDORSE = "Endorse",
@@ -10,6 +11,7 @@ export enum ButtonCommand {
   AFFIRM = "Affirm",
   NEGATE = "Negate",
   RETIRE = "Retire",
+  TRIGGER = "Trigger",
 }
 
 export const handleButtonInteraction = (
@@ -20,7 +22,7 @@ export const handleButtonInteraction = (
     LogInitiator.NDB2,
     "NDB2 Button Interaction Handler"
   );
-  const [command, predictionId] = interaction.customId.split(" ");
+  const [command, predictionId, ...args] = interaction.customId.split(" ");
 
   logger.addLog(
     LogStatus.INFO,
@@ -30,8 +32,8 @@ export const handleButtonInteraction = (
   const isBet =
     command === ButtonCommand.ENDORSE || command === ButtonCommand.UNDORSE;
 
-  // const isVote =
-  //   command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
+  const isVote =
+    command === ButtonCommand.AFFIRM || command === ButtonCommand.NEGATE;
 
   if (isBet) {
     logger.addLog(
@@ -71,6 +73,38 @@ export const handleButtonInteraction = (
       Ndb2Events.RETIRE_PREDICTION,
       interaction,
       predictionId
+    );
+  }
+
+  if (command === ButtonCommand.TRIGGER) {
+    logger.addLog(
+      LogStatus.INFO,
+      `Interaction is a Trigger Prediction request - handing off to TRIGGER prediction handler.`
+    );
+    logger.sendLog(interaction.client);
+
+    const [close_date] = args;
+
+    return interaction.client.emit(
+      Ndb2Events.TRIGGER_PREDICTION,
+      interaction,
+      predictionId,
+      close_date
+    );
+  }
+
+  if (isVote) {
+    logger.addLog(
+      LogStatus.INFO,
+      `Interaction is a Prediction Vote request - handing off to VOTE handler.`
+    );
+    logger.sendLog(interaction.client);
+
+    return interaction.client.emit(
+      Ndb2Events.NEW_VOTE,
+      interaction,
+      predictionId,
+      command
     );
   }
 
