@@ -20,7 +20,7 @@ import { NDB2API } from "../../../../utilities/ndb2Client/types";
 import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2InteractionCache";
 import { Ndb2Events } from "../../../../types/eventEnums";
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
-import { add, isAfter, isBefore, isFuture, isPast } from "date-fns";
+import { add, isBefore, isFuture } from "date-fns";
 
 export const handleSlashCommandInteraction = async (
   interaction: ChatInputCommandInteraction
@@ -87,23 +87,6 @@ export const handleSlashCommandInteraction = async (
 
     return await interaction.showModal(modal);
   }
-
-  // if (subCommand === Ndb2Subcommand.SCORE) {
-  //   const discordId = interaction.user.id;
-  //   const interactor = await interaction.guild.members.fetch(discordId);
-
-  //   try {
-  //     const user = await getUser(discordId);
-  //     const embed = generateUserEmbed(user, interactor.displayName);
-  //     return interaction.reply({ embeds: [embed] });
-  //   } catch (err) {
-  //     console.error(err);
-  //     return interaction.reply({
-  //       content: err.response.data.error,
-  //       ephemeral: true,
-  //     });
-  //   }
-  // }
 
   // Prediction specific commands
 
@@ -315,90 +298,7 @@ export const handleSlashCommandInteraction = async (
     }, 600000);
 
     return interaction.reply({ content, components, ephemeral: true });
-
-    //   // Trigger prediction
-    //   let triggeredPrediction: ClosePredictionResponse;
-
-    //   try {
-    //     triggeredPrediction = await triggerPrediction(
-    //       predictionId,
-    //       closer_discord_id,
-    //       closed
-    //     );
-    //   } catch (err) {
-    //     return interaction.reply({
-    //       content: err.response.data.error,
-    //       ephemeral: true,
-    //     });
-    //   }
-
-    //   // Fetch channel for Prediction Message
-
-    //   let voteChannel: Channel;
-    //   try {
-    //     voteChannel = await interaction.client.channels.fetch(
-    //       triggeredPrediction.channel_id
-    //     );
-    //   } catch (err) {
-    //     console.log(err);
-    //     return interaction.reply({
-    //       content: "Error fetching channel for voting.",
-    //     });
-    //   }
-
-    //   if (voteChannel.type !== ChannelType.GuildText) {
-    //     return interaction.reply({
-    //       content: "Something went wrong. Tell Jake to check the logs.",
-    //       ephemeral: true,
-    //     });
-    //   }
-
-    //   // Send Voting Message
-    //   let voteMessage: Message;
-
-    //   try {
-    //     const vote = generateVoteResponse(prediction, { closer_discord_id });
-    //     voteMessage = await voteChannel.send(vote);
-    //   } catch (err) {
-    //     return interaction.reply({
-    //       content: "Error sending vote to voting channel.",
-    //       ephemeral: true,
-    //     });
-    //   }
-
-    //   try {
-    //     return interaction.reply({
-    //       content: `Prediction #${predictionId} has been triggered. Voting will now occur in ${channelMention(
-    //         voteChannel.id
-    //       )}`,
-    //     });
-    //   } catch (err) {
-    //     return interaction.reply({
-    //       content: err.response.data.error,
-    //     });
-    //   }
   }
-
-  // if (
-  //   subCommand === Ndb2Subcommand.ENDORSE ||
-  //   subCommand === Ndb2Subcommand.UNDORSE
-  // ) {
-  //   const endorsed = subCommand === Ndb2Subcommand.ENDORSE;
-  //   const discordId = interaction.member.user.id;
-
-  //   try {
-  //     await addBet(discordId, predictionId, endorsed);
-  //     interaction.reply({
-  //       content: `Prediction successfully ${subCommand}d!`,
-  //       ephemeral: true,
-  //     });
-  //   } catch (err) {
-  //     return interaction.reply({
-  //       content: err.response.data.error,
-  //       ephemeral: true,
-  //     });
-  //   }
-  // }
 
   if (subCommand === Ndb2Subcommand.VIEW) {
     logger.addLog(
