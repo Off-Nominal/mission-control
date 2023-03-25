@@ -187,7 +187,7 @@ export const handleSlashCommandInteraction = async (
     setTimeout(() => {
       // Clear unused confirmation dialog
       ndb2InteractionCache.retirements[prediction.id]
-        .fetchReply()
+        ?.fetchReply()
         .then((reply) => {
           if (reply.deletable) {
             return reply.delete();
@@ -302,7 +302,7 @@ export const handleSlashCommandInteraction = async (
     setTimeout(() => {
       // Clear unused confirmation dialog
       ndb2InteractionCache.triggers[prediction.id]
-        .fetchReply()
+        ?.fetchReply()
         .then((reply) => {
           if (reply.deletable) {
             return reply.delete();

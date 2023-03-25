@@ -44,11 +44,9 @@ export default function generateHandleTriggerPrediction(db: Client) {
 
     // Clear the confirmation dialog
     try {
-      ndb2InteractionCache.retirements[prediction.id]
-        ?.deleteReply()
-        .then(() => {
-          delete ndb2InteractionCache.retirements[prediction.id];
-        });
+      ndb2InteractionCache.triggers[prediction.id]?.deleteReply().then(() => {
+        delete ndb2InteractionCache.triggers[prediction.id];
+      });
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, `Could not clear confirmation dialog.`);
       console.error(err);
