@@ -76,6 +76,7 @@ export const generatePublicNoticeEmbed = (
   const due = new Date(prediction.due_date);
   const triggered = new Date(prediction.triggered_date);
   const retired = new Date(prediction.retired_date);
+  const closed = new Date(prediction.closed_date);
 
   const embed = new EmbedBuilder({
     author: getAuthor(type, predictor, triggerer, client),
@@ -133,6 +134,13 @@ export const generatePublicNoticeEmbed = (
       name: "Triggered",
       value: `🗓️ ${time(triggered, TimestampStyles.LongDate)} (${time(
         triggered,
+        TimestampStyles.RelativeTime
+      )}) `,
+    });
+    fields.push({
+      name: "Effective Close Date",
+      value: `🗓️ ${time(closed, TimestampStyles.LongDate)} (${time(
+        closed,
         TimestampStyles.RelativeTime
       )}) `,
     });
