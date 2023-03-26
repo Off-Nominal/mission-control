@@ -4,25 +4,25 @@ import {
   ButtonBuilder,
   ButtonStyle,
   Client,
-  Collection,
   GuildMember,
   userMention,
 } from "discord.js";
+import { NDB2WebhookEvent } from "../../../types/routerTypes";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { generatePublicNoticeEmbed } from "./generatePublicNoticeEmbed";
-import { NoticeType } from "./sendPublicNotice";
+import { generatePublicNoticeEmbed } from "./embedGenerators/generatePublicNoticeEmbed";
 
 export const generatePublicNotice = (
   prediction: NDB2API.EnhancedPrediction,
-  type: NoticeType,
+  type:
+    | NDB2WebhookEvent.JUDGED_PREDICTION
+    | NDB2WebhookEvent.RETIRED_PREDICTION
+    | NDB2WebhookEvent.TRIGGERED_PREDICTION,
   betters: string[],
   predictor: GuildMember,
   triggerer: GuildMember | null,
   client: Client
 ): BaseMessageOptions => {
-  const content =
-    "Notice to affected parties who have bets on this prediction: " +
-    betters.map((b) => userMention(b)).join(", ");
+  const content = betters.map((b) => userMention(b)).join(", ");
 
   const embed = generatePublicNoticeEmbed(
     prediction,
@@ -32,9 +32,11 @@ export const generatePublicNotice = (
     client.user
   );
 
+  let addComponents = false;
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
 
-  if (type === NoticeType.TRIGGERED) {
+  if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
+    addComponents = true;
     actionRow
       .addComponents(
         new ButtonBuilder()
@@ -50,12 +52,22 @@ export const generatePublicNotice = (
       );
   }
 
-  actionRow.addComponents(
-    new ButtonBuilder()
-      .setCustomId(`Details ${prediction.id}`)
-      .setLabel("Details")
-      .setStyle(ButtonStyle.Secondary)
-  );
+  if (
+    type === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
+    type === NDB2WebhookEvent.RETIRED_PREDICTION
+  ) {
+    addComponents = true;
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`Details ${prediction.id}`)
+        .setLabel("Details")
+        .setStyle(ButtonStyle.Secondary)
+    );
+  }
 
-  return { content, embeds: [embed], components: [actionRow] };
+  return {
+    content,
+    embeds: [embed],
+    components: addComponents ? [actionRow] : undefined,
+  };
 };

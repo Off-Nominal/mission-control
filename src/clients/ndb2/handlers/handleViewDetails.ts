@@ -8,7 +8,7 @@ import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { generatePredictionDetailsEmbed } from "../actions/generatePredictionDetailsEmbed";
+import { generatePredictionDetailsEmbed } from "../actions/embedGenerators/generatePredictionDetailsEmbed";
 
 export default function generateHandleViewDetails(db: Client) {
   return async function handleViewDetails(

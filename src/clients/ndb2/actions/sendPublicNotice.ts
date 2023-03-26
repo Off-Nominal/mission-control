@@ -12,23 +12,26 @@ import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { channelIds } from "../../../types/channelEnums";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
+import { NDB2WebhookEvent } from "../../../types/routerTypes";
 
 const fallbackContextChannelId = channelIds.general;
 
-export enum NoticeType {
-  RETIRED = "retired",
-  TRIGGERED = "triggered",
-}
-
 const getLoggerFields = (
-  type: NoticeType,
+  type:
+    | NDB2WebhookEvent.JUDGED_PREDICTION
+    | NDB2WebhookEvent.RETIRED_PREDICTION
+    | NDB2WebhookEvent.TRIGGERED_PREDICTION,
   triggerer_id: string
 ): [string, string] => {
-  if (type === NoticeType.RETIRED) {
+  if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
     return ["Retirement Notice", "Prediction retired"];
   }
 
-  if (type === NoticeType.TRIGGERED) {
+  if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
+    return ["Judgement Notice", "Prediction judged"];
+  }
+
+  if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
     return [
       "Trigger Notice",
       `Prediction triggered ${triggerer_id ? "manually" : "automatically"} by ${
@@ -40,11 +43,13 @@ const getLoggerFields = (
 
 export const sendPublicNotice = async (
   client: Client,
-  subs: Ndb2MsgSubscription[],
   predictor: GuildMember,
   db: DbClient,
   prediction: NDB2API.EnhancedPrediction,
-  type: NoticeType
+  type:
+    | NDB2WebhookEvent.JUDGED_PREDICTION
+    | NDB2WebhookEvent.RETIRED_PREDICTION
+    | NDB2WebhookEvent.TRIGGERED_PREDICTION
 ) => {
   const { addSubscription, fetchSubByType } = ndb2MsgSubscriptionQueries(db);
 
@@ -81,9 +86,10 @@ export const sendPublicNotice = async (
   let context: Promise<Ndb2MsgSubscription[]>;
 
   // Retired predictions post notice in the channel they are retired
-  if (type === NoticeType.RETIRED) {
+  if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
     context = fetchSubByType(prediction.id, Ndb2MsgSubscriptionType.RETIREMENT);
   } else {
+    // Judgements and Triggers go in their original channel
     context = fetchSubByType(prediction.id, Ndb2MsgSubscriptionType.CONTEXT);
   }
 
@@ -118,13 +124,21 @@ export const sendPublicNotice = async (
       return channel
         .send(response)
         .then((message) => {
-          if (type === NoticeType.TRIGGERED) {
+          if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
             addSubscription(
               Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
               prediction.id,
               message.channel.id,
               message.id,
               add(new Date(), { hours: 36 })
+            );
+          }
+          if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
+            addSubscription(
+              Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
+              prediction.id,
+              message.channel.id,
+              message.id
             );
           }
         })

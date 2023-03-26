@@ -5,6 +5,7 @@ export enum Ndb2MsgSubscriptionType {
   VIEW = "view",
   RETIREMENT = "retirement",
   TRIGGER_NOTICE = "trigger_notice",
+  JUDGEMENT_NOTICE = "judgement_notice",
 }
 
 export type Ndb2MsgSubscription = {
