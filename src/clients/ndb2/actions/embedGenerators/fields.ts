@@ -1,4 +1,4 @@
-import { time, TimestampStyles, userMention } from "discord.js";
+import { bold, time, TimestampStyles, userMention } from "discord.js";
 import {
   NDB2API,
   PredictionLifeCycle,
@@ -115,27 +115,27 @@ const embedFields = {
 
     if (status === PredictionLifeCycle.OPEN) {
       value =
-        status.toUpperCase() +
+        bold(status.toUpperCase()) +
         ": Prediction is open and new bets can be placed.";
     }
     if (status === PredictionLifeCycle.CLOSED) {
       value =
-        status.toUpperCase() +
+        bold(status.toUpperCase()) +
         ": Prediction is closed and the community is currently voting on its outcome.";
     }
     if (status === PredictionLifeCycle.RETIRED) {
       value =
-        status.toUpperCase() +
+        bold(status.toUpperCase()) +
         ": Prediction was retired by its creator shortly after creation. Usually this means there was a mistake in the prediction.";
     }
     if (status === PredictionLifeCycle.SUCCESSFUL) {
       value =
-        status.toUpperCase() +
+        bold(status.toUpperCase()) +
         ": Prediction has been judged successful and points have been awarded or revoked.";
     }
-    if (status === PredictionLifeCycle.OPEN) {
+    if (status === PredictionLifeCycle.FAILED) {
       value =
-        status.toUpperCase() +
+        bold(status.toUpperCase()) +
         ": Prediction has been judged failed and points have been awarded or revoked.";
     }
 

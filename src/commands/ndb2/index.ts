@@ -25,31 +25,23 @@ const predictCommand = new SlashCommandBuilder()
       .setName(Ndb2Subcommand.VIEW)
       .setDescription("View a Prediction")
       .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
+        option
+          .setName("id")
+          .setDescription("Prediction ID")
+          .setRequired(true)
+          .setMaxValue(2147483647)
       )
   )
-  // .addSubcommand((command) =>
-  //   command
-  //     .setName(Ndb2Subcommand.ENDORSE)
-  //     .setDescription("Endorse a Prediction")
-  //     .addIntegerOption((option) =>
-  //       option.setName("id").setDescription("Prediction ID").setRequired(true)
-  //     )
-  // )
-  // .addSubcommand((command) =>
-  //   command
-  //     .setName(Ndb2Subcommand.UNDORSE)
-  //     .setDescription("Undorse a Prediction")
-  //     .addIntegerOption((option) =>
-  //       option.setName("id").setDescription("Prediction ID").setRequired(true)
-  //     )
-  // )
   .addSubcommand((command) =>
     command
       .setName(Ndb2Subcommand.RETIRE)
       .setDescription("Cancel a Prediction you made within last 12 hours")
       .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
+        option
+          .setName("id")
+          .setDescription("Prediction ID")
+          .setRequired(true)
+          .setMaxValue(2147483647)
       )
   )
   .addSubcommand((command) =>
@@ -57,7 +49,11 @@ const predictCommand = new SlashCommandBuilder()
       .setName(Ndb2Subcommand.TRIGGER)
       .setDescription("Trigger a prediction to be voted on")
       .addIntegerOption((option) =>
-        option.setName("id").setDescription("Prediction ID").setRequired(true)
+        option
+          .setName("id")
+          .setDescription("Prediction ID")
+          .setRequired(true)
+          .setMaxValue(2147483647)
       )
       .addStringOption((option) =>
         option
