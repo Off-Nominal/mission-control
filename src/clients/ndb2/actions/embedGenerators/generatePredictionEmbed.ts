@@ -1,8 +1,9 @@
-import { APIEmbedField, EmbedBuilder, time, TimestampStyles } from "discord.js";
+import { APIEmbedField, EmbedBuilder } from "discord.js";
 import {
   NDB2API,
   PredictionLifeCycle,
-} from "../../../utilities/ndb2Client/types";
+} from "../../../../utilities/ndb2Client/types";
+import embedFields from "./fields";
 
 const thumbnails = {
   open: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134394/Discord%20Assets/4236484_aggyej.png",
@@ -65,6 +66,7 @@ export const generatePredictionEmbed = (
   const closed = new Date(prediction.closed_date);
   const judgement = new Date(prediction.due_date);
   const retired = new Date(prediction.retired_date);
+  const triggered = new Date(prediction.triggered_date);
 
   const endorsements = prediction.bets.filter((bet) => bet.endorsed);
   const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
@@ -86,65 +88,68 @@ export const generatePredictionEmbed = (
     },
   });
 
-  const fields: APIEmbedField[] = [
-    {
-      name: `Created`,
-      value: `🗓️ ${time(created, TimestampStyles.LongDate)} (${time(
-        created,
-        TimestampStyles.RelativeTime
-      )})`,
-    },
-  ];
+  const fields: APIEmbedField[] = [embedFields.date(created, "Created")];
 
   if (prediction.status === PredictionLifeCycle.CLOSED) {
-    fields.push({
-      name: "Vote triggered",
-      value: `🗓️ ${time(closed, TimestampStyles.LongDate)} (${time(
-        closed,
-        TimestampStyles.RelativeTime
-      )}) `,
-    });
+    prediction.triggerer &&
+      fields.push(
+        embedFields.triggeredDate(
+          triggered,
+          `Vote Triggered`,
+          prediction.triggerer.discord_id
+        )
+      );
+    fields.push(embedFields.date(closed, "Effective Close Date"));
+    fields.push(embedFields.date(judgement, "Original Judgement Day"));
+    fields.push(
+      embedFields.shortBets(
+        endorsements.length,
+        undorsements.length,
+        prediction.payouts
+      )
+    );
+    fields.push(embedFields.votingNotice());
+    fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
   }
 
-  fields.push({
-    name: "Original Judgement Day",
-    value: `🗓️ ${time(judgement, TimestampStyles.LongDate)} (${time(
-      judgement,
-      TimestampStyles.RelativeTime
-    )}) `,
-  });
+  if (prediction.status === PredictionLifeCycle.SUCCESSFUL) {
+    fields.push(embedFields.date(closed, "Effective Close Date"));
+    fields.push(
+      embedFields.shortBets(
+        endorsements.length,
+        undorsements.length,
+        prediction.payouts
+      )
+    );
+    fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
+  }
+
+  if (prediction.status === PredictionLifeCycle.FAILED) {
+    fields.push(embedFields.date(closed, "Effective Close Date"));
+    fields.push(
+      embedFields.shortBets(
+        endorsements.length,
+        undorsements.length,
+        prediction.payouts
+      )
+    );
+    fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
+  }
+
+  if (prediction.status === PredictionLifeCycle.OPEN) {
+    fields.push(embedFields.date(judgement, "Judgement Day"));
+    fields.push(
+      embedFields.shortBets(
+        endorsements.length,
+        undorsements.length,
+        prediction.payouts
+      )
+    );
+  }
 
   if (prediction.status === PredictionLifeCycle.RETIRED) {
-    fields.push({
-      name: "Retired",
-      value: `🗓️ ${time(retired, TimestampStyles.LongDate)} (${time(
-        retired,
-        TimestampStyles.RelativeTime
-      )}) `,
-    });
-  } else {
-    fields.push({
-      name: "Bets (Odds)",
-      value: `
-      ✅ ${endorsements.length} (${prediction.payouts.endorse.toFixed(
-        2
-      )}) \u200B \u200B \u200B \u200B ❌ ${
-        undorsements.length
-      } (${prediction.payouts.undorse.toFixed(2)})`,
-    });
-  }
-
-  if (prediction.status === PredictionLifeCycle.CLOSED) {
-    fields.push({
-      name: "Voting",
-      value:
-        "Voting on the outcome of this prediction is now active. Click Yes if you believe this prediction has come true and No if you think this prediction did not come true.",
-    });
-    fields.push({
-      name: "Votes",
-      value: `
-      ✅ ${yesVotes.length} \u200B \u200B \u200B \u200B ❌ ${noVotes.length}`,
-    });
+    fields.push(embedFields.date(retired, "Retired"));
+    fields.push(embedFields.date(judgement, "Original Judgement Day"));
   }
 
   embed.setFields(fields);

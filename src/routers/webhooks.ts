@@ -2,33 +2,15 @@ import { Client, GuildMember, userMention } from "discord.js";
 import { Client as DbClient } from "pg";
 import express from "express";
 import { updatePredictionEmbeds } from "../clients/ndb2/actions/updatePredictionEmbeds";
-import {
-  sendPublicNotice,
-  NoticeType,
-} from "../clients/ndb2/actions/sendPublicNotice";
+import { sendPublicNotice } from "../clients/ndb2/actions/sendPublicNotice";
 import ndb2MsgSubscriptionQueries, {
   Ndb2MsgSubscription,
 } from "../queries/ndb2_msg_subscriptions";
 import fetchGuild from "../utilities/fetchGuild";
 import { Logger, LogStatus } from "../utilities/logger";
 import { LogInitiator } from "../types/logEnums";
+import { isNdb2WebhookEvent, NDB2WebhookEvent } from "../types/routerTypes";
 const router = express.Router();
-
-enum NDB2WebhookEvent {
-  NEW_PREDICTION = "new_prediction",
-  NEW_BET = "new_bet",
-  RETIRED_PREDICTION = "retired_prediction",
-  TRIGGERED_PREDICTION = "triggered_prediction",
-  NEW_VOTE = "new_vote",
-}
-
-const isNdb2WebhookEvent = (event: any): event is NDB2WebhookEvent => {
-  if (typeof event !== "string") {
-    return false;
-  }
-
-  return Object.values(NDB2WebhookEvent).includes(event as NDB2WebhookEvent);
-};
 
 const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
   const { fetchActiveSubs } = ndb2MsgSubscriptionQueries(db);
@@ -126,13 +108,10 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
 
     if (
       event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
-      event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION
+      event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
+      event_name === NDB2WebhookEvent.JUDGED_PREDICTION
     ) {
-      const type =
-        event_name === NDB2WebhookEvent.RETIRED_PREDICTION
-          ? NoticeType.RETIRED
-          : NoticeType.TRIGGERED;
-      sendPublicNotice(client, subs, predictor, db, data, type);
+      sendPublicNotice(client, predictor, db, data, event_name);
     }
   });
 };

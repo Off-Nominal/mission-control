@@ -9,7 +9,7 @@ import {
   NDB2API,
   PredictionLifeCycle,
 } from "../../../utilities/ndb2Client/types";
-import { generatePredictionEmbed } from "./generatePredictionEmbed";
+import { generatePredictionEmbed } from "./embedGenerators/generatePredictionEmbed";
 
 export const generatePredictionResponse = (
   predictor: GuildMember,

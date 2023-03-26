@@ -23,6 +23,27 @@ export namespace NDB2API {
     data: T;
   };
 
+  export type EnhancedPredictionBet = {
+    id: number;
+    date: string;
+    endorsed: boolean;
+    wager: number;
+    better: {
+      id: string;
+      discord_id: string;
+    };
+  };
+
+  export type EnhancedPredictionVote = {
+    id: string;
+    vote: boolean;
+    voted_date: string;
+    voter: {
+      id: string;
+      discord_id: string;
+    };
+  };
+
   export type EnhancedPrediction = {
     id: number;
     predictor: {
@@ -41,24 +62,8 @@ export namespace NDB2API {
     judged_date: string | null;
     retired_date: string | null;
     status: PredictionLifeCycle;
-    bets: {
-      id: number;
-      date: string;
-      endorsed: boolean;
-      better: {
-        id: string;
-        discord_id: string;
-      };
-    }[];
-    votes: {
-      id: string;
-      vote: boolean;
-      voted_date: string;
-      voter: {
-        id: string;
-        discord_id: string;
-      };
-    }[];
+    bets: EnhancedPredictionBet[];
+    votes: EnhancedPredictionVote[];
     payouts: {
       endorse: number;
       undorse: number;

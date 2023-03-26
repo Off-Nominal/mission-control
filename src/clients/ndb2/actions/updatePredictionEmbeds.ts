@@ -10,12 +10,12 @@ import {
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
 import { LogInitiator } from "../../../types/logEnums";
+import { NDB2WebhookEvent } from "../../../types/routerTypes";
 import fetchGuild from "../../../utilities/fetchGuild";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionResponse } from "./generatePredictionResponse";
 import { generatePublicNotice } from "./generatePublicNotice";
-import { NoticeType } from "./sendPublicNotice";
 
 export const updatePredictionEmbeds = async (
   client: Client,
@@ -98,7 +98,7 @@ export const updatePredictionEmbeds = async (
           if (!triggerResponse) {
             triggerResponse = generatePublicNotice(
               prediction,
-              NoticeType.TRIGGERED,
+              NDB2WebhookEvent.TRIGGERED_PREDICTION,
               prediction.bets.map((bet) => bet.better.discord_id),
               predictor,
               triggerer,
