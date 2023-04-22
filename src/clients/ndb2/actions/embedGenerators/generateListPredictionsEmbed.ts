@@ -26,7 +26,7 @@ export const generateListPredictionsEmbed = (
     titleDate = "Due";
   }
 
-  if ((type = "search")) {
+  if (type === "search") {
     title = "Search Results";
     description = `Here are the best ten prediction matches for keyword: ${options.keyword}`;
     titleDate = "Due";
