@@ -64,12 +64,12 @@ const predictCommand = new SlashCommandBuilder()
           .setMinLength(10)
           .setMaxLength(10)
       )
+  )
+  .addSubcommand((command) =>
+    command
+      .setName(Ndb2Subcommand.SCORE)
+      .setDescription("View your Nostradambot Scores")
   );
-// .addSubcommand((command) =>
-//   command
-//     .setName(Ndb2Subcommand.SCORE)
-//     .setDescription("View your Nostradambot Scores")
-// )
 // .addSubcommand((group) =>
 //   group.setName(Ndb2Subcommand.HELP).setDescription("Help with Nostradambot2")
 // );

@@ -1,5 +1,3 @@
-// Basic Schema Records
-
 export enum PredictionLifeCycle {
   OPEN = "open",
   RETIRED = "retired",
@@ -70,6 +68,32 @@ export namespace NDB2API {
     };
   };
 
+  export type Scores = {
+    score: {
+      points: number;
+      rank: number;
+    };
+    predictions: {
+      successful: number;
+      failed: number;
+      pending: number;
+      retired: number;
+      rank: number;
+    };
+    bets: {
+      successful: number;
+      failed: number;
+      pending: number;
+      retired: number;
+      rank: number;
+    };
+    votes: {
+      sycophantic: number;
+      contrarian: number;
+      pending: number;
+    };
+  };
+
   export type AddPrediction = GeneralResponse<EnhancedPrediction>;
 
   export type AddBet = GeneralResponse<EnhancedPrediction>;
@@ -77,6 +101,8 @@ export namespace NDB2API {
   export type GetPrediction = GeneralResponse<EnhancedPrediction>;
 
   export type TriggerPrediction = GeneralResponse<EnhancedPrediction>;
+
+  export type GetScores = GeneralResponse<Scores>;
 }
 
 // export interface Record {
