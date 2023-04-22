@@ -1,6 +1,8 @@
 import { APIEmbedField, EmbedBuilder, TimestampStyles, time } from "discord.js";
 import { NDB2API } from "../../../../utilities/ndb2Client/types";
 
+const MAX_TEXT_LENGTH = 500;
+
 export const generateListPredictionsEmbed = (
   type: "recent" | "upcoming" | "search",
   predictions: NDB2API.ShortEnhancedPrediction[],
@@ -42,12 +44,20 @@ export const generateListPredictionsEmbed = (
       date = new Date(pred.due_date);
     }
 
+    let value: string;
+
+    if (pred.text.length > MAX_TEXT_LENGTH) {
+      value = pred.text.slice(0, MAX_TEXT_LENGTH) + "...";
+    } else {
+      value = pred.text;
+    }
+
     return {
       name: `#${pred.id} - ${titleDate} ${time(
         date,
         TimestampStyles.RelativeTime
       )}`,
-      value: `${pred.text.slice(0, 250)}`,
+      value,
     };
   });
 
