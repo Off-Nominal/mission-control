@@ -227,6 +227,23 @@ export class Ndb2Client {
         throw handleError(err);
       });
   }
+
+  public getScores(
+    discord_id: string,
+    season_id?: string | number
+  ): Promise<NDB2API.GetScores> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/users/discord_id/${discord_id}/scores`;
+    if (season_id) {
+      url.pathname += `/seasons/${season_id}`;
+    }
+    return this.client
+      .get<NDB2API.GetScores>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
 }
 
 const ndbKey = process.env.NDB2_CLIENT_ID;

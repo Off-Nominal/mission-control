@@ -88,6 +88,15 @@ export const handleSlashCommandInteraction = async (
     return await interaction.showModal(modal);
   }
 
+  if (subCommand === Ndb2Subcommand.SCORE) {
+    logger.addLog(
+      LogStatus.INFO,
+      `Received a Score request, handing off to Score handler.`
+    );
+    logger.sendLog(interaction.client);
+    return interaction.client.emit(Ndb2Events.VIEW_SCORE, interaction);
+  }
+
   // Prediction specific commands
 
   const predictionId = options.getInteger("id");

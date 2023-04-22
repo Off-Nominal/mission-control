@@ -8,6 +8,7 @@ import generateHandleViewDetails from "./handleViewDetails";
 import generateHandleRetirePrediction from "./handleRetirePrediction";
 import generateHandleTriggerPrediction from "./handleTriggerPrediction";
 import generateHandleNewVote from "./handleNewVote";
+import generateHandleViewScore from "./handleViewScore";
 
 export default function generateNdb2BotHandlers(db: Client) {
   return {
@@ -20,5 +21,6 @@ export default function generateNdb2BotHandlers(db: Client) {
     handleRetirePrediction: generateHandleRetirePrediction(db),
     handleTriggerPrediction: generateHandleTriggerPrediction(db),
     handleNewVote: generateHandleNewVote(db),
+    handleViewScore: generateHandleViewScore(db),
   };
 }

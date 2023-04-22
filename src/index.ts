@@ -410,6 +410,12 @@ ndb2Bot.on(
     ndb2BotHandlers.handleNewVote(interaction, predictionId, command);
   }
 );
+ndb2Bot.on(
+  Ndb2Events.VIEW_SCORE,
+  (interaction: ChatInputCommandInteraction<CacheType>) => {
+    ndb2BotHandlers.handleViewScore(interaction);
+  }
+);
 
 /***********************************
  *  Utility Bot Event Handlers
