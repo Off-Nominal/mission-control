@@ -11,34 +11,20 @@ export const generateScoresEmbed = (
     fields: [
       {
         name: "🏆 Score",
-        value: `
-          Points: ${scores.score.points}
+        value: `Points: ${scores.score.points}
           Rank: ${scores.score.rank}`,
       },
       {
         name: "💭 Predictions",
-        value: `
-          Successful: ${scores.predictions.successful}
-          Failed: ${scores.predictions.failed}
-          Pending: ${scores.predictions.pending}
-          Retired: ${scores.predictions.retired}
-          Rank: ${scores.predictions.rank}`,
+        value: `Successful: ${scores.predictions.successful}\nFailed: ${scores.predictions.failed}\nPending: ${scores.predictions.pending}\nRetired: ${scores.predictions.retired}\nRank: ${scores.predictions.rank}`,
       },
       {
         name: "💵 Bets",
-        value: `
-          Successful: ${scores.bets.successful}
-          Failed: ${scores.bets.failed}
-          Pending: ${scores.bets.pending}
-          Retired: ${scores.bets.retired}
-          Rank: ${scores.bets.rank}`,
+        value: `Successful: ${scores.bets.successful}\nFailed: ${scores.bets.failed}\nPending: ${scores.bets.pending}\nRetired: ${scores.bets.retired}\nRank: ${scores.bets.rank}`,
       },
       {
         name: "📝 Votes",
-        value: `
-          Sycophantic: ${scores.votes.sycophantic}
-          Contrarian: ${scores.votes.contrarian}
-          Pending: ${scores.votes.pending}`,
+        value: `Sycophantic: ${scores.votes.sycophantic}\nContrarian: ${scores.votes.contrarian}\nPending: ${scores.votes.pending}`,
       },
     ],
   });

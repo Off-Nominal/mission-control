@@ -68,6 +68,11 @@ export namespace NDB2API {
     };
   };
 
+  export type ShortEnhancedPrediction = Omit<
+    EnhancedPrediction,
+    "bets" | "votes"
+  >;
+
   export type Scores = {
     score: {
       points: number;
@@ -94,6 +99,23 @@ export namespace NDB2API {
     };
   };
 
+  export type Leader = {
+    id: string;
+    discord_id: string;
+    rank: number;
+    points?: number;
+    predictions?: {
+      successful: number;
+      unsuccessful: number;
+      total: number;
+    };
+    bets?: {
+      successful: number;
+      unsuccessful: number;
+      total: number;
+    };
+  };
+
   export type AddPrediction = GeneralResponse<EnhancedPrediction>;
 
   export type AddBet = GeneralResponse<EnhancedPrediction>;
@@ -103,6 +125,19 @@ export namespace NDB2API {
   export type TriggerPrediction = GeneralResponse<EnhancedPrediction>;
 
   export type GetScores = GeneralResponse<Scores>;
+
+  export type SearchPredictions = GeneralResponse<ShortEnhancedPrediction[]>;
+
+  export type GetLeaderboard = GeneralResponse<{
+    type: "points" | "predictions" | "bets";
+    season?: {
+      id: number;
+      name: string;
+      start: string;
+      end: string;
+    };
+    leaders: Leader[];
+  }>;
 }
 
 // export interface Record {
