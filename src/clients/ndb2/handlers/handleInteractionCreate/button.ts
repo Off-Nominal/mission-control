@@ -108,37 +108,5 @@ export const handleButtonInteraction = (
     );
   }
 
-  // if (isVote) {
-  //   const affirmed = command === ButtonCommand.AFFIRM;
-
-  //   // Add Vote
-  //   try {
-  //     await addVote(discordId, predictionId, affirmed);
-  //     interaction.reply({
-  //       content: `Prediction successfully ${command.toLowerCase()}d!`,
-  //       ephemeral: true,
-  //     });
-  //   } catch (err) {
-  //     return interaction.reply({
-  //       content: err.response.data.error,
-  //       ephemeral: true,
-  //     });
-  //   }
-  // }
-
-  // // Update Embed with new stats
-  // try {
-  //   const buttonMsg = await interaction.message;
-  //   const predictor = await interaction.guild.members.fetch(
-  //     prediction.predictor.discord_id
-  //   );
-
-  //   const embed = generatePredictionEmbed(predictor.nickname, prediction);
-  //   // : generateVoteEmbed(prediction);
-
-  //   return await buttonMsg.edit({ embeds: [embed] });
-  // } catch (err) {
-  //   console.error(err);
-  // }
   return;
 };

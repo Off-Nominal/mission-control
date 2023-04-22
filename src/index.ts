@@ -416,6 +416,24 @@ ndb2Bot.on(
     ndb2BotHandlers.handleViewScore(interaction);
   }
 );
+ndb2Bot.on(
+  Ndb2Events.LIST_PREDICTIONS,
+  (interaction: ChatInputCommandInteraction<CacheType>) => {
+    ndb2BotHandlers.handleListPredictions(interaction);
+  }
+);
+ndb2Bot.on(
+  Ndb2Events.SEARCH_PREDICTIONS,
+  (interaction: ChatInputCommandInteraction<CacheType>) => {
+    ndb2BotHandlers.handleSearchPredictions(interaction);
+  }
+);
+ndb2Bot.on(
+  Ndb2Events.VIEW_LEADERBOARDS,
+  (interaction: ChatInputCommandInteraction<CacheType>) => {
+    ndb2BotHandlers.handleViewLeaderboards(interaction);
+  }
+);
 
 /***********************************
  *  Utility Bot Event Handlers

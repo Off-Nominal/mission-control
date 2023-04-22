@@ -97,6 +97,33 @@ export const handleSlashCommandInteraction = async (
     return interaction.client.emit(Ndb2Events.VIEW_SCORE, interaction);
   }
 
+  if (subCommand === Ndb2Subcommand.LIST) {
+    logger.addLog(
+      LogStatus.INFO,
+      `Received a List request, handing off to List handler.`
+    );
+    logger.sendLog(interaction.client);
+    return interaction.client.emit(Ndb2Events.LIST_PREDICTIONS, interaction);
+  }
+
+  if (subCommand === Ndb2Subcommand.SEARCH) {
+    logger.addLog(
+      LogStatus.INFO,
+      `Received a Search request, handing off to Search handler.`
+    );
+    logger.sendLog(interaction.client);
+    return interaction.client.emit(Ndb2Events.SEARCH_PREDICTIONS, interaction);
+  }
+
+  if (subCommand === Ndb2Subcommand.LEADERBOARDS) {
+    logger.addLog(
+      LogStatus.INFO,
+      `Received a Leaderboards request, handing off to Leaderboards handler.`
+    );
+    logger.sendLog(interaction.client);
+    return interaction.client.emit(Ndb2Events.VIEW_LEADERBOARDS, interaction);
+  }
+
   // Prediction specific commands
 
   const predictionId = options.getInteger("id");

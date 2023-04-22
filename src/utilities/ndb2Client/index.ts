@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { NDB2API } from "./types";
+import { NDB2API, PredictionLifeCycle } from "./types";
 
 const isNdb2ApiResponse = (
   response: any
@@ -29,6 +29,28 @@ const isNdb2ApiResponse = (
 
   return true;
 };
+
+export type SearchOptions = {
+  status?: PredictionLifeCycle[];
+  keyword?: string;
+  sort_by?: SortByOption[];
+  page?: number;
+};
+
+export enum SortByOption {
+  CREATED_ASC = "created_date-asc",
+  CREATED_DESC = "created_date-desc",
+  DUE_ASC = "due_date-asc",
+  DUE_DESC = "due_date-desc",
+  RETIRED_ASC = "retired_date-asc",
+  RETIRED_DESC = "retired_date-desc",
+  TRIGGERED_ASC = "triggered_date-asc",
+  TRIGGERED_DESC = "triggered_date-desc",
+  CLOSED_ASC = "closed_date-asc",
+  CLOSED_DESC = "closed_date-desc",
+  JUDGED_ASC = "judged_date-asc",
+  JUDGED_DESC = "judged_date-desc",
+}
 
 const handleError = (err: any): [string, string] => {
   // returns user friendly message and full message in array
@@ -109,26 +131,6 @@ export class Ndb2Client {
       },
     });
   }
-
-  // public fetchUserId(discordId: string) {
-  //   const url = new URL(this.baseURL);
-  //   url.pathname = "api/users";
-  //   const params = new URLSearchParams({ discordId });
-  //   url.search = params.toString();
-
-  //   return this.client
-  //     .get<APIUser[]>(url.toString())
-  //     .then((res) => res.data[0]);
-  // }
-
-  // public fetchEnhancedUser(id: string | number) {
-  //   const url = new URL(this.baseURL);
-  //   url.pathname = `api/users/${id}`;
-
-  //   return this.client
-  //     .get<APIEnhancedUser>(url.toString())
-  //     .then((res) => res.data);
-  // }
 
   public getPrediction(
     id: string | number
@@ -239,6 +241,56 @@ export class Ndb2Client {
     }
     return this.client
       .get<NDB2API.GetScores>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public searchPredictions(
+    options: SearchOptions = {}
+  ): Promise<NDB2API.SearchPredictions> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/search`;
+    const params = new URLSearchParams();
+
+    if (options.status) {
+      options.status.forEach((option) => {
+        params.set("status", option);
+      });
+    }
+
+    if (options.keyword) {
+      params.set("keyword", options.keyword);
+    }
+
+    if (options.sort_by) {
+      options.sort_by.forEach((option) => {
+        params.set("sort_by", option);
+      });
+    }
+
+    url.search = params.toString();
+
+    return this.client
+      .get<NDB2API.SearchPredictions>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public getLeaderboard(
+    type: "points" | "predictions" | "bets"
+  ): Promise<NDB2API.GetLeaderboard> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/scores`;
+    const params = new URLSearchParams();
+    params.set("view", type);
+    url.search = params.toString();
+
+    return this.client
+      .get<NDB2API.GetLeaderboard>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);
