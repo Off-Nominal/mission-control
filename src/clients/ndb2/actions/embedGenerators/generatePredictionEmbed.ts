@@ -58,8 +58,8 @@ const getAuthor = (status: PredictionLifeCycle): string => {
 };
 
 export const generatePredictionEmbed = (
-  displayName: string,
-  avatarUrl: string,
+  displayName: string | undefined,
+  avatarUrl: string | undefined,
   prediction: NDB2API.EnhancedPrediction
 ) => {
   const created = new Date(prediction.created_date);
@@ -76,7 +76,9 @@ export const generatePredictionEmbed = (
 
   const embed = new EmbedBuilder({
     author: {
-      name: `${displayName} ${getAuthor(prediction.status)}`,
+      name: `${displayName || "A former discord member"} ${getAuthor(
+        prediction.status
+      )}`,
       icon_url: avatarUrl,
     },
     description: prediction.text,

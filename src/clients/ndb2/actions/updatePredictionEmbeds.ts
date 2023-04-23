@@ -20,7 +20,7 @@ import { generatePublicNotice } from "./generatePublicNotice";
 export const updatePredictionEmbeds = async (
   client: Client,
   subs: Ndb2MsgSubscription[],
-  predictor: GuildMember,
+  predictor: GuildMember | undefined,
   prediction: NDB2API.EnhancedPrediction
 ) => {
   const logger = new Logger(

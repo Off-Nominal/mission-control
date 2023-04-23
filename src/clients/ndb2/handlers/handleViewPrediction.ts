@@ -1,14 +1,10 @@
-import { add, format, isFuture, isValid } from "date-fns";
+import { add } from "date-fns";
 import {
   CacheType,
   ChatInputCommandInteraction,
-  ModalSubmitInteraction,
-  time,
-  TimestampStyles,
-  userMention,
+  GuildMember,
 } from "discord.js";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-import { ndb2Client } from "../../../utilities/ndb2Client";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { LogInitiator } from "../../../types/logEnums";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
@@ -31,10 +27,20 @@ export default function generateHandleViewPrediction(db: Client) {
     );
 
     // Generate response
+    let predictor: GuildMember | undefined = undefined;
+
     try {
-      const predictor = await interaction.guild.members.fetch(
+      predictor = await interaction.guild.members.fetch(
         prediction.predictor.discord_id
       );
+    } catch (err) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error Retrieving a prediction for a user. Proceeding with fallback.`
+      );
+    }
+
+    try {
       const reply = generatePredictionResponse(predictor, prediction);
       interaction.reply(reply);
       logger.addLog(
@@ -42,11 +48,12 @@ export default function generateHandleViewPrediction(db: Client) {
         `Prediction embed was successfully delivered to channel.`
       );
     } catch (err) {
-      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error Retrieving a prediction for a user. ${err.response.data.message}`
+        `There was an error sending the reply to the discord.`
       );
+      console.error(err);
+      return logger.sendLog(interaction.client);
     }
 
     // Add subscription for embed

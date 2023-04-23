@@ -12,12 +12,12 @@ import {
 import { generatePredictionEmbed } from "./embedGenerators/generatePredictionEmbed";
 
 export const generatePredictionResponse = (
-  predictor: GuildMember,
+  predictor: GuildMember | undefined,
   prediction: NDB2API.EnhancedPrediction
 ): BaseMessageOptions => {
   const embed = generatePredictionEmbed(
-    predictor.displayName,
-    predictor.displayAvatarURL(),
+    predictor?.displayName,
+    predictor?.displayAvatarURL(),
     prediction
   );
 

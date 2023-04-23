@@ -83,7 +83,7 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
     const guild = fetchGuild(client);
 
     // Fetch Guild Member for Predictor
-    let predictor: GuildMember;
+    let predictor: GuildMember | undefined = undefined;
     try {
       predictor = await guild.members.fetch(data.predictor.discord_id);
       logger.addLog(
@@ -95,10 +95,8 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
         LogStatus.FAILURE,
         `Failed to fetch predictor User ${userMention(
           data.predictor.discord_id
-        )} for this event, cannot process any further.`
+        )} for this event, will fallback to defauls.`
       );
-      logger.sendLog(client);
-      return console.error(err);
     }
 
     logger.addLog(LogStatus.INFO, `Passing log to update functions.`);
