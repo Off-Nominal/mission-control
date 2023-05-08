@@ -150,7 +150,12 @@ export const generatePublicNoticeEmbed = (
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
     fields.push(
-      embedFields.longPayouts(prediction.status, endorsements, undorsements)
+      embedFields.longPayouts(
+        prediction.status,
+        prediction.payouts,
+        endorsements,
+        undorsements
+      )
     );
   }
 

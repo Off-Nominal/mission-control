@@ -55,7 +55,12 @@ export const generatePredictionDetailsEmbed = (
   if (prediction.status === PredictionLifeCycle.SUCCESSFUL) {
     fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
     fields.push(
-      embedFields.longPayouts(prediction.status, endorsements, undorsements)
+      embedFields.longPayouts(
+        prediction.status,
+        prediction.payouts,
+        endorsements,
+        undorsements
+      )
     );
     fields.push(embedFields.longVotes(yesVotes, "yes"));
     fields.push(embedFields.longVotes(noVotes, "no"));
@@ -64,7 +69,12 @@ export const generatePredictionDetailsEmbed = (
   if (prediction.status === PredictionLifeCycle.FAILED) {
     fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
     fields.push(
-      embedFields.longPayouts(prediction.status, endorsements, undorsements)
+      embedFields.longPayouts(
+        prediction.status,
+        prediction.payouts,
+        endorsements,
+        undorsements
+      )
     );
     fields.push(embedFields.longVotes(yesVotes, "yes"));
     fields.push(embedFields.longVotes(noVotes, "no"));

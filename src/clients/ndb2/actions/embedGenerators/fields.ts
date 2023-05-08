@@ -78,6 +78,7 @@ const embedFields = {
   },
   longPayouts: (
     status: PredictionLifeCycle,
+    ratios: { endorse: number; undorse: number },
     endorsements: NDB2API.EnhancedPredictionBet[],
     undorsements: NDB2API.EnhancedPredictionBet[]
   ) => {
@@ -86,16 +87,20 @@ const embedFields = {
     if (status === PredictionLifeCycle.SUCCESSFUL) {
       const bets = [...endorsements, ...undorsements.reverse()];
       payouts = bets.map((b) => {
+        const multiplier = b.endorsed ? ratios.endorse : ratios.undorse;
+        const payout = Math.floor(b.wager * multiplier);
         return `${b.endorsed ? "✅" : "❌"} ${userMention(
           b.better.discord_id
-        )} (${b.endorsed ? "+" : "-"}${b.wager})`;
+        )} (${b.endorsed ? "+" : "-"}${payout})`;
       });
     } else {
       const bets = [...undorsements, ...endorsements.reverse()];
       payouts = bets.map((b) => {
+        const multiplier = b.endorsed ? ratios.undorse : ratios.endorse;
+        const payout = Math.floor(b.wager * multiplier);
         return `${!b.endorsed ? "✅" : "❌"} ${userMention(
           b.better.discord_id
-        )} (${!b.endorsed ? "+" : "-"}${b.wager})`;
+        )} (${!b.endorsed ? "+" : "-"}${payout})`;
       });
     }
 
@@ -105,9 +110,16 @@ const embedFields = {
     };
   },
   shortStatus: (status: PredictionLifeCycle) => {
+    let pStatus: string;
+
+    if (status === PredictionLifeCycle.CLOSED) {
+      pStatus = "VOTING";
+    } else {
+      pStatus = status.toUpperCase();
+    }
     return {
       name: "Current Prediction Status",
-      value: status.toUpperCase() + `\n \u200B`,
+      value: pStatus + `\n \u200B`,
     };
   },
   longStatus: (status: PredictionLifeCycle) => {
