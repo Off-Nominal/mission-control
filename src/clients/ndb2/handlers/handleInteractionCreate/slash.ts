@@ -98,6 +98,8 @@ export const handleSlashCommandInteraction = async (
         },
       ],
     });
+
+    return interaction.reply({ embeds: [embed] });
   }
 
   if (subCommand === Ndb2Subcommand.NEW) {
