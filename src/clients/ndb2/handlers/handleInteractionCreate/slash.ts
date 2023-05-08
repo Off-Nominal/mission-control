@@ -21,6 +21,9 @@ import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2Interacti
 import { Ndb2Events } from "../../../../types/eventEnums";
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
+import fetchGuild from "../../../../utilities/fetchGuild";
+import { roleIds } from "../../../../types/roleEnums";
+import { SpecificRole } from "../../../../types/roleEnums";
 
 export const handleSlashCommandInteraction = async (
   interaction: ChatInputCommandInteraction
@@ -222,6 +225,22 @@ export const handleSlashCommandInteraction = async (
   }
 
   if (subCommand === Ndb2Subcommand.TRIGGER) {
+    // Restrict trigger command to moderators during launch
+    const guild = fetchGuild(interaction.client);
+    const mods = guild.members.cache.filter((member) =>
+      member.roles.cache.some((role) => role.id === roleIds[SpecificRole.MODS])
+    );
+
+    const modsIds = mods.map((mod) => mod.id);
+
+    if (!modsIds.includes(interaction.user.id)) {
+      return interaction.reply({
+        content:
+          "NDB2 is currently in launch mode and only moderators may trigger predictions manually at this time. Please hang tight while we complete the migration!",
+      });
+    }
+
+    // Proceed with trigger
     const closed = options.getString("closed");
 
     logger.addLog(
