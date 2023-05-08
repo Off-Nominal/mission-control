@@ -192,17 +192,17 @@ const ndb2Bot = new Client({ intents: [simpleIntents] });
  *  Express Server Setup
  ************************************/
 
-import usersRouter from "./routers/users";
 import webhooksRouter from "./routers/webhooks";
-import apiAuth from "./middleware/auth";
 import { NDB2API } from "./utilities/ndb2Client/types";
-const morgan = require("morgan");
 
 const app = express();
-// app.use(apiAuth);
 const PORT = process.env.PORT || 8080;
-const morganOutput = process.env.NODE_ENV === "dev" ? "dev" : "combined";
-app.use(morgan(morganOutput));
+
+if (process.env.NODE_ENV !== "production") {
+  const morgan = require("morgan");
+  app.use(morgan("dev"));
+}
+
 app.use(express.json());
 
 app.use("/webhooks", webhooksRouter(ndb2Bot, db));
