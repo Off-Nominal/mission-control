@@ -122,10 +122,10 @@ const predictCommand = new SlashCommandBuilder()
           .setRequired(true)
           .addChoices(...leaderboardOptions)
       )
+  )
+  .addSubcommand((group) =>
+    group.setName(Ndb2Subcommand.HELP).setDescription("Help with Nostradambot2")
   );
-// .addSubcommand((group) =>
-//   group.setName(Ndb2Subcommand.HELP).setDescription("Help with Nostradambot2")
-// );
 
 const commands = [predictCommand].map((command) => command.toJSON());
 

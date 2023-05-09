@@ -10,12 +10,12 @@ export default function generateHandleInteractionCreate(db: Client) {
   return async function handleInteractionCreate(interaction: Interaction) {
     // Handle Modal Submissions for new Predictions
     if (interaction.isModalSubmit()) {
-      // return handleModalInteraction(interaction);
+      return handleModalInteraction(interaction);
     }
 
     // Handle Button Submissions for Endorsements, Undorsements and Details
     if (interaction.isButton()) {
-      // return handleButtonInteraction(interaction);
+      return handleButtonInteraction(interaction);
     }
 
     if (!interaction.isChatInputCommand()) {
@@ -33,11 +33,7 @@ export default function generateHandleInteractionCreate(db: Client) {
       return logger.sendLog(interaction.client);
     }
 
-    return interaction.reply({
-      content: "NDB2 is currently offline while we prep for the launch.",
-    });
-
     // Handle Chat Input Commands for all slash commands
-    // handleSlashCommandInteraction(interaction);
+    handleSlashCommandInteraction(interaction);
   };
 }

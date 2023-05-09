@@ -19,6 +19,15 @@ export default function generateHandleViewLeaderboards(db: Client) {
       `View Leaderboards: ${leaderboardType}`
     );
 
+    // Leaderboard calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
+    try {
+      await interaction.deferReply();
+      logger.addLog(LogStatus.SUCCESS, "Successfully deferred reply.");
+    } catch (err) {
+      logger.addLog(LogStatus.FAILURE, "Failed to defer reply, aborting.");
+      return logger.sendLog(interaction.client);
+    }
+
     if (
       leaderboardType !== "points" &&
       leaderboardType !== "bets" &&
@@ -28,7 +37,7 @@ export default function generateHandleViewLeaderboards(db: Client) {
         LogStatus.FAILURE,
         `Invalid interaction option: Type: ${leaderboardType}`
       );
-      return interaction.reply({
+      return interaction.editReply({
         content:
           "This is an invalid option. Type can only be 'points', 'predictions' or 'bets'",
       });
@@ -44,7 +53,7 @@ export default function generateHandleViewLeaderboards(db: Client) {
       const leaders = response.data.leaders;
 
       const embed = generateLeaderboardEmbed(leaderboardType, leaders);
-      await interaction.reply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
       logger.addLog(
         LogStatus.SUCCESS,
         "Successfully posted leaderboard embed to Discord"
