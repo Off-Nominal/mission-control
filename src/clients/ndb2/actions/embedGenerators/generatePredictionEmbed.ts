@@ -64,7 +64,7 @@ export const generatePredictionEmbed = (
 ) => {
   const created = new Date(prediction.created_date);
   const closed = new Date(prediction.closed_date);
-  const judgement = new Date(prediction.due_date);
+  const due = new Date(prediction.due_date);
   const retired = new Date(prediction.retired_date);
   const triggered = new Date(prediction.triggered_date);
 
@@ -93,6 +93,7 @@ export const generatePredictionEmbed = (
   const fields: APIEmbedField[] = [embedFields.date(created, "Created")];
 
   if (prediction.status === PredictionLifeCycle.CLOSED) {
+    fields.push(embedFields.date(due, "Original Due Date"));
     prediction.triggerer &&
       fields.push(
         embedFields.triggeredDate(
@@ -102,7 +103,6 @@ export const generatePredictionEmbed = (
         )
       );
     fields.push(embedFields.date(closed, "Effective Close Date"));
-    fields.push(embedFields.date(judgement, "Original Judgement Day"));
     fields.push(
       embedFields.shortBets(
         endorsements.length,
@@ -139,7 +139,7 @@ export const generatePredictionEmbed = (
   }
 
   if (prediction.status === PredictionLifeCycle.OPEN) {
-    fields.push(embedFields.date(judgement, "Judgement Day"));
+    fields.push(embedFields.date(due, "Due Date"));
     fields.push(
       embedFields.shortBets(
         endorsements.length,
@@ -151,7 +151,7 @@ export const generatePredictionEmbed = (
 
   if (prediction.status === PredictionLifeCycle.RETIRED) {
     fields.push(embedFields.date(retired, "Retired"));
-    fields.push(embedFields.date(judgement, "Original Judgement Day"));
+    fields.push(embedFields.date(due, "Original Due Day"));
   }
 
   embed.setFields(fields);
