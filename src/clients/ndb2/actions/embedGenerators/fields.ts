@@ -89,32 +89,27 @@ const embedFields = {
     };
   },
   longPayouts: (
-    status: PredictionLifeCycle,
+    status: PredictionLifeCycle.SUCCESSFUL | PredictionLifeCycle.FAILED,
     ratios: { endorse: number; undorse: number },
-    endorsements: NDB2API.EnhancedPredictionBet[],
-    undorsements: NDB2API.EnhancedPredictionBet[]
+    type: "endorsements" | "undorsements",
+    bets: NDB2API.EnhancedPredictionBet[]
   ) => {
     let payouts: string[];
 
-    if (status === PredictionLifeCycle.SUCCESSFUL) {
-      const bets = [...endorsements, ...undorsements.reverse()];
-      payouts = bets.map((b) => {
-        const multiplier = b.endorsed ? ratios.endorse : ratios.undorse;
-        const payout = Math.floor(b.wager * multiplier);
-        return `${b.endorsed ? "✅" : "❌"} ${userMention(
-          b.better.discord_id
-        )} (${b.endorsed ? "+" : "-"}${payout})`;
-      });
-    } else {
-      const bets = [...undorsements, ...endorsements.reverse()];
-      payouts = bets.map((b) => {
-        const multiplier = b.endorsed ? ratios.undorse : ratios.endorse;
-        const payout = Math.floor(b.wager * multiplier);
-        return `${!b.endorsed ? "✅" : "❌"} ${userMention(
-          b.better.discord_id
-        )} (${!b.endorsed ? "+" : "-"}${payout})`;
-      });
-    }
+    const isPayout =
+      (type === "endorsements" && status === PredictionLifeCycle.SUCCESSFUL) ||
+      (type === "undorsements" && status === PredictionLifeCycle.FAILED);
+
+    const sortedBets = isPayout ? [...bets] : [...bets].reverse();
+
+    const multiplier = isPayout ? ratios.endorse : ratios.undorse;
+
+    payouts = sortedBets.map((b) => {
+      const payout = Math.floor(b.wager * multiplier);
+      return `${userMention(b.better.discord_id)} (${
+        isPayout ? "+" : "-"
+      }${payout})`;
+    });
 
     const fieldCount = Math.ceil(payouts.length / USER_LIST_LIMIT);
 
@@ -124,10 +119,10 @@ const embedFields = {
       const payoutsSlice = payouts.slice(i, i + USER_LIST_LIMIT);
 
       payoutFields.push({
-        name: `Payouts and Penalties${
+        name: `${isPayout ? "🏆 Payouts" : "☠️ Penalites"}${
           payouts.length > USER_LIST_LIMIT ? ` Part ${i + 1}` : ""
         }`,
-        value: `${payoutsSlice.join("\n")}`,
+        value: `${payoutsSlice.join("\n")}` + `\n \u200B`,
       });
     }
 

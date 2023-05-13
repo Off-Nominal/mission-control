@@ -167,14 +167,26 @@ export const generatePublicNoticeEmbed = (
     fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
   }
 
-  if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
+  if (
+    type === NDB2WebhookEvent.JUDGED_PREDICTION &&
+    (prediction.status === PredictionLifeCycle.SUCCESSFUL ||
+      prediction.status === PredictionLifeCycle.FAILED)
+  ) {
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
     embedFields
       .longPayouts(
         prediction.status,
         prediction.payouts,
-        endorsements,
+        "endorsements",
+        endorsements
+      )
+      .forEach((ef) => fields.push(ef));
+    embedFields
+      .longPayouts(
+        prediction.status,
+        prediction.payouts,
+        "undorsements",
         undorsements
       )
       .forEach((ef) => fields.push(ef));

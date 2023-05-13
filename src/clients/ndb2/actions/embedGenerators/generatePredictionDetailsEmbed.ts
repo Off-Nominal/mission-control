@@ -70,7 +70,15 @@ export const generatePredictionDetailsEmbed = (
       .longPayouts(
         prediction.status,
         prediction.payouts,
-        endorsements,
+        "endorsements",
+        endorsements
+      )
+      .forEach((ef) => fields.push(ef));
+    embedFields
+      .longPayouts(
+        prediction.status,
+        prediction.payouts,
+        "undorsements",
         undorsements
       )
       .forEach((ef) => fields.push(ef));
@@ -84,7 +92,15 @@ export const generatePredictionDetailsEmbed = (
       .longPayouts(
         prediction.status,
         prediction.payouts,
-        endorsements,
+        "endorsements",
+        endorsements
+      )
+      .forEach((ef) => fields.push(ef));
+    embedFields
+      .longPayouts(
+        prediction.status,
+        prediction.payouts,
+        "undorsements",
         undorsements
       )
       .forEach((ef) => fields.push(ef));
