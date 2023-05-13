@@ -1,9 +1,5 @@
-import { add } from "date-fns";
 import { ButtonInteraction } from "discord.js";
 import { Client } from "pg";
-import ndb2MsgSubscriptionQueries, {
-  Ndb2MsgSubscriptionType,
-} from "../../../queries/ndb2_msg_subscriptions";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";

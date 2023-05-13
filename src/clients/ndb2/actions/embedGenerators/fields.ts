@@ -4,6 +4,8 @@ import {
   PredictionLifeCycle,
 } from "../../../../utilities/ndb2Client/types";
 
+const USER_LIST_LIMIT = 30;
+
 const embedFields = {
   date: (date: Date, title: string) => {
     return {
@@ -42,26 +44,36 @@ const embedFields = {
     return {
       name: "Voting",
       value:
-        "Voting on the outcome of this prediction is now active. Click Yes if you believe this prediction has come true and No if you think this prediction did not come true.",
+        "Voting is now active. Click *Yes* or *No* based on whether you think this prediction came true or not.",
     };
   },
   shortVotes: (yesCount: number, noCount: number) => {
     return {
       name: "Votes",
-      value: `
-  ✅ ${yesCount} \u200B \u200B \u200B \u200B ❌ ${noCount}`,
+      value: `👍 ${yesCount} \u200B \u200B \u200B \u200B 👎 ${noCount}`,
     };
   },
   longVotes: (votes: NDB2API.EnhancedPredictionVote[], type: "yes" | "no") => {
-    const value =
-      votes.map((e) => userMention(e.voter.discord_id)).join("\n") || "None";
+    const values = votes.map((e) => userMention(e.voter.discord_id));
 
-    const name = type === "yes" ? "✅ Yes Votes" : "❌ No Votes";
+    const fieldCount = Math.ceil(values.length / USER_LIST_LIMIT);
 
-    return {
-      name,
-      value: value + `\n \u200B`,
-    };
+    const voteFields = [];
+
+    const name = type === "yes" ? "👍 Yes Votes" : "👎 No Votes";
+
+    for (let i = 0; i < fieldCount; i++) {
+      const voteSlice = values.slice(i, i + USER_LIST_LIMIT);
+
+      voteFields.push({
+        name: `${name}${
+          values.length > USER_LIST_LIMIT ? ` Part ${i + 1}` : ""
+        }`,
+        value: `${voteSlice.join("\n") || "None"}` + `\n \u200B`,
+      });
+    }
+
+    return voteFields;
   },
   payoutsText: (
     status: PredictionLifeCycle,
@@ -104,10 +116,22 @@ const embedFields = {
       });
     }
 
-    return {
-      name: "Payouts and Penalties",
-      value: `${payouts.join("\n")}`,
-    };
+    const fieldCount = Math.ceil(payouts.length / USER_LIST_LIMIT);
+
+    const payoutFields = [];
+
+    for (let i = 0; i < fieldCount; i++) {
+      const payoutsSlice = payouts.slice(i, i + USER_LIST_LIMIT);
+
+      payoutFields.push({
+        name: `Payouts and Penalties${
+          payouts.length > USER_LIST_LIMIT ? ` Part ${i + 1}` : ""
+        }`,
+        value: `${payoutsSlice.join("\n")}`,
+      });
+    }
+
+    return payoutFields;
   },
   shortStatus: (status: PredictionLifeCycle) => {
     let pStatus: string;
@@ -186,24 +210,33 @@ const embedFields = {
     bets: NDB2API.EnhancedPredictionBet[],
     type: "undorsements" | "endorsements"
   ) => {
-    const text =
-      bets
-        .map(
-          (e) =>
-            `${userMention(e.better.discord_id)} ${time(
-              new Date(e.date),
-              TimestampStyles.LongDate
-            )} (${e.wager} points wagered)`
-        )
-        .join("\n") || "None";
+    const values = bets.map(
+      (e) =>
+        `${userMention(e.better.discord_id)} ${time(
+          new Date(e.date),
+          TimestampStyles.LongDate
+        )} (${e.wager} points wagered)`
+    );
+
+    const fieldCount = Math.ceil(values.length / USER_LIST_LIMIT);
+
+    const betFields = [];
 
     const name =
       type === "endorsements" ? "✅ Endorsements" : "❌ Undorsements";
 
-    return {
-      name,
-      value: text + `\n \u200B`,
-    };
+    for (let i = 0; i < fieldCount; i++) {
+      const betSlice = values.slice(i, i + USER_LIST_LIMIT);
+
+      betFields.push({
+        name: `${name}${
+          values.length > USER_LIST_LIMIT ? ` Part ${i + 1}` : ""
+        }`,
+        value: `${betSlice.join("\n") || "None"}` + `\n \u200B`,
+      });
+    }
+
+    return betFields;
   },
   accuracyDisclaimer: () => {
     return {

@@ -34,50 +34,62 @@ export const generatePredictionDetailsEmbed = (
       )
     );
     fields.push(embedFields.longOdds(prediction.payouts));
-    fields.push(embedFields.longBets(endorsements, "endorsements"));
-    fields.push(embedFields.longBets(undorsements, "undorsements"));
+    embedFields
+      .longBets(endorsements, "endorsements")
+      .forEach((bf) => fields.push(bf));
+    embedFields
+      .longBets(undorsements, "undorsements")
+      .forEach((bf) => fields.push(bf));
     fields.push(embedFields.accuracyDisclaimer());
   }
 
   if (prediction.status === PredictionLifeCycle.CLOSED) {
-    fields.push(embedFields.longBets(endorsements, "endorsements"));
-    fields.push(embedFields.longBets(undorsements, "undorsements"));
-    fields.push(embedFields.longVotes(yesVotes, "yes"));
-    fields.push(embedFields.longVotes(noVotes, "no"));
+    embedFields
+      .longBets(endorsements, "endorsements")
+      .forEach((bf) => fields.push(bf));
+    embedFields
+      .longBets(undorsements, "undorsements")
+      .forEach((bf) => fields.push(bf));
+    embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
+    embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
     fields.push(embedFields.accuracyDisclaimer());
   }
 
   if (prediction.status === PredictionLifeCycle.RETIRED) {
-    fields.push(embedFields.longBets(endorsements, "endorsements"));
-    fields.push(embedFields.longBets(undorsements, "undorsements"));
+    embedFields
+      .longBets(endorsements, "endorsements")
+      .forEach((bf) => fields.push(bf));
+    embedFields
+      .longBets(undorsements, "undorsements")
+      .forEach((bf) => fields.push(bf));
   }
 
   if (prediction.status === PredictionLifeCycle.SUCCESSFUL) {
     fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
-    fields.push(
-      embedFields.longPayouts(
+    embedFields
+      .longPayouts(
         prediction.status,
         prediction.payouts,
         endorsements,
         undorsements
       )
-    );
-    fields.push(embedFields.longVotes(yesVotes, "yes"));
-    fields.push(embedFields.longVotes(noVotes, "no"));
+      .forEach((ef) => fields.push(ef));
+    embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
+    embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
   }
 
   if (prediction.status === PredictionLifeCycle.FAILED) {
     fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
-    fields.push(
-      embedFields.longPayouts(
+    embedFields
+      .longPayouts(
         prediction.status,
         prediction.payouts,
         endorsements,
         undorsements
       )
-    );
-    fields.push(embedFields.longVotes(yesVotes, "yes"));
-    fields.push(embedFields.longVotes(noVotes, "no"));
+      .forEach((ef) => fields.push(ef));
+    embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
+    embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
   }
 
   embed.setFields(fields);
