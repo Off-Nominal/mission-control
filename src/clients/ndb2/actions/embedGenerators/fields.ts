@@ -13,13 +13,27 @@ import {
 const USER_LIST_LIMIT = 30;
 
 const embedFields = {
-  date: (date: Date, title: string) => {
+  date: (
+    date: Date,
+    title: string,
+    context?: { channelId: string; messageId: string }
+  ) => {
+    const baseMessage = `🗓️ ${time(date, TimestampStyles.LongDate)} (${time(
+      date,
+      TimestampStyles.RelativeTime
+    )})`;
+
+    let value = baseMessage;
+
+    if (context) {
+      value =
+        baseMessage +
+        ` (context: ${messageLink(context.channelId, context.messageId)})`;
+    }
+
     return {
       name: title,
-      value: `🗓️ ${time(date, TimestampStyles.LongDate)} (${time(
-        date,
-        TimestampStyles.RelativeTime
-      )})`,
+      value,
     };
   },
   triggeredDate: (date: Date, title: string, triggerer_id: string) => {
@@ -238,12 +252,6 @@ const embedFields = {
     }
 
     return betFields;
-  },
-  context: (channelId: string, messageId: string) => {
-    return {
-      name: "Discussion context",
-      value: messageLink(channelId, messageId),
-    };
   },
   accuracyDisclaimer: () => {
     return {

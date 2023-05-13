@@ -148,7 +148,7 @@ export const generatePublicNoticeEmbed = (
       name: "Prediction",
       value: prediction.text + `\n \u200B`,
     },
-    embedFields.date(created, "Created"),
+    embedFields.date(created, "Created", context),
   ];
 
   if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
@@ -157,10 +157,6 @@ export const generatePublicNoticeEmbed = (
   }
 
   if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
-    if (context) {
-      fields.push(embedFields.context(context.channelId, context.messageId));
-    }
-
     triggerer && fields.push(embedFields.date(due, "Original Due Date"));
     fields.push(embedFields.date(triggered, "Triggered Date"));
     fields.push(embedFields.date(closed, "Effective Close Date"));
