@@ -9,12 +9,13 @@ import { Logger, LogStatus } from "../../../utilities/logger";
 import { LogInitiator } from "../../../types/logEnums";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import ndb2MsgSubscriptionQueries, {
+  Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
 import { Client } from "pg";
 
 export default function generateHandleViewPrediction(db: Client) {
-  const { addSubscription } = ndb2MsgSubscriptionQueries(db);
+  const { addSubscription, fetchSubByType } = ndb2MsgSubscriptionQueries(db);
 
   return async function handleViewPrediction(
     interaction: ChatInputCommandInteraction<CacheType>,
@@ -33,15 +34,46 @@ export default function generateHandleViewPrediction(db: Client) {
       predictor = await interaction.guild.members.fetch(
         prediction.predictor.discord_id
       );
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Successfully retrieved the predictor of this prediction.`
+      );
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error Retrieving a prediction for a user. Proceeding with fallback.`
+        `There was an error retrieving the predictor for this prediction. Using fallback.`
       );
     }
 
+    // Fetch Context
+    let context: { messageId: string; channelId: string };
+    let contextSub: Ndb2MsgSubscription;
     try {
-      const reply = generatePredictionResponse(predictor, prediction);
+      const contextSubs = await fetchSubByType(
+        prediction.id,
+        Ndb2MsgSubscriptionType.CONTEXT
+      );
+      if (contextSubs[0]) {
+        contextSub = contextSubs[0];
+        context = {
+          channelId: contextSub.channel_id,
+          messageId: contextSub.message_id,
+        };
+        logger.addLog(LogStatus.SUCCESS, `Prediction context retreived.`);
+      } else {
+        logger.addLog(LogStatus.INFO, `Prediction has no context.`);
+      }
+    } catch (err) {
+      console.error(err);
+      logger.addLog(
+        LogStatus.FAILURE,
+        `Failure to retrieve prediction context subscriptions.`
+      );
+    }
+
+    // generate response
+    try {
+      const reply = generatePredictionResponse(predictor, prediction, context);
       interaction.reply(reply);
       logger.addLog(
         LogStatus.SUCCESS,

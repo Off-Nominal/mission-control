@@ -13,12 +13,14 @@ import { generatePredictionEmbed } from "./embedGenerators/generatePredictionEmb
 
 export const generatePredictionResponse = (
   predictor: GuildMember | undefined,
-  prediction: NDB2API.EnhancedPrediction
+  prediction: NDB2API.EnhancedPrediction,
+  context?: { messageId: string; channelId: string }
 ): BaseMessageOptions => {
   const embed = generatePredictionEmbed(
     predictor?.displayName,
     predictor?.displayAvatarURL(),
-    prediction
+    prediction,
+    context
   );
 
   const actionRow = new ActionRowBuilder<ButtonBuilder>();

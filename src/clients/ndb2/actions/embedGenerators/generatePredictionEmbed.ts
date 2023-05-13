@@ -60,7 +60,8 @@ const getAuthor = (status: PredictionLifeCycle): string => {
 export const generatePredictionEmbed = (
   displayName: string | undefined,
   avatarUrl: string | undefined,
-  prediction: NDB2API.EnhancedPrediction
+  prediction: NDB2API.EnhancedPrediction,
+  context?: { messageId: string; channelId: string }
 ) => {
   const created = new Date(prediction.created_date);
   const closed = new Date(prediction.closed_date);
@@ -90,7 +91,11 @@ export const generatePredictionEmbed = (
     },
   });
 
-  const fields: APIEmbedField[] = [embedFields.date(created, "Created")];
+  console.log(context);
+
+  const fields: APIEmbedField[] = [
+    embedFields.date(created, "Created", context),
+  ];
 
   if (prediction.status === PredictionLifeCycle.CLOSED) {
     fields.push(embedFields.date(due, "Original Due Date"));

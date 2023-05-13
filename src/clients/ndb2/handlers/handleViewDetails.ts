@@ -1,9 +1,5 @@
-import { add } from "date-fns";
 import { ButtonInteraction } from "discord.js";
 import { Client } from "pg";
-import ndb2MsgSubscriptionQueries, {
-  Ndb2MsgSubscriptionType,
-} from "../../../queries/ndb2_msg_subscriptions";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
@@ -25,7 +21,8 @@ export default function generateHandleViewDetails(db: Client) {
 
     // Fetch prediction
     try {
-      prediction = await ndb2Client.getPrediction(predictionId);
+      const response = await ndb2Client.getPrediction(predictionId);
+      prediction = response.data;
       logger.addLog(LogStatus.SUCCESS, "Prediction successfully fetched");
     } catch ([userError, logError]) {
       interaction.reply({

@@ -1,4 +1,4 @@
-import { userMention } from "@discordjs/builders";
+import { userMention, messageLink } from "@discordjs/builders";
 import { Client as DbClient } from "pg";
 import { Client, GuildMember } from "discord.js";
 import ndb2MsgSubscriptionQueries, {
@@ -13,6 +13,7 @@ import { channelIds } from "../../../types/channelEnums";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
 import { NDB2WebhookEvent } from "../../../types/routerTypes";
+import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionCache";
 
 const fallbackContextChannelId = channelIds.general;
 
@@ -83,6 +84,7 @@ export const sendPublicNotice = async (
     : Promise.resolve(null);
 
   let channelId: string;
+  let messageId: string;
   let context: Promise<Ndb2MsgSubscription[]>;
 
   // Retired predictions post notice in the channel they are retired
@@ -102,6 +104,7 @@ export const sendPublicNotice = async (
       channelId = fallbackContextChannelId;
     } else {
       channelId = contextSub.channel_id;
+      messageId = contextSub.message_id;
     }
     return guild.channels.fetch(channelId);
   });
@@ -118,7 +121,8 @@ export const sendPublicNotice = async (
         prediction.bets.map((bet) => bet.better.discord_id),
         predictor,
         triggerer,
-        client
+        client,
+        { channelId, messageId }
       );
 
       return channel
@@ -132,6 +136,29 @@ export const sendPublicNotice = async (
               message.id,
               add(new Date(), { hours: 36 })
             );
+
+            const triggerNoticeInteraction =
+              ndb2InteractionCache.triggerResponses[prediction.id];
+
+            if (triggerNoticeInteraction) {
+              triggerNoticeInteraction
+                .editReply({
+                  content: `Prediction #${
+                    prediction.id
+                  } has been triggered by ${userMention(
+                    triggerNoticeInteraction.user.id
+                  )}; voting can now begin. A voting notice has been posted at ${messageLink(
+                    channel.id,
+                    message.id
+                  )}`,
+                })
+                .catch((err) => {
+                  console.error(err);
+                })
+                .finally(() => {
+                  delete ndb2InteractionCache.triggerResponses[prediction.id];
+                });
+            }
           }
           if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
             addSubscription(

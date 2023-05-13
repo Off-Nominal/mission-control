@@ -56,32 +56,53 @@ const getDescription = (
   triggererId?: string
 ): string => {
   if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
-    return `Prediction #${prediction.id} has been retired by ${userMention(
-      prediction.predictor.discord_id
-    )} within the allowable adjustment period (${
-      process.env.GM_PREDICTION_UPDATE_WINDOW_HOURS
-    } hours) since the prediction was made.`;
+    return (
+      `Prediction #${prediction.id} by ${userMention(
+        prediction.predictor.discord_id
+      )} has been retired by ${userMention(prediction.predictor.discord_id)}.` +
+      `\n \u200B`
+    );
   }
 
   if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
-    return `Prediction #${prediction.id} has been triggered ${
-      triggererId ? "manually" : "automatically"
-    } by ${
-      triggererId ? `user ${userMention(triggererId)}` : "NDB2"
-    }. Vote now to determine the outcome of this prediction!`;
+    return (
+      `Prediction #${prediction.id} by ${userMention(
+        prediction.predictor.discord_id
+      )} has been triggered ${triggererId ? "manually" : "automatically"} by ${
+        triggererId ? `${userMention(triggererId)}` : "NDB2"
+      }.` + `\n \u200B`
+    );
   }
 
   if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
-    return `Prediction ${prediction.id} has been judged ${bold(
-      prediction.status
-    )} by the community. ${
-      prediction.status === PredictionLifeCycle.SUCCESSFUL
-        ? "Nice work"
-        : "Better luck next time"
-    }, ${userMention(prediction.predictor.discord_id)}!`;
+    return (
+      `Prediction ${prediction.id} by ${userMention(
+        prediction.predictor.discord_id
+      )} has been judged ${bold(prediction.status)} by the community. ${
+        prediction.status === PredictionLifeCycle.SUCCESSFUL
+          ? "Nice work"
+          : "Better luck next time"
+      }!` + `\n \u200B`
+    );
   }
 
   return "Unknown notice type";
+};
+
+const getTitle = (type: NDB2WebhookEvent) => {
+  if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
+    return "Judgement Notice";
+  }
+
+  if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
+    return "Retirement Notice";
+  }
+
+  if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
+    return "Trigger Notice";
+  }
+
+  return "Public Notice";
 };
 
 export const generatePublicNoticeEmbed = (
@@ -92,7 +113,11 @@ export const generatePublicNoticeEmbed = (
     | NDB2WebhookEvent.TRIGGERED_PREDICTION,
   predictor: GuildMember,
   triggerer: GuildMember | null,
-  client: ClientUser
+  client: ClientUser,
+  context?: {
+    channelId: string;
+    messageId: string;
+  }
 ): EmbedBuilder => {
   const created = new Date(prediction.created_date);
   const due = new Date(prediction.due_date);
@@ -110,7 +135,7 @@ export const generatePublicNoticeEmbed = (
     thumbnail: {
       url: thumbnails[prediction.status],
     },
-    title: "Public Notice",
+    title: getTitle(type),
     description: getDescription(type, prediction, triggerer?.id),
     footer: {
       text: `Prediction ID: ${prediction.id}`,
@@ -120,10 +145,10 @@ export const generatePublicNoticeEmbed = (
   // Base Fields
   const fields: APIEmbedField[] = [
     {
-      name: "Original text",
-      value: prediction.text,
+      name: "Prediction",
+      value: prediction.text + `\n \u200B`,
     },
-    embedFields.date(created, "Created"),
+    embedFields.date(created, "Created", context),
   ];
 
   if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
@@ -146,17 +171,29 @@ export const generatePublicNoticeEmbed = (
     fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
   }
 
-  if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
+  if (
+    type === NDB2WebhookEvent.JUDGED_PREDICTION &&
+    (prediction.status === PredictionLifeCycle.SUCCESSFUL ||
+      prediction.status === PredictionLifeCycle.FAILED)
+  ) {
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
-    fields.push(
-      embedFields.longPayouts(
+    embedFields
+      .longPayouts(
         prediction.status,
         prediction.payouts,
-        endorsements,
+        "endorsements",
+        endorsements
+      )
+      .forEach((ef) => fields.push(ef));
+    embedFields
+      .longPayouts(
+        prediction.status,
+        prediction.payouts,
+        "undorsements",
         undorsements
       )
-    );
+      .forEach((ef) => fields.push(ef));
   }
 
   embed.setFields(fields);

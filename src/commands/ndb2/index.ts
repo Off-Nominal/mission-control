@@ -86,6 +86,9 @@ const predictCommand = new SlashCommandBuilder()
     command
       .setName(Ndb2Subcommand.SCORE)
       .setDescription("View your Nostradambot Scores")
+      .addBooleanOption((option) =>
+        option.setName("brag").setDescription("Show this response publicly")
+      )
   )
   .addSubcommand((command) =>
     command
@@ -121,6 +124,9 @@ const predictCommand = new SlashCommandBuilder()
           .setDescription("The type of leaderboard you want to see")
           .setRequired(true)
           .addChoices(...leaderboardOptions)
+      )
+      .addBooleanOption((option) =>
+        option.setName("brag").setDescription("Show this response publicly")
       )
   )
   .addSubcommand((group) =>

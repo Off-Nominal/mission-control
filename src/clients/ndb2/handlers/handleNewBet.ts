@@ -28,7 +28,12 @@ export default function generateHandleNewBet(db: Client) {
 
     // Add Bet
     try {
-      prediction = await ndb2Client.addBet(predictionId, discordId, endorsed);
+      const response = await ndb2Client.addBet(
+        predictionId,
+        discordId,
+        endorsed
+      );
+      prediction = response.data;
       logger.addLog(
         LogStatus.SUCCESS,
         `Bet was successfully submitted to NDB2`

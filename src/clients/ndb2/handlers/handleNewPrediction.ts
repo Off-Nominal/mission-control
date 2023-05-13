@@ -78,11 +78,12 @@ export default function generateNewPredictionHandler(db: Client) {
     let prediction: NDB2API.EnhancedPrediction;
 
     try {
-      prediction = await ndb2Client.addPrediction(
+      const response = await ndb2Client.addPrediction(
         discordId,
         text,
         due_date.toISOString()
       );
+      prediction = response.data;
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully submitted to NDB2`

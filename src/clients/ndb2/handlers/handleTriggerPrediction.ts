@@ -1,4 +1,4 @@
-import { ButtonInteraction, channelMention } from "discord.js";
+import { ButtonInteraction, channelMention, userMention } from "discord.js";
 import { Client } from "pg";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
@@ -26,7 +26,8 @@ export default function generateHandleTriggerPrediction(db: Client) {
     let prediction: NDB2API.EnhancedPrediction;
 
     try {
-      prediction = await ndb2Client.getPrediction(predictionId);
+      const response = await ndb2Client.getPrediction(predictionId);
+      prediction = response.data;
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
@@ -75,32 +76,50 @@ export default function generateHandleTriggerPrediction(db: Client) {
     }
 
     // Fetch context channel
-    let channelId: string;
+    let contextChannelId: string;
 
     try {
       const [contextSub] = await fetchSubByType(
         prediction.id,
         Ndb2MsgSubscriptionType.CONTEXT
       );
-      logger.addLog(LogStatus.INFO, `Fetched context message subscriptions.`);
-      channelId = contextSub.channel_id;
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Fetched prediction context successfully.`
+      );
+
+      contextChannelId = contextSub.channel_id;
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
         `Prediction creation context could not be retrieved. Fallback to current channel will be used.`
       );
-      channelId = interaction.channelId;
+      contextChannelId = interaction.channelId;
     }
+
+    const showContextLink = interaction.channelId !== contextChannelId;
 
     // Send Response
     try {
+      const baseMessage = `Prediction #${
+        prediction.id
+      } has been triggered by ${userMention(
+        interaction.user.id
+      )}; voting can now begin.`;
+
       await interaction.reply({
-        content: `Prediction #${
-          prediction.id
-        } has been triggered; voting can now begin. A voting notice will be posted in ${channelMention(
-          channelId
-        )}`,
+        content:
+          baseMessage + showContextLink
+            ? `A voting notice will be posted in ${channelMention(
+                contextChannelId
+              )}. Awaiting notice link...`
+            : "",
       });
+
+      if (showContextLink) {
+        ndb2InteractionCache.triggerResponses[prediction.id] = interaction;
+      }
+
       logger.addLog(
         LogStatus.SUCCESS,
         `Channel successfully notified of prediction trigger.`
