@@ -1,4 +1,10 @@
-import { bold, time, TimestampStyles, userMention } from "discord.js";
+import {
+  bold,
+  messageLink,
+  time,
+  TimestampStyles,
+  userMention,
+} from "discord.js";
 import {
   NDB2API,
   PredictionLifeCycle,
@@ -232,6 +238,12 @@ const embedFields = {
     }
 
     return betFields;
+  },
+  context: (channelId: string, messageId: string) => {
+    return {
+      name: "Discussion context",
+      value: messageLink(channelId, messageId),
+    };
   },
   accuracyDisclaimer: () => {
     return {

@@ -84,6 +84,7 @@ export const sendPublicNotice = async (
     : Promise.resolve(null);
 
   let channelId: string;
+  let messageId: string;
   let context: Promise<Ndb2MsgSubscription[]>;
 
   // Retired predictions post notice in the channel they are retired
@@ -103,6 +104,7 @@ export const sendPublicNotice = async (
       channelId = fallbackContextChannelId;
     } else {
       channelId = contextSub.channel_id;
+      channelId = contextSub.message_id;
     }
     return guild.channels.fetch(channelId);
   });
@@ -119,7 +121,8 @@ export const sendPublicNotice = async (
         prediction.bets.map((bet) => bet.better.discord_id),
         predictor,
         triggerer,
-        client
+        client,
+        { channelId, messageId }
       );
 
       return channel

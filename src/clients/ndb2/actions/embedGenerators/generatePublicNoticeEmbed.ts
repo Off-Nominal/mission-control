@@ -113,7 +113,11 @@ export const generatePublicNoticeEmbed = (
     | NDB2WebhookEvent.TRIGGERED_PREDICTION,
   predictor: GuildMember,
   triggerer: GuildMember | null,
-  client: ClientUser
+  client: ClientUser,
+  context?: {
+    channelId: string;
+    messageId: string;
+  }
 ): EmbedBuilder => {
   const created = new Date(prediction.created_date);
   const due = new Date(prediction.due_date);
@@ -153,6 +157,10 @@ export const generatePublicNoticeEmbed = (
   }
 
   if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
+    if (context) {
+      fields.push(embedFields.context(context.channelId, context.messageId));
+    }
+
     triggerer && fields.push(embedFields.date(due, "Original Due Date"));
     fields.push(embedFields.date(triggered, "Triggered Date"));
     fields.push(embedFields.date(closed, "Effective Close Date"));

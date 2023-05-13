@@ -20,7 +20,11 @@ export const generatePublicNotice = (
   betters: string[],
   predictor: GuildMember,
   triggerer: GuildMember | null,
-  client: Client
+  client: Client,
+  context?: {
+    channelId: string;
+    messageId: string;
+  }
 ): BaseMessageOptions => {
   const content = betters.map((b) => userMention(b)).join(", ");
 
@@ -29,7 +33,8 @@ export const generatePublicNotice = (
     type,
     predictor,
     triggerer,
-    client.user
+    client.user,
+    context
   );
 
   let addComponents = false;
