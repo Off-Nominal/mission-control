@@ -77,6 +77,7 @@ export default function generateHandleTriggerPrediction(db: Client) {
 
     // Fetch context channel
     let channelId: string;
+    let messageId: string;
 
     try {
       const [contextSub] = await fetchSubByType(
@@ -84,7 +85,9 @@ export default function generateHandleTriggerPrediction(db: Client) {
         Ndb2MsgSubscriptionType.CONTEXT
       );
       logger.addLog(LogStatus.INFO, `Fetched context message subscriptions.`);
+
       channelId = contextSub.channel_id;
+      messageId = contextSub.message_id;
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
@@ -93,14 +96,18 @@ export default function generateHandleTriggerPrediction(db: Client) {
       channelId = interaction.channelId;
     }
 
+    const showContextLink = interaction.channelId !== channelId;
+
     // Send Response
     try {
       await interaction.reply({
         content: `Prediction #${
           prediction.id
-        } has been triggered; voting can now begin. A voting notice will be posted in ${channelMention(
-          channelId
-        )}`,
+        } has been triggered; voting can now begin.${
+          showContextLink
+            ? `A voting notice will be posted in ${channelMention(channelId)}`
+            : ""
+        }`,
       });
       logger.addLog(
         LogStatus.SUCCESS,
