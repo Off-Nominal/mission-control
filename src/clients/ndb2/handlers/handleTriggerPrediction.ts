@@ -112,7 +112,10 @@ export default function generateHandleTriggerPrediction(db: Client) {
         }`,
       });
 
-      ndb2InteractionCache.triggerNotices[prediction.id] = interaction;
+      if (showContextLink) {
+        ndb2InteractionCache.triggerNotices[prediction.id] = interaction;
+      }
+
       logger.addLog(
         LogStatus.SUCCESS,
         `Channel successfully notified of prediction trigger.`

@@ -153,15 +153,9 @@ export const sendPublicNotice = async (
                   console.error(err);
                 })
                 .finally(() => {
-                  delete ndb2InteractionCache.triggers[prediction.id];
+                  delete ndb2InteractionCache.triggerNotices[prediction.id];
                 });
             }
-
-            ndb2InteractionCache.triggers[prediction.id]
-              ?.deleteReply()
-              .then(() => {
-                delete ndb2InteractionCache.triggers[prediction.id];
-              });
           }
           if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
             addSubscription(
