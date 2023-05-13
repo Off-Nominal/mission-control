@@ -1,4 +1,4 @@
-import { ButtonInteraction, channelMention } from "discord.js";
+import { ButtonInteraction, channelMention, userMention } from "discord.js";
 import { Client } from "pg";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
@@ -77,7 +77,6 @@ export default function generateHandleTriggerPrediction(db: Client) {
 
     // Fetch context channel
     let channelId: string;
-    let messageId: string;
 
     try {
       const [contextSub] = await fetchSubByType(
@@ -87,7 +86,6 @@ export default function generateHandleTriggerPrediction(db: Client) {
       logger.addLog(LogStatus.INFO, `Fetched context message subscriptions.`);
 
       channelId = contextSub.channel_id;
-      messageId = contextSub.message_id;
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
@@ -103,12 +101,18 @@ export default function generateHandleTriggerPrediction(db: Client) {
       await interaction.reply({
         content: `Prediction #${
           prediction.id
-        } has been triggered; voting can now begin.${
+        } has been triggered by ${userMention(
+          interaction.user.id
+        )}; voting can now begin.${
           showContextLink
-            ? `A voting notice will be posted in ${channelMention(channelId)}`
+            ? `A voting notice will be posted in ${channelMention(
+                channelId
+              )}. Awaiting notice link...`
             : ""
         }`,
       });
+
+      ndb2InteractionCache.triggerNotices[prediction.id] = interaction;
       logger.addLog(
         LogStatus.SUCCESS,
         `Channel successfully notified of prediction trigger.`

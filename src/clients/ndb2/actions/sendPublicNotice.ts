@@ -1,4 +1,4 @@
-import { userMention } from "@discordjs/builders";
+import { userMention, messageLink } from "@discordjs/builders";
 import { Client as DbClient } from "pg";
 import { Client, GuildMember } from "discord.js";
 import ndb2MsgSubscriptionQueries, {
@@ -13,6 +13,7 @@ import { channelIds } from "../../../types/channelEnums";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
 import { NDB2WebhookEvent } from "../../../types/routerTypes";
+import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionCache";
 
 const fallbackContextChannelId = channelIds.general;
 
@@ -132,6 +133,35 @@ export const sendPublicNotice = async (
               message.id,
               add(new Date(), { hours: 36 })
             );
+
+            const triggerNoticeInteraction =
+              ndb2InteractionCache.triggerNotices[prediction.id];
+
+            if (triggerNoticeInteraction) {
+              triggerNoticeInteraction
+                .editReply({
+                  content: `Prediction #${
+                    prediction.id
+                  } has been triggered by ${userMention(
+                    triggerNoticeInteraction.user.id
+                  )}; voting can now begin. A voting notice has been posted at ${messageLink(
+                    channel.id,
+                    message.id
+                  )}`,
+                })
+                .catch((err) => {
+                  console.error(err);
+                })
+                .finally(() => {
+                  delete ndb2InteractionCache.triggers[prediction.id];
+                });
+            }
+
+            ndb2InteractionCache.triggers[prediction.id]
+              ?.deleteReply()
+              .then(() => {
+                delete ndb2InteractionCache.triggers[prediction.id];
+              });
           }
           if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
             addSubscription(
