@@ -26,7 +26,8 @@ export default function generateHandleRetirePrediction(db: Client) {
     let prediction: NDB2API.EnhancedPrediction;
 
     try {
-      prediction = await ndb2Client.getPrediction(predictionId);
+      const response = await ndb2Client.getPrediction(predictionId);
+      prediction = response.data;
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`

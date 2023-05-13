@@ -29,10 +29,13 @@ export default function generateHandleNewVote(db: Client) {
     );
 
     let prediction: NDB2API.EnhancedPrediction;
+    let message: string;
 
     // Add Vote
     try {
-      prediction = await ndb2Client.addVote(predictionId, discordId, vote);
+      const response = await ndb2Client.addVote(predictionId, discordId, vote);
+      prediction = response.data;
+      message = response.message;
       logger.addLog(
         LogStatus.SUCCESS,
         `Vote was successfully submitted to NDB2`
@@ -53,7 +56,7 @@ export default function generateHandleNewVote(db: Client) {
     // Reply to Discord
     try {
       interaction.reply({
-        content: `Prediction #${predictionId} successfully voted for (${command.toLowerCase()})!`,
+        content: message,
         ephemeral: true,
       });
       logger.addLog(

@@ -21,7 +21,8 @@ export default function generateHandleViewDetails(db: Client) {
 
     // Fetch prediction
     try {
-      prediction = await ndb2Client.getPrediction(predictionId);
+      const response = await ndb2Client.getPrediction(predictionId);
+      prediction = response.data;
       logger.addLog(LogStatus.SUCCESS, "Prediction successfully fetched");
     } catch ([userError, logError]) {
       interaction.reply({

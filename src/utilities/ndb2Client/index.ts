@@ -132,15 +132,13 @@ export class Ndb2Client {
     });
   }
 
-  public getPrediction(
-    id: string | number
-  ): Promise<NDB2API.EnhancedPrediction> {
+  public getPrediction(id: string | number): Promise<NDB2API.GetPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${id}`;
 
     return this.client
       .get<NDB2API.GetPrediction>(url.toString())
-      .then((res) => res.data.data)
+      .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);
       });
@@ -150,7 +148,7 @@ export class Ndb2Client {
     discord_id: string,
     text: string,
     due_date: string
-  ): Promise<NDB2API.EnhancedPrediction> {
+  ): Promise<NDB2API.AddPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = "api/predictions";
     return this.client
@@ -159,7 +157,7 @@ export class Ndb2Client {
         due_date,
         discord_id,
       })
-      .then((res) => res.data.data)
+      .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);
       });
@@ -169,7 +167,7 @@ export class Ndb2Client {
     prediction_id: string | number,
     discord_id: string | number,
     endorsed: boolean
-  ): Promise<NDB2API.EnhancedPrediction> {
+  ): Promise<NDB2API.AddBet> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${prediction_id}/bets`;
     return this.client
@@ -177,7 +175,7 @@ export class Ndb2Client {
         discord_id,
         endorsed,
       })
-      .then((res) => res.data.data)
+      .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);
       });
@@ -187,11 +185,11 @@ export class Ndb2Client {
     predictionId: string | number,
     discord_id: string | number,
     vote: boolean
-  ) {
+  ): Promise<NDB2API.AddVote> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${predictionId}/votes`;
     return this.client
-      .post<NDB2API.EnhancedPrediction>(url.toString(), {
+      .post<NDB2API.AddVote>(url.toString(), {
         discord_id,
         vote,
       })
@@ -205,7 +203,7 @@ export class Ndb2Client {
     id: string | number,
     discord_id: string | null = null,
     closed_date?: Date
-  ) {
+  ): Promise<NDB2API.TriggerPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${id}/trigger`;
     return this.client
@@ -219,11 +217,14 @@ export class Ndb2Client {
       });
   }
 
-  public retirePrediction(id: string | number, discord_id: string) {
+  public retirePrediction(
+    id: string | number,
+    discord_id: string
+  ): Promise<NDB2API.RetirePrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${id}/retire`;
     return this.client
-      .patch<NDB2API.EnhancedPrediction>(url.toString(), { discord_id })
+      .patch<NDB2API.RetirePrediction>(url.toString(), { discord_id })
       .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);
