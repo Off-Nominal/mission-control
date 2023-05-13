@@ -104,7 +104,7 @@ export const sendPublicNotice = async (
       channelId = fallbackContextChannelId;
     } else {
       channelId = contextSub.channel_id;
-      channelId = contextSub.message_id;
+      messageId = contextSub.message_id;
     }
     return guild.channels.fetch(channelId);
   });
@@ -138,7 +138,7 @@ export const sendPublicNotice = async (
             );
 
             const triggerNoticeInteraction =
-              ndb2InteractionCache.triggerNotices[prediction.id];
+              ndb2InteractionCache.triggerResponses[prediction.id];
 
             if (triggerNoticeInteraction) {
               triggerNoticeInteraction
@@ -156,7 +156,7 @@ export const sendPublicNotice = async (
                   console.error(err);
                 })
                 .finally(() => {
-                  delete ndb2InteractionCache.triggerNotices[prediction.id];
+                  delete ndb2InteractionCache.triggerResponses[prediction.id];
                 });
             }
           }

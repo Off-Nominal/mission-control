@@ -76,44 +76,48 @@ export default function generateHandleTriggerPrediction(db: Client) {
     }
 
     // Fetch context channel
-    let channelId: string;
+    let contextChannelId: string;
 
     try {
       const [contextSub] = await fetchSubByType(
         prediction.id,
         Ndb2MsgSubscriptionType.CONTEXT
       );
-      logger.addLog(LogStatus.INFO, `Fetched context message subscriptions.`);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Fetched prediction context successfully.`
+      );
 
-      channelId = contextSub.channel_id;
+      contextChannelId = contextSub.channel_id;
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
         `Prediction creation context could not be retrieved. Fallback to current channel will be used.`
       );
-      channelId = interaction.channelId;
+      contextChannelId = interaction.channelId;
     }
 
-    const showContextLink = interaction.channelId !== channelId;
+    const showContextLink = interaction.channelId !== contextChannelId;
 
     // Send Response
     try {
+      const baseMessage = `Prediction #${
+        prediction.id
+      } has been triggered by ${userMention(
+        interaction.user.id
+      )}; voting can now begin.`;
+
       await interaction.reply({
-        content: `Prediction #${
-          prediction.id
-        } has been triggered by ${userMention(
-          interaction.user.id
-        )}; voting can now begin.${
-          showContextLink
+        content:
+          baseMessage + showContextLink
             ? `A voting notice will be posted in ${channelMention(
-                channelId
+                contextChannelId
               )}. Awaiting notice link...`
-            : ""
-        }`,
+            : "",
       });
 
       if (showContextLink) {
-        ndb2InteractionCache.triggerNotices[prediction.id] = interaction;
+        ndb2InteractionCache.triggerResponses[prediction.id] = interaction;
       }
 
       logger.addLog(
