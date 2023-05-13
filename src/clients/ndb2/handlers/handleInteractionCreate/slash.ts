@@ -89,12 +89,12 @@ export const handleSlashCommandInteraction = async (
         {
           name: "View Score",
           value:
-            "`/predict score` - View your own all-time scores and stats, including points, predictions, bets and votes. Example: `/predict score`.",
+            "`/predict score [optional: brag]` - View your own all-time scores and stats, including points, predictions, bets and votes. Responses are private unless the optional brag option is set to true. Example: `/predict score`.",
         },
         {
           name: "View Leaderboards",
           value:
-            "`/predict leaderboards [type]` - View the leaderboards (top 10 players) in three categories. Currently supported are Most Points, Most Successful Predictions, and Most Successful bets. Example: `/predict leaderboards points`.",
+            "`/predict leaderboards [type]` - View the leaderboards (top 10 players) in three categories. Currently supported are Most Points, Most Successful Predictions, and Most Successful bets. Responses are private unless the optional brag option is set to true. Example: `/predict leaderboards points`.",
         },
       ],
     });
