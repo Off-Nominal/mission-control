@@ -14,8 +14,6 @@ export const generatePredictionDetailsEmbed = (
   const yesVotes = prediction.votes.filter((vote) => vote.vote);
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
 
-  const retired = new Date(prediction.retired_date);
-
   const embed = new EmbedBuilder({
     title: "Detailed Prediction View",
     description: prediction.text + `\n \u200B`,

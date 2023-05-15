@@ -48,7 +48,7 @@ export default function generateHandleViewDetails(db: Client) {
         `Successfully notified user of prediction details.`
       );
     } catch (err) {
-      console.log(err);
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `There was an error sending the prediction details in the channel. ${err.response.data.message}`

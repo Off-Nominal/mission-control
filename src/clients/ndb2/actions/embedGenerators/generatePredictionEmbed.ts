@@ -91,8 +91,6 @@ export const generatePredictionEmbed = (
     },
   });
 
-  console.log(context);
-
   const fields: APIEmbedField[] = [
     embedFields.date(created, "Created", context),
   ];

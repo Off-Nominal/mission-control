@@ -125,7 +125,7 @@ export default function generateHandleTriggerPrediction(db: Client) {
         `Channel successfully notified of prediction trigger.`
       );
     } catch (err) {
-      console.log(err);
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `Error sending interaction response to user.`

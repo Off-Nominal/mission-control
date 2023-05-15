@@ -225,6 +225,7 @@ const embedFields = {
     bets: NDB2API.EnhancedPredictionBet[],
     type: "undorsements" | "endorsements"
   ) => {
+    const betUserListLimit = USER_LIST_LIMIT / 3;
     const values = bets.map(
       (e) =>
         `${userMention(e.better.discord_id)} ${time(
@@ -233,7 +234,7 @@ const embedFields = {
         )} (${e.wager} points wagered)`
     );
 
-    const fieldCount = Math.ceil(values.length / USER_LIST_LIMIT);
+    const fieldCount = Math.ceil(values.length / betUserListLimit);
 
     const betFields = [];
 
@@ -241,11 +242,11 @@ const embedFields = {
       type === "endorsements" ? "✅ Endorsements" : "❌ Undorsements";
 
     for (let i = 0; i < fieldCount; i++) {
-      const betSlice = values.slice(i, i + USER_LIST_LIMIT);
+      const betSlice = values.slice(i, i + betUserListLimit);
 
       betFields.push({
         name: `${name}${
-          values.length > USER_LIST_LIMIT ? ` Part ${i + 1}` : ""
+          values.length > betUserListLimit ? ` Part ${i + 1}` : ""
         }`,
         value: `${betSlice.join("\n") || "None"}` + `\n \u200B`,
       });
