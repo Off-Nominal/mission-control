@@ -83,7 +83,10 @@ const embedFields = {
     const name = type === "yes" ? "👍 Yes Votes" : "👎 No Votes";
 
     for (let i = 0; i < fieldCount; i++) {
-      const voteSlice = values.slice(i, i + USER_LIST_LIMIT);
+      const voteSlice = values.slice(
+        i * USER_LIST_LIMIT,
+        i * USER_LIST_LIMIT + USER_LIST_LIMIT
+      );
 
       voteFields.push({
         name: `${name}${
@@ -136,7 +139,10 @@ const embedFields = {
     const payoutFields = [];
 
     for (let i = 0; i < fieldCount; i++) {
-      const payoutsSlice = payouts.slice(i, i + USER_LIST_LIMIT);
+      const payoutsSlice = payouts.slice(
+        i * USER_LIST_LIMIT,
+        i * USER_LIST_LIMIT + USER_LIST_LIMIT
+      );
 
       payoutFields.push({
         name: `${isPayout ? "🏆 Payouts" : "☠️ Penalites"}${
