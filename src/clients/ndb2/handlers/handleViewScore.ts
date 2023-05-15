@@ -16,9 +16,12 @@ export default function generateHandleViewScore(db: Client) {
       "View Score"
     );
 
+    const { options } = interaction;
+    const brag = options.getBoolean("brag");
+
     // Score calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
     try {
-      await interaction.deferReply();
+      await interaction.deferReply({ ephemeral: !brag });
       logger.addLog(LogStatus.SUCCESS, "Successfully deferred reply.");
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, "Failed to defer reply, aborting.");
