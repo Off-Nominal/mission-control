@@ -64,7 +64,7 @@ export default function generateHandleNewVote(db: Client) {
         `Successfully notified user of vote success.`
       );
     } catch (err) {
-      console.log(err);
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `There was an error responding to the prediction in the channel, but the vote was submitted. ${err.response.data.message}`

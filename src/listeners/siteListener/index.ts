@@ -91,7 +91,7 @@ export class SiteListener extends EventEmitter {
     try {
       diffUrl = await this.saveChange(newEtag);
     } catch (err) {
-      return console.log(err);
+      return console.error(err);
     }
 
     // If there are changes, the checker will either chill from the cooldown or notify the Discord

@@ -113,7 +113,7 @@ export default function generateHandleRetirePrediction(db: Client) {
         `User successfully notified of prediction retirement.`
       );
     } catch (err) {
-      console.log(err);
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `Error sending interaction response to user.`

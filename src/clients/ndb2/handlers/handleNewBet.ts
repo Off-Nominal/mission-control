@@ -62,7 +62,7 @@ export default function generateHandleNewBet(db: Client) {
         `Successfully notified user of bet success.`
       );
     } catch (err) {
-      console.log(err);
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `There was an error responding to the prediction in the channel, but the prediction was submitted. ${err.response.data.message}`
