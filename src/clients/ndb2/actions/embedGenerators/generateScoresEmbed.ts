@@ -11,8 +11,7 @@ export const generateScoresEmbed = (
     fields: [
       {
         name: "🏆 Score",
-        value: `Points: ${scores.score.points}
-          Rank: ${scores.score.rank}`,
+        value: `Points: ${scores.score.points}\nRank: ${scores.score.rank}`,
       },
       {
         name: "💭 Predictions",
