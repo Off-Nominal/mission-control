@@ -242,7 +242,10 @@ const embedFields = {
       type === "endorsements" ? "✅ Endorsements" : "❌ Undorsements";
 
     for (let i = 0; i < fieldCount; i++) {
-      const betSlice = values.slice(i, i + betUserListLimit);
+      const betSlice = values.slice(
+        i * betUserListLimit,
+        i * betUserListLimit + betUserListLimit
+      );
 
       betFields.push({
         name: `${name}${
