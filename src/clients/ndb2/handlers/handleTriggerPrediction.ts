@@ -8,6 +8,7 @@ import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionC
 import ndb2MsgSubscriptionQueries, {
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
+import { add } from "date-fns";
 
 export default function generateHandleTriggerPrediction(db: Client) {
   const { fetchSubByType } = ndb2MsgSubscriptionQueries(db);
@@ -58,7 +59,8 @@ export default function generateHandleTriggerPrediction(db: Client) {
       await ndb2Client.triggerPrediction(
         prediction.id,
         interaction.user.id,
-        closed_date && new Date(closed_date)
+        closed_date &&
+          add(new Date(closed_date), { hours: 23, minutes: 59, seconds: 59 })
       );
       logger.addLog(LogStatus.SUCCESS, `Prediction triggered successfully.`);
     } catch ([userError, LogError]) {
