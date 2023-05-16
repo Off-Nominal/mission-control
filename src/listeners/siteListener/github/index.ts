@@ -2,7 +2,7 @@ const { createAppAuth } = require("@octokit/auth-app");
 import axios, { AxiosRequestConfig } from "axios";
 
 const BASEURL = "https://api.github.com";
-const OWNER = "mendahu";
+const OWNER = "Off-Nominal";
 const REPO = "starship-site-tracking";
 const BRANCH = process.env.STARSHIP_SITE_TRACKER_BRANCH;
 
