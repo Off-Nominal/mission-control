@@ -26,6 +26,8 @@ export namespace NDB2API {
     date: string;
     endorsed: boolean;
     wager: number;
+    valid: boolean;
+    payout: number;
     better: {
       id: string;
       discord_id: string;
@@ -90,6 +92,7 @@ export namespace NDB2API {
       failed: number;
       pending: number;
       retired: number;
+      invalid: number;
       rank: number;
     };
     votes: {

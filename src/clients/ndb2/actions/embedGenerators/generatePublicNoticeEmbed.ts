@@ -125,8 +125,14 @@ export const generatePublicNoticeEmbed = (
   const retired = new Date(prediction.retired_date);
   const closed = new Date(prediction.closed_date);
 
-  const endorsements = prediction.bets.filter((bet) => bet.endorsed);
-  const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
+  const endorsements = prediction.bets.filter(
+    (bet) => bet.endorsed && bet.valid
+  );
+  const undorsements = prediction.bets.filter(
+    (bet) => !bet.endorsed && bet.valid
+  );
+  const invalidBets = prediction.bets.filter((bet) => !bet.valid);
+
   const yesVotes = prediction.votes.filter((vote) => vote.vote);
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
 
@@ -192,6 +198,14 @@ export const generatePublicNoticeEmbed = (
         prediction.payouts,
         "undorsements",
         undorsements
+      )
+      .forEach((ef) => fields.push(ef));
+    embedFields
+      .longPayouts(
+        prediction.status,
+        prediction.payouts,
+        "invalid",
+        invalidBets
       )
       .forEach((ef) => fields.push(ef));
   }

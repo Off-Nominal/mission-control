@@ -69,8 +69,13 @@ export const generatePredictionEmbed = (
   const retired = new Date(prediction.retired_date);
   const triggered = new Date(prediction.triggered_date);
 
-  const endorsements = prediction.bets.filter((bet) => bet.endorsed);
-  const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
+  const endorsements = prediction.bets.filter(
+    (bet) => bet.endorsed && bet.valid
+  );
+  const undorsements = prediction.bets.filter(
+    (bet) => !bet.endorsed && bet.valid
+  );
+  const invalidBets = prediction.bets.filter((bet) => !bet.valid);
 
   const yesVotes = prediction.votes.filter((vote) => vote.vote);
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
