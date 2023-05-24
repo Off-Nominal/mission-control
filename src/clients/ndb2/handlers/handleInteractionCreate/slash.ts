@@ -22,9 +22,6 @@ import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2Interacti
 import { Ndb2Events } from "../../../../types/eventEnums";
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
-import fetchGuild from "../../../../utilities/fetchGuild";
-import { roleIds } from "../../../../types/roleEnums";
-import { SpecificRole } from "../../../../types/roleEnums";
 
 export const handleSlashCommandInteraction = async (
   interaction: ChatInputCommandInteraction

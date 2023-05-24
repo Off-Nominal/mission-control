@@ -35,6 +35,8 @@ export type SearchOptions = {
   keyword?: string;
   sort_by?: SortByOption[];
   page?: number;
+  creator?: string;
+  unbetter?: string;
 };
 
 export enum SortByOption {
@@ -269,6 +271,14 @@ export class Ndb2Client {
       options.sort_by.forEach((option) => {
         params.set("sort_by", option);
       });
+    }
+
+    if (options.creator) {
+      params.set("creator", options.creator);
+    }
+
+    if (options.unbetter) {
+      params.set("unbetter", options.unbetter);
     }
 
     url.search = params.toString();

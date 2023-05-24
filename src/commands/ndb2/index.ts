@@ -20,6 +20,8 @@ export enum Ndb2Subcommand {
 const listOptions: APIApplicationCommandOptionChoice<string>[] = [
   { name: "Recently Made", value: "recent" },
   { name: "Upcoming Judgements", value: "upcoming" },
+  { name: "My Upcoming Judgements", value: "upcoming-mine" },
+  { name: "Upcoming Judgements I haven't Bet on", value: "upcoming-no-bet" },
 ];
 
 const leaderboardOptions: APIApplicationCommandOptionChoice<string>[] = [
