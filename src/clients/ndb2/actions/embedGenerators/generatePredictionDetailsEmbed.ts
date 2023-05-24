@@ -8,8 +8,13 @@ import embedFields from "./fields";
 export const generatePredictionDetailsEmbed = (
   prediction: NDB2API.EnhancedPrediction
 ) => {
-  const endorsements = prediction.bets.filter((bet) => bet.endorsed);
-  const undorsements = prediction.bets.filter((bet) => !bet.endorsed);
+  const endorsements = prediction.bets.filter(
+    (bet) => bet.endorsed && bet.valid
+  );
+  const undorsements = prediction.bets.filter(
+    (bet) => !bet.endorsed && bet.valid
+  );
+  const invalidBets = prediction.bets.filter((bet) => !bet.valid);
 
   const yesVotes = prediction.votes.filter((vote) => vote.vote);
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
@@ -48,6 +53,10 @@ export const generatePredictionDetailsEmbed = (
     embedFields
       .longBets(undorsements, "undorsements")
       .forEach((bf) => fields.push(bf));
+    embedFields
+      .longBets(invalidBets, "invalid")
+      .forEach((bf) => fields.push(bf));
+
     embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
     embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
     fields.push(embedFields.accuracyDisclaimer());
@@ -80,6 +89,14 @@ export const generatePredictionDetailsEmbed = (
         undorsements
       )
       .forEach((ef) => fields.push(ef));
+    embedFields
+      .longPayouts(
+        prediction.status,
+        prediction.payouts,
+        "invalid",
+        invalidBets
+      )
+      .forEach((ef) => fields.push(ef));
     embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
     embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
   }
@@ -100,6 +117,14 @@ export const generatePredictionDetailsEmbed = (
         prediction.payouts,
         "undorsements",
         undorsements
+      )
+      .forEach((ef) => fields.push(ef));
+    embedFields
+      .longPayouts(
+        prediction.status,
+        prediction.payouts,
+        "invalid",
+        invalidBets
       )
       .forEach((ef) => fields.push(ef));
     embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));

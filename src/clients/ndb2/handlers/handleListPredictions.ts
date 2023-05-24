@@ -23,7 +23,12 @@ export default function generateHandleListPredictions(db: Client) {
       `List Predictions: ${listType}`
     );
 
-    if (listType !== "recent" && listType !== "upcoming") {
+    if (
+      listType !== "recent" &&
+      listType !== "upcoming" &&
+      listType !== "upcoming-mine" &&
+      listType !== "upcoming-no-bet"
+    ) {
       logger.addLog(
         LogStatus.FAILURE,
         `Invalid interaction option: Type: ${listType}`
@@ -44,6 +49,18 @@ export default function generateHandleListPredictions(db: Client) {
     if (listType === "upcoming") {
       searchOptions.sort_by = [SortByOption.DUE_ASC];
       searchOptions.status = [PredictionLifeCycle.OPEN];
+    }
+
+    if (listType === "upcoming-mine") {
+      searchOptions.sort_by = [SortByOption.DUE_ASC];
+      searchOptions.status = [PredictionLifeCycle.OPEN];
+      searchOptions.creator = interaction.user.id;
+    }
+
+    if (listType === "upcoming-no-bet") {
+      searchOptions.sort_by = [SortByOption.DUE_ASC];
+      searchOptions.status = [PredictionLifeCycle.OPEN];
+      searchOptions.unbetter = interaction.user.id;
     }
 
     try {

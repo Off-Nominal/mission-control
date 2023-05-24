@@ -114,24 +114,39 @@ const embedFields = {
   longPayouts: (
     status: PredictionLifeCycle.SUCCESSFUL | PredictionLifeCycle.FAILED,
     ratios: { endorse: number; undorse: number },
-    type: "endorsements" | "undorsements",
+    type: "endorsements" | "undorsements" | "invalid",
     bets: NDB2API.EnhancedPredictionBet[]
   ) => {
     let payouts: string[];
+    let listType: "invalid" | "payouts" | "penalties";
+    let multiplier: number = 0;
+    let sign: string = "";
+    let title: string;
+    const sortedBets = [...bets];
 
-    const isPayout =
+    if (type === "invalid") {
+      listType = "invalid";
+      title = "🚫 Invalid Bets";
+    } else if (
       (type === "endorsements" && status === PredictionLifeCycle.SUCCESSFUL) ||
-      (type === "undorsements" && status === PredictionLifeCycle.FAILED);
-
-    const sortedBets = isPayout ? [...bets] : [...bets].reverse();
-
-    const multiplier = isPayout ? ratios.endorse : ratios.undorse;
+      (type === "undorsements" && status === PredictionLifeCycle.FAILED)
+    ) {
+      listType = "payouts";
+      multiplier = ratios.endorse;
+      sign = "+";
+      title = "🏆 Payouts";
+    } else {
+      listType = "penalties";
+      sortedBets.reverse();
+      multiplier = ratios.undorse;
+      sign = "-";
+      title = "☠️ Penalties";
+    }
 
     payouts = sortedBets.map((b) => {
-      const payout = Math.floor(b.wager * multiplier);
-      return `${userMention(b.better.discord_id)} (${
-        isPayout ? "+" : "-"
-      }${payout})`;
+      const payout =
+        type === "invalid" ? "-" : Math.floor(b.wager * multiplier);
+      return `${userMention(b.better.discord_id)} (${sign}${payout})`;
     });
 
     const fieldCount = Math.ceil(payouts.length / USER_LIST_LIMIT);
@@ -144,11 +159,16 @@ const embedFields = {
         i * USER_LIST_LIMIT + USER_LIST_LIMIT
       );
 
+      const note =
+        type === "invalid"
+          ? "A new effective close date rendered these bets invalid (they were made after the event predicted transpired)\n"
+          : "";
+
       payoutFields.push({
-        name: `${isPayout ? "🏆 Payouts" : "☠️ Penalites"}${
+        name: `${title}${
           payouts.length > USER_LIST_LIMIT ? ` Part ${i + 1}` : ""
         }`,
-        value: `${payoutsSlice.join("\n")}` + `\n \u200B`,
+        value: `${note}${payoutsSlice.join("\n")}` + `\n \u200B`,
       });
     }
 
@@ -229,23 +249,32 @@ const embedFields = {
   },
   longBets: (
     bets: NDB2API.EnhancedPredictionBet[],
-    type: "undorsements" | "endorsements"
+    type: "undorsements" | "endorsements" | "invalid"
   ) => {
     const betUserListLimit = USER_LIST_LIMIT / 3;
-    const values = bets.map(
-      (e) =>
-        `${userMention(e.better.discord_id)} ${time(
-          new Date(e.date),
-          TimestampStyles.LongDate
-        )} (${e.wager} points wagered)`
-    );
+
+    const values = bets.map((e) => {
+      const wagerNote =
+        type === "invalid" ? "" : ` (${e.wager} points wagered)`;
+      return `${userMention(e.better.discord_id)} ${time(
+        new Date(e.date),
+        TimestampStyles.LongDate
+      )}${wagerNote}`;
+    });
 
     const fieldCount = Math.ceil(values.length / betUserListLimit);
 
     const betFields = [];
 
-    const name =
-      type === "endorsements" ? "✅ Endorsements" : "❌ Undorsements";
+    let name: string;
+
+    if (type === "invalid") {
+      name = "🚫 Invalid Bets";
+    } else if (type === "endorsements") {
+      name = "✅ Endorsements";
+    } else {
+      name = "❌ Undorsements";
+    }
 
     for (let i = 0; i < fieldCount; i++) {
       const betSlice = values.slice(
@@ -253,11 +282,16 @@ const embedFields = {
         i * betUserListLimit + betUserListLimit
       );
 
+      const note =
+        type === "invalid"
+          ? "A new effective close date rendered these bets invalid (they were made after the event predicted transpired)\n"
+          : "";
+
       betFields.push({
         name: `${name}${
           values.length > betUserListLimit ? ` Part ${i + 1}` : ""
         }`,
-        value: `${betSlice.join("\n") || "None"}` + `\n \u200B`,
+        value: `${note}${betSlice.join("\n") || "None"}` + `\n \u200B`,
       });
     }
 

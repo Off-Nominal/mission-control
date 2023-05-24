@@ -4,7 +4,7 @@ import { NDB2API } from "../../../../utilities/ndb2Client/types";
 const MAX_TEXT_LENGTH = 500;
 
 export const generateListPredictionsEmbed = (
-  type: "recent" | "upcoming" | "search",
+  type: "recent" | "upcoming" | "upcoming-mine" | "upcoming-no-bet" | "search",
   predictions: NDB2API.ShortEnhancedPrediction[],
   options: {
     keyword?: string;
@@ -28,6 +28,20 @@ export const generateListPredictionsEmbed = (
     titleDate = "Due";
   }
 
+  if (type === "upcoming-mine") {
+    title = "Your Upcoming Judgements";
+    description =
+      "Here are your next ten predictions that are due to be judged.";
+    titleDate = "Due";
+  }
+
+  if (type === "upcoming-no-bet") {
+    title = "Upcoming Judgements (No Bet)";
+    description =
+      "Here are the next ten predictions that are due to be judged that you haven't yet placed a bet for.";
+    titleDate = "Due";
+  }
+
   if (type === "search") {
     title = "Search Results";
     description = `Here are the best ten prediction matches for keyword: ${options.keyword}`;
@@ -40,7 +54,12 @@ export const generateListPredictionsEmbed = (
     if (type === "recent") {
       date = new Date(pred.created_date);
     }
-    if (type === "upcoming" || type === "search") {
+    if (
+      type === "upcoming" ||
+      type === "upcoming-mine" ||
+      type === "upcoming-no-bet" ||
+      type === "search"
+    ) {
       date = new Date(pred.due_date);
     }
 

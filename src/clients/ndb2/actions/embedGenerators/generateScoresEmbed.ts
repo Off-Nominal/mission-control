@@ -19,7 +19,7 @@ export const generateScoresEmbed = (
       },
       {
         name: "💵 Bets",
-        value: `Successful: ${scores.bets.successful}\nFailed: ${scores.bets.failed}\nPending: ${scores.bets.pending}\nRetired: ${scores.bets.retired}\nRank: ${scores.bets.rank}`,
+        value: `Successful: ${scores.bets.successful}\nFailed: ${scores.bets.failed}\nPending: ${scores.bets.pending}\nRetired: ${scores.bets.retired}\nInvalid: ${scores.bets.invalid}\nRank: ${scores.bets.rank}`,
       },
       {
         name: "📝 Votes",
