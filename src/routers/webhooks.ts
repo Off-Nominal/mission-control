@@ -59,8 +59,7 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
         LogStatus.INFO,
         "Event was NEW PREDICTION, which is currently ignored."
       );
-      logger.sendLog(client);
-      return console.log("new prediction");
+      return logger.sendLog(client);
     }
 
     // Fetch subscriptions to events

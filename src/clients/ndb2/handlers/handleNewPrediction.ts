@@ -1,5 +1,6 @@
 import { add, isFuture } from "date-fns";
 import {
+  Message,
   ModalSubmitInteraction,
   time,
   TimestampStyles,
@@ -15,6 +16,8 @@ import ndb2MsgSubscriptionQueries, {
 } from "../../../queries/ndb2_msg_subscriptions";
 import { Client } from "pg";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
+import { channelIds } from "../../../types/channelEnums";
+import { SpecificChannel } from "../../../types/channelEnums";
 
 export default function generateNewPredictionHandler(db: Client) {
   const { addSubscription } = ndb2MsgSubscriptionQueries(db);
@@ -139,9 +142,11 @@ export default function generateNewPredictionHandler(db: Client) {
       console.error(err);
     }
 
+    let reply: Message<boolean>;
+
     // Add subscription for embed
     try {
-      const reply = await interaction.fetchReply();
+      reply = await interaction.fetchReply();
       await addSubscription(
         Ndb2MsgSubscriptionType.VIEW,
         prediction.id,
@@ -157,6 +162,24 @@ export default function generateNewPredictionHandler(db: Client) {
       logger.addLog(
         LogStatus.FAILURE,
         `Prediction view message subscription log failure.`
+      );
+      console.error(err);
+    }
+
+    try {
+      const botsChannel = await interaction.guild.channels.cache.find(
+        (c) => c.id === channelIds[SpecificChannel.BOTS]
+      );
+      if (botsChannel.isTextBased()) {
+        botsChannel.send({
+          content: `NDB2->TC ${channelId} ${reply.id} ${prediction.text}`,
+        });
+      }
+      logger.addLog(LogStatus.SUCCESS, `New Prediction TC Alert logged`);
+    } catch (err) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `New Prediction TC Alert Message failure`
       );
       console.error(err);
     }
