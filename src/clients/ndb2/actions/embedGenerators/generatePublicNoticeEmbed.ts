@@ -183,30 +183,17 @@ export const generatePublicNoticeEmbed = (
       prediction.status === PredictionLifeCycle.FAILED)
   ) {
     fields.push(embedFields.date(closed, "Effective Close Date"));
-    fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
+    fields.push(
+      embedFields.payoutsText(prediction.status, prediction.payouts, true)
+    );
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "endorsements",
-        endorsements
-      )
+      .longPayouts(prediction.status, "endorsements", endorsements, true)
       .forEach((ef) => fields.push(ef));
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "undorsements",
-        undorsements
-      )
+      .longPayouts(prediction.status, "undorsements", undorsements, true)
       .forEach((ef) => fields.push(ef));
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "invalid",
-        invalidBets
-      )
+      .longPayouts(prediction.status, "invalid", invalidBets, true)
       .forEach((ef) => fields.push(ef));
   }
 

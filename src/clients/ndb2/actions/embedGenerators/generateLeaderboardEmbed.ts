@@ -3,30 +3,40 @@ import { NDB2API } from "../../../../utilities/ndb2Client/types";
 
 export const generateLeaderboardEmbed = (
   type: "points" | "predictions" | "bets",
-  leaders: NDB2API.Leader[]
+  leaders:
+    | NDB2API.PointsLeader[]
+    | NDB2API.BetsLeader[]
+    | NDB2API.PredictionsLeader[]
 ): EmbedBuilder => {
-  const fields: APIEmbedField[] = leaders.map((leader) => {
-    let value: string;
+  const fields: APIEmbedField[] = leaders.map(
+    (
+      leader:
+        | NDB2API.PointsLeader
+        | NDB2API.BetsLeader
+        | NDB2API.PredictionsLeader
+    ) => {
+      let value: string;
 
-    if (type === "points") {
-      value = `Points: ${leader.points}`;
+      if ("points" in leader) {
+        value = `Points: ${leader.points}`;
+      }
+
+      if ("predictions" in leader) {
+        value = `Successful predictions: ${leader.predictions.successful}`;
+      }
+
+      if ("bets" in leader) {
+        value = `Successful bets: ${leader.bets.successful}`;
+      }
+
+      value += ` - ${userMention(leader.discord_id)}`;
+
+      return {
+        name: `#${leader.rank}`,
+        value,
+      };
     }
-
-    if (type === "predictions") {
-      value = `Successful predictions: ${leader.predictions.successful}`;
-    }
-
-    if (type === "bets") {
-      value = `Successful bets: ${leader.bets.successful}`;
-    }
-
-    value += ` - ${userMention(leader.discord_id)}`;
-
-    return {
-      name: `#${leader.rank}`,
-      value,
-    };
-  });
+  );
 
   const embed = new EmbedBuilder({
     title: `Leaderboard for ${type}`,

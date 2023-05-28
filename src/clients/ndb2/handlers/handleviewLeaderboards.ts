@@ -5,6 +5,7 @@ import { LogInitiator } from "../../../types/logEnums";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { generateListPredictionsEmbed } from "../actions/embedGenerators/generateListPredictionsEmbed";
 import { generateLeaderboardEmbed } from "../actions/embedGenerators/generateLeaderboardEmbed";
+import { NDB2API } from "../../../utilities/ndb2Client/types";
 
 export default function generateHandleViewLeaderboards(db: Client) {
   return async function handleViewLeaderboards(
@@ -45,7 +46,19 @@ export default function generateHandleViewLeaderboards(db: Client) {
     }
 
     try {
-      const response = await ndb2Client.getLeaderboard(leaderboardType);
+      let response:
+        | NDB2API.GetPredictionsLeaderboard
+        | NDB2API.GetBetsLeaderboard
+        | NDB2API.GetPointsLeaderboard;
+
+      if (leaderboardType === "predictions") {
+        response = await ndb2Client.getPredictionsLeaderboard();
+      } else if (leaderboardType === "bets") {
+        response = await ndb2Client.getBetsLeaderboard();
+      } else {
+        response = await ndb2Client.getPointsLeaderboard();
+      }
+
       logger.addLog(
         LogStatus.SUCCESS,
         "Successfully fetched leaderboard from API."

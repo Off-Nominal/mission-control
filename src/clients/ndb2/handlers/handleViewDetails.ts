@@ -9,7 +9,8 @@ import { generatePredictionDetailsEmbed } from "../actions/embedGenerators/gener
 export default function generateHandleViewDetails(db: Client) {
   return async function handleViewDetails(
     interaction: ButtonInteraction,
-    predictionId: string
+    predictionId: string,
+    season: boolean
   ) {
     const logger = new Logger(
       "NDB2 Interaction",
@@ -36,7 +37,7 @@ export default function generateHandleViewDetails(db: Client) {
       return logger.sendLog(interaction.client);
     }
 
-    const embed = generatePredictionDetailsEmbed(prediction);
+    const embed = generatePredictionDetailsEmbed(prediction, season);
 
     try {
       interaction.reply({

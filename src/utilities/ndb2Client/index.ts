@@ -291,17 +291,45 @@ export class Ndb2Client {
       });
   }
 
-  public getLeaderboard(
-    type: "points" | "predictions" | "bets"
-  ): Promise<NDB2API.GetLeaderboard> {
+  public getPointsLeaderboard(): Promise<NDB2API.GetPointsLeaderboard> {
     const url = new URL(this.baseURL);
     url.pathname = `api/scores`;
     const params = new URLSearchParams();
-    params.set("view", type);
+    params.set("view", "points");
     url.search = params.toString();
 
     return this.client
-      .get<NDB2API.GetLeaderboard>(url.toString())
+      .get<NDB2API.GetPointsLeaderboard>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public getPredictionsLeaderboard(): Promise<NDB2API.GetPredictionsLeaderboard> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/scores`;
+    const params = new URLSearchParams();
+    params.set("view", "predictions");
+    url.search = params.toString();
+
+    return this.client
+      .get<NDB2API.GetPredictionsLeaderboard>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public getBetsLeaderboard(): Promise<NDB2API.GetBetsLeaderboard> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/scores`;
+    const params = new URLSearchParams();
+    params.set("view", "bets");
+    url.search = params.toString();
+
+    return this.client
+      .get<NDB2API.GetBetsLeaderboard>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);

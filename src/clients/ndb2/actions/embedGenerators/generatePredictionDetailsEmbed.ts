@@ -1,12 +1,14 @@
-import { APIEmbedField, EmbedBuilder } from "discord.js";
+import { APIEmbedField, EmbedBuilder, italic, userMention } from "discord.js";
 import {
   NDB2API,
   PredictionLifeCycle,
 } from "../../../../utilities/ndb2Client/types";
 import embedFields from "./fields";
+import { getPredictedPrefix } from "./helpers";
 
 export const generatePredictionDetailsEmbed = (
-  prediction: NDB2API.EnhancedPrediction
+  prediction: NDB2API.EnhancedPrediction,
+  season: boolean
 ) => {
   const endorsements = prediction.bets.filter(
     (bet) => bet.endorsed && bet.valid
@@ -20,14 +22,17 @@ export const generatePredictionDetailsEmbed = (
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
 
   const embed = new EmbedBuilder({
-    title: "Detailed Prediction View",
-    description: prediction.text + `\n \u200B`,
-    thumbnail: {
-      url: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679231457/Discord%20Assets/5067685_evmy8z.png",
-    },
+    title: "Detailed View - Status: " + prediction.status.toUpperCase(),
+    description:
+      userMention(prediction.predictor.discord_id) +
+      " " +
+      getPredictedPrefix(prediction.status) +
+      " " +
+      italic(prediction.text) +
+      `\n \u200B`,
   });
 
-  const fields: APIEmbedField[] = [embedFields.longStatus(prediction.status)];
+  const fields: APIEmbedField[] = [];
 
   if (prediction.status === PredictionLifeCycle.OPEN) {
     fields.push(
@@ -72,60 +77,34 @@ export const generatePredictionDetailsEmbed = (
   }
 
   if (prediction.status === PredictionLifeCycle.SUCCESSFUL) {
-    fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
+    fields.push(
+      embedFields.payoutsText(prediction.status, prediction.payouts, season)
+    );
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "endorsements",
-        endorsements
-      )
+      .longPayouts(prediction.status, "endorsements", endorsements, season)
       .forEach((ef) => fields.push(ef));
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "undorsements",
-        undorsements
-      )
+      .longPayouts(prediction.status, "undorsements", undorsements, season)
       .forEach((ef) => fields.push(ef));
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "invalid",
-        invalidBets
-      )
+      .longPayouts(prediction.status, "invalid", invalidBets, season)
       .forEach((ef) => fields.push(ef));
     embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
     embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
   }
 
   if (prediction.status === PredictionLifeCycle.FAILED) {
-    fields.push(embedFields.payoutsText(prediction.status, prediction.payouts));
+    fields.push(
+      embedFields.payoutsText(prediction.status, prediction.payouts, season)
+    );
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "endorsements",
-        endorsements
-      )
+      .longPayouts(prediction.status, "endorsements", endorsements, season)
       .forEach((ef) => fields.push(ef));
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "undorsements",
-        undorsements
-      )
+      .longPayouts(prediction.status, "undorsements", undorsements, season)
       .forEach((ef) => fields.push(ef));
     embedFields
-      .longPayouts(
-        prediction.status,
-        prediction.payouts,
-        "invalid",
-        invalidBets
-      )
+      .longPayouts(prediction.status, "invalid", invalidBets, season)
       .forEach((ef) => fields.push(ef));
     embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
     embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
