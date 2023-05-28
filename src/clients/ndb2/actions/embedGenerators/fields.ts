@@ -1,6 +1,5 @@
 import {
   bold,
-  codeBlock,
   messageLink,
   time,
   TimestampStyles,
@@ -17,19 +16,27 @@ const embedFields = {
   date: (
     date: Date,
     title: string,
-    context?: { channelId: string; messageId: string }
+    options: {
+      context?: { channelId: string; messageId: string };
+      showTime?: boolean;
+    } = {}
   ) => {
-    const baseMessage = `🗓️ ${time(date, TimestampStyles.LongDate)} (${time(
+    const baseMessage = `🗓️ ${time(
       date,
-      TimestampStyles.RelativeTime
-    )})`;
+      options.showTime
+        ? TimestampStyles.ShortDateTime
+        : TimestampStyles.LongDate
+    )} (${time(date, TimestampStyles.RelativeTime)})`;
 
     let value = baseMessage;
 
-    if (context) {
+    if (options.context) {
       value =
         baseMessage +
-        ` (context: ${messageLink(context.channelId, context.messageId)})`;
+        ` (context: ${messageLink(
+          options.context.channelId,
+          options.context.messageId
+        )})`;
     }
 
     return {
@@ -44,6 +51,14 @@ const embedFields = {
         date,
         TimestampStyles.RelativeTime
       )}) by ${userMention(triggerer_id)}`,
+    };
+  },
+  wagerCap: (wagerCap: number) => {
+    return {
+      name: "Wager Cap",
+      value: `This season's wager cap is ${bold(
+        wagerCap.toString() + " points"
+      )}. This is the most amount of points that can be wagered for purposes of season-based scoring (all-time scoring is unaffected). Wagers are then modified by their respective endorsement and undorsement multipliers.`,
     };
   },
   shortBets: (

@@ -5,6 +5,7 @@ export enum NDB2WebhookEvent {
   TRIGGERED_PREDICTION = "triggered_prediction",
   NEW_VOTE = "new_vote",
   JUDGED_PREDICTION = "judged_prediction",
+  SEASON_START = "season_start",
 }
 
 export const isNdb2WebhookEvent = (event: any): event is NDB2WebhookEvent => {

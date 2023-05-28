@@ -154,7 +154,7 @@ export const generatePublicNoticeEmbed = (
       name: "Prediction",
       value: prediction.text + `\n \u200B`,
     },
-    embedFields.date(created, "Created", context),
+    embedFields.date(created, "Created", { context }),
   ];
 
   if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {

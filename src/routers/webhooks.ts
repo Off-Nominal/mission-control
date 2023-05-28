@@ -10,6 +10,7 @@ import fetchGuild from "../utilities/fetchGuild";
 import { Logger, LogStatus } from "../utilities/logger";
 import { LogInitiator } from "../types/logEnums";
 import { isNdb2WebhookEvent, NDB2WebhookEvent } from "../types/routerTypes";
+import { sendSeasonStartNotice } from "../clients/ndb2/actions/sendSeasonStartNotice";
 const router = express.Router();
 
 const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
@@ -60,6 +61,14 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
         "Event was NEW PREDICTION, which is currently ignored."
       );
       return logger.sendLog(client);
+    }
+
+    if (event_name === NDB2WebhookEvent.SEASON_START) {
+      logger.addLog(
+        LogStatus.INFO,
+        "Event was SEASON START, generating embed notice."
+      );
+      return sendSeasonStartNotice(client, data);
     }
 
     // Fetch subscriptions to events

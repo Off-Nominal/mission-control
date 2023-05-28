@@ -78,7 +78,7 @@ export const generatePredictionEmbed = (
   });
 
   const fields: APIEmbedField[] = [
-    embedFields.date(created, "Created", context),
+    embedFields.date(created, "Created", { context }),
   ];
 
   if (prediction.status === PredictionLifeCycle.CLOSED) {

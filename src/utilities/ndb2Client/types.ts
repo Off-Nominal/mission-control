@@ -130,6 +130,14 @@ export namespace NDB2API {
     };
   }
 
+  export type Season = {
+    id: number;
+    name: string;
+    start: string;
+    end: string;
+    wager_cap: number;
+  };
+
   export type AddPrediction = GeneralResponse<EnhancedPrediction>;
 
   export type AddBet = GeneralResponse<EnhancedPrediction>;
@@ -150,12 +158,7 @@ export namespace NDB2API {
 
   type GetLeaderboard<T> = GeneralResponse<{
     type: LeaderboardType;
-    season?: {
-      id: number;
-      name: string;
-      start: string;
-      end: string;
-    };
+    season?: Season;
     leaders: T[];
   }>;
 
