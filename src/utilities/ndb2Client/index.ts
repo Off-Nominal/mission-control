@@ -235,12 +235,12 @@ export class Ndb2Client {
 
   public getScores(
     discord_id: string,
-    season_id?: string | number
+    seasonIdentifier?: number | "current" | "last"
   ): Promise<NDB2API.GetScores> {
     const url = new URL(this.baseURL);
     url.pathname = `api/users/discord_id/${discord_id}/scores`;
-    if (season_id) {
-      url.pathname += `/seasons/${season_id}`;
+    if (seasonIdentifier) {
+      url.pathname += `/seasons/${seasonIdentifier}`;
     }
     return this.client
       .get<NDB2API.GetScores>(url.toString())
@@ -291,9 +291,11 @@ export class Ndb2Client {
       });
   }
 
-  public getPointsLeaderboard(): Promise<NDB2API.GetPointsLeaderboard> {
+  public getPointsLeaderboard(
+    seasonId?: number | "current" | "last"
+  ): Promise<NDB2API.GetPointsLeaderboard> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/scores`;
+    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
     const params = new URLSearchParams();
     params.set("view", "points");
     url.search = params.toString();
@@ -306,9 +308,11 @@ export class Ndb2Client {
       });
   }
 
-  public getPredictionsLeaderboard(): Promise<NDB2API.GetPredictionsLeaderboard> {
+  public getPredictionsLeaderboard(
+    seasonId?: number | "current" | "last"
+  ): Promise<NDB2API.GetPredictionsLeaderboard> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/scores`;
+    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
     const params = new URLSearchParams();
     params.set("view", "predictions");
     url.search = params.toString();
@@ -321,9 +325,11 @@ export class Ndb2Client {
       });
   }
 
-  public getBetsLeaderboard(): Promise<NDB2API.GetBetsLeaderboard> {
+  public getBetsLeaderboard(
+    seasonId?: number | "current" | "last"
+  ): Promise<NDB2API.GetBetsLeaderboard> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/scores`;
+    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
     const params = new URLSearchParams();
     params.set("view", "bets");
     url.search = params.toString();

@@ -3,11 +3,20 @@ import { NDB2API } from "../../../../utilities/ndb2Client/types";
 
 export const generateScoresEmbed = (
   scores: NDB2API.Scores,
-  member: GuildMember
+  member: GuildMember,
+  seasonIdentifier?: "current" | "last"
 ): EmbedBuilder => {
+  let timeWindowDescription: string = "the all time";
+
+  if (seasonIdentifier === "current") {
+    timeWindowDescription = "this season's";
+  } else if (seasonIdentifier === "last") {
+    timeWindowDescription = "last season's";
+  }
+
   const embed = new EmbedBuilder({
     title: `Statistics for ${member.displayName}`,
-    description: `Here are the all-time stats for ${member.displayName}.`,
+    description: `Here are ${timeWindowDescription} stats for ${member.displayName}.`,
     fields: [
       {
         name: "🏆 Score",

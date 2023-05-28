@@ -6,8 +6,17 @@ export const generateLeaderboardEmbed = (
   leaders:
     | NDB2API.PointsLeader[]
     | NDB2API.BetsLeader[]
-    | NDB2API.PredictionsLeader[]
+    | NDB2API.PredictionsLeader[],
+  seasonIdentifier?: "current" | "last"
 ): EmbedBuilder => {
+  let timeWindowDescription: string = "all time";
+
+  if (seasonIdentifier === "current") {
+    timeWindowDescription = "this season";
+  } else if (seasonIdentifier === "last") {
+    timeWindowDescription = "last season";
+  }
+
   const fields: APIEmbedField[] = leaders.map(
     (
       leader:
@@ -40,7 +49,7 @@ export const generateLeaderboardEmbed = (
 
   const embed = new EmbedBuilder({
     title: `Leaderboard for ${type}`,
-    description: `Here are the top ten leaders in ${type}.`,
+    description: `Here are the top ten leaders in ${type} for ${timeWindowDescription}.`,
     fields,
   });
 

@@ -30,6 +30,12 @@ const leaderboardOptions: APIApplicationCommandOptionChoice<string>[] = [
   { name: "Most Successful Bets", value: "bets" },
 ];
 
+const timeWindowOptions: APIApplicationCommandOptionChoice<string>[] = [
+  { name: "Current Season", value: "current" },
+  { name: "Last Season", value: "last" },
+  { name: "All Time", value: "alltime" },
+];
+
 // Predict
 const predictCommand = new SlashCommandBuilder()
   .setName("predict")
@@ -88,6 +94,13 @@ const predictCommand = new SlashCommandBuilder()
     command
       .setName(Ndb2Subcommand.SCORE)
       .setDescription("View your Nostradambot Scores")
+      .addStringOption((option) =>
+        option
+          .setName("window")
+          .setDescription("Select a time window")
+          .setRequired(true)
+          .addChoices(...timeWindowOptions)
+      )
       .addBooleanOption((option) =>
         option.setName("brag").setDescription("Show this response publicly")
       )
@@ -126,6 +139,13 @@ const predictCommand = new SlashCommandBuilder()
           .setDescription("The type of leaderboard you want to see")
           .setRequired(true)
           .addChoices(...leaderboardOptions)
+      )
+      .addStringOption((option) =>
+        option
+          .setName("window")
+          .setDescription("Select a time window")
+          .setRequired(true)
+          .addChoices(...timeWindowOptions)
       )
       .addBooleanOption((option) =>
         option.setName("brag").setDescription("Show this response publicly")
