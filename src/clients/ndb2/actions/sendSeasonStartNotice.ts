@@ -46,4 +46,6 @@ export const sendSeasonStartNotice = async (
     logger.sendLog(client);
     return console.error(err);
   }
+
+  logger.sendLog(client);
 };
