@@ -129,7 +129,7 @@ const embedFields = {
         payouts.endorse
       } and undorsers will ${undorseVerb} points at a rate of ${
         payouts.undorse
-      }. These rates and payouts/penalties are based on the season in which the prediction closed. Below are the bets and their final  ${
+      }. These rates and payouts/penalties are based on the season in which the prediction closed. Below are the bets and their final ${
         season ? "season" : "all time"
       } payouts`,
     };
