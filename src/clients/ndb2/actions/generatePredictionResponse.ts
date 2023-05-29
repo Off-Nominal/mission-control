@@ -59,8 +59,14 @@ export const generatePredictionResponse = (
 
   actionRow.addComponents(
     new ButtonBuilder()
-      .setCustomId(`Details ${prediction.id}`)
-      .setLabel("Details")
+      .setCustomId(`Details ${prediction.id} Season`)
+      .setLabel("Details - Season")
+      .setStyle(ButtonStyle.Secondary)
+  );
+  actionRow.addComponents(
+    new ButtonBuilder()
+      .setCustomId(`Details ${prediction.id} Alltime`)
+      .setLabel("Details - All-Time")
       .setStyle(ButtonStyle.Secondary)
   );
   // .addComponents(

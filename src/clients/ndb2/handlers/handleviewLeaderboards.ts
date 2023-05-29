@@ -3,8 +3,8 @@ import { Client } from "pg";
 import { LogStatus, Logger } from "../../../utilities/logger";
 import { LogInitiator } from "../../../types/logEnums";
 import { ndb2Client } from "../../../utilities/ndb2Client";
-import { generateListPredictionsEmbed } from "../actions/embedGenerators/generateListPredictionsEmbed";
 import { generateLeaderboardEmbed } from "../actions/embedGenerators/generateLeaderboardEmbed";
+import { NDB2API } from "../../../utilities/ndb2Client/types";
 
 export default function generateHandleViewLeaderboards(db: Client) {
   return async function handleViewLeaderboards(
@@ -13,6 +13,16 @@ export default function generateHandleViewLeaderboards(db: Client) {
     const { options } = interaction;
     const leaderboardType = options.getString("type", true);
     const brag = options.getBoolean("brag");
+    const window = options.getString("window") || "current";
+    let seasonIdentifier: undefined | "current" | "last";
+
+    if (window === "current") {
+      seasonIdentifier = "current";
+    }
+
+    if (window === "last") {
+      seasonIdentifier = "last";
+    }
 
     const logger = new Logger(
       "NDB2 Interaction",
@@ -45,7 +55,19 @@ export default function generateHandleViewLeaderboards(db: Client) {
     }
 
     try {
-      const response = await ndb2Client.getLeaderboard(leaderboardType);
+      let response:
+        | NDB2API.GetPredictionsLeaderboard
+        | NDB2API.GetBetsLeaderboard
+        | NDB2API.GetPointsLeaderboard;
+
+      if (leaderboardType === "predictions") {
+        response = await ndb2Client.getPredictionsLeaderboard(seasonIdentifier);
+      } else if (leaderboardType === "bets") {
+        response = await ndb2Client.getBetsLeaderboard(seasonIdentifier);
+      } else {
+        response = await ndb2Client.getPointsLeaderboard(seasonIdentifier);
+      }
+
       logger.addLog(
         LogStatus.SUCCESS,
         "Successfully fetched leaderboard from API."

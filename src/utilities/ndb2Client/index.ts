@@ -235,12 +235,12 @@ export class Ndb2Client {
 
   public getScores(
     discord_id: string,
-    season_id?: string | number
+    seasonIdentifier?: number | "current" | "last"
   ): Promise<NDB2API.GetScores> {
     const url = new URL(this.baseURL);
     url.pathname = `api/users/discord_id/${discord_id}/scores`;
-    if (season_id) {
-      url.pathname += `/seasons/${season_id}`;
+    if (seasonIdentifier) {
+      url.pathname += `/seasons/${seasonIdentifier}`;
     }
     return this.client
       .get<NDB2API.GetScores>(url.toString())
@@ -291,17 +291,51 @@ export class Ndb2Client {
       });
   }
 
-  public getLeaderboard(
-    type: "points" | "predictions" | "bets"
-  ): Promise<NDB2API.GetLeaderboard> {
+  public getPointsLeaderboard(
+    seasonId?: number | "current" | "last"
+  ): Promise<NDB2API.GetPointsLeaderboard> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/scores`;
+    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
     const params = new URLSearchParams();
-    params.set("view", type);
+    params.set("view", "points");
     url.search = params.toString();
 
     return this.client
-      .get<NDB2API.GetLeaderboard>(url.toString())
+      .get<NDB2API.GetPointsLeaderboard>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public getPredictionsLeaderboard(
+    seasonId?: number | "current" | "last"
+  ): Promise<NDB2API.GetPredictionsLeaderboard> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
+    const params = new URLSearchParams();
+    params.set("view", "predictions");
+    url.search = params.toString();
+
+    return this.client
+      .get<NDB2API.GetPredictionsLeaderboard>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public getBetsLeaderboard(
+    seasonId?: number | "current" | "last"
+  ): Promise<NDB2API.GetBetsLeaderboard> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
+    const params = new URLSearchParams();
+    params.set("view", "bets");
+    url.search = params.toString();
+
+    return this.client
+      .get<NDB2API.GetBetsLeaderboard>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);

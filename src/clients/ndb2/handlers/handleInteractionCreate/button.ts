@@ -2,7 +2,6 @@ import { ButtonInteraction, CacheType } from "discord.js";
 import { Ndb2Events } from "../../../../types/eventEnums";
 import { LogInitiator } from "../../../../types/logEnums";
 import { Logger, LogStatus } from "../../../../utilities/logger";
-import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2InteractionCache";
 
 export enum ButtonCommand {
   ENDORSE = "Endorse",
@@ -52,13 +51,14 @@ export const handleButtonInteraction = (
   if (command === ButtonCommand.DETAILS) {
     logger.addLog(
       LogStatus.INFO,
-      `Interaction is a View Details request - handing off to VIEW_DETAILS handler.`
+      `Interaction is a View Details ${args[0]} request - handing off to VIEW_DETAILS handler.`
     );
     logger.sendLog(interaction.client);
     return interaction.client.emit(
       Ndb2Events.VIEW_DETAILS,
       interaction,
-      predictionId
+      predictionId,
+      args[0] === "Season"
     );
   }
 

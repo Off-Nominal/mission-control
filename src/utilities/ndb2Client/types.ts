@@ -22,12 +22,13 @@ export namespace NDB2API {
   };
 
   export type EnhancedPredictionBet = {
-    id: number;
-    date: string;
+    id: string;
     endorsed: boolean;
+    date: string;
     wager: number;
     valid: boolean;
     payout: number;
+    season_payout: number;
     better: {
       id: string;
       discord_id: string;
@@ -51,6 +52,7 @@ export namespace NDB2API {
       discord_id: string;
     };
     text: string;
+    season_id: number;
     created_date: string;
     due_date: string;
     closed_date: string | null;
@@ -102,21 +104,38 @@ export namespace NDB2API {
     };
   };
 
-  export type Leader = {
+  export interface Leader {
     id: string;
     discord_id: string;
     rank: number;
-    points?: number;
-    predictions?: {
+  }
+
+  export interface PointsLeader extends Leader {
+    points: number;
+  }
+
+  export interface BetsLeader extends Leader {
+    bets: {
       successful: number;
       unsuccessful: number;
       total: number;
     };
-    bets?: {
+  }
+
+  export interface PredictionsLeader extends Leader {
+    predictions: {
       successful: number;
       unsuccessful: number;
       total: number;
     };
+  }
+
+  export type Season = {
+    id: number;
+    name: string;
+    start: string;
+    end: string;
+    wager_cap: number;
   };
 
   export type AddPrediction = GeneralResponse<EnhancedPrediction>;
@@ -135,14 +154,15 @@ export namespace NDB2API {
 
   export type AddVote = GeneralResponse<EnhancedPrediction>;
 
-  export type GetLeaderboard = GeneralResponse<{
-    type: "points" | "predictions" | "bets";
-    season?: {
-      id: number;
-      name: string;
-      start: string;
-      end: string;
-    };
-    leaders: Leader[];
+  export type LeaderboardType = "points" | "predictions" | "bets";
+
+  type GetLeaderboard<T> = GeneralResponse<{
+    type: LeaderboardType;
+    season?: Season;
+    leaders: T[];
   }>;
+
+  export type GetPointsLeaderboard = GetLeaderboard<PointsLeader>;
+  export type GetBetsLeaderboard = GetLeaderboard<BetsLeader>;
+  export type GetPredictionsLeaderboard = GetLeaderboard<PredictionsLeader>;
 }

@@ -374,8 +374,8 @@ ndb2Bot.on(
 );
 ndb2Bot.on(
   Ndb2Events.VIEW_DETAILS,
-  (interaction: ButtonInteraction, predictionId: string) => {
-    ndb2BotHandlers.handleViewDetails(interaction, predictionId);
+  (interaction: ButtonInteraction, predictionId: string, season: boolean) => {
+    ndb2BotHandlers.handleViewDetails(interaction, predictionId, season);
   }
 );
 ndb2Bot.on(

@@ -4,6 +4,7 @@ import {
   PredictionLifeCycle,
 } from "../../../../utilities/ndb2Client/types";
 import embedFields from "./fields";
+import { getPredictedPrefix } from "./helpers";
 
 const thumbnails = {
   open: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134394/Discord%20Assets/4236484_aggyej.png",
@@ -37,26 +38,6 @@ const getThumbnail = (status: PredictionLifeCycle): string => {
   return thumbnails.open;
 };
 
-const getAuthor = (status: PredictionLifeCycle): string => {
-  if (status === PredictionLifeCycle.RETIRED) {
-    return `had predicted that...`;
-  }
-
-  if (status === PredictionLifeCycle.CLOSED) {
-    return `predicted that...`;
-  }
-
-  if (status === PredictionLifeCycle.SUCCESSFUL) {
-    return `successfully predicted that...`;
-  }
-
-  if (status === PredictionLifeCycle.FAILED) {
-    return `unsuccessfully predicted that...`;
-  }
-
-  return `predicts that...`;
-};
-
 export const generatePredictionEmbed = (
   displayName: string | undefined,
   avatarUrl: string | undefined,
@@ -82,7 +63,7 @@ export const generatePredictionEmbed = (
 
   const embed = new EmbedBuilder({
     author: {
-      name: `${displayName || "A former discord member"} ${getAuthor(
+      name: `${displayName || "A former discord member"} ${getPredictedPrefix(
         prediction.status
       )}`,
       icon_url: avatarUrl,
@@ -97,7 +78,7 @@ export const generatePredictionEmbed = (
   });
 
   const fields: APIEmbedField[] = [
-    embedFields.date(created, "Created", context),
+    embedFields.date(created, "Created", { context }),
   ];
 
   if (prediction.status === PredictionLifeCycle.CLOSED) {

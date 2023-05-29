@@ -18,6 +18,16 @@ export default function generateHandleViewScore(db: Client) {
 
     const { options } = interaction;
     const brag = options.getBoolean("brag");
+    const window = options.getString("window") || "current";
+    let seasonIdentifier: undefined | "current" | "last";
+
+    if (window === "current") {
+      seasonIdentifier = "current";
+    }
+
+    if (window === "last") {
+      seasonIdentifier = "last";
+    }
 
     // Score calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
     try {
@@ -31,14 +41,14 @@ export default function generateHandleViewScore(db: Client) {
     const discord_id = interaction.user.id;
 
     try {
-      const response = await ndb2Client.getScores(discord_id);
+      const response = await ndb2Client.getScores(discord_id, seasonIdentifier);
       logger.addLog(LogStatus.SUCCESS, "Successfully fetched scores from API.");
 
       const scores = response.data;
       const guild = fetchGuild(interaction.client);
       const member = await guild.members.fetch(interaction.user.id);
       logger.addLog(LogStatus.SUCCESS, "Successfully fetched Guild Member");
-      const embed = generateScoresEmbed(scores, member);
+      const embed = generateScoresEmbed(scores, member, seasonIdentifier);
       await interaction.editReply({ embeds: [embed] });
       logger.addLog(
         LogStatus.SUCCESS,

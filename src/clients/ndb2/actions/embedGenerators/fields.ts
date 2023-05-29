@@ -16,19 +16,27 @@ const embedFields = {
   date: (
     date: Date,
     title: string,
-    context?: { channelId: string; messageId: string }
+    options: {
+      context?: { channelId: string; messageId: string };
+      showTime?: boolean;
+    } = {}
   ) => {
-    const baseMessage = `🗓️ ${time(date, TimestampStyles.LongDate)} (${time(
+    const baseMessage = `🗓️ ${time(
       date,
-      TimestampStyles.RelativeTime
-    )})`;
+      options.showTime
+        ? TimestampStyles.ShortDateTime
+        : TimestampStyles.LongDate
+    )} (${time(date, TimestampStyles.RelativeTime)})`;
 
     let value = baseMessage;
 
-    if (context) {
+    if (options.context) {
       value =
         baseMessage +
-        ` (context: ${messageLink(context.channelId, context.messageId)})`;
+        ` (context: ${messageLink(
+          options.context.channelId,
+          options.context.messageId
+        )})`;
     }
 
     return {
@@ -43,6 +51,14 @@ const embedFields = {
         date,
         TimestampStyles.RelativeTime
       )}) by ${userMention(triggerer_id)}`,
+    };
+  },
+  wagerCap: (wagerCap: number) => {
+    return {
+      name: "Wager Cap",
+      value: `This season's wager cap is ${bold(
+        wagerCap.toString() + " points"
+      )}. This is the most amount of points that can be wagered for purposes of season-based scoring (all-time scoring is unaffected). Wagers are then modified by their respective endorsement and undorsement multipliers.`,
     };
   },
   shortBets: (
@@ -99,8 +115,9 @@ const embedFields = {
     return voteFields;
   },
   payoutsText: (
-    status: PredictionLifeCycle,
-    payouts: { endorse: number; undorse: number }
+    status: PredictionLifeCycle.SUCCESSFUL | PredictionLifeCycle.FAILED,
+    payouts: { endorse: number; undorse: number },
+    season: boolean
   ) => {
     const endorseVerb =
       status === PredictionLifeCycle.SUCCESSFUL ? "earn" : "lose";
@@ -108,18 +125,24 @@ const embedFields = {
 
     return {
       name: "Payouts",
-      value: `As a ${status} prediction, endorsers will ${endorseVerb} points at a rate of ${payouts.endorse} and undorsers will ${undorseVerb} points at a rate of ${payouts.undorse}. Below are the bets and their final tallies.`,
+      value: `As a ${status} prediction, endorsers will ${endorseVerb} points at a rate of ${
+        payouts.endorse
+      } and undorsers will ${undorseVerb} points at a rate of ${
+        payouts.undorse
+      }. These rates and payouts/penalties are based on the season in which the prediction closed. Below are the bets and their final  ${
+        season ? "season" : "all time"
+      } payouts`,
     };
   },
   longPayouts: (
     status: PredictionLifeCycle.SUCCESSFUL | PredictionLifeCycle.FAILED,
-    ratios: { endorse: number; undorse: number },
     type: "endorsements" | "undorsements" | "invalid",
-    bets: NDB2API.EnhancedPredictionBet[]
+    bets: NDB2API.EnhancedPredictionBet[],
+    season: boolean
   ) => {
     let payouts: string[];
     let listType: "invalid" | "payouts" | "penalties";
-    let multiplier: number = 0;
+
     let sign: string = "";
     let title: string;
     const sortedBets = [...bets];
@@ -132,21 +155,20 @@ const embedFields = {
       (type === "undorsements" && status === PredictionLifeCycle.FAILED)
     ) {
       listType = "payouts";
-      multiplier = ratios.endorse;
       sign = "+";
       title = "🏆 Payouts";
     } else {
       listType = "penalties";
       sortedBets.reverse();
-      multiplier = ratios.undorse;
-      sign = "-";
       title = "☠️ Penalties";
     }
 
     payouts = sortedBets.map((b) => {
-      const payout =
-        type === "invalid" ? "-" : Math.floor(b.wager * multiplier);
-      return `${userMention(b.better.discord_id)} (${sign}${payout})`;
+      const payout = season ? b.season_payout : b.payout;
+
+      return `(${sign}${payout.toString()}) `.concat(
+        userMention(b.better.discord_id)
+      );
     });
 
     const fieldCount = Math.ceil(payouts.length / USER_LIST_LIMIT);
@@ -185,40 +207,6 @@ const embedFields = {
     return {
       name: "Current Prediction Status",
       value: pStatus + `\n \u200B`,
-    };
-  },
-  longStatus: (status: PredictionLifeCycle) => {
-    let value: string;
-
-    if (status === PredictionLifeCycle.OPEN) {
-      value =
-        bold(status.toUpperCase()) +
-        ": Prediction is open and new bets can be placed.";
-    }
-    if (status === PredictionLifeCycle.CLOSED) {
-      value =
-        bold(status.toUpperCase()) +
-        ": Prediction is closed and the community is currently voting on its outcome.";
-    }
-    if (status === PredictionLifeCycle.RETIRED) {
-      value =
-        bold(status.toUpperCase()) +
-        ": Prediction was retired by its creator shortly after creation. Usually this means there was a mistake in the prediction.";
-    }
-    if (status === PredictionLifeCycle.SUCCESSFUL) {
-      value =
-        bold(status.toUpperCase()) +
-        ": Prediction has been judged successful and points have been awarded or revoked.";
-    }
-    if (status === PredictionLifeCycle.FAILED) {
-      value =
-        bold(status.toUpperCase()) +
-        ": Prediction has been judged failed and points have been awarded or revoked.";
-    }
-
-    return {
-      name: "Current Prediction Status",
-      value: value + `\n \u200B`,
     };
   },
   riskAssessment: (betCount: number, endorsePayout: number) => {
