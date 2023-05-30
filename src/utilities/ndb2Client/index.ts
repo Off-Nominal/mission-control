@@ -21,7 +21,7 @@ const isNdb2ApiResponse = (
 
   if (
     typeof success !== "boolean" ||
-    typeof errorCode !== "string" ||
+    typeof errorCode !== "number" ||
     (typeof message !== "string" && message !== null)
   ) {
     return false;

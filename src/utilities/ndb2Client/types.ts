@@ -6,17 +6,18 @@ export enum PredictionLifeCycle {
   FAILED = "failed",
 }
 
-const ErrorCode = {
-  SERVER_ERROR: 0,
-  AUTHENTICATION_ERROR: 1,
-  BAD_REQUEST: 2,
-  MALFORMED_BODY_DATA: 3,
-};
+export enum ErrorCode {
+  SERVER_ERROR = 0,
+  AUTHENTICATION_ERROR = 1,
+  BAD_REQUEST = 2,
+  MALFORMED_BODY_DATA = 3,
+  MALFORMED_QUERY_PARAMS = 4,
+}
 
 export namespace NDB2API {
   export type GeneralResponse<T = null> = {
     success: boolean;
-    errorCode?: keyof typeof ErrorCode;
+    errorCode?: ErrorCode;
     message: string | null;
     data: T;
   };
