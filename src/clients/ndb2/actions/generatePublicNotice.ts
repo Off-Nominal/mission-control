@@ -5,7 +5,6 @@ import {
   ButtonStyle,
   Client,
   GuildMember,
-  userMention,
 } from "discord.js";
 import { NDB2WebhookEvent } from "../../../types/routerTypes";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
@@ -17,7 +16,6 @@ export const generatePublicNotice = (
     | NDB2WebhookEvent.JUDGED_PREDICTION
     | NDB2WebhookEvent.RETIRED_PREDICTION
     | NDB2WebhookEvent.TRIGGERED_PREDICTION,
-  betters: string[],
   predictor: GuildMember,
   triggerer: GuildMember | null,
   client: Client,
@@ -26,8 +24,6 @@ export const generatePublicNotice = (
     messageId: string;
   }
 ): BaseMessageOptions => {
-  const content = betters.map((b) => userMention(b)).join(", ");
-
   const embed = generatePublicNoticeEmbed(
     prediction,
     type,
@@ -71,7 +67,6 @@ export const generatePublicNotice = (
   }
 
   return {
-    content,
     embeds: [embed],
     components: addComponents ? [actionRow] : undefined,
   };

@@ -118,7 +118,6 @@ export const sendPublicNotice = async (
       const response = generatePublicNotice(
         prediction,
         type,
-        prediction.bets.map((bet) => bet.better.discord_id),
         predictor,
         triggerer,
         client,
