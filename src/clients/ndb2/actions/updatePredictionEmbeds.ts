@@ -99,7 +99,6 @@ export const updatePredictionEmbeds = async (
             triggerResponse = generatePublicNotice(
               prediction,
               NDB2WebhookEvent.TRIGGERED_PREDICTION,
-              prediction.bets.map((bet) => bet.better.discord_id),
               predictor,
               triggerer,
               client
