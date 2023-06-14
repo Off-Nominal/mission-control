@@ -137,6 +137,7 @@ export namespace NDB2API {
     start: string;
     end: string;
     wager_cap: number;
+    closed: boolean;
   };
 
   export type AddPrediction = GeneralResponse<EnhancedPrediction>;
