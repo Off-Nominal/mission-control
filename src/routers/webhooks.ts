@@ -11,6 +11,7 @@ import { Logger, LogStatus } from "../utilities/logger";
 import { LogInitiator } from "../types/logEnums";
 import { isNdb2WebhookEvent, NDB2WebhookEvent } from "../types/routerTypes";
 import { sendSeasonStartNotice } from "../clients/ndb2/actions/sendSeasonStartNotice";
+import { sendSeasonEndNotice } from "../clients/ndb2/actions/sendSeasonEndNotice";
 const router = express.Router();
 
 const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
@@ -69,6 +70,14 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
         "Event was SEASON START, generating embed notice."
       );
       return sendSeasonStartNotice(client, data);
+    }
+
+    if (event_name === NDB2WebhookEvent.SEASON_END) {
+      logger.addLog(
+        LogStatus.INFO,
+        "Event was SEASON END, generating embed notice."
+      );
+      return sendSeasonEndNotice(client, data);
     }
 
     // Fetch subscriptions to events
