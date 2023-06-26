@@ -1,4 +1,10 @@
-import { CacheType, ChatInputCommandInteraction } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  CacheType,
+  ChatInputCommandInteraction,
+} from "discord.js";
 import { Client } from "pg";
 import { LogStatus, Logger } from "../../../utilities/logger";
 import { LogInitiator } from "../../../types/logEnums";
@@ -34,7 +40,20 @@ export default function generateHandleSearchPredictions(db: Client) {
       const embed = generateListPredictionsEmbed("search", predictions, {
         keyword,
       });
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+
+      const actionRow = new ActionRowBuilder<ButtonBuilder>();
+      actionRow.addComponents(
+        new ButtonBuilder()
+          .setLabel("Advanced Search on Web")
+          .setURL("https://ndb.offnom.com/predictions")
+          .setStyle(ButtonStyle.Link)
+      );
+
+      await interaction.reply({
+        embeds: [embed],
+        components: [actionRow],
+        ephemeral: true,
+      });
       logger.addLog(
         LogStatus.SUCCESS,
         "Successfully posted prediction list embed to Discord"

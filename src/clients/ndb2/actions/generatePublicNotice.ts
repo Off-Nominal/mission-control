@@ -33,11 +33,9 @@ export const generatePublicNotice = (
     context
   );
 
-  let addComponents = false;
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
 
   if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
-    addComponents = true;
     actionRow
       .addComponents(
         new ButtonBuilder()
@@ -57,17 +55,36 @@ export const generatePublicNotice = (
     type === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
     type === NDB2WebhookEvent.RETIRED_PREDICTION
   ) {
-    addComponents = true;
     actionRow.addComponents(
       new ButtonBuilder()
         .setCustomId(`Details ${prediction.id}`)
         .setLabel("Details")
         .setStyle(ButtonStyle.Secondary)
     );
+  } else {
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`Results ${prediction.id} Season`)
+        .setLabel("Results - Season")
+        .setStyle(ButtonStyle.Secondary)
+    );
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`Results ${prediction.id} Alltime`)
+        .setLabel("Results - All-Time")
+        .setStyle(ButtonStyle.Secondary)
+    );
   }
+
+  actionRow.addComponents(
+    new ButtonBuilder()
+      .setLabel("View on Web")
+      .setURL("https://ndb.offnom.com/predictions/" + prediction.id)
+      .setStyle(ButtonStyle.Link)
+  );
 
   return {
     embeds: [embed],
-    components: addComponents ? [actionRow] : undefined,
+    components: [actionRow],
   };
 };

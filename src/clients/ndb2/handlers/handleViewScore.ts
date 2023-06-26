@@ -1,4 +1,10 @@
-import { CacheType, ChatInputCommandInteraction } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  CacheType,
+  ChatInputCommandInteraction,
+} from "discord.js";
 import { Client } from "pg";
 import { LogStatus, Logger } from "../../../utilities/logger";
 import { LogInitiator } from "../../../types/logEnums";
@@ -48,8 +54,18 @@ export default function generateHandleViewScore(db: Client) {
       const guild = fetchGuild(interaction.client);
       const member = await guild.members.fetch(interaction.user.id);
       logger.addLog(LogStatus.SUCCESS, "Successfully fetched Guild Member");
+
       const embed = generateScoresEmbed(scores, member, seasonIdentifier);
-      await interaction.editReply({ embeds: [embed] });
+
+      const actionRow = new ActionRowBuilder<ButtonBuilder>();
+      actionRow.addComponents(
+        new ButtonBuilder()
+          .setLabel("View Leaderboards on Web")
+          .setURL("https://ndb.offnom.com/")
+          .setStyle(ButtonStyle.Link)
+      );
+
+      await interaction.editReply({ embeds: [embed], components: [actionRow] });
       logger.addLog(
         LogStatus.SUCCESS,
         "Successfully posted scores embed to Discord"

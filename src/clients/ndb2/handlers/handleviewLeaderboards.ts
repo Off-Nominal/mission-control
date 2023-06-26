@@ -1,4 +1,10 @@
-import { CacheType, ChatInputCommandInteraction } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  CacheType,
+  ChatInputCommandInteraction,
+} from "discord.js";
 import { Client } from "pg";
 import { LogStatus, Logger } from "../../../utilities/logger";
 import { LogInitiator } from "../../../types/logEnums";
@@ -76,7 +82,16 @@ export default function generateHandleViewLeaderboards(db: Client) {
       const leaders = response.data.leaders;
 
       const embed = generateLeaderboardEmbed(leaderboardType, leaders);
-      await interaction.editReply({ embeds: [embed] });
+
+      const actionRow = new ActionRowBuilder<ButtonBuilder>();
+      actionRow.addComponents(
+        new ButtonBuilder()
+          .setLabel("View Leaderboards on Web")
+          .setURL("https://ndb.offnom.com/")
+          .setStyle(ButtonStyle.Link)
+      );
+
+      await interaction.editReply({ embeds: [embed], components: [actionRow] });
       logger.addLog(
         LogStatus.SUCCESS,
         "Successfully posted leaderboard embed to Discord"
