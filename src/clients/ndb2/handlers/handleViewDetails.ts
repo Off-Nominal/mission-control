@@ -1,4 +1,10 @@
-import { ButtonInteraction } from "discord.js";
+import {
+  ActionRow,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+} from "discord.js";
 import { Client } from "pg";
 import { LogInitiator } from "../../../types/logEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
@@ -39,9 +45,18 @@ export default function generateHandleViewDetails(db: Client) {
 
     const embed = generatePredictionDetailsEmbed(prediction, season);
 
+    const actionRow = new ActionRowBuilder<ButtonBuilder>();
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setLabel("View on Web")
+        .setURL("https://ndb.offnom.com/predictions/" + prediction.id)
+        .setStyle(ButtonStyle.Link)
+    );
+
     try {
       interaction.reply({
         embeds: [embed],
+        components: [actionRow],
         ephemeral: true,
       });
       logger.addLog(

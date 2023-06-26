@@ -57,24 +57,37 @@ export const generatePredictionResponse = (
       );
   }
 
+  if (
+    prediction.status === PredictionLifeCycle.SUCCESSFUL ||
+    prediction.status === PredictionLifeCycle.FAILED
+  ) {
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`Details ${prediction.id} Season`)
+        .setLabel("Results - Season")
+        .setStyle(ButtonStyle.Secondary)
+    );
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`Details ${prediction.id} Alltime`)
+        .setLabel("Results - All-Time")
+        .setStyle(ButtonStyle.Secondary)
+    );
+  } else {
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`Details ${prediction.id} Season`)
+        .setLabel("Details")
+        .setStyle(ButtonStyle.Secondary)
+    );
+  }
+
   actionRow.addComponents(
     new ButtonBuilder()
-      .setCustomId(`Details ${prediction.id} Season`)
-      .setLabel("Details - Season")
-      .setStyle(ButtonStyle.Secondary)
+      .setLabel("View on Web")
+      .setURL("https://ndb.offnom.com/predictions/" + prediction.id)
+      .setStyle(ButtonStyle.Link)
   );
-  actionRow.addComponents(
-    new ButtonBuilder()
-      .setCustomId(`Details ${prediction.id} Alltime`)
-      .setLabel("Details - All-Time")
-      .setStyle(ButtonStyle.Secondary)
-  );
-  // .addComponents(
-  //   new ButtonBuilder()
-  //     .setLabel("Web")
-  //     .setURL("https://www.offnom.com")
-  //     .setStyle(ButtonStyle.Link)
-  // ),
 
   return { embeds: [embed], components: [actionRow] };
 };

@@ -1,4 +1,10 @@
-import { Client, GuildTextBasedChannel } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  Client,
+  GuildTextBasedChannel,
+} from "discord.js";
 import fetchGuild from "../../../utilities/fetchGuild";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { channelIds } from "../../../types/channelEnums";
@@ -48,6 +54,15 @@ export const sendSeasonEndNotice = async (
     betsLeaderboard,
     pointsLeaderboard
   );
+
+  const actionRow = new ActionRowBuilder<ButtonBuilder>();
+  actionRow.addComponents(
+    new ButtonBuilder()
+      .setLabel("View Leaderboards on Web")
+      .setURL("https://ndb.offnom.com/")
+      .setStyle(ButtonStyle.Link)
+  );
+
   logger.addLog(LogStatus.SUCCESS, "Embed generated");
 
   const guild = fetchGuild(client);
@@ -70,7 +85,7 @@ export const sendSeasonEndNotice = async (
   }
 
   try {
-    await channel.send({ embeds: [embed] });
+    await channel.send({ embeds: [embed], components: [actionRow] });
     logger.addLog(LogStatus.SUCCESS, "Embed sent");
   } catch (err) {
     logger.addLog(LogStatus.FAILURE, "Embed send failed");
