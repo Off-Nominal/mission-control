@@ -64,13 +64,13 @@ export const generatePublicNotice = (
   } else {
     actionRow.addComponents(
       new ButtonBuilder()
-        .setCustomId(`Results ${prediction.id} Season`)
+        .setCustomId(`Details ${prediction.id} Season`)
         .setLabel("Results - Season")
         .setStyle(ButtonStyle.Secondary)
     );
     actionRow.addComponents(
       new ButtonBuilder()
-        .setCustomId(`Results ${prediction.id} Alltime`)
+        .setCustomId(`Details ${prediction.id} Alltime`)
         .setLabel("Results - All-Time")
         .setStyle(ButtonStyle.Secondary)
     );
