@@ -166,6 +166,10 @@ const embedFields = {
     payouts = sortedBets.map((b) => {
       const payout = season ? b.season_payout : b.payout;
 
+      if (!payout) {
+        return `(--) ${userMention(b.better.discord_id)}`;
+      }
+
       return `(${sign}${payout.toString()}) `.concat(
         userMention(b.better.discord_id)
       );
