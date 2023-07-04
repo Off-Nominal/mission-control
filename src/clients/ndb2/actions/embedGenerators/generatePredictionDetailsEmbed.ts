@@ -76,24 +76,14 @@ export const generatePredictionDetailsEmbed = (
       .forEach((bf) => fields.push(bf));
   }
 
-  if (prediction.status === PredictionLifeCycle.SUCCESSFUL) {
+  if (
+    prediction.status === PredictionLifeCycle.SUCCESSFUL ||
+    prediction.status === PredictionLifeCycle.FAILED
+  ) {
     fields.push(
-      embedFields.payoutsText(prediction.status, prediction.payouts, season)
+      embedFields.season(prediction.season_id, prediction.season_applicable)
     );
-    embedFields
-      .longPayouts(prediction.status, "endorsements", endorsements, season)
-      .forEach((ef) => fields.push(ef));
-    embedFields
-      .longPayouts(prediction.status, "undorsements", undorsements, season)
-      .forEach((ef) => fields.push(ef));
-    embedFields
-      .longPayouts(prediction.status, "invalid", invalidBets, season)
-      .forEach((ef) => fields.push(ef));
-    embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
-    embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
-  }
 
-  if (prediction.status === PredictionLifeCycle.FAILED) {
     fields.push(
       embedFields.payoutsText(prediction.status, prediction.payouts, season)
     );
@@ -106,6 +96,7 @@ export const generatePredictionDetailsEmbed = (
     embedFields
       .longPayouts(prediction.status, "invalid", invalidBets, season)
       .forEach((ef) => fields.push(ef));
+
     embedFields.longVotes(yesVotes, "yes").forEach((yv) => fields.push(yv));
     embedFields.longVotes(noVotes, "no").forEach((nv) => fields.push(nv));
   }

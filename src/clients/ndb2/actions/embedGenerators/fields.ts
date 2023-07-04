@@ -9,6 +9,7 @@ import {
   NDB2API,
   PredictionLifeCycle,
 } from "../../../../utilities/ndb2Client/types";
+import { ndb2Client } from "../../../../utilities/ndb2Client";
 
 const USER_LIST_LIMIT = 30;
 
@@ -166,6 +167,10 @@ const embedFields = {
     payouts = sortedBets.map((b) => {
       const payout = season ? b.season_payout : b.payout;
 
+      if (!payout) {
+        return `(--) ${userMention(b.better.discord_id)}`;
+      }
+
       return `(${sign}${payout.toString()}) `.concat(
         userMention(b.better.discord_id)
       );
@@ -290,6 +295,23 @@ const embedFields = {
       name: "Notes",
       value:
         "The data in this detail reply is current at the time of click but could become out of date as different bets or votes are made. These kinds of replies (ephemeral replies, that only you can see) cannot be edited after the fact, so to ensure you are getting the most up to date info, click the Details button again to get a new reply as needed.",
+    };
+  },
+  season: (seasonId: number, applicable: boolean) => {
+    const season = ndb2Client.getSeason(seasonId);
+
+    let value = `${season.name} (${time(
+      new Date(season.start),
+      TimestampStyles.ShortDate
+    )} - ${time(new Date(season.end), TimestampStyles.ShortDate)})`;
+
+    if (!applicable) {
+      value += `\nThis prediction was retroactively triggered into this season after the season had closed, and thus its payout did not affect the season's results.`;
+    }
+
+    return {
+      name: "Season",
+      value,
     };
   },
 };

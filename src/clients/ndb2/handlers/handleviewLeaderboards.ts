@@ -81,7 +81,11 @@ export default function generateHandleViewLeaderboards(db: Client) {
 
       const leaders = response.data.leaders;
 
-      const embed = generateLeaderboardEmbed(leaderboardType, leaders);
+      const embed = generateLeaderboardEmbed(
+        leaderboardType,
+        leaders,
+        seasonIdentifier
+      );
 
       const actionRow = new ActionRowBuilder<ButtonBuilder>();
       actionRow.addComponents(
