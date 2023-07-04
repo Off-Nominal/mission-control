@@ -93,6 +93,9 @@ export const generatePredictionEmbed = (
       );
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
+      embedFields.season(prediction.season_id, prediction.season_applicable)
+    );
+    fields.push(
       embedFields.shortBets(
         endorsements.length,
         undorsements.length,
@@ -106,6 +109,9 @@ export const generatePredictionEmbed = (
   if (prediction.status === PredictionLifeCycle.SUCCESSFUL) {
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
+      embedFields.season(prediction.season_id, prediction.season_applicable)
+    );
+    fields.push(
       embedFields.shortBets(
         endorsements.length,
         undorsements.length,
@@ -117,6 +123,9 @@ export const generatePredictionEmbed = (
 
   if (prediction.status === PredictionLifeCycle.FAILED) {
     fields.push(embedFields.date(closed, "Effective Close Date"));
+    fields.push(
+      embedFields.season(prediction.season_id, prediction.season_applicable)
+    );
     fields.push(
       embedFields.shortBets(
         endorsements.length,
@@ -130,6 +139,9 @@ export const generatePredictionEmbed = (
   if (prediction.status === PredictionLifeCycle.OPEN) {
     fields.push(embedFields.date(due, "Due Date"));
     fields.push(
+      embedFields.season(prediction.season_id, prediction.season_applicable)
+    );
+    fields.push(
       embedFields.shortBets(
         endorsements.length,
         undorsements.length,
@@ -141,6 +153,9 @@ export const generatePredictionEmbed = (
   if (prediction.status === PredictionLifeCycle.RETIRED) {
     fields.push(embedFields.date(retired, "Retired"));
     fields.push(embedFields.date(due, "Original Due Day"));
+    fields.push(
+      embedFields.season(prediction.season_id, prediction.season_applicable)
+    );
   }
 
   embed.setFields(fields);

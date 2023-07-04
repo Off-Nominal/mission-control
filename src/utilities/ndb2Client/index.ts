@@ -125,6 +125,7 @@ const handleError = (err: any): [string, string] => {
 export class Ndb2Client {
   private baseURL = process.env.NDB2_API_BASEURL;
   private client: AxiosInstance;
+  private seasons: NDB2API.Season[] = [];
 
   constructor(key) {
     this.client = axios.create({
@@ -132,6 +133,26 @@ export class Ndb2Client {
         Authorization: `Bearer ${key}`,
       },
     });
+
+    this.getSeasons().then((seasons) => {
+      this.seasons = seasons.data;
+    });
+  }
+
+  public getSeasons(): Promise<NDB2API.GetSeasons> {
+    const url = new URL(this.baseURL);
+    url.pathname = "api/seasons";
+
+    return this.client
+      .get<NDB2API.GetSeasons>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public getSeason(id: string | number): NDB2API.Season {
+    return this.seasons.find((season) => season.id === id);
   }
 
   public getPrediction(id: string | number): Promise<NDB2API.GetPrediction> {

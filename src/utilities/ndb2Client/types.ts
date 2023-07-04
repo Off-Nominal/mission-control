@@ -54,6 +54,7 @@ export namespace NDB2API {
     };
     text: string;
     season_id: number;
+    season_applicable: boolean;
     created_date: string;
     due_date: string;
     closed_date: string | null;
@@ -207,4 +208,6 @@ export namespace NDB2API {
       };
     };
   };
+
+  export type GetSeasons = GeneralResponse<Season[]>;
 }
