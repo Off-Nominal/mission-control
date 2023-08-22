@@ -139,7 +139,6 @@ export class Ndb2Client {
   public initialize() {
     return this.getSeasons().then((seasons) => {
       this.seasons = seasons.data;
-      console.log(this.seasons);
     });
   }
 
