@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from "axios";
 import { NDB2API, PredictionLifeCycle } from "./types";
-import { abort } from "process";
 
 const isNdb2ApiResponse = (
   response: any
