@@ -133,8 +133,10 @@ export class Ndb2Client {
         Authorization: `Bearer ${key}`,
       },
     });
+  }
 
-    this.getSeasons().then((seasons) => {
+  public initialize() {
+    return this.getSeasons().then((seasons) => {
       this.seasons = seasons.data;
     });
   }
@@ -366,3 +368,7 @@ export class Ndb2Client {
 
 const ndbKey = process.env.NDB2_CLIENT_ID;
 export const ndb2Client = new Ndb2Client(ndbKey);
+
+ndb2Client.initialize().catch((err) => {
+  console.error(err);
+});

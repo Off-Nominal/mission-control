@@ -300,6 +300,13 @@ const embedFields = {
   season: (seasonId: number, applicable: boolean) => {
     const season = ndb2Client.getSeason(seasonId);
 
+    if (!season) {
+      return {
+        name: "Season",
+        value: "Future unnamed season",
+      };
+    }
+
     let value = `${season.name} (${time(
       new Date(season.start),
       TimestampStyles.ShortDate
