@@ -76,9 +76,10 @@ export class NewsManager extends EventEmitter {
     return watcher
       .start()
       .then((entries) => {
-        const recentEntries = entries.filter(
-          (entry) => entry.pubDate.getTime() > thresholdDate.getTime()
-        );
+        const recentEntries = entries.filter((entry) => {
+          if (!entry.pubDate) return false;
+          return entry.pubDate.getTime() > thresholdDate.getTime();
+        });
         recentEntries.forEach((entry) => (this.entryUrls[entry.link] = true));
         this.feeds.push({
           data: formattedFeed,
