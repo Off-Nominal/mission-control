@@ -27,7 +27,11 @@ export const feedRequest = (feedUrl: string): Promise<FeedParserEntry[]> => {
           reject(new Error("No entries in the feed"));
         }
         resolve(
-          entries.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime())
+          entries.sort((a, b) => {
+            if (!a.pubDate || !b.pubDate) return 0;
+
+            return b.pubDate.getTime() - a.pubDate.getTime();
+          })
         );
       });
 
