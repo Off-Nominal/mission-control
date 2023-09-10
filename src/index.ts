@@ -85,7 +85,12 @@ const bootChecklist = {
 };
 
 // Database Config
-const db = new DbClient();
+const db = new DbClient({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 db.connect()
   .then(() => {
     bootLog.addLog(LogStatus.SUCCESS, "Database connected");
@@ -96,23 +101,6 @@ db.connect()
   })
   .finally(() => {
     bootChecklist.db = true;
-  });
-
-// Test new DB connection prod instance
-const newDb = new DbClient({
-  connectionString: process.env.NEW_PROD_DB_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
-newDb
-  .connect()
-  .then(() => {
-    console.log("Connected to new DB instance");
-  })
-  .catch((err) => {
-    console.error("Could not connect to new DB instance");
-    console.error(err);
   });
 
 const {
