@@ -98,8 +98,6 @@ db.connect()
     bootChecklist.db = true;
   });
 
-console.log("new db", process.env.NEW_PROD_DB_URL);
-
 // Test new DB connection prod instance
 const newDb = new DbClient({
   connectionString: process.env.NEW_PROD_DB_URL,
