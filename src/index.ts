@@ -91,10 +91,30 @@ db.connect()
     bootLog.addLog(LogStatus.SUCCESS, "Database connected");
   })
   .catch((err) => {
+    console.error(err);
     bootLog.addLog(LogStatus.FAILURE, "Failure to connect to Database");
   })
   .finally(() => {
     bootChecklist.db = true;
+  });
+
+console.log("new db", process.env.NEW_PROD_DB_URL);
+
+// Test new DB connection prod instance
+const newDb = new DbClient({
+  connectionString: process.env.NEW_PROD_DB_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+newDb
+  .connect()
+  .then(() => {
+    console.log("Connected to new DB instance");
+  })
+  .catch((err) => {
+    console.error("Could not connect to new DB instance");
+    console.error(err);
   });
 
 const {
