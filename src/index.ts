@@ -66,7 +66,6 @@ bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 const bootChecklist = {
   db: false,
   utilityBot: false,
-  bcBot: false,
   contentBot: false,
   eventBot: false,
   ndb2Bot: false,
@@ -104,7 +103,6 @@ db.connect()
   });
 
 const {
-  bookClubBotHandlers,
   contentBotHandlers,
   devHandlers,
   eventBotHandlers,
@@ -125,7 +123,6 @@ const OFN_YT_FEED = process.env.OFN_YT_FEED;
 const HHFEED = process.env.HHFEED;
 
 const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
-const BC_TOKEN = process.env.BOOK_CLUB_BOT_TOKEN_ID;
 const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
 const EVENT_TOKEN = process.env.EVENT_BOT_TOKEN_ID;
 const NDB2_TOKEN = process.env.NDB2_BOT_TOKEN_ID;
@@ -182,9 +179,6 @@ const utilityBot = new Client({
     Partials.GuildMember,
   ],
   intents: [simpleIntents, utilityIntents],
-});
-const bcBot = new Client({
-  intents: simpleIntents,
 });
 const contentBot = new Client({
   intents: simpleIntents,
@@ -338,7 +332,6 @@ const reportGenerator = new ReportGenerator();
  ************************************/
 
 utilityBot.login(UTILITY_TOKEN);
-bcBot.login(BC_TOKEN);
 contentBot.login(CONTENT_TOKEN);
 eventBot.login(EVENT_TOKEN);
 ndb2Bot.login(NDB2_TOKEN);
@@ -478,22 +471,6 @@ utilityBot.on(
   UtilityBotEvents.STARSHIP_UPDATE,
   mainBotHandlers.handleStarshipSiteUpdate
 );
-
-/***********************************
- *  Book Club Bot Event Handlers
- ************************************/
-
-bcBot.once("ready", bookClubBotHandlers.handleReady);
-bcBot.once("ready", () => {
-  bootLog.addLog(LogStatus.SUCCESS, "Book Club Bot ready");
-  bootChecklist.bcBot = true;
-});
-bcBot.on("messageCreate", bookClubBotHandlers.handleMessageCreate);
-bcBot.on("threadCreate", bookClubBotHandlers.handleThreadCreate);
-bcBot.on("interactionCreate", (interaction) => {
-  bookClubBotHandlers.handleInteractionCreate(interaction);
-});
-bcBot.on("error", handleError);
 
 /***********************************
  *  Content Bot Event Handlers

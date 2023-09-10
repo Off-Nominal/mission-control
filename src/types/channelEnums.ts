@@ -17,15 +17,15 @@ export enum SpecificChannel {
   MEDIA = "media",
   TECH = "tech",
   RANDOM = "random",
+  LIVECHAT = "livechat",
+  BOCA_CHICA = "boca_chica",
+  LIVE = "live",
+  HANGOUT = "hangout",
+  BOOKCLUB = "bookclub",
+  OLD_COVID19 = "old_covid19",
   PATREON_MECO = "patreon_meco",
   PATREON_WEMARTIANS = "patreon_wemartians",
   MEMBERS_OFFNOMINAL = "members_offnominal",
-  LIVECHAT = "livechat",
-  BOCA_CHICA = "boca_chica",
-  BOOKCLUB = "bookclub",
-  LIVE = "live",
-  HANGOUT = "hangout",
-  OLD_COVID19 = "old_covid19",
 }
 
 export const channelIds = {
