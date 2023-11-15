@@ -7,18 +7,15 @@ import handleInteractionCreate from "./handleInteractionCreate";
 import handleThreadDigestSend from "./handleThreadDigestSend";
 import handleStarshipSiteUpdate from "./handleStarshipSiteUpdate";
 import handleSendDelinquents from "./handleSendDelinquents";
-import { Client } from "pg";
 
-export default function generateMainBotHandlers(db: Client) {
-  return {
-    handleMessageCreate,
-    handleThreadCreate,
-    handleGuildMemberUpdate,
-    handleMessageReactionAdd,
-    handleReady,
-    handleInteractionCreate,
-    handleThreadDigestSend,
-    handleStarshipSiteUpdate,
-    handleSendDelinquents,
-  };
-}
+export default {
+  handleMessageCreate,
+  handleThreadCreate,
+  handleGuildMemberUpdate,
+  handleMessageReactionAdd,
+  handleReady,
+  handleInteractionCreate,
+  handleThreadDigestSend,
+  handleStarshipSiteUpdate,
+  handleSendDelinquents,
+};

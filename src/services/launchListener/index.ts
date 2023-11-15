@@ -3,7 +3,7 @@ import { LogStatus, Logger } from "../../utilities/logger";
 import { RLLEvents } from "../../types/eventEnums";
 import { LogInitiator } from "../../types/logEnums";
 import { helperBot } from "../../discord_clients";
-import LaunchListener from "./launchListener";
+import LaunchListener from "./LaunchListener";
 
 const launchListener = new LaunchListener(mcconfig.providers.rll.key);
 

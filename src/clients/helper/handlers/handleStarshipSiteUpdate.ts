@@ -5,7 +5,7 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import { GithubUpdateEmbedData } from "../../../listeners/siteListener";
+import { GithubUpdateEmbedData } from "../../../services/siteListener/SiteListener";
 import mcconfig from "../../../mcconfig";
 
 export default async function handleStarshipSiteUpdate(

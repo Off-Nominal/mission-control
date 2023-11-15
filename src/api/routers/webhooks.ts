@@ -1,18 +1,18 @@
 import { Client, GuildMember, userMention } from "discord.js";
 import { Client as DbClient } from "pg";
 import express from "express";
-import { updatePredictionEmbeds } from "../clients/ndb2/actions/updatePredictionEmbeds";
-import { sendPublicNotice } from "../clients/ndb2/actions/sendPublicNotice";
+import { updatePredictionEmbeds } from "../../clients/ndb2/actions/updatePredictionEmbeds";
+import { sendPublicNotice } from "../../clients/ndb2/actions/sendPublicNotice";
 import ndb2MsgSubscriptionQueries, {
   Ndb2MsgSubscription,
-} from "../queries/ndb2_msg_subscriptions";
-import fetchGuild from "../utilities/fetchGuild";
-import { Logger, LogStatus } from "../utilities/logger";
-import { LogInitiator } from "../types/logEnums";
-import { isNdb2WebhookEvent, NDB2WebhookEvent } from "../types/routerTypes";
-import { sendSeasonStartNotice } from "../clients/ndb2/actions/sendSeasonStartNotice";
-import { sendSeasonEndNotice } from "../clients/ndb2/actions/sendSeasonEndNotice";
-import mcconfig from "../mcconfig";
+} from "../../queries/ndb2_msg_subscriptions";
+import fetchGuild from "../../utilities/fetchGuild";
+import { Logger, LogStatus } from "../../utilities/logger";
+import { LogInitiator } from "../../types/logEnums";
+import { isNdb2WebhookEvent, NDB2WebhookEvent } from "../../types/routerTypes";
+import { sendSeasonStartNotice } from "../../clients/ndb2/actions/sendSeasonStartNotice";
+import { sendSeasonEndNotice } from "../../clients/ndb2/actions/sendSeasonEndNotice";
+import mcconfig from "../../mcconfig";
 const router = express.Router();
 
 const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {

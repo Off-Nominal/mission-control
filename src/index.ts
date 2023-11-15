@@ -5,6 +5,13 @@ import { contentBot, eventsBot, helperBot, ndb2Bot } from "./discord_clients";
 import db from "./db";
 import api from "./api";
 
+// Services
+import launchListener from "./services/launchListener";
+import siteChecker from "./services/siteListener";
+
+// Handlers
+import handlers from "./clients/handlers";
+
 import {
   ButtonInteraction,
   CacheType,
@@ -16,9 +23,6 @@ import {
   ModalSubmitInteraction,
 } from "discord.js";
 
-import generateHandlers from "./clients/handlers";
-
-import { SiteListener } from "./listeners/siteListener";
 import { ReportGenerator } from "./utilities/ReportGenerator";
 import {
   youtubeFeedMapper,
@@ -51,6 +55,7 @@ import {
 } from "./types/eventEnums";
 import { Logger, LogStatus } from "./utilities/logger";
 import { LogInitiator } from "./types/logEnums";
+import { NDB2API } from "./utilities/ndb2Client/types";
 
 // Boot Logger
 console.log("*** BOOTING... ***");
@@ -94,14 +99,6 @@ db.connect()
     bootChecklist.db = true;
   });
 
-const {
-  contentBotHandlers,
-  devHandlers,
-  eventBotHandlers,
-  mainBotHandlers,
-  ndb2BotHandlers,
-} = generateHandlers(db);
-
 export enum Feed {
   WEMARTIANS = "wm",
   MAIN_ENGINE_CUT_OFF = "meco",
@@ -123,15 +120,8 @@ export type FeedList = {
 };
 
 /***********************************
- *  Express Server Setup
+ *  API Initialization
  ************************************/
-
-import webhooksRouter from "./routers/webhooks";
-import { NDB2API } from "./utilities/ndb2Client/types";
-import launchListener from "./services/launchListener";
-
-api.use("/webhooks", webhooksRouter(ndb2Bot, db));
-api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
 
 api.listen(mcconfig.api.port, () => {
   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
@@ -151,17 +141,6 @@ launchListener.on(RLLEvents.BOOT_ERROR, (message) => {
 });
 
 /***********************************
- *  Site Listener Setup
- ************************************/
-
-const starshipURL = "https://www.spacex.com/vehicles/starship/";
-
-const starshipChecker = new SiteListener(starshipURL, {
-  interval: 15,
-  cooldown: 600,
-});
-
-/***********************************
  *  News Feed Listener Setup
  ************************************/
 
@@ -170,7 +149,7 @@ newsFeedListener.initialize();
 newsFeedListener.on(
   NewsManagerEvents.NEW,
   (contentFeedItem: ContentFeedItem, text: string) => {
-    contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
+    handlers.content.handleNewContent(contentFeedItem, contentBot, "news", {
       text,
     });
   }
@@ -196,7 +175,7 @@ const streamHost = new StreamHost();
 
 // const memberManager = new MemberManager();
 // memberManager.on(MemberManagerEvents.SEND_DELINQUENTS, () => {
-//   mainBotHandlers.handleSendDelinquents(utilityBot);
+//   handlers.helper.handleSendDelinquents(utilityBot);
 // });
 
 /***********************************
@@ -250,23 +229,21 @@ hlFeedListener.initialize();
 hhFeedListener.initialize();
 ytFeedListener.initialize();
 
-starshipChecker.initialize();
-
 /***********************************
  *  NDB2 Bot Event Handlers
  ************************************/
 
-ndb2Bot.once("ready", ndb2BotHandlers.handleReady);
+ndb2Bot.once("ready", handlers.ndb2.handleReady);
 ndb2Bot.once("ready", () => {
   bootLog.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
   bootChecklist.ndb2Bot = true;
 });
 ndb2Bot.on(Events.InteractionCreate, (interaction) => {
-  ndb2BotHandlers.handleInteractionCreate(interaction);
+  handlers.ndb2.handleInteractionCreate(interaction);
 });
 ndb2Bot.on("error", handleError);
 ndb2Bot.on(Ndb2Events.NEW_PREDICTION, (interaction: ModalSubmitInteraction) => {
-  ndb2BotHandlers.handleNewPrediction(interaction);
+  handlers.ndb2.handleNewPrediction(interaction);
 });
 ndb2Bot.on(
   Ndb2Events.VIEW_PREDICTION,
@@ -274,25 +251,25 @@ ndb2Bot.on(
     interaction: ChatInputCommandInteraction<CacheType>,
     prediction: NDB2API.EnhancedPrediction
   ) => {
-    ndb2BotHandlers.handleViewPrediction(interaction, prediction);
+    handlers.ndb2.handleViewPrediction(interaction, prediction);
   }
 );
 ndb2Bot.on(
   Ndb2Events.VIEW_DETAILS,
   (interaction: ButtonInteraction, predictionId: string, season: boolean) => {
-    ndb2BotHandlers.handleViewDetails(interaction, predictionId, season);
+    handlers.ndb2.handleViewDetails(interaction, predictionId, season);
   }
 );
 ndb2Bot.on(
   Ndb2Events.NEW_BET,
   (interaction: ButtonInteraction, predictionId: string, command: string) => {
-    ndb2BotHandlers.handleNewBet(interaction, predictionId, command);
+    handlers.ndb2.handleNewBet(interaction, predictionId, command);
   }
 );
 ndb2Bot.on(
   Ndb2Events.RETIRE_PREDICTION,
   (interaction: ButtonInteraction, predictionId: string) => {
-    ndb2BotHandlers.handleRetirePrediction(interaction, predictionId);
+    handlers.ndb2.handleRetirePrediction(interaction, predictionId);
   }
 );
 ndb2Bot.on(
@@ -302,7 +279,7 @@ ndb2Bot.on(
     predictionId: string,
     closed_date?: string
   ) => {
-    ndb2BotHandlers.handleTriggerPrediction(
+    handlers.ndb2.handleTriggerPrediction(
       interaction,
       predictionId,
       closed_date
@@ -312,31 +289,31 @@ ndb2Bot.on(
 ndb2Bot.on(
   Ndb2Events.NEW_VOTE,
   (interaction: ButtonInteraction, predictionId: string, command: string) => {
-    ndb2BotHandlers.handleNewVote(interaction, predictionId, command);
+    handlers.ndb2.handleNewVote(interaction, predictionId, command);
   }
 );
 ndb2Bot.on(
   Ndb2Events.VIEW_SCORE,
   (interaction: ChatInputCommandInteraction<CacheType>) => {
-    ndb2BotHandlers.handleViewScore(interaction);
+    handlers.ndb2.handleViewScore(interaction);
   }
 );
 ndb2Bot.on(
   Ndb2Events.LIST_PREDICTIONS,
   (interaction: ChatInputCommandInteraction<CacheType>) => {
-    ndb2BotHandlers.handleListPredictions(interaction);
+    handlers.ndb2.handleListPredictions(interaction);
   }
 );
 ndb2Bot.on(
   Ndb2Events.SEARCH_PREDICTIONS,
   (interaction: ChatInputCommandInteraction<CacheType>) => {
-    ndb2BotHandlers.handleSearchPredictions(interaction);
+    handlers.ndb2.handleSearchPredictions(interaction);
   }
 );
 ndb2Bot.on(
   Ndb2Events.VIEW_LEADERBOARDS,
   (interaction: ChatInputCommandInteraction<CacheType>) => {
-    ndb2BotHandlers.handleViewLeaderboards(interaction);
+    handlers.ndb2.handleViewLeaderboards(interaction);
   }
 );
 
@@ -344,23 +321,23 @@ ndb2Bot.on(
  *  Utility Bot Event Handlers
  ************************************/
 
-helperBot.once("ready", mainBotHandlers.handleReady);
+helperBot.once("ready", handlers.helper.handleReady);
 helperBot.once("ready", scheduleThreadDigest);
 helperBot.once("ready", () => {
   bootLog.addLog(LogStatus.SUCCESS, "Main Bot ready");
   bootChecklist.helperBot = true;
 });
-helperBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
-helperBot.on("guildMemberUpdate", mainBotHandlers.handleGuildMemberUpdate);
-helperBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
-helperBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
+helperBot.on("messageCreate", handlers.helper.handleMessageCreate);
+helperBot.on("guildMemberUpdate", handlers.helper.handleGuildMemberUpdate);
+helperBot.on("messageReactionAdd", handlers.helper.handleMessageReactionAdd);
+helperBot.on("threadCreate", handlers.helper.handleThreadCreate);
 helperBot.on("interactionCreate", (interaction) => {
-  mainBotHandlers.handleInteractionCreate(interaction);
+  handlers.helper.handleInteractionCreate(interaction);
 });
 helperBot.on("error", handleError);
 helperBot.on(
   HelperBotEvents.SEND_DELINQUENTS,
-  mainBotHandlers.handleSendDelinquents
+  handlers.helper.handleSendDelinquents
 );
 helperBot.on(
   HelperBotEvents.SUMMARY_CREATE,
@@ -371,11 +348,11 @@ helperBot.on(
 helperBot.on(HelperBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
 helperBot.on(
   HelperBotEvents.THREAD_DIGEST_SEND,
-  mainBotHandlers.handleThreadDigestSend
+  handlers.helper.handleThreadDigestSend
 );
 helperBot.on(
   HelperBotEvents.STARSHIP_UPDATE,
-  mainBotHandlers.handleStarshipSiteUpdate
+  handlers.helper.handleStarshipSiteUpdate
 );
 
 /***********************************
@@ -391,34 +368,34 @@ const feeds: FeedList = {
   hh: hhFeedListener,
   yt: ytFeedListener,
 };
-contentBot.once("ready", contentBotHandlers.handleReady);
+contentBot.once("ready", handlers.content.handleReady);
 contentBot.once("ready", () => {
   bootLog.addLog(LogStatus.SUCCESS, "Content Bot ready");
   bootChecklist.contentBot = true;
 });
-contentBot.on("threadCreate", contentBotHandlers.handleThreadCreate);
+contentBot.on("threadCreate", handlers.content.handleThreadCreate);
 contentBot.on("interactionCreate", (interaction) => {
-  contentBotHandlers.handleInteractionCreate(interaction, feeds);
+  handlers.content.handleInteractionCreate(interaction, feeds);
 });
 contentBot.on("error", handleError);
-contentBot.on(ContentBotEvents.RSS_LIST, contentBotHandlers.handleRssList);
+contentBot.on(ContentBotEvents.RSS_LIST, handlers.content.handleRssList);
 
 /***********************************
  *  Event Bot Event Handlers
  ************************************/
 
-eventsBot.once("ready", eventBotHandlers.handleReady);
+eventsBot.once("ready", handlers.events.handleReady);
 eventsBot.once("ready", () => {
   bootLog.addLog(LogStatus.SUCCESS, "Event Bot ready");
   bootChecklist.eventBot = true;
 });
 eventsBot.on(
   "guildScheduledEventUpdate",
-  eventBotHandlers.handleGuildScheduledEventUpdate
+  handlers.events.handleGuildScheduledEventUpdate
 );
 eventsBot.on(
   "guildScheduledEventCreate",
-  eventBotHandlers.handleGuildScheduledEventCreate
+  handlers.events.handleGuildScheduledEventCreate
 );
 eventsBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
 eventsBot.on("guildScheduledEventUpdate", (oldEvent, newEvent) => {
@@ -429,12 +406,12 @@ eventsBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
 
 eventsBot.on(EventBotEvents.START, ytFeedListener.verifyEvent);
 eventsBot.on(EventBotEvents.END, (event) =>
-  contentBotHandlers.handleEventEnded(event, contentBot, feeds)
+  handlers.content.handleEventEnded(event, contentBot, feeds)
 );
 eventsBot.on(EventBotEvents.END, ytFeedListener.verifyEvent);
 
 eventsBot.on("interactionCreate", (interaction) => {
-  eventBotHandlers.handleInteractionCreate(interaction);
+  handlers.events.handleInteractionCreate(interaction);
 });
 eventsBot.on(EventBotEvents.RETRIEVED, eventsListener.initialize);
 eventsBot.on(
@@ -455,7 +432,7 @@ eventsBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);
 wmFeedListener.on(ContentListnerEvents.NEW, (content) => {
   deployWeMartians();
   setTimeout(() => {
-    contentBotHandlers.handleNewContent(content, contentBot, "content");
+    handlers.content.handleNewContent(content, contentBot, "content");
   }, 600000);
 });
 wmFeedListener.on(ContentListnerEvents.READY, (message) => {
@@ -467,7 +444,7 @@ wmFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 mecoFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  handlers.content.handleNewContent(content, contentBot, "content");
 });
 mecoFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.mecoFeedListener = true;
@@ -478,7 +455,7 @@ mecoFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 ofnFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  handlers.content.handleNewContent(content, contentBot, "content");
 });
 ofnFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.ofnFeedListener = true;
@@ -489,7 +466,7 @@ ofnFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 rprFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  handlers.content.handleNewContent(content, contentBot, "content");
 });
 rprFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.rprFeedListener = true;
@@ -500,7 +477,7 @@ rprFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 hlFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(content, contentBot, "content");
+  handlers.content.handleNewContent(content, contentBot, "content");
 });
 hlFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.hlFeedListener = true;
@@ -511,7 +488,7 @@ hlFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 hhFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  eventBotHandlers.handleNewContent(content, eventsBot);
+  handlers.events.handleNewContent(content, eventsBot);
 });
 hhFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.hhFeedListener = true;
@@ -522,7 +499,7 @@ hhFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 ytFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  eventBotHandlers.handleNewContent(content, eventsBot);
+  handlers.events.handleNewContent(content, eventsBot);
 });
 ytFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.ytFeedListener = true;
@@ -541,7 +518,7 @@ ytFeedListener.on(ContentListnerEvents.STREAM_END, streamHost.endParty);
 
 eventsListener.on(
   EventListenerEvents.MONITOR,
-  eventBotHandlers.handleEventsMonitored
+  handlers.events.handleEventsMonitored
 );
 eventsListener.on(EventListenerEvents.READY, (message) => {
   bootChecklist.eventsListener = true;
@@ -550,21 +527,21 @@ eventsListener.on(EventListenerEvents.READY, (message) => {
 
 streamHost.on(
   StreamHostEvents.PARTY_MESSAGE,
-  eventBotHandlers.handlePartyMessage
+  handlers.events.handlePartyMessage
 );
 
 /***********************************
  *  Site Listeners Event Handlers
  ************************************/
 
-starshipChecker.on(SiteListenerEvents.READY, () => {
+siteChecker.starship.on(SiteListenerEvents.READY, () => {
   bootChecklist.starshipSiteChecker = true;
   bootLog.addLog(
     LogStatus.SUCCESS,
     `Site listener monitoring Starship Website`
   );
 });
-starshipChecker.on(SiteListenerEvents.UPDATE, (update) =>
+siteChecker.starship.on(SiteListenerEvents.UPDATE, (update) =>
   helperBot.emit(HelperBotEvents.STARSHIP_UPDATE, update)
 );
 
@@ -621,7 +598,7 @@ const bootChecker = setInterval(() => {
  ************************************/
 
 if (mcconfig.env === "dev") {
-  helperBot.on("messageCreate", devHandlers.handleMessageCreate);
+  helperBot.on("messageCreate", handlers.dev.handleMessageCreate);
 
   helperBot.on(DevEvents.NEW_ENTRIES, (show) => {
     const feed = feeds[show] as ContentListener;
@@ -639,6 +616,6 @@ if (mcconfig.env === "dev") {
 
   helperBot.on(
     DevEvents.THREAD_DIGEST_SEND,
-    mainBotHandlers.handleThreadDigestSend
+    handlers.helper.handleThreadDigestSend
   );
 }

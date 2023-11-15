@@ -1,18 +1,14 @@
-import { Client } from "pg";
+import contentBotHandlers from "./content/handlers";
+import eventBotHandlers from "./event/handlers";
+import helperBotHandlers from "./helper/handlers";
+import ndb2BotHandlers from "./ndb2/handlers";
 
-import generateContentBotHandlers from "./content/handlers";
-import generateEventBotHandlers from "./event/handlers";
-import generateMainBotHandlers from "./helper/handlers";
-import generateNdb2BotHandlers from "./ndb2/handlers";
+import devHandlers from "./dev/handlers";
 
-import genereateDevHandlers from "./dev/handlers";
-
-export default function generateHandlers(db: Client) {
-  return {
-    contentBotHandlers: generateContentBotHandlers(db),
-    devHandlers: genereateDevHandlers(db),
-    eventBotHandlers: generateEventBotHandlers(db),
-    mainBotHandlers: generateMainBotHandlers(db),
-    ndb2BotHandlers: generateNdb2BotHandlers(db),
-  };
-}
+export default {
+  content: contentBotHandlers,
+  dev: devHandlers,
+  events: eventBotHandlers,
+  helper: helperBotHandlers,
+  ndb2: ndb2BotHandlers,
+};

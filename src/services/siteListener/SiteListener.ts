@@ -3,7 +3,7 @@ import { sub } from "date-fns";
 import EventEmitter = require("events");
 import { SiteListenerEvents } from "../../types/eventEnums";
 import { Logger } from "../../utilities/logger";
-import { GitHubAgent } from "./github";
+import { GitHubAgent } from "../../providers/github";
 
 export type SiteListenerOptions = {
   interval?: number;

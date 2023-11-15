@@ -1,32 +1,29 @@
-import { Client } from "pg";
 import handleReady from "./handleReady";
-import generateHandleInteractionCreate from "./handleInteractionCreate";
-import generateHandleNewPrediction from "./handleNewPrediction";
-import generateHandleNewBet from "./handleNewBet";
-import generateHandleViewPrediction from "./handleViewPrediction";
-import generateHandleViewDetails from "./handleViewDetails";
-import generateHandleRetirePrediction from "./handleRetirePrediction";
-import generateHandleTriggerPrediction from "./handleTriggerPrediction";
-import generateHandleNewVote from "./handleNewVote";
-import generateHandleViewScore from "./handleViewScore";
-import generateHandleListPredictions from "./handleListPredictions";
-import generateHandleSearchPredictions from "./handleSearchPredictions";
-import generateHandleViewLeaderboards from "./handleviewLeaderboards";
+import handleInteractionCreate from "./handleInteractionCreate";
+import handleNewPrediction from "./handleNewPrediction";
+import handleNewBet from "./handleNewBet";
+import handleViewPrediction from "./handleViewPrediction";
+import handleViewDetails from "./handleViewDetails";
+import handleRetirePrediction from "./handleRetirePrediction";
+import handleTriggerPrediction from "./handleTriggerPrediction";
+import handleNewVote from "./handleNewVote";
+import handleViewScore from "./handleViewScore";
+import handleListPredictions from "./handleListPredictions";
+import handleSearchPredictions from "./handleSearchPredictions";
+import handleViewLeaderboards from "./handleviewLeaderboards";
 
-export default function generateNdb2BotHandlers(db: Client) {
-  return {
-    handleReady,
-    handleInteractionCreate: generateHandleInteractionCreate(db),
-    handleNewPrediction: generateHandleNewPrediction(db),
-    handleNewBet: generateHandleNewBet(db),
-    handleViewPrediction: generateHandleViewPrediction(db),
-    handleViewDetails: generateHandleViewDetails(db),
-    handleRetirePrediction: generateHandleRetirePrediction(db),
-    handleTriggerPrediction: generateHandleTriggerPrediction(db),
-    handleNewVote: generateHandleNewVote(db),
-    handleViewScore: generateHandleViewScore(db),
-    handleListPredictions: generateHandleListPredictions(db),
-    handleSearchPredictions: generateHandleSearchPredictions(db),
-    handleViewLeaderboards: generateHandleViewLeaderboards(db),
-  };
-}
+export default {
+  handleReady,
+  handleInteractionCreate,
+  handleNewPrediction,
+  handleNewBet,
+  handleViewPrediction,
+  handleViewDetails,
+  handleRetirePrediction,
+  handleTriggerPrediction,
+  handleNewVote,
+  handleViewScore,
+  handleListPredictions,
+  handleSearchPredictions,
+  handleViewLeaderboards,
+};

@@ -1,6 +1,6 @@
 const { createAppAuth } = require("@octokit/auth-app");
 import axios, { AxiosRequestConfig } from "axios";
-import mcconfig from "../../../mcconfig";
+import mcconfig from "../../mcconfig";
 
 const BASEURL = mcconfig.providers.github.baseUrl;
 
