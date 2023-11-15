@@ -1,7 +1,9 @@
 import mcconfig from "./mcconfig";
 
-// Discord Clients
+// Main Providers
 import { contentBot, eventsBot, helperBot, ndb2Bot } from "./discord_clients";
+import db from "./db";
+import api from "./api";
 
 import {
   ButtonInteraction,
@@ -127,11 +129,14 @@ export type FeedList = {
 
 import webhooksRouter from "./routers/webhooks";
 import { NDB2API } from "./utilities/ndb2Client/types";
-import db from "./db";
-import api from "./api";
 
 api.use("/webhooks", webhooksRouter(ndb2Bot, db));
 api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
+
+api.listen(mcconfig.api.port, () => {
+  bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
+  bootChecklist.express = true;
+});
 
 /***********************************
  *  RLL Event Listener
