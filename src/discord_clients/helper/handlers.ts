@@ -1,27 +1,24 @@
-import mcconfig from "../../../mcconfig";
-import { channelMention, ThreadChannel } from "discord.js";
-import {
-  LogInitiator,
-  Logger,
-  LogStatus,
-} from "../../../services/logger/Logger";
-import fetchGuild from "../../../utilities/fetchGuild";
-import joinThread from "../../actions/joinThread";
+import mcconfig from "../../mcconfig";
+import { Client, ThreadChannel, channelMention } from "discord.js";
+import { LogInitiator, LogStatus, Logger } from "../../services/logger/Logger";
+import fetchGuild from "../../utilities/fetchGuild";
 
-export default async function handleThreadCreate(thread: ThreadChannel) {
+// Find Off-Nominal Discord Guild, fetch members to prevent partials
+export function populateGuildMembers(client: Client) {
+  const guild = fetchGuild(client);
+  guild.members
+    .fetch()
+    .catch((err) =>
+      console.error("Error fetching partials for Guild Members", err)
+    );
+}
+
+export function addModsToThread(thread: ThreadChannel) {
   const logger = new Logger(
     "Mod Thread Membership",
     LogInitiator.DISCORD,
     `threadCreate Event - ${channelMention(thread.id)}`
   );
-
-  try {
-    await joinThread(thread);
-    logger.addLog(LogStatus.SUCCESS, `Helper Bot successfully joined thread`);
-  } catch (err) {
-    console.error(err);
-    logger.addLog(LogStatus.FAILURE, `Helper Bot did not join thread`);
-  }
 
   const guild = fetchGuild(thread.client);
   logger.addLog(

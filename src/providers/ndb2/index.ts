@@ -374,5 +374,6 @@ export class Ndb2Client {
 
 const ndbKey = mcconfig.ndb2.clientId;
 const ndb2Client = new Ndb2Client(ndbKey);
+ndb2Client.initialize();
 
 export default ndb2Client;

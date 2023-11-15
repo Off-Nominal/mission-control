@@ -1,4 +1,3 @@
-import handleReady from "./handleReady";
 import handleInteractionCreate from "./handleInteractionCreate";
 import handleNewPrediction from "./handleNewPrediction";
 import handleNewBet from "./handleNewBet";
@@ -13,7 +12,6 @@ import handleSearchPredictions from "./handleSearchPredictions";
 import handleViewLeaderboards from "./handleViewLeaderboards";
 
 export default {
-  handleReady,
   handleInteractionCreate,
   handleNewPrediction,
   handleNewBet,

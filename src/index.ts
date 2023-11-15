@@ -14,10 +14,21 @@ bootLogger.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 // import feedListeners from "./services/feedListeners";
 
 // Providers
-import { contentBot, eventsBot, helperBot, ndb2Bot } from "./discord_clients";
-import db from "./db";
+import { contentBot, helperBot, ndb2Bot, eventsBot } from "./discord_clients";
 import api from "./api";
-import ndb2Client from "./providers/ndb2";
+import db from "./db";
+
+db.connect()
+  .then(() => {
+    bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
+    bootLogger.logItemSuccess("db");
+  })
+  .catch((err) => {
+    console.error(err);
+    bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
+  });
+
+// import ndb2Client from "./providers/ndb2";
 // import cache from "./providers/cache";
 
 // import handleError from "./clients/actions/handleError";
@@ -39,17 +50,6 @@ import ndb2Client from "./providers/ndb2";
 // import { SiteListenerEvents } from "./services/siteListener/SiteListener";
 
 // Database
-db.connect()
-  .then(() => {
-    bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
-    bootLogger.logItemSuccess("db");
-  })
-  .catch((err) => {
-    console.error(err);
-    bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
-  });
-
-ndb2Client.initialize();
 
 // export enum Feed {
 //   WEMARTIANS = "wm",

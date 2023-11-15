@@ -1,9 +1,11 @@
 import { ChatInputCommandInteraction, Client, Partials } from "discord.js";
-import mcconfig from "../mcconfig";
-import handlers from "../clients/handlers";
-import scheduleThreadDigest from "../utilities/scheduleThreadDigest";
-import handleError from "../clients/actions/handleError";
-import reportGenerator from "../services/reportGenerator";
+import mcconfig from "../../mcconfig";
+import handlers from "../../clients/handlers";
+import scheduleThreadDigest from "../../utilities/scheduleThreadDigest";
+import reportGenerator from "../../services/reportGenerator";
+import { addModsToThread, populateGuildMembers } from "./handlers";
+import { handleError, setPresence } from "../common_handlers";
+import joinThread from "../../clients/actions/joinThread";
 
 export enum HelperBotEvents {
   SUMMARY_CREATE = "summaryReportCreate",
@@ -26,17 +28,22 @@ const helperBot = new Client({
   ],
 });
 
-// // Handlers
-// helperBot.once("ready", handlers.helper.handleReady);
+// Handlers
+helperBot.once("ready", (client) => setPresence(client, "/help"));
+helperBot.once("ready", populateGuildMembers);
+helperBot.on("threadCreate", joinThread);
+helperBot.on("threadCreate", addModsToThread);
+helperBot.on("error", handleError);
+
 // helperBot.once("ready", scheduleThreadDigest);
 // helperBot.on("messageCreate", handlers.helper.handleMessageCreate);
 // helperBot.on("guildMemberUpdate", handlers.helper.handleGuildMemberUpdate);
 // helperBot.on("messageReactionAdd", handlers.helper.handleMessageReactionAdd);
-// helperBot.on("threadCreate", handlers.helper.handleThreadCreate);
+
 // helperBot.on("interactionCreate", (interaction) => {
 //   handlers.helper.handleInteractionCreate(interaction);
 // });
-// helperBot.on("error", handleError);
+
 // helperBot.on(
 //   HelperBotEvents.SEND_DELINQUENTS,
 //   handlers.helper.handleSendDelinquents
