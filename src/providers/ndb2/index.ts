@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { NDB2API, PredictionLifeCycle } from "./types";
 import mcconfig from "../../mcconfig";
+export * from "./types";
 
 const isNdb2ApiResponse = (
   response: any
@@ -137,9 +138,13 @@ export class Ndb2Client {
   }
 
   public initialize() {
-    return this.getSeasons().then((seasons) => {
-      this.seasons = seasons.data;
-    });
+    return this.getSeasons()
+      .then((seasons) => {
+        this.seasons = seasons.data;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
   public getSeasons(): Promise<NDB2API.GetSeasons> {
@@ -368,8 +373,6 @@ export class Ndb2Client {
 }
 
 const ndbKey = mcconfig.ndb2.clientId;
-export const ndb2Client = new Ndb2Client(ndbKey);
+const ndb2Client = new Ndb2Client(ndbKey);
 
-ndb2Client.initialize().catch((err) => {
-  console.error(err);
-});
+export default ndb2Client;

@@ -1,17 +1,24 @@
 import mcconfig from "./mcconfig";
 
-// Services
-import launchListener from "./services/launchListener";
-import siteChecker from "./services/siteListener";
-import feedListeners from "./services/feedListeners";
+// Boot Logger
+import bootLogger from "./services/logger";
+import { LogStatus } from "./services/logger/Logger";
+bootLogger.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 
-// Main Providers
+// Handlers
+// import handlers from "./clients/handlers";
+
+// Services
+// import launchListener from "./services/launchListener";
+// import siteChecker from "./services/siteListener";
+// import feedListeners from "./services/feedListeners";
+
+// Providers
 import { contentBot, eventsBot, helperBot, ndb2Bot } from "./discord_clients";
 import db from "./db";
 import api from "./api";
-
-// Handlers
-import handlers from "./clients/handlers";
+import ndb2Client from "./providers/ndb2";
+// import cache from "./providers/cache";
 
 // import handleError from "./clients/actions/handleError";
 // import { ContentListener } from "./listeners/contentListener/contentListener";
@@ -23,7 +30,7 @@ import handlers from "./clients/handlers";
 //   NewsManagerEvents,
 //   RLLEvents,
 // } from "./types/eventEnums";
-import { Logger, LogInitiator, LogStatus } from "./services/logger";
+
 // import newsFeedListener from "./services/newsfeedListener";
 // import { HelperBotEvents } from "./discord_clients/helper";
 // import eventsListener from "./services/eventsListener";
@@ -31,47 +38,18 @@ import { Logger, LogInitiator, LogStatus } from "./services/logger";
 // import { EventListenerEvents } from "./services/eventsListener/EventsListener";
 // import { SiteListenerEvents } from "./services/siteListener/SiteListener";
 
-// Boot Logger
-console.log("*** BOOTING... ***");
-const bootLog = new Logger(
-  "Application Bootup Log",
-  LogInitiator.SERVER,
-  "Bootup"
-);
-bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
+// Database
+db.connect()
+  .then(() => {
+    bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
+    bootLogger.logItemSuccess("db");
+  })
+  .catch((err) => {
+    console.error(err);
+    bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
+  });
 
-// const bootChecklist = {
-//   db: false,
-//   helperBot: false,
-//   contentBot: false,
-//   eventBot: false,
-//   ndb2Bot: false,
-//   starshipSiteChecker: false,
-//   wmFeedListener: false,
-//   mecoFeedListener: false,
-//   ofnFeedListener: false,
-//   rprFeedListener: false,
-//   hlFeedListener: false,
-//   hhFeedListener: false,
-//   ytFeedListener: false,
-//   eventsListener: false,
-//   newsFeed: false,
-//   rllClient: false,
-//   express: false,
-// };
-
-// // Database
-// db.connect()
-//   .then(() => {
-//     bootLog.addLog(LogStatus.SUCCESS, "Database connected");
-//   })
-//   .catch((err) => {
-//     console.error(err);
-//     bootLog.addLog(LogStatus.FAILURE, "Failure to connect to Database");
-//   })
-//   .finally(() => {
-//     bootChecklist.db = true;
-//   });
+ndb2Client.initialize();
 
 // export enum Feed {
 //   WEMARTIANS = "wm",
@@ -93,14 +71,14 @@ bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 //   [Feed.OFF_NOMINAL_YOUTUBE]: ContentListener;
 // };
 
-// /***********************************
-//  *  API Initialization
-//  ************************************/
+/***********************************
+ *  API Initialization
+ ************************************/
 
-// api.listen(mcconfig.api.port, () => {
-//   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
-//   bootChecklist.express = true;
-// });
+api.listen(mcconfig.api.port, () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
+  bootLogger.logItemSuccess("api");
+});
 
 // /***********************************
 //  *  RLL Event Listener
@@ -149,50 +127,45 @@ bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 //  *  NDB2 Bot Event Handlers
 //  ************************************/
 
-// ndb2Bot.once("ready", () => {
-//   bootLog.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
-//   bootChecklist.ndb2Bot = true;
-// });
+ndb2Bot.once("ready", () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
+  bootLogger.logItemSuccess("ndb2Bot");
+});
 
-// ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
+ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
 
 // /***********************************
 //  *  Utility Bot Event Handlers
 //  ************************************/
 
-// helperBot.once("ready", () => {
-//   bootLog.addLog(LogStatus.SUCCESS, "Main Bot ready");
-//   bootChecklist.helperBot = true;
-// });
+helperBot.once("ready", () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "Helper Bot ready");
+  bootLogger.logItemSuccess("helperBot");
+});
 
-// helperBot.login(mcconfig.discord.clients.helper.token);
+helperBot.login(mcconfig.discord.clients.helper.token);
 
 // /***********************************
 //  *  Content Bot Event Handlers
 //  ************************************/
 
-// contentBot.once("ready", handlers.content.handleReady);
-// contentBot.once("ready", () => {
-//   bootLog.addLog(LogStatus.SUCCESS, "Content Bot ready");
-//   bootChecklist.contentBot = true;
-// });
-// contentBot.on("threadCreate", handlers.content.handleThreadCreate);
-// contentBot.on("interactionCreate", (interaction) => {
-//   handlers.content.handleInteractionCreate(interaction, feedListeners);
-// });
-// contentBot.on("error", handleError);
-// contentBot.on(ContentBotEvents.RSS_LIST, handlers.content.handleRssList);
+contentBot.once("ready", () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "Content Bot ready");
+  bootLogger.logItemSuccess("contentBot");
+});
+
+contentBot.login(mcconfig.discord.clients.content.token);
 
 // /***********************************
 //  *  Event Bot Event Handlers
 //  ************************************/
 
-// eventsBot.once("ready", () => {
-//   bootLog.addLog(LogStatus.SUCCESS, "Event Bot ready");
-//   bootChecklist.eventBot = true;
-// });
+eventsBot.once("ready", () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "Event Bot ready");
+  bootLogger.logItemSuccess("eventsBot");
+});
 
-// eventsBot.login(mcconfig.discord.clients.events.token);
+eventsBot.login(mcconfig.discord.clients.events.token);
 
 // /***********************************
 //  *  Feed Listeners Event Handlers
@@ -288,51 +261,11 @@ bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 
 // siteChecker.starship.initialize();
 
-// /***********************************
-//  *  Boot Logger
-//  ************************************/
+/***********************************
+ *  Boot Logger
+ ************************************/
 
-// let bootLogAttempts = 0;
-// const bootChecker = setInterval(() => {
-//   let booted = true;
-
-//   for (const item in bootChecklist) {
-//     if (!bootChecklist[item]) {
-//       booted = false;
-//       break;
-//     }
-//   }
-
-//   if (booted) {
-//     bootLog.addLog(
-//       LogStatus.SUCCESS,
-//       "Boot Checklist complete. The Off-Nominal Discord Bot is online."
-//     );
-//     bootLog.sendLog(helperBot);
-//     console.log("*** BOOTUP COMPLETE ***");
-//     clearInterval(bootChecker);
-//   } else {
-//     bootLogAttempts++;
-//   }
-
-//   if (bootLogAttempts > 15) {
-//     let failures = "";
-
-//     for (const item in bootChecklist) {
-//       if (!bootChecklist[item]) {
-//         failures += `- ❌: ${item}`;
-//       }
-//     }
-
-//     bootLog.addLog(
-//       LogStatus.FAILURE,
-//       `Boot Checklist still incomplete after 15 attempts, logger aborted. Failed items:\n${failures}`
-//     );
-//     bootLog.sendLog(helperBot);
-//     console.log("*** BOOTUP FAILURE CHECK LOGS ***");
-//     clearInterval(bootChecker);
-//   }
-// }, 1000);
+bootLogger.checkBoot(helperBot);
 
 // /***********************************
 //  *  Dev Test Event Handlers

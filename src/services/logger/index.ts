@@ -1,83 +1,106 @@
-import {
-  ChannelType,
-  Client,
-  EmbedBuilder,
-  EmbedField,
-  time,
-  TimestampStyles,
-} from "discord.js";
-import mcconfig from "../../mcconfig";
+import { Client } from "discord.js";
+import { helperBot } from "../../discord_clients";
+import { LogInitiator, LogStatus, Logger } from "./Logger";
 
-export enum LogStatus {
-  SUCCESS = "✅",
-  FAILURE = "❌",
-  INFO = "💬",
-  WARNING = "⚠️",
-}
+type BootChecklist = {
+  db: boolean;
+  helperBot: boolean;
+  contentBot: boolean;
+  eventsBot: boolean;
+  ndb2Bot: boolean;
+  starshipSiteChecker: boolean;
+  wmFeedListener: boolean;
+  mecoFeedListener: boolean;
+  ofnFeedListener: boolean;
+  rprFeedListener: boolean;
+  hlFeedListener: boolean;
+  hhFeedListener: boolean;
+  ytFeedListener: boolean;
+  eventsListener: boolean;
+  newsFeed: boolean;
+  rllClient: boolean;
+  api: boolean;
+};
 
-export enum LogInitiator {
-  SERVER = "Server",
-  DISCORD = "Discord",
-  RLL = "RLL CLient",
-  NDB2 = "NDB2",
-}
-
-export class Logger {
-  private fields: EmbedField[] = [];
-  private date: Date = new Date();
-  private title: string;
-  private description: string;
+class BootLogger extends Logger {
+  private checklist: BootChecklist = {
+    db: false,
+    helperBot: false,
+    contentBot: false,
+    eventsBot: false,
+    ndb2Bot: false,
+    starshipSiteChecker: false,
+    wmFeedListener: false,
+    mecoFeedListener: false,
+    ofnFeedListener: false,
+    rprFeedListener: false,
+    hlFeedListener: false,
+    hhFeedListener: false,
+    ytFeedListener: false,
+    eventsListener: false,
+    newsFeed: false,
+    rllClient: false,
+    api: false,
+  };
 
   constructor(title: string, initiator: LogInitiator, eventName: string) {
-    this.title = title;
-    this.description = `Initiated by: ${initiator}\nEvent Name: ${eventName}`;
+    super(title, initiator, eventName);
+    console.log("*** BOOTING... ***");
   }
 
-  public addLog(
-    status: LogStatus,
-    value: string,
-    inline: boolean = false,
-    timestamp: Date = new Date()
-  ) {
-    const text = `${status} ${time(
-      timestamp,
-      TimestampStyles.LongTime
-    )}: ${value}`;
-
-    const field: EmbedField = {
-      name: "\u200B",
-      value: text.slice(0, 1023),
-      inline,
-    };
-
-    this.fields.push(field);
+  logItemSuccess(item: keyof BootChecklist) {
+    this.checklist[item] = true;
   }
 
-  private generateEmbed(): EmbedBuilder {
-    const embed = new EmbedBuilder({
-      title: this.title + `: ${time(this.date, TimestampStyles.LongDate)}`,
-      description: this.description,
-      fields: this.fields,
-    });
+  checkBoot(client: Client) {
+    let bootLogAttempts = 0;
+    const bootChecker = setInterval(() => {
+      let booted = true;
 
-    return embed;
-  }
-
-  public async sendLog(client: Client) {
-    const embed = this.generateEmbed();
-
-    try {
-      const channel = await client.channels.fetch(
-        mcconfig.discord.channels.bots
-      );
-      if (channel.type === ChannelType.GuildText) {
-        return channel.send({ embeds: [embed] });
-      } else {
-        throw new Error("Tried to send log to non-text based channel.");
+      for (const item in this.checklist) {
+        if (!this.checklist[item]) {
+          booted = false;
+          break;
+        }
       }
-    } catch (err) {
-      console.error("Failed to Send Log");
-      console.error(err);
-    }
+
+      if (booted) {
+        this.addLog(
+          LogStatus.SUCCESS,
+          "Boot Checklist complete. The Off-Nominal Discord Bot is online."
+        );
+        this.sendLog(client);
+        console.log("*** BOOTUP COMPLETE ***");
+        clearInterval(bootChecker);
+      } else {
+        bootLogAttempts++;
+      }
+
+      if (bootLogAttempts > 15) {
+        let failures = "";
+
+        for (const item in this.checklist) {
+          if (!this.checklist[item]) {
+            failures += `- ❌: ${item}`;
+          }
+        }
+
+        this.addLog(
+          LogStatus.FAILURE,
+          `Boot Checklist still incomplete after 15 attempts, logger aborted. Failed items:\n${failures}`
+        );
+        this.sendLog(helperBot);
+        console.log("*** BOOTUP FAILURE CHECK LOGS ***");
+        clearInterval(bootChecker);
+      }
+    }, 1000);
   }
 }
+
+const bootLogger = new BootLogger(
+  "Application Bootup Log",
+  LogInitiator.SERVER,
+  "Bootup"
+);
+
+export default bootLogger;

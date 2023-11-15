@@ -1,5 +1,5 @@
 import { APIEmbedField, EmbedBuilder, userMention } from "discord.js";
-import { NDB2API } from "../../../../utilities/ndb2Client/types";
+import { NDB2API } from "../../../../providers/ndb2";
 
 export const generateLeaderboardEmbed = (
   type: "points" | "predictions" | "bets",

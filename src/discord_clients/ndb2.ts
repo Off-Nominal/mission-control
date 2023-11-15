@@ -9,7 +9,7 @@ import {
 import mcconfig from "../mcconfig";
 import handlers from "../clients/handlers";
 import handleError from "../clients/actions/handleError";
-import { NDB2API } from "../utilities/ndb2Client/types";
+import { NDB2API } from "../providers/ndb2";
 
 export enum Ndb2Events {
   NEW_PREDICTION = "new_prediction",
@@ -29,86 +29,86 @@ const ndb2Bot = new Client({
   intents: [mcconfig.discord.intents.simpleIntents],
 });
 
-// Handlers
-ndb2Bot.once("ready", handlers.ndb2.handleReady);
-ndb2Bot.on(Events.InteractionCreate, (interaction) => {
-  handlers.ndb2.handleInteractionCreate(interaction);
-});
+// // Handlers
+// ndb2Bot.once("ready", handlers.ndb2.handleReady);
+// ndb2Bot.on(Events.InteractionCreate, (interaction) => {
+//   handlers.ndb2.handleInteractionCreate(interaction);
+// });
 
-ndb2Bot.on("error", handleError);
-ndb2Bot.on(Ndb2Events.NEW_PREDICTION, (interaction: ModalSubmitInteraction) => {
-  handlers.ndb2.handleNewPrediction(interaction);
-});
-ndb2Bot.on(
-  Ndb2Events.VIEW_PREDICTION,
-  (
-    interaction: ChatInputCommandInteraction<CacheType>,
-    prediction: NDB2API.EnhancedPrediction
-  ) => {
-    handlers.ndb2.handleViewPrediction(interaction, prediction);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.VIEW_DETAILS,
-  (interaction: ButtonInteraction, predictionId: string, season: boolean) => {
-    handlers.ndb2.handleViewDetails(interaction, predictionId, season);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.NEW_BET,
-  (interaction: ButtonInteraction, predictionId: string, command: string) => {
-    handlers.ndb2.handleNewBet(interaction, predictionId, command);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.RETIRE_PREDICTION,
-  (interaction: ButtonInteraction, predictionId: string) => {
-    handlers.ndb2.handleRetirePrediction(interaction, predictionId);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.TRIGGER_PREDICTION,
-  (
-    interaction: ButtonInteraction,
-    predictionId: string,
-    closed_date?: string
-  ) => {
-    handlers.ndb2.handleTriggerPrediction(
-      interaction,
-      predictionId,
-      closed_date
-    );
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.NEW_VOTE,
-  (interaction: ButtonInteraction, predictionId: string, command: string) => {
-    handlers.ndb2.handleNewVote(interaction, predictionId, command);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.VIEW_SCORE,
-  (interaction: ChatInputCommandInteraction<CacheType>) => {
-    handlers.ndb2.handleViewScore(interaction);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.LIST_PREDICTIONS,
-  (interaction: ChatInputCommandInteraction<CacheType>) => {
-    handlers.ndb2.handleListPredictions(interaction);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.SEARCH_PREDICTIONS,
-  (interaction: ChatInputCommandInteraction<CacheType>) => {
-    handlers.ndb2.handleSearchPredictions(interaction);
-  }
-);
-ndb2Bot.on(
-  Ndb2Events.VIEW_LEADERBOARDS,
-  (interaction: ChatInputCommandInteraction<CacheType>) => {
-    handlers.ndb2.handleViewLeaderboards(interaction);
-  }
-);
+// ndb2Bot.on("error", handleError);
+// ndb2Bot.on(Ndb2Events.NEW_PREDICTION, (interaction: ModalSubmitInteraction) => {
+//   handlers.ndb2.handleNewPrediction(interaction);
+// });
+// ndb2Bot.on(
+//   Ndb2Events.VIEW_PREDICTION,
+//   (
+//     interaction: ChatInputCommandInteraction<CacheType>,
+//     prediction: NDB2API.EnhancedPrediction
+//   ) => {
+//     handlers.ndb2.handleViewPrediction(interaction, prediction);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.VIEW_DETAILS,
+//   (interaction: ButtonInteraction, predictionId: string, season: boolean) => {
+//     handlers.ndb2.handleViewDetails(interaction, predictionId, season);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.NEW_BET,
+//   (interaction: ButtonInteraction, predictionId: string, command: string) => {
+//     handlers.ndb2.handleNewBet(interaction, predictionId, command);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.RETIRE_PREDICTION,
+//   (interaction: ButtonInteraction, predictionId: string) => {
+//     handlers.ndb2.handleRetirePrediction(interaction, predictionId);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.TRIGGER_PREDICTION,
+//   (
+//     interaction: ButtonInteraction,
+//     predictionId: string,
+//     closed_date?: string
+//   ) => {
+//     handlers.ndb2.handleTriggerPrediction(
+//       interaction,
+//       predictionId,
+//       closed_date
+//     );
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.NEW_VOTE,
+//   (interaction: ButtonInteraction, predictionId: string, command: string) => {
+//     handlers.ndb2.handleNewVote(interaction, predictionId, command);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.VIEW_SCORE,
+//   (interaction: ChatInputCommandInteraction<CacheType>) => {
+//     handlers.ndb2.handleViewScore(interaction);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.LIST_PREDICTIONS,
+//   (interaction: ChatInputCommandInteraction<CacheType>) => {
+//     handlers.ndb2.handleListPredictions(interaction);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.SEARCH_PREDICTIONS,
+//   (interaction: ChatInputCommandInteraction<CacheType>) => {
+//     handlers.ndb2.handleSearchPredictions(interaction);
+//   }
+// );
+// ndb2Bot.on(
+//   Ndb2Events.VIEW_LEADERBOARDS,
+//   (interaction: ChatInputCommandInteraction<CacheType>) => {
+//     handlers.ndb2.handleViewLeaderboards(interaction);
+//   }
+// );
 
 export default ndb2Bot;

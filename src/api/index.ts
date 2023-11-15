@@ -1,7 +1,7 @@
 import mcconfig from "../mcconfig";
 import express from "express";
 
-import webhooksRouter from "./routers/webhooks";
+import webhooksRouter from "./controllers/webhooks";
 
 const api = express();
 

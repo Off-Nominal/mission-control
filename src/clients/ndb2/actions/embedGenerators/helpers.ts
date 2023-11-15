@@ -1,4 +1,4 @@
-import { PredictionLifeCycle } from "../../../../utilities/ndb2Client/types";
+import { PredictionLifeCycle } from "../../../../providers/ndb2";
 
 export const getPredictedPrefix = (status: PredictionLifeCycle): string => {
   if (status === PredictionLifeCycle.RETIRED) {

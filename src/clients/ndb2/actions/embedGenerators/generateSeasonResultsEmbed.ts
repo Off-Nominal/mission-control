@@ -1,6 +1,6 @@
 import { EmbedBuilder, bold, userMention } from "discord.js";
-import { NDB2API } from "../../../../utilities/ndb2Client/types";
 import embedFields from "./fields";
+import { NDB2API } from "../../../../providers/ndb2";
 
 const trophies = ["🥇", "🥈", "🥉"];
 

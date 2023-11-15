@@ -1,3 +1,4 @@
+// Modules
 import {
   BaseMessageOptions,
   channelMention,
@@ -5,14 +6,23 @@ import {
   GuildMember,
   messageLink,
 } from "discord.js";
+
+// Providers
+import {
+  Logger,
+  LogStatus,
+  LogInitiator,
+} from "../../../services/logger/Logger";
+import { NDB2API } from "../../../providers/ndb2";
+import { NDB2WebhookEvent } from "../../../api/controllers/webhooks";
+
 import {
   Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
-import { NDB2WebhookEvent } from "../../../types/routerTypes";
+
+// Actions
 import fetchGuild from "../../../utilities/fetchGuild";
-import { Logger, LogStatus, LogInitiator } from "../../../services/logger";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionResponse } from "./generatePredictionResponse";
 import { generatePublicNotice } from "./generatePublicNotice";
 

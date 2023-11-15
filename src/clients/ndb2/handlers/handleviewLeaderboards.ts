@@ -5,10 +5,13 @@ import {
   CacheType,
   ChatInputCommandInteraction,
 } from "discord.js";
-import { LogStatus, LogInitiator, Logger } from "../../../services/logger";
-import { ndb2Client } from "../../../utilities/ndb2Client";
+import {
+  LogStatus,
+  LogInitiator,
+  Logger,
+} from "../../../services/logger/Logger";
 import { generateLeaderboardEmbed } from "../actions/embedGenerators/generateLeaderboardEmbed";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2";
 
 export default async function handleViewLeaderboards(
   interaction: ChatInputCommandInteraction<CacheType>

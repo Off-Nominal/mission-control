@@ -5,11 +5,10 @@ import {
   TimestampStyles,
   userMention,
 } from "discord.js";
-import {
+import ndb2Client, {
   NDB2API,
   PredictionLifeCycle,
-} from "../../../../utilities/ndb2Client/types";
-import { ndb2Client } from "../../../../utilities/ndb2Client";
+} from "../../../../providers/ndb2";
 
 const USER_LIST_LIMIT = 30;
 

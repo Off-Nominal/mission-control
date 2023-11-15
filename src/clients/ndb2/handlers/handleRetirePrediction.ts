@@ -4,10 +4,13 @@ import {
   deleteSubById,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
-import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
-import { ndb2Client } from "../../../utilities/ndb2Client";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
-import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionCache";
+import {
+  Logger,
+  LogInitiator,
+  LogStatus,
+} from "../../../services/logger/Logger";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import cache from "../../../providers/cache";
 
 export default async function handleRetirePrediction(
   interaction: ButtonInteraction,
@@ -41,8 +44,8 @@ export default async function handleRetirePrediction(
 
   // Clear the confirmation dialog
   try {
-    ndb2InteractionCache.retirements[prediction.id]?.deleteReply().then(() => {
-      delete ndb2InteractionCache.retirements[prediction.id];
+    cache.ndb2.retirements[prediction.id]?.deleteReply().then(() => {
+      delete cache.ndb2.retirements[prediction.id];
     });
   } catch (err) {
     logger.addLog(LogStatus.FAILURE, `Could not clear confirmation dialog.`);

@@ -16,7 +16,11 @@ import {
 } from "discord.js";
 import { isFulfilled, isRejected } from "../../../helpers/allSettledTypeGuard";
 import { fillMessageCache } from "../../../helpers/fillMessageCache";
-import { LogInitiator, Logger, LogStatus } from "../../../services/logger";
+import {
+  LogInitiator,
+  Logger,
+  LogStatus,
+} from "../../../services/logger/Logger";
 import fetchGuild from "../../../utilities/fetchGuild";
 
 type ThreadData = {

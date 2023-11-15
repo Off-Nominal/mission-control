@@ -6,10 +6,14 @@ import {
   GuildTextBasedChannel,
 } from "discord.js";
 import fetchGuild from "../../../utilities/fetchGuild";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generateNewSeasonEmbed } from "./embedGenerators/generateNewSeasonEmbed";
-import { LogStatus, Logger, LogInitiator } from "../../../services/logger";
+import {
+  LogStatus,
+  Logger,
+  LogInitiator,
+} from "../../../services/logger/Logger";
 import mcconfig from "../../../mcconfig";
+import { NDB2API } from "../../../providers/ndb2";
 
 export const sendSeasonStartNotice = async (
   client: Client,

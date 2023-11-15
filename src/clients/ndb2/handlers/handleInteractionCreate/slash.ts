@@ -14,14 +14,17 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../../commands/ndb2";
-import { Logger, LogInitiator, LogStatus } from "../../../../services/logger";
-import { ndb2Client } from "../../../../utilities/ndb2Client";
-import { NDB2API } from "../../../../utilities/ndb2Client/types";
-import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2InteractionCache";
+import {
+  Logger,
+  LogInitiator,
+  LogStatus,
+} from "../../../../services/logger/Logger";
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
 import mcconfig from "../../../../mcconfig";
 import { Ndb2Events } from "../../../../discord_clients/ndb2";
+import ndb2Client, { NDB2API } from "../../../../providers/ndb2";
+import cache from "../../../../providers/cache";
 
 export const handleSlashCommandInteraction = async (
   interaction: ChatInputCommandInteraction
@@ -248,14 +251,14 @@ export const handleSlashCommandInteraction = async (
 
     const content = `Retiring a prediction can only be done in the first ${mcconfig.ndb2.changeWindow} hours of its creation. If you decide to proceed with the cancellation, a public notice of the cancellation will be posted, and all bets against it will be cancelled as well. If you understand and still want to continue, click the button below.\n\nHere is the prediction you are about to retire:\n\n${prediction.text}`;
 
-    if (ndb2InteractionCache.retirements[prediction.id]) {
-      ndb2InteractionCache.retirements[prediction.id].deleteReply();
+    if (cache.ndb2.retirements[prediction.id]) {
+      cache.ndb2.retirements[prediction.id].deleteReply();
     }
-    ndb2InteractionCache.retirements[prediction.id] = interaction;
+    cache.ndb2.retirements[prediction.id] = interaction;
 
     setTimeout(() => {
       // Clear unused confirmation dialog
-      ndb2InteractionCache.retirements[prediction.id]
+      cache.ndb2.retirements[prediction.id]
         ?.fetchReply()
         .then((reply) => {
           if (reply.deletable) {
@@ -264,7 +267,7 @@ export const handleSlashCommandInteraction = async (
         })
         .catch((err) => console.error(err))
         .finally(() => {
-          delete ndb2InteractionCache.retirements[prediction.id];
+          delete cache.ndb2.retirements[prediction.id];
         });
     }, 600000);
 
@@ -363,14 +366,14 @@ export const handleSlashCommandInteraction = async (
       confirmMessage,
     ].join("\n\n");
 
-    if (ndb2InteractionCache.triggers[prediction.id]) {
-      ndb2InteractionCache.triggers[prediction.id].deleteReply();
+    if (cache.ndb2.triggers[prediction.id]) {
+      cache.ndb2.triggers[prediction.id].deleteReply();
     }
-    ndb2InteractionCache.triggers[prediction.id] = interaction;
+    cache.ndb2.triggers[prediction.id] = interaction;
 
     setTimeout(() => {
       // Clear unused confirmation dialog
-      ndb2InteractionCache.triggers[prediction.id]
+      cache.ndb2.triggers[prediction.id]
         ?.fetchReply()
         .then((reply) => {
           if (reply.deletable) {
@@ -379,7 +382,7 @@ export const handleSlashCommandInteraction = async (
         })
         .catch((err) => console.error(err))
         .finally(() => {
-          delete ndb2InteractionCache.triggers[prediction.id];
+          delete cache.ndb2.triggers[prediction.id];
         });
     }, 600000);
 

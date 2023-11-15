@@ -1,5 +1,5 @@
 import mcconfig from "../../mcconfig";
-import { LogStatus, LogInitiator, Logger } from "../logger";
+import { LogStatus, LogInitiator, Logger } from "../logger/Logger";
 import { RLLEvents } from "../../types/eventEnums";
 import { helperBot } from "../../discord_clients";
 import LaunchListener from "./LaunchListener";

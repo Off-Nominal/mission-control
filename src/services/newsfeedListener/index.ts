@@ -6,13 +6,13 @@ import { NewsManager } from "./NewsManager";
 
 const newsFeedListener = new NewsManager();
 
-newsFeedListener.on(
-  NewsManagerEvents.NEW,
-  (contentFeedItem: ContentFeedItem, text: string) => {
-    handlers.content.handleNewContent(contentFeedItem, contentBot, "news", {
-      text,
-    });
-  }
-);
+// newsFeedListener.on(
+//   NewsManagerEvents.NEW,
+//   (contentFeedItem: ContentFeedItem, text: string) => {
+//     handlers.content.handleNewContent(contentFeedItem, contentBot, "news", {
+//       text,
+//     });
+//   }
+// );
 
 export default newsFeedListener;

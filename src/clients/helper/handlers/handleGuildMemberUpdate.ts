@@ -6,7 +6,11 @@ import {
   Role,
   MessageCreateOptions,
 } from "discord.js";
-import { LogInitiator, Logger, LogStatus } from "../../../services/logger";
+import {
+  LogInitiator,
+  Logger,
+  LogStatus,
+} from "../../../services/logger/Logger";
 import mcconfig from "../../../mcconfig";
 
 const roleLabels = {

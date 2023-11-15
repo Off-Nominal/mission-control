@@ -8,14 +8,17 @@ import {
   userMention,
 } from "discord.js";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-import { ndb2Client } from "../../../utilities/ndb2Client";
-import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
+import {
+  Logger,
+  LogInitiator,
+  LogStatus,
+} from "../../../services/logger/Logger";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 import {
   Ndb2MsgSubscriptionType,
   addSubscription,
 } from "../../../queries/ndb2_msg_subscriptions";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2";
 
 export default async function handleNewPrediction(
   interaction: ModalSubmitInteraction

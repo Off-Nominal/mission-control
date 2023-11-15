@@ -1,8 +1,11 @@
 import { ButtonInteraction, userMention } from "discord.js";
-import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
-import { ndb2Client } from "../../../utilities/ndb2Client";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
+import {
+  Logger,
+  LogInitiator,
+  LogStatus,
+} from "../../../services/logger/Logger";
 import { ButtonCommand } from "./handleInteractionCreate/button";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2";
 
 export default async function handleNewBet(
   interaction: ButtonInteraction,

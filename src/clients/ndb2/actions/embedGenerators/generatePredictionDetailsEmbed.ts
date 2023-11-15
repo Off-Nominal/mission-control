@@ -1,10 +1,7 @@
 import { APIEmbedField, EmbedBuilder, italic, userMention } from "discord.js";
-import {
-  NDB2API,
-  PredictionLifeCycle,
-} from "../../../../utilities/ndb2Client/types";
 import embedFields from "./fields";
 import { getPredictedPrefix } from "./helpers";
+import { NDB2API, PredictionLifeCycle } from "../../../../providers/ndb2";
 
 export const generatePredictionDetailsEmbed = (
   prediction: NDB2API.EnhancedPrediction,

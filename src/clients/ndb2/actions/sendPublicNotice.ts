@@ -7,13 +7,17 @@ import {
   fetchSubByType,
 } from "../../../queries/ndb2_msg_subscriptions";
 import fetchGuild from "../../../utilities/fetchGuild";
-import { Logger, LogStatus, LogInitiator } from "../../../services/logger";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
+import {
+  Logger,
+  LogStatus,
+  LogInitiator,
+} from "../../../services/logger/Logger";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
-import { NDB2WebhookEvent } from "../../../types/routerTypes";
-import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionCache";
 import mcconfig from "../../../mcconfig";
+import { NDB2API } from "../../../providers/ndb2";
+import cache from "../../../providers/cache";
+import { NDB2WebhookEvent } from "../../../api/controllers/webhooks";
 
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 
@@ -134,7 +138,7 @@ export const sendPublicNotice = async (
             );
 
             const triggerNoticeInteraction =
-              ndb2InteractionCache.triggerResponses[prediction.id];
+              cache.ndb2.triggerResponses[prediction.id];
 
             if (triggerNoticeInteraction) {
               triggerNoticeInteraction
@@ -152,7 +156,7 @@ export const sendPublicNotice = async (
                   console.error(err);
                 })
                 .finally(() => {
-                  delete ndb2InteractionCache.triggerResponses[prediction.id];
+                  delete cache.ndb2.triggerResponses[prediction.id];
                 });
             }
           }

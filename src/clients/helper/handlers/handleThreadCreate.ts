@@ -1,6 +1,10 @@
 import mcconfig from "../../../mcconfig";
 import { channelMention, ThreadChannel } from "discord.js";
-import { LogInitiator, Logger, LogStatus } from "../../../services/logger";
+import {
+  LogInitiator,
+  Logger,
+  LogStatus,
+} from "../../../services/logger/Logger";
 import fetchGuild from "../../../utilities/fetchGuild";
 import joinThread from "../../actions/joinThread";
 

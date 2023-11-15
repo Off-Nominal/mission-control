@@ -5,14 +5,18 @@ import {
   GuildMember,
 } from "discord.js";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
+import {
+  Logger,
+  LogInitiator,
+  LogStatus,
+} from "../../../services/logger/Logger";
 import {
   Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
   addSubscription,
   fetchSubByType,
 } from "../../../queries/ndb2_msg_subscriptions";
+import { NDB2API } from "../../../providers/ndb2";
 
 export default async function handleViewPrediction(
   interaction: ChatInputCommandInteraction<CacheType>,

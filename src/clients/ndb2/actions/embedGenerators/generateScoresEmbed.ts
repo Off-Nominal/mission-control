@@ -1,5 +1,5 @@
 import { EmbedBuilder, GuildMember } from "discord.js";
-import { NDB2API } from "../../../../utilities/ndb2Client/types";
+import { NDB2API } from "../../../../providers/ndb2";
 
 export const generateScoresEmbed = (
   scores: NDB2API.Scores,

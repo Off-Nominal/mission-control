@@ -5,14 +5,17 @@ import {
   CacheType,
   ChatInputCommandInteraction,
 } from "discord.js";
-import { LogStatus, Logger, LogInitiator } from "../../../services/logger";
 import {
+  LogStatus,
+  Logger,
+  LogInitiator,
+} from "../../../services/logger/Logger";
+import { generateListPredictionsEmbed } from "../actions/embedGenerators/generateListPredictionsEmbed";
+import ndb2Client, {
+  PredictionLifeCycle,
   SearchOptions,
   SortByOption,
-  ndb2Client,
-} from "../../../utilities/ndb2Client";
-import { PredictionLifeCycle } from "../../../utilities/ndb2Client/types";
-import { generateListPredictionsEmbed } from "../actions/embedGenerators/generateListPredictionsEmbed";
+} from "../../../providers/ndb2";
 
 export default async function handleListPredictions(
   interaction: ChatInputCommandInteraction<CacheType>

@@ -5,11 +5,8 @@ import {
   ButtonStyle,
   GuildMember,
 } from "discord.js";
-import {
-  NDB2API,
-  PredictionLifeCycle,
-} from "../../../utilities/ndb2Client/types";
 import { generatePredictionEmbed } from "./embedGenerators/generatePredictionEmbed";
+import { NDB2API, PredictionLifeCycle } from "../../../providers/ndb2";
 
 export const generatePredictionResponse = (
   predictor: GuildMember | undefined,

@@ -1,13 +1,16 @@
 import { ButtonInteraction, channelMention, userMention } from "discord.js";
-import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
-import { ndb2Client } from "../../../utilities/ndb2Client";
-import { NDB2API } from "../../../utilities/ndb2Client/types";
-import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionCache";
+import {
+  Logger,
+  LogInitiator,
+  LogStatus,
+} from "../../../services/logger/Logger";
 import {
   fetchSubByType,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
 import { add } from "date-fns";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import cache from "../../../providers/cache";
 
 export default async function handleTriggerPrediction(
   interaction: ButtonInteraction,
@@ -42,8 +45,8 @@ export default async function handleTriggerPrediction(
 
   // Clear the confirmation dialog
   try {
-    ndb2InteractionCache.triggers[prediction.id]?.deleteReply().then(() => {
-      delete ndb2InteractionCache.triggers[prediction.id];
+    cache.ndb2.triggers[prediction.id]?.deleteReply().then(() => {
+      delete cache.ndb2.triggers[prediction.id];
     });
   } catch (err) {
     logger.addLog(LogStatus.FAILURE, `Could not clear confirmation dialog.`);
@@ -115,7 +118,7 @@ export default async function handleTriggerPrediction(
     });
 
     if (showContextLink) {
-      ndb2InteractionCache.triggerResponses[prediction.id] = interaction;
+      cache.ndb2.triggerResponses[prediction.id] = interaction;
     }
 
     logger.addLog(

@@ -26,35 +26,35 @@ const helperBot = new Client({
   ],
 });
 
-// Handlers
-helperBot.once("ready", handlers.helper.handleReady);
-helperBot.once("ready", scheduleThreadDigest);
-helperBot.on("messageCreate", handlers.helper.handleMessageCreate);
-helperBot.on("guildMemberUpdate", handlers.helper.handleGuildMemberUpdate);
-helperBot.on("messageReactionAdd", handlers.helper.handleMessageReactionAdd);
-helperBot.on("threadCreate", handlers.helper.handleThreadCreate);
-helperBot.on("interactionCreate", (interaction) => {
-  handlers.helper.handleInteractionCreate(interaction);
-});
-helperBot.on("error", handleError);
-helperBot.on(
-  HelperBotEvents.SEND_DELINQUENTS,
-  handlers.helper.handleSendDelinquents
-);
-helperBot.on(
-  HelperBotEvents.SUMMARY_CREATE,
-  (interaction: ChatInputCommandInteraction) => {
-    reportGenerator.handleReportRequest(interaction);
-  }
-);
-helperBot.on(HelperBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
-helperBot.on(
-  HelperBotEvents.THREAD_DIGEST_SEND,
-  handlers.helper.handleThreadDigestSend
-);
-helperBot.on(
-  HelperBotEvents.STARSHIP_UPDATE,
-  handlers.helper.handleStarshipSiteUpdate
-);
+// // Handlers
+// helperBot.once("ready", handlers.helper.handleReady);
+// helperBot.once("ready", scheduleThreadDigest);
+// helperBot.on("messageCreate", handlers.helper.handleMessageCreate);
+// helperBot.on("guildMemberUpdate", handlers.helper.handleGuildMemberUpdate);
+// helperBot.on("messageReactionAdd", handlers.helper.handleMessageReactionAdd);
+// helperBot.on("threadCreate", handlers.helper.handleThreadCreate);
+// helperBot.on("interactionCreate", (interaction) => {
+//   handlers.helper.handleInteractionCreate(interaction);
+// });
+// helperBot.on("error", handleError);
+// helperBot.on(
+//   HelperBotEvents.SEND_DELINQUENTS,
+//   handlers.helper.handleSendDelinquents
+// );
+// helperBot.on(
+//   HelperBotEvents.SUMMARY_CREATE,
+//   (interaction: ChatInputCommandInteraction) => {
+//     reportGenerator.handleReportRequest(interaction);
+//   }
+// );
+// helperBot.on(HelperBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
+// helperBot.on(
+//   HelperBotEvents.THREAD_DIGEST_SEND,
+//   handlers.helper.handleThreadDigestSend
+// );
+// helperBot.on(
+//   HelperBotEvents.STARSHIP_UPDATE,
+//   handlers.helper.handleStarshipSiteUpdate
+// );
 
 export default helperBot;

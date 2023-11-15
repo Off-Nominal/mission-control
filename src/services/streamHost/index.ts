@@ -3,9 +3,9 @@ import { StreamHost, StreamHostEvents } from "./StreamHost";
 
 const streamHost = new StreamHost();
 
-streamHost.on(
-  StreamHostEvents.PARTY_MESSAGE,
-  handlers.events.handlePartyMessage
-);
+// streamHost.on(
+//   StreamHostEvents.PARTY_MESSAGE,
+//   handlers.events.handlePartyMessage
+// );
 
 export default streamHost;
