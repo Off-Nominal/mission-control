@@ -8,4 +8,6 @@ const eventsBot = new Client({
   ],
 });
 
+eventsBot.login(mcconfig.discord.clients.events.token);
+
 export default eventsBot;

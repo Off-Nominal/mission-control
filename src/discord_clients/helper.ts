@@ -14,4 +14,6 @@ const helperBot = new Client({
   ],
 });
 
+helperBot.login(mcconfig.discord.clients.helper.token);
+
 export default helperBot;

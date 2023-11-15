@@ -1,6 +1,4 @@
 import mcconfig from "./mcconfig";
-import express from "express";
-import { Client as DbClient } from "pg";
 
 // Discord Clients
 import { contentBot, eventsBot, helperBot, ndb2Bot } from "./discord_clients";
@@ -82,13 +80,7 @@ const bootChecklist = {
   express: false,
 };
 
-// Database Config
-const db = new DbClient({
-  connectionString: mcconfig.database.url,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+// Database
 db.connect()
   .then(() => {
     bootLog.addLog(LogStatus.SUCCESS, "Database connected");
@@ -135,22 +127,11 @@ export type FeedList = {
 
 import webhooksRouter from "./routers/webhooks";
 import { NDB2API } from "./utilities/ndb2Client/types";
+import db from "./db";
+import api from "./api";
 
-const app = express();
-
-if (mcconfig.env !== "production") {
-  const morgan = require("morgan");
-  app.use(morgan("dev"));
-}
-
-app.use(express.json());
-
-app.use("/webhooks", webhooksRouter(ndb2Bot, db));
-app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
-app.listen(mcconfig.api.port, () => {
-  bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
-  bootChecklist.express = true;
-});
+api.use("/webhooks", webhooksRouter(ndb2Bot, db));
+api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
 
 /***********************************
  *  RLL Event Listener
@@ -265,11 +246,6 @@ const reportGenerator = new ReportGenerator();
 /***********************************
  *  ASYNC LOGINS/INITS
  ************************************/
-
-helperBot.login(mcconfig.discord.clients.helper.token);
-contentBot.login(mcconfig.discord.clients.content.token);
-eventsBot.login(mcconfig.discord.clients.events.token);
-ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
