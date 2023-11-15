@@ -1,7 +1,7 @@
 {
-  "name": "off-nominal-discord-bot",
-  "version": "1.0.0",
-  "description": "For use in the Off-Nominal Discord",
+  "name": "mission-control",
+  "version": "2.0.0",
+  "description": "Support application or use in the Off-Nominal Discord",
   "main": "index.js",
   "scripts": {
     "clear": "rm -rf ./dist",
@@ -13,18 +13,19 @@
     "log": "heroku logs -a onbc-bot --tail",
     "log:all": "heroku logs -a onbc-bot -n 1500",
     "deploy": "git push heroku master",
-    "db:reset": "node seeds/seed.js"
+    "db:reset": "node seeds/seed.js",
+    "db:connect:prod": "heroku pg:psql postgresql-deep-62451 --app off-nominal-mission-control"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mendahu/off-nominal-discord-bot.git"
+    "url": "git+https://github.com/Off-Nominal/mission-control.git"
   },
   "author": "Jake Robins",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mendahu/off-nominal-discord-bot/issues"
+    "url": "https://github.com/Off-Nominal/mission-control/issues"
   },
-  "homepage": "https://github.com/mendahu/off-nominal-discord-bot#readme",
+  "homepage": "https://github.com/Off-Nominal/mission-control#readme",
   "dependencies": {
     "@discordjs/rest": "^1.0.1",
     "@octokit/auth-app": "^3.4.0",
