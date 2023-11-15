@@ -6,7 +6,7 @@ import { marsTime } from "../actions/marstime/marsTime";
 import shunt from "../actions/shunt";
 import letters from "../../../helpers/pollIndicators";
 import createPollHelpEmbed from "../actions/poll/createPollHelpEmbed";
-import { UtilityBotEvents } from "../../../types/eventEnums";
+import { HelperBotEvents } from "../../../types/eventEnums";
 
 export default async function handleInteractionCreate(
   interaction: Interaction
@@ -37,7 +37,7 @@ export default async function handleInteractionCreate(
       return interaction.reply({ embeds: [generateSummaryHelpEmbed()] });
     }
 
-    interaction.client.emit(UtilityBotEvents.SUMMARY_CREATE, interaction);
+    interaction.client.emit(HelperBotEvents.SUMMARY_CREATE, interaction);
   }
 
   if (commandName === "poll") {

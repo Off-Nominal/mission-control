@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
-import { DevEvents, UtilityBotEvents } from "../../../types/eventEnums";
+import { DevEvents, HelperBotEvents } from "../../../types/eventEnums";
 import {
   findTempsToConvert,
   createTempConversionEmbed,
@@ -48,7 +48,7 @@ export default async function handleMessageCreate(message: Message) {
   }
 
   if (prefix === AllowedPrefix.SEND_DELINQUENTS) {
-    this.emit(UtilityBotEvents.SEND_DELINQUENTS, message);
+    this.emit(HelperBotEvents.SEND_DELINQUENTS, message);
   }
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;

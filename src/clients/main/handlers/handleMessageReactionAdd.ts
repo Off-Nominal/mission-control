@@ -4,7 +4,7 @@ import {
   PartialUser,
   User,
 } from "discord.js";
-import { UtilityBotEvents } from "../../../types/eventEnums";
+import { HelperBotEvents } from "../../../types/eventEnums";
 
 export default async function handleMessageReactionAdd(
   messageReact: MessageReaction | PartialMessageReaction,
@@ -28,7 +28,7 @@ export default async function handleMessageReactionAdd(
     messageReact.message.embeds[0]?.title !== "Channel Summary Report"
   ) {
     messageReact.client.emit(
-      UtilityBotEvents.SUMMARY_SEND,
+      HelperBotEvents.SUMMARY_SEND,
       user,
       messageReact.message.id
     );

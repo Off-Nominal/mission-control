@@ -33,7 +33,7 @@ export enum ContentListnerEvents {
   ERROR = "error",
 }
 
-export enum UtilityBotEvents {
+export enum HelperBotEvents {
   SUMMARY_CREATE = "summaryReportCreate",
   SUMMARY_SEND = "summaryReportSend",
   THREAD_DIGEST_SEND = "threadDigestSend",
