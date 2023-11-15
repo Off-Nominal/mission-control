@@ -1,9 +1,8 @@
 import axios from "axios";
-
-const WM_DEPLOY_URL = process.env.WM_DEPLOY_URL;
+import mcconfig from "../mcconfig";
 
 export default function () {
   axios
-    .post(WM_DEPLOY_URL)
+    .post(mcconfig.wemartians.deployUrl)
     .catch((err) => console.error("Failed to deploy WeMartians Build.", err));
 }

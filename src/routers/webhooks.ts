@@ -12,6 +12,7 @@ import { LogInitiator } from "../types/logEnums";
 import { isNdb2WebhookEvent, NDB2WebhookEvent } from "../types/routerTypes";
 import { sendSeasonStartNotice } from "../clients/ndb2/actions/sendSeasonStartNotice";
 import { sendSeasonEndNotice } from "../clients/ndb2/actions/sendSeasonEndNotice";
+import mcconfig from "../mcconfig";
 const router = express.Router();
 
 const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
@@ -25,7 +26,7 @@ const generateNDB2WebhookRouter = (client: Client, db: DbClient) => {
     );
 
     // verify source of webhook
-    if (req.headers.authorization !== `Bearer ${process.env.NDB2_CLIENT_ID}`) {
+    if (req.headers.authorization !== `Bearer ${mcconfig.ndb2.clientId}`) {
       logger.addLog(
         LogStatus.FAILURE,
         "Webhook did not have sufficient credentials, rejecting."

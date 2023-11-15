@@ -22,6 +22,7 @@ import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2Interacti
 import { Ndb2Events } from "../../../../types/eventEnums";
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
+import mcconfig from "../../../../mcconfig";
 
 export const handleSlashCommandInteraction = async (
   interaction: ChatInputCommandInteraction
@@ -246,7 +247,7 @@ export const handleSlashCommandInteraction = async (
       ),
     ];
 
-    const content = `Retiring a prediction can only be done in the first ${process.env.GM_PREDICTION_UPDATE_WINDOW_HOURS} hours of its creation. If you decide to proceed with the cancellation, a public notice of the cancellation will be posted, and all bets against it will be cancelled as well. If you understand and still want to continue, click the button below.\n\nHere is the prediction you are about to retire:\n\n${prediction.text}`;
+    const content = `Retiring a prediction can only be done in the first ${mcconfig.ndb2.changeWindow} hours of its creation. If you decide to proceed with the cancellation, a public notice of the cancellation will be posted, and all bets against it will be cancelled as well. If you understand and still want to continue, click the button below.\n\nHere is the prediction you are about to retire:\n\n${prediction.text}`;
 
     if (ndb2InteractionCache.retirements[prediction.id]) {
       ndb2InteractionCache.retirements[prediction.id].deleteReply();

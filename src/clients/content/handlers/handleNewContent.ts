@@ -1,6 +1,6 @@
 import { Channel, ChannelType, Client } from "discord.js";
-import { channelIds, SpecificChannel } from "../../../types/channelEnums";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
+import mcconfig from "../../../mcconfig";
 
 export type ContentFeedItem = {
   author: string;
@@ -18,7 +18,7 @@ export type ContentFeedItem = {
 export default async function handleNewContent(
   content: ContentFeedItem,
   client: Client,
-  target: SpecificChannel.NEWS | SpecificChannel.CONTENT,
+  target: "news" | "content",
   options?: {
     text?: string;
   }
@@ -28,7 +28,7 @@ export default async function handleNewContent(
   let channel: Channel;
 
   try {
-    channel = await client.channels.fetch(channelIds[target]);
+    channel = await client.channels.fetch(mcconfig.discord.channels[target]);
   } catch (err) {
     console.error(err);
   }

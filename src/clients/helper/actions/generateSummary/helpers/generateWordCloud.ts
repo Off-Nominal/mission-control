@@ -4,11 +4,10 @@ import {
   UploadApiOptions,
   UploadApiResponse,
 } from "cloudinary";
+import mcconfig from "../../../../../mcconfig";
 const cloudinary = require("cloudinary").v2;
 
 // Word Cloud API - https://wordcloudapi.com
-
-const RAPID_API_KEY = process.env.RAPID_API_KEY;
 
 export const generateWordCloud = async (text: string) => {
   const options: AxiosRequestConfig = {
@@ -23,7 +22,7 @@ export const generateWordCloud = async (text: string) => {
     },
     headers: {
       "content-type": "application/json",
-      "x-rapidapi-key": RAPID_API_KEY,
+      "x-rapidapi-key": mcconfig.providers.rapidApi.key,
       "x-rapidapi-host": "textvis-word-cloud-v1.p.rapidapi.com",
     },
   };

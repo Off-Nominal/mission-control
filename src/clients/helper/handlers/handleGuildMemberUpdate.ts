@@ -6,17 +6,16 @@ import {
   Role,
   MessageCreateOptions,
 } from "discord.js";
-import { SpecificChannel, channelIds } from "../../../types/channelEnums";
 import { LogInitiator } from "../../../types/logEnums";
-import { roleIds, SpecificRole } from "../../../types/roleEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
+import mcconfig from "../../../mcconfig";
 
 const roleLabels = {
-  [roleIds[SpecificRole.ANOMALY]]: "Discord Anomaly",
-  [roleIds[SpecificRole.NFRS]]: "Discord Never Fly Ride Share",
-  [roleIds[SpecificRole.MECO]]: "Main Engine Cut Off Patron",
-  [roleIds[SpecificRole.WEMARTIANS]]: "WeMartians Patron",
-  [roleIds[SpecificRole.YT_ANOMALY]]: "YouTube Anomaly",
+  [mcconfig.discord.roles.anomaly]: "Discord Anomaly",
+  [mcconfig.discord.roles.nfrs]: "Discord Never Fly Ride Share",
+  [mcconfig.discord.roles.meco]: "Main Engine Cut Off Patron",
+  [mcconfig.discord.roles.wemartians]: "WeMartians Patron",
+  [mcconfig.discord.roles.youtube_anomaly]: "YouTube Anomaly",
 };
 
 export default async function handleGuildMemberUpdate(
@@ -58,17 +57,17 @@ export default async function handleGuildMemberUpdate(
   const isNewMember =
     !oldRoles.find(
       (_, roleId) =>
-        roleId === roleIds[SpecificRole.PREMIUM] ||
-        roleId === roleIds[SpecificRole.YOUTUBE] ||
-        roleId === roleIds[SpecificRole.WEMARTIANS] ||
-        roleId === roleIds[SpecificRole.MECO]
+        roleId === mcconfig.discord.roles.premium ||
+        roleId === mcconfig.discord.roles.youtube ||
+        roleId === mcconfig.discord.roles.wemartians ||
+        roleId === mcconfig.discord.roles.meco
     ) &&
     newRoles.find(
       (_, roleId) =>
-        roleId === roleIds[SpecificRole.PREMIUM] ||
-        roleId === roleIds[SpecificRole.YOUTUBE] ||
-        roleId === roleIds[SpecificRole.WEMARTIANS] ||
-        roleId === roleIds[SpecificRole.MECO]
+        roleId === mcconfig.discord.roles.premium ||
+        roleId === mcconfig.discord.roles.youtube ||
+        roleId === mcconfig.discord.roles.wemartians ||
+        roleId === mcconfig.discord.roles.meco
     );
 
   logger.addLog(
@@ -116,7 +115,7 @@ export default async function handleGuildMemberUpdate(
       .setDescription("Thanks for supporting this community ❤️");
 
     for (const [k, v] of addedRoles) {
-      if (v.id === roleIds[SpecificRole.ANOMALY]) {
+      if (v.id === mcconfig.discord.roles.anomaly) {
         embed
           .setColor("#C0C0C0")
           .setTitle(
@@ -128,7 +127,7 @@ export default async function handleGuildMemberUpdate(
           "New pledge (Discord Anomaly) Embed added!"
         );
       }
-      if (v.id === roleIds[SpecificRole.NFRS]) {
+      if (v.id === mcconfig.discord.roles.nfrs) {
         embed
           .setColor("#FFD700")
           .setTitle(
@@ -140,7 +139,7 @@ export default async function handleGuildMemberUpdate(
           "New pledge (Discord #NeverFlyRideShare) Embed added!"
         );
       }
-      if (v.id === roleIds[SpecificRole.MECO]) {
+      if (v.id === mcconfig.discord.roles.meco) {
         embed
           .setColor("#66a3c6")
           .setTitle(
@@ -152,7 +151,7 @@ export default async function handleGuildMemberUpdate(
           "New pledge (MECO Patron) Embed added!"
         );
       }
-      if (v.id === roleIds[SpecificRole.WEMARTIANS]) {
+      if (v.id === mcconfig.discord.roles.wemartians) {
         embed
           .setColor("#d15d27")
           .setTitle(
@@ -164,7 +163,7 @@ export default async function handleGuildMemberUpdate(
           "New pledge (WeMartians Patron) Embed added!"
         );
       }
-      if (v.id === roleIds[SpecificRole.YT_ANOMALY]) {
+      if (v.id === mcconfig.discord.roles.youtube_anomaly) {
         embed
           .setColor("#FF0000")
           .setTitle(
@@ -181,7 +180,7 @@ export default async function handleGuildMemberUpdate(
 
   try {
     const channel = await newMember.client.channels.fetch(
-      channelIds[SpecificChannel.GENERAL]
+      mcconfig.discord.channels.general
     );
     if (channel.type !== ChannelType.GuildText) return;
 

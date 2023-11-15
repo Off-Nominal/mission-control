@@ -6,11 +6,7 @@ import {
   TimestampStyles,
 } from "discord.js";
 import { GithubUpdateEmbedData } from "../../../listeners/siteListener";
-import { SpecificChannel, channelIds } from "../../../types/channelEnums";
-
-const OWNER = "mendahu";
-const REPO = "starship-site-tracking";
-const BRANCH = process.env.STARSHIP_SITE_TRACKER_BRANCH;
+import mcconfig from "../../../mcconfig";
 
 export default async function handleStarshipSiteUpdate(
   update: GithubUpdateEmbedData
@@ -37,7 +33,7 @@ export default async function handleStarshipSiteUpdate(
       },
       {
         name: "History",
-        value: `[Recent Changes](https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/log.json)`,
+        value: `[Recent Changes](https://github.com/${mcconfig.siteTracker.starship.owner}/${mcconfig.siteTracker.starship.repo}/blob/${mcconfig.siteTracker.starship.branch}/log.json)`,
         inline: true,
       },
     ])
@@ -45,7 +41,7 @@ export default async function handleStarshipSiteUpdate(
 
   try {
     const channel = await client.channels.fetch(
-      channelIds[SpecificChannel.BOCA_CHICA]
+      mcconfig.discord.channels.boca_chica
     );
     if (channel.type !== ChannelType.GuildText) return;
     await channel.send({ embeds: [embed] });

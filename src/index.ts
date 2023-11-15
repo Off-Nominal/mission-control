@@ -1,9 +1,6 @@
-require("dotenv").config();
 import mcconfig from "./mcconfig";
 import express from "express";
 import { Client as DbClient } from "pg";
-
-console.log(mcconfig);
 
 // Discord Clients
 import { contentBot, eventsBot, helperBot, ndb2Bot } from "./discord_clients";
@@ -52,7 +49,6 @@ import {
   StreamHostEvents,
   HelperBotEvents,
 } from "./types/eventEnums";
-import { SpecificChannel } from "./types/channelEnums";
 import LaunchListener from "./listeners/launchListener/launchListener";
 import { Logger, LogStatus } from "./utilities/logger";
 import { LogInitiator } from "./types/logEnums";
@@ -88,7 +84,7 @@ const bootChecklist = {
 
 // Database Config
 const db = new DbClient({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: mcconfig.database.url,
   ssl: {
     rejectUnauthorized: false,
   },
@@ -141,9 +137,8 @@ import webhooksRouter from "./routers/webhooks";
 import { NDB2API } from "./utilities/ndb2Client/types";
 
 const app = express();
-const PORT = process.env.PORT || 8080;
 
-if (process.env.NODE_ENV !== "production") {
+if (mcconfig.env !== "production") {
   const morgan = require("morgan");
   app.use(morgan("dev"));
 }
@@ -152,7 +147,7 @@ app.use(express.json());
 
 app.use("/webhooks", webhooksRouter(ndb2Bot, db));
 app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
-app.listen(PORT, () => {
+app.listen(mcconfig.api.port, () => {
   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
   bootChecklist.express = true;
 });
@@ -199,14 +194,9 @@ newsFeedListener.initialize();
 newsFeedListener.on(
   NewsManagerEvents.NEW,
   (contentFeedItem: ContentFeedItem, text: string) => {
-    contentBotHandlers.handleNewContent(
-      contentFeedItem,
-      contentBot,
-      SpecificChannel.NEWS,
-      {
-        text,
-      }
-    );
+    contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
+      text,
+    });
   }
 );
 newsFeedListener.on(NewsManagerEvents.READY, (message) => {
@@ -276,10 +266,10 @@ const reportGenerator = new ReportGenerator();
  *  ASYNC LOGINS/INITS
  ************************************/
 
-helperBot.login(mcconfig.discord.clients.helperToken);
-contentBot.login(mcconfig.discord.clients.contentToken);
-eventsBot.login(mcconfig.discord.clients.eventToken);
-ndb2Bot.login(mcconfig.discord.clients.ndb2Token);
+helperBot.login(mcconfig.discord.clients.helper.token);
+contentBot.login(mcconfig.discord.clients.content.token);
+eventsBot.login(mcconfig.discord.clients.events.token);
+ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
@@ -494,11 +484,7 @@ eventsBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);
 wmFeedListener.on(ContentListnerEvents.NEW, (content) => {
   deployWeMartians();
   setTimeout(() => {
-    contentBotHandlers.handleNewContent(
-      content,
-      contentBot,
-      SpecificChannel.CONTENT
-    );
+    contentBotHandlers.handleNewContent(content, contentBot, "content");
   }, 600000);
 });
 wmFeedListener.on(ContentListnerEvents.READY, (message) => {
@@ -510,11 +496,7 @@ wmFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 mecoFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 mecoFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.mecoFeedListener = true;
@@ -525,11 +507,7 @@ mecoFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 ofnFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 ofnFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.ofnFeedListener = true;
@@ -540,11 +518,7 @@ ofnFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 rprFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 rprFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.rprFeedListener = true;
@@ -555,11 +529,7 @@ rprFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 hlFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 hlFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.hlFeedListener = true;
@@ -679,7 +649,7 @@ const bootChecker = setInterval(() => {
  *  to enable simulated events
  ************************************/
 
-if (process.env.NODE_ENV === "dev") {
+if (mcconfig.env === "dev") {
   helperBot.on("messageCreate", devHandlers.handleMessageCreate);
 
   helperBot.on(DevEvents.NEW_ENTRIES, (show) => {

@@ -2,7 +2,7 @@ import { Client } from "pg";
 
 import generateContentBotHandlers from "./content/handlers";
 import generateEventBotHandlers from "./event/handlers";
-import generateMainBotHandlers from "./main/handlers";
+import generateMainBotHandlers from "./helper/handlers";
 import generateNdb2BotHandlers from "./ndb2/handlers";
 
 import genereateDevHandlers from "./dev/handlers";
