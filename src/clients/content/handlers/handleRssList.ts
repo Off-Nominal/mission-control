@@ -2,7 +2,7 @@ import { SanityDocument } from "@sanity/client";
 import { EmbedBuilder, BaseInteraction } from "discord.js";
 import { sanityClient } from "../../../cms/client";
 import { NewsFeedDocument } from "../../../listeners/newsManager/newsManager";
-import { SpecificChannel } from "../../../types/channelEnums";
+import mcconfig from "../../../mcconfig";
 
 export interface NewsCategoryDocument extends SanityDocument {
   name: string;
@@ -26,7 +26,7 @@ export default function handleRssList(interaction: BaseInteraction) {
 
       const embed = new EmbedBuilder({
         title: "Currently Subscribed RSS Feeds",
-        description: `These are the feeds currently being posted in <#${SpecificChannel.NEWS}>.`,
+        description: `These are the feeds currently being posted in <#${mcconfig.discord.channels.news}>.`,
         fields: feedsFields,
       });
 

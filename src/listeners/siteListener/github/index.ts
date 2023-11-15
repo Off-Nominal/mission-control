@@ -1,10 +1,12 @@
 const { createAppAuth } = require("@octokit/auth-app");
 import axios, { AxiosRequestConfig } from "axios";
+import mcconfig from "../../../mcconfig";
 
-const BASEURL = "https://api.github.com";
-const OWNER = "Off-Nominal";
-const REPO = "starship-site-tracking";
-const BRANCH = process.env.STARSHIP_SITE_TRACKER_BRANCH;
+const BASEURL = mcconfig.providers.github.baseUrl;
+
+const OWNER = mcconfig.siteTracker.starship.owner;
+const REPO = mcconfig.siteTracker.starship.repo;
+const BRANCH = mcconfig.siteTracker.starship.branch;
 
 const config: AxiosRequestConfig = {
   headers: {
@@ -20,16 +22,16 @@ export class GitHubAgent {
 
   private async authenticate() {
     const auth = createAppAuth({
-      appId: process.env.GITHUB_APP_ID,
-      privateKey: process.env.GITHUB_PRIVATE_KEY,
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      appId: mcconfig.providers.github.appId,
+      privateKey: mcconfig.providers.github.privateKey,
+      clientId: mcconfig.providers.github.clientId,
+      clientSecret: mcconfig.providers.github.clientSecret,
     });
 
     try {
       const { token } = await auth({
         type: "installation",
-        installationId: process.env.BOT_INSTALL_ID,
+        installationId: mcconfig.providers.github.botInstallId,
       });
       this.token = token;
       this.authConfig = {
@@ -50,7 +52,7 @@ export class GitHubAgent {
   }
 
   public async getContents() {
-    const url = `${BASEURL}/repos/${OWNER}/${REPO}/contents/?ref=${BRANCH}`;
+    const url = `${BASEURL}/repos/${mcconfig.siteTracker.starship.owner}/${REPO}/contents/?ref=${BRANCH}`;
     try {
       const { data } = await axios.get(url, config);
       return data;

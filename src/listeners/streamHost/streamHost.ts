@@ -6,7 +6,7 @@ import {
   MessagePayload,
 } from "discord.js";
 import EventEmitter = require("events");
-import createPollEmbed from "../../clients/main/actions/poll/createPollEmbed";
+import createPollEmbed from "../../clients/helper/actions/poll/createPollEmbed";
 import { StreamHostEvents } from "../../types/eventEnums";
 import {
   generatePartyMessages,

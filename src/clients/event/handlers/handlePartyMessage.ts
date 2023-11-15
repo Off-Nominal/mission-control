@@ -4,7 +4,7 @@ import {
   GuildScheduledEventStatus,
   MessagePayload,
 } from "discord.js";
-import { SpecificChannel, channelIds } from "../../../types/channelEnums";
+import mcconfig from "../../../mcconfig";
 
 export default async function handlePartyMessage(
   message: string | MessagePayload,
@@ -12,7 +12,7 @@ export default async function handlePartyMessage(
 ) {
   try {
     const channel = await event.client.channels.fetch(
-      channelIds[SpecificChannel.LIVECHAT]
+      mcconfig.discord.channels.livechat
     );
     if (channel.type !== ChannelType.GuildText) return;
     channel.send(message);

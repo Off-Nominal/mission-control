@@ -9,13 +9,13 @@ import { LogInitiator } from "../../../types/logEnums";
 import fetchGuild from "../../../utilities/fetchGuild";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { channelIds } from "../../../types/channelEnums";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
 import { NDB2WebhookEvent } from "../../../types/routerTypes";
 import ndb2InteractionCache from "../../../utilities/ndb2Client/ndb2InteractionCache";
+import mcconfig from "../../../mcconfig";
 
-const fallbackContextChannelId = channelIds.general;
+const fallbackContextChannelId = mcconfig.discord.channels.general;
 
 const getLoggerFields = (
   type:

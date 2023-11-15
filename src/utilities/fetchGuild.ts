@@ -1,7 +1,8 @@
 import { Client } from "discord.js";
-
-const GUILD_ID = process.env.GUILD_ID;
+import mcconfig from "../mcconfig";
 
 export default function fetchGuild(client: Client) {
-  return client.guilds.cache.find((guild) => guild.id === GUILD_ID);
+  return client.guilds.cache.find(
+    (guild) => guild.id === mcconfig.discord.guildId
+  );
 }

@@ -8,9 +8,9 @@ import {
 import fetchGuild from "../../../utilities/fetchGuild";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generateNewSeasonEmbed } from "./embedGenerators/generateNewSeasonEmbed";
-import { channelIds } from "../../../types/channelEnums";
 import { LogInitiator } from "../../../types/logEnums";
 import { LogStatus, Logger } from "../../../utilities/logger";
+import mcconfig from "../../../mcconfig";
 
 export const sendSeasonStartNotice = async (
   client: Client,
@@ -40,7 +40,9 @@ export const sendSeasonStartNotice = async (
   let channel: GuildTextBasedChannel;
 
   try {
-    const channelResponse = await guild.channels.cache.get(channelIds.general);
+    const channelResponse = await guild.channels.cache.get(
+      mcconfig.discord.channels.general
+    );
     if (!channelResponse.isTextBased()) {
       throw new Error("Not a text-based channel");
     } else {

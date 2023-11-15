@@ -1,7 +1,7 @@
 import { ChannelType, Client, GuildScheduledEvent } from "discord.js";
 import { Feed, FeedList } from "../../..";
-import { SpecificChannel, channelIds } from "../../../types/channelEnums";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
+import mcconfig from "../../../mcconfig";
 
 export default async function handleEventEnded(
   event: GuildScheduledEvent,
@@ -24,7 +24,7 @@ export default async function handleEventEnded(
   const embed = createUniqueResultEmbed(episode);
   try {
     const channel = await client.channels.fetch(
-      channelIds[SpecificChannel.CONTENT]
+      mcconfig.discord.channels.content
     );
 
     if (channel.type !== ChannelType.GuildAnnouncement) return;

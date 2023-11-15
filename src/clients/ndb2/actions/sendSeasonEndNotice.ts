@@ -7,11 +7,11 @@ import {
 } from "discord.js";
 import fetchGuild from "../../../utilities/fetchGuild";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { channelIds } from "../../../types/channelEnums";
 import { LogInitiator } from "../../../types/logEnums";
 import { LogStatus, Logger } from "../../../utilities/logger";
 import { generateSeasonResultsEmbed } from "./embedGenerators/generateSeasonResultsEmbed";
 import { ndb2Client } from "../../../utilities/ndb2Client";
+import mcconfig from "../../../mcconfig";
 
 export const sendSeasonEndNotice = async (
   client: Client,
@@ -71,7 +71,9 @@ export const sendSeasonEndNotice = async (
   let channel: GuildTextBasedChannel;
 
   try {
-    const channelResponse = await guild.channels.cache.get(channelIds.general);
+    const channelResponse = await guild.channels.cache.get(
+      mcconfig.discord.channels.general
+    );
     if (!channelResponse.isTextBased()) {
       throw new Error("Not a text-based channel");
     } else {

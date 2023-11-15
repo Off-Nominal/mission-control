@@ -1,13 +1,13 @@
 import { Message, EmbedBuilder } from "discord.js";
-import { roleIds, SpecificRole } from "../../../types/roleEnums";
 import fetchGuild from "../../../utilities/fetchGuild";
+import mcconfig from "../../../mcconfig";
 
 export default async function handleSendDelinquents(message: Message) {
   const guild = fetchGuild(message.client);
   const guildMemberManager = guild.members;
 
   const author = await guildMemberManager.fetch(message.author.id);
-  if (!author.roles.cache.has(roleIds[SpecificRole.MODS])) {
+  if (!author.roles.cache.has(mcconfig.discord.roles.mods)) {
     return;
   }
 
@@ -17,13 +17,13 @@ export default async function handleSendDelinquents(message: Message) {
 
   const delinquents = allUsers.filter((member) => {
     const roleChecks = [
-      member.roles.cache.has(roleIds[SpecificRole.WEMARTIANS]),
-      member.roles.cache.has(roleIds[SpecificRole.MECO]),
-      member.roles.cache.has(roleIds[SpecificRole.YOUTUBE]),
-      member.roles.cache.has(roleIds[SpecificRole.PREMIUM]),
-      member.roles.cache.has(roleIds[SpecificRole.BOTS]),
-      member.roles.cache.has(roleIds[SpecificRole.HOSTS]),
-      member.roles.cache.has(roleIds[SpecificRole.GUESTS]),
+      member.roles.cache.has(mcconfig.discord.roles.wemartians),
+      member.roles.cache.has(mcconfig.discord.roles.meco),
+      member.roles.cache.has(mcconfig.discord.roles.youtube),
+      member.roles.cache.has(mcconfig.discord.roles.premium),
+      member.roles.cache.has(mcconfig.discord.roles.bots),
+      member.roles.cache.has(mcconfig.discord.roles.hosts),
+      member.roles.cache.has(mcconfig.discord.roles.guests),
     ];
     return !roleChecks.includes(true);
   });

@@ -1,9 +1,9 @@
 import { channelMention, ThreadChannel } from "discord.js";
 import { LogInitiator } from "../../../types/logEnums";
-import { roleIds, SpecificRole } from "../../../types/roleEnums";
 import { Logger, LogStatus } from "../../../utilities/logger";
 import fetchGuild from "../../../utilities/fetchGuild";
 import joinThread from "../../actions/joinThread";
+import mcconfig from "../../../mcconfig";
 
 export default async function handleThreadCreate(thread: ThreadChannel) {
   const logger = new Logger(
@@ -28,7 +28,7 @@ export default async function handleThreadCreate(thread: ThreadChannel) {
 
   // Auto-adds moderators to all threads
   const mods = guild.members.cache.filter((member) =>
-    member.roles.cache.some((role) => role.id === roleIds[SpecificRole.MODS])
+    member.roles.cache.some((role) => role.id === mcconfig.discord.roles.mods)
   );
   logger.addLog(LogStatus.INFO, `Found ${mods.size} mods to add to thread.`);
 

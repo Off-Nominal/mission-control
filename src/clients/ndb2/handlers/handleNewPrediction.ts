@@ -16,8 +16,7 @@ import ndb2MsgSubscriptionQueries, {
 } from "../../../queries/ndb2_msg_subscriptions";
 import { Client } from "pg";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
-import { channelIds } from "../../../types/channelEnums";
-import { SpecificChannel } from "../../../types/channelEnums";
+import mcconfig from "../../../mcconfig";
 
 export default function generateNewPredictionHandler(db: Client) {
   const { addSubscription } = ndb2MsgSubscriptionQueries(db);
@@ -168,7 +167,7 @@ export default function generateNewPredictionHandler(db: Client) {
 
     try {
       const botsChannel = await interaction.guild.channels.cache.find(
-        (c) => c.id === channelIds[SpecificChannel.BOTS]
+        (c) => c.id === mcconfig.discord.channels.bots
       );
       if (botsChannel.isTextBased()) {
         botsChannel.send({

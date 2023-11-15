@@ -1,10 +1,11 @@
 import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
-import { DevEvents, UtilityBotEvents } from "../../../types/eventEnums";
+import { DevEvents, HelperBotEvents } from "../../../types/eventEnums";
 import {
   findTempsToConvert,
   createTempConversionEmbed,
 } from "../actions/translateTemp";
+import mcconfig from "../../../mcconfig";
 
 export enum AllowedPrefix {
   SHUNT = "!shunt",
@@ -41,14 +42,14 @@ export default async function handleMessageCreate(message: Message) {
   const [prefix] = parseCommands(message);
 
   // for testing connection to db
-  if (process.env.NODE_ENV === "dev") {
+  if (mcconfig.env === "dev") {
     if (prefix === "!dbtest") {
       this.emit(DevEvents.DB_TEST);
     }
   }
 
   if (prefix === AllowedPrefix.SEND_DELINQUENTS) {
-    this.emit(UtilityBotEvents.SEND_DELINQUENTS, message);
+    this.emit(HelperBotEvents.SEND_DELINQUENTS, message);
   }
 
   if (!Object.values(AllowedPrefix).includes(prefix as AllowedPrefix)) return;

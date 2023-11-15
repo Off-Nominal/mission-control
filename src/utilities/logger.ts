@@ -6,8 +6,8 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import { SpecificChannel, channelIds } from "../types/channelEnums";
 import { LogInitiator } from "../types/logEnums";
+import mcconfig from "../mcconfig";
 
 export enum LogStatus {
   SUCCESS = "✅",
@@ -62,7 +62,7 @@ export class Logger {
 
     try {
       const channel = await client.channels.fetch(
-        channelIds[SpecificChannel.BOTS]
+        mcconfig.discord.channels.bots
       );
       if (channel.type === ChannelType.GuildText) {
         return channel.send({ embeds: [embed] });

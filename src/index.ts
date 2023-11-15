@@ -1,19 +1,19 @@
-require("dotenv").config();
-import express from "express";
-import { Client as DbClient } from "pg";
+import mcconfig from "./mcconfig";
+
+// Main Providers
+import { contentBot, eventsBot, helperBot, ndb2Bot } from "./discord_clients";
+import db from "./db";
+import api from "./api";
 
 import {
   ButtonInteraction,
   CacheType,
   ChatInputCommandInteraction,
-  Client,
   Collection,
   Events,
-  GatewayIntentBits,
   GuildScheduledEvent,
   GuildScheduledEventManager,
   ModalSubmitInteraction,
-  Partials,
 } from "discord.js";
 
 import generateHandlers from "./clients/handlers";
@@ -47,9 +47,8 @@ import {
   RLLEvents,
   SiteListenerEvents,
   StreamHostEvents,
-  UtilityBotEvents,
+  HelperBotEvents,
 } from "./types/eventEnums";
-import { SpecificChannel } from "./types/channelEnums";
 import LaunchListener from "./listeners/launchListener/launchListener";
 import { Logger, LogStatus } from "./utilities/logger";
 import { LogInitiator } from "./types/logEnums";
@@ -65,7 +64,7 @@ bootLog.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
 
 const bootChecklist = {
   db: false,
-  utilityBot: false,
+  helperBot: false,
   contentBot: false,
   eventBot: false,
   ndb2Bot: false,
@@ -83,13 +82,7 @@ const bootChecklist = {
   express: false,
 };
 
-// Database Config
-const db = new DbClient({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+// Database
 db.connect()
   .then(() => {
     bootLog.addLog(LogStatus.SUCCESS, "Database connected");
@@ -109,31 +102,6 @@ const {
   mainBotHandlers,
   ndb2BotHandlers,
 } = generateHandlers(db);
-
-const searchOptions = require("../config/searchOptions.json");
-
-const RLL_KEY = process.env.RLL_KEY;
-
-const WMFEED = process.env.WMFEED;
-const MECOFEED = process.env.MECOFEED;
-const OFNFEED = process.env.OFNFEED;
-const RPRFEED = process.env.RPRFEED;
-const HLFEED = process.env.HLFEED;
-const OFN_YT_FEED = process.env.OFN_YT_FEED;
-const HHFEED = process.env.HHFEED;
-
-const UTILITY_TOKEN = process.env.UTILITY_BOT_TOKEN_ID;
-const CONTENT_TOKEN = process.env.CONTENT_BOT_TOKEN_ID;
-const EVENT_TOKEN = process.env.EVENT_BOT_TOKEN_ID;
-const NDB2_TOKEN = process.env.NDB2_BOT_TOKEN_ID;
-
-const WM_SEARCH_OPTIONS = searchOptions.wm || searchOptions.default;
-const MECO_SEARCH_OPTIONS = searchOptions.meco || searchOptions.default;
-const OFN_SEARCH_OPTIONS = searchOptions.ofn || searchOptions.default;
-const RPR_SEARCH_OPTIONS = searchOptions.rpr || searchOptions.default;
-const HL_SEARCH_OPTIONS = searchOptions.hl || searchOptions.default;
-const HH_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
-const YT_SEARCH_OPTIONS = searchOptions.youtube || searchOptions.default;
 
 export enum Feed {
   WEMARTIANS = "wm",
@@ -156,58 +124,16 @@ export type FeedList = {
 };
 
 /***********************************
- *  Bot Setup
- ************************************/
-
-const simpleIntents = [
-  GatewayIntentBits.Guilds,
-  GatewayIntentBits.GuildMessages,
-  GatewayIntentBits.DirectMessages,
-];
-const utilityIntents = [
-  GatewayIntentBits.GuildMembers,
-  GatewayIntentBits.GuildMessageReactions,
-  GatewayIntentBits.MessageContent,
-];
-const eventIntents = [GatewayIntentBits.GuildScheduledEvents];
-
-const utilityBot = new Client({
-  partials: [
-    Partials.Message,
-    Partials.Channel,
-    Partials.Reaction,
-    Partials.GuildMember,
-  ],
-  intents: [simpleIntents, utilityIntents],
-});
-const contentBot = new Client({
-  intents: simpleIntents,
-});
-const eventBot = new Client({
-  intents: [simpleIntents, eventIntents],
-});
-const ndb2Bot = new Client({ intents: [simpleIntents] });
-
-/***********************************
  *  Express Server Setup
  ************************************/
 
 import webhooksRouter from "./routers/webhooks";
 import { NDB2API } from "./utilities/ndb2Client/types";
 
-const app = express();
-const PORT = process.env.PORT || 8080;
+api.use("/webhooks", webhooksRouter(ndb2Bot, db));
+api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
 
-if (process.env.NODE_ENV !== "production") {
-  const morgan = require("morgan");
-  app.use(morgan("dev"));
-}
-
-app.use(express.json());
-
-app.use("/webhooks", webhooksRouter(ndb2Bot, db));
-app.get("*", (req, res) => res.status(404).json("Invalid Resource."));
-app.listen(PORT, () => {
+api.listen(mcconfig.api.port, () => {
   bootLog.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
   bootChecklist.express = true;
 });
@@ -216,7 +142,7 @@ app.listen(PORT, () => {
  *  RLL Event Listener
  ************************************/
 
-const launchListener = new LaunchListener(RLL_KEY);
+const launchListener = new LaunchListener(mcconfig.providers.rll.key);
 launchListener.on(RLLEvents.READY, (message) => {
   bootChecklist.rllClient = true;
   bootLog.addLog(LogStatus.SUCCESS, message);
@@ -231,7 +157,7 @@ launchListener.on(RLLEvents.ERROR, (err) => {
     err.event
   );
   logger.addLog(LogStatus.FAILURE, err.error);
-  logger.sendLog(utilityBot);
+  logger.sendLog(helperBot);
 });
 
 /***********************************
@@ -254,14 +180,9 @@ newsFeedListener.initialize();
 newsFeedListener.on(
   NewsManagerEvents.NEW,
   (contentFeedItem: ContentFeedItem, text: string) => {
-    contentBotHandlers.handleNewContent(
-      contentFeedItem,
-      contentBot,
-      SpecificChannel.NEWS,
-      {
-        text,
-      }
-    );
+    contentBotHandlers.handleNewContent(contentFeedItem, contentBot, "news", {
+      text,
+    });
   }
 );
 newsFeedListener.on(NewsManagerEvents.READY, (message) => {
@@ -292,33 +213,33 @@ const streamHost = new StreamHost();
  *  Feed Listener Setup
  ************************************/
 
-const wmFeedListener = new ContentListener(WMFEED, {
+const wmFeedListener = new ContentListener(mcconfig.content.rss.wm, {
   processor: simpleCastFeedMapper,
-  searchOptions: WM_SEARCH_OPTIONS,
+  searchOptions: mcconfig.content.rss.searchOptions.default,
 });
-const mecoFeedListener = new ContentListener(MECOFEED, {
+const mecoFeedListener = new ContentListener(mcconfig.content.rss.meco, {
   processor: simpleCastFeedMapper,
-  searchOptions: MECO_SEARCH_OPTIONS,
+  searchOptions: mcconfig.content.rss.searchOptions.default,
 });
-const ofnFeedListener = new ContentListener(OFNFEED, {
+const ofnFeedListener = new ContentListener(mcconfig.content.rss.ofn, {
   processor: simpleCastFeedMapper,
-  searchOptions: OFN_SEARCH_OPTIONS,
+  searchOptions: mcconfig.content.rss.searchOptions.default,
 });
-const rprFeedListener = new ContentListener(RPRFEED, {
+const rprFeedListener = new ContentListener(mcconfig.content.rss.rpr, {
   processor: simpleCastFeedMapper,
-  searchOptions: RPR_SEARCH_OPTIONS,
+  searchOptions: mcconfig.content.rss.searchOptions.default,
 });
-const hlFeedListener = new ContentListener(HLFEED, {
+const hlFeedListener = new ContentListener(mcconfig.content.rss.hl, {
   processor: simpleCastFeedMapper,
-  searchOptions: HL_SEARCH_OPTIONS,
+  searchOptions: mcconfig.content.rss.searchOptions.default,
 });
-const hhFeedListener = new ContentListener(HHFEED, {
+const hhFeedListener = new ContentListener(mcconfig.content.rss.ofn_hh, {
   processor: youtubeFeedMapper,
-  searchOptions: HH_SEARCH_OPTIONS,
+  searchOptions: mcconfig.content.rss.searchOptions.youtube,
 });
-const ytFeedListener = new ContentListener(OFN_YT_FEED, {
+const ytFeedListener = new ContentListener(mcconfig.content.rss.ofn_yt, {
   processor: youtubeFeedMapper,
-  searchOptions: YT_SEARCH_OPTIONS,
+  searchOptions: mcconfig.content.rss.searchOptions.youtube,
 });
 
 /***********************************
@@ -330,11 +251,6 @@ const reportGenerator = new ReportGenerator();
 /***********************************
  *  ASYNC LOGINS/INITS
  ************************************/
-
-utilityBot.login(UTILITY_TOKEN);
-contentBot.login(CONTENT_TOKEN);
-eventBot.login(EVENT_TOKEN);
-ndb2Bot.login(NDB2_TOKEN);
 
 wmFeedListener.initialize();
 mecoFeedListener.initialize();
@@ -438,37 +354,37 @@ ndb2Bot.on(
  *  Utility Bot Event Handlers
  ************************************/
 
-utilityBot.once("ready", mainBotHandlers.handleReady);
-utilityBot.once("ready", scheduleThreadDigest);
-utilityBot.once("ready", () => {
+helperBot.once("ready", mainBotHandlers.handleReady);
+helperBot.once("ready", scheduleThreadDigest);
+helperBot.once("ready", () => {
   bootLog.addLog(LogStatus.SUCCESS, "Main Bot ready");
-  bootChecklist.utilityBot = true;
+  bootChecklist.helperBot = true;
 });
-utilityBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
-utilityBot.on("guildMemberUpdate", mainBotHandlers.handleGuildMemberUpdate);
-utilityBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
-utilityBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
-utilityBot.on("interactionCreate", (interaction) => {
+helperBot.on("messageCreate", mainBotHandlers.handleMessageCreate);
+helperBot.on("guildMemberUpdate", mainBotHandlers.handleGuildMemberUpdate);
+helperBot.on("messageReactionAdd", mainBotHandlers.handleMessageReactionAdd);
+helperBot.on("threadCreate", mainBotHandlers.handleThreadCreate);
+helperBot.on("interactionCreate", (interaction) => {
   mainBotHandlers.handleInteractionCreate(interaction);
 });
-utilityBot.on("error", handleError);
-utilityBot.on(
-  UtilityBotEvents.SEND_DELINQUENTS,
+helperBot.on("error", handleError);
+helperBot.on(
+  HelperBotEvents.SEND_DELINQUENTS,
   mainBotHandlers.handleSendDelinquents
 );
-utilityBot.on(
-  UtilityBotEvents.SUMMARY_CREATE,
+helperBot.on(
+  HelperBotEvents.SUMMARY_CREATE,
   (interaction: ChatInputCommandInteraction) => {
     reportGenerator.handleReportRequest(interaction);
   }
 );
-utilityBot.on(UtilityBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
-utilityBot.on(
-  UtilityBotEvents.THREAD_DIGEST_SEND,
+helperBot.on(HelperBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
+helperBot.on(
+  HelperBotEvents.THREAD_DIGEST_SEND,
   mainBotHandlers.handleThreadDigestSend
 );
-utilityBot.on(
-  UtilityBotEvents.STARSHIP_UPDATE,
+helperBot.on(
+  HelperBotEvents.STARSHIP_UPDATE,
   mainBotHandlers.handleStarshipSiteUpdate
 );
 
@@ -501,46 +417,46 @@ contentBot.on(ContentBotEvents.RSS_LIST, contentBotHandlers.handleRssList);
  *  Event Bot Event Handlers
  ************************************/
 
-eventBot.once("ready", eventBotHandlers.handleReady);
-eventBot.once("ready", () => {
+eventsBot.once("ready", eventBotHandlers.handleReady);
+eventsBot.once("ready", () => {
   bootLog.addLog(LogStatus.SUCCESS, "Event Bot ready");
   bootChecklist.eventBot = true;
 });
-eventBot.on(
+eventsBot.on(
   "guildScheduledEventUpdate",
   eventBotHandlers.handleGuildScheduledEventUpdate
 );
-eventBot.on(
+eventsBot.on(
   "guildScheduledEventCreate",
   eventBotHandlers.handleGuildScheduledEventCreate
 );
-eventBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
-eventBot.on("guildScheduledEventUpdate", (oldEvent, newEvent) => {
+eventsBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
+eventsBot.on("guildScheduledEventUpdate", (oldEvent, newEvent) => {
   launchListener.clearEvent(oldEvent, newEvent);
 });
-eventBot.on("guildScheduledEventCreate", eventsListener.addEvent);
-eventBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
+eventsBot.on("guildScheduledEventCreate", eventsListener.addEvent);
+eventsBot.on("guildScheduledEventDelete", eventsListener.cancelEvent);
 
-eventBot.on(EventBotEvents.START, ytFeedListener.verifyEvent);
-eventBot.on(EventBotEvents.END, (event) =>
+eventsBot.on(EventBotEvents.START, ytFeedListener.verifyEvent);
+eventsBot.on(EventBotEvents.END, (event) =>
   contentBotHandlers.handleEventEnded(event, contentBot, feeds)
 );
-eventBot.on(EventBotEvents.END, ytFeedListener.verifyEvent);
+eventsBot.on(EventBotEvents.END, ytFeedListener.verifyEvent);
 
-eventBot.on("interactionCreate", (interaction) => {
+eventsBot.on("interactionCreate", (interaction) => {
   eventBotHandlers.handleInteractionCreate(interaction);
 });
-eventBot.on(EventBotEvents.RETRIEVED, eventsListener.initialize);
-eventBot.on(
+eventsBot.on(EventBotEvents.RETRIEVED, eventsListener.initialize);
+eventsBot.on(
   EventBotEvents.RETRIEVED,
   (
     events: Collection<string, GuildScheduledEvent>,
     eventManager: GuildScheduledEventManager
   ) => launchListener.initialize(events, eventManager)
 );
-eventBot.on("error", handleError);
-eventBot.on(EventBotEvents.NEW_TITLE, streamHost.logSuggestion);
-eventBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);
+eventsBot.on("error", handleError);
+eventsBot.on(EventBotEvents.NEW_TITLE, streamHost.logSuggestion);
+eventsBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);
 
 /***********************************
  *  Feed Listeners Event Handlers
@@ -549,11 +465,7 @@ eventBot.on(EventBotEvents.VIEW_TITLES, streamHost.viewSuggestions);
 wmFeedListener.on(ContentListnerEvents.NEW, (content) => {
   deployWeMartians();
   setTimeout(() => {
-    contentBotHandlers.handleNewContent(
-      content,
-      contentBot,
-      SpecificChannel.CONTENT
-    );
+    contentBotHandlers.handleNewContent(content, contentBot, "content");
   }, 600000);
 });
 wmFeedListener.on(ContentListnerEvents.READY, (message) => {
@@ -565,11 +477,7 @@ wmFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 mecoFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 mecoFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.mecoFeedListener = true;
@@ -580,11 +488,7 @@ mecoFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 ofnFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 ofnFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.ofnFeedListener = true;
@@ -595,11 +499,7 @@ ofnFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 rprFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 rprFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.rprFeedListener = true;
@@ -610,11 +510,7 @@ rprFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 hlFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  contentBotHandlers.handleNewContent(
-    content,
-    contentBot,
-    SpecificChannel.CONTENT
-  );
+  contentBotHandlers.handleNewContent(content, contentBot, "content");
 });
 hlFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.hlFeedListener = true;
@@ -625,7 +521,7 @@ hlFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 hhFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  eventBotHandlers.handleNewContent(content, eventBot);
+  eventBotHandlers.handleNewContent(content, eventsBot);
 });
 hhFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.hhFeedListener = true;
@@ -636,7 +532,7 @@ hhFeedListener.on(ContentListnerEvents.ERROR, (message) => {
 });
 
 ytFeedListener.on(ContentListnerEvents.NEW, (content) => {
-  eventBotHandlers.handleNewContent(content, eventBot);
+  eventBotHandlers.handleNewContent(content, eventsBot);
 });
 ytFeedListener.on(ContentListnerEvents.READY, (message) => {
   bootChecklist.ytFeedListener = true;
@@ -679,7 +575,7 @@ starshipChecker.on(SiteListenerEvents.READY, () => {
   );
 });
 starshipChecker.on(SiteListenerEvents.UPDATE, (update) =>
-  utilityBot.emit(UtilityBotEvents.STARSHIP_UPDATE, update)
+  helperBot.emit(HelperBotEvents.STARSHIP_UPDATE, update)
 );
 
 /***********************************
@@ -702,7 +598,7 @@ const bootChecker = setInterval(() => {
       LogStatus.SUCCESS,
       "Boot Checklist complete. The Off-Nominal Discord Bot is online."
     );
-    bootLog.sendLog(utilityBot);
+    bootLog.sendLog(helperBot);
     console.log("*** BOOTUP COMPLETE ***");
     clearInterval(bootChecker);
   } else {
@@ -722,7 +618,7 @@ const bootChecker = setInterval(() => {
       LogStatus.FAILURE,
       `Boot Checklist still incomplete after 15 attempts, logger aborted. Failed items:\n${failures}`
     );
-    bootLog.sendLog(utilityBot);
+    bootLog.sendLog(helperBot);
     console.log("*** BOOTUP FAILURE CHECK LOGS ***");
     clearInterval(bootChecker);
   }
@@ -734,14 +630,14 @@ const bootChecker = setInterval(() => {
  *  to enable simulated events
  ************************************/
 
-if (process.env.NODE_ENV === "dev") {
-  utilityBot.on("messageCreate", devHandlers.handleMessageCreate);
+if (mcconfig.env === "dev") {
+  helperBot.on("messageCreate", devHandlers.handleMessageCreate);
 
-  utilityBot.on(DevEvents.NEW_ENTRIES, (show) => {
+  helperBot.on(DevEvents.NEW_ENTRIES, (show) => {
     const feed = feeds[show] as ContentListener;
     feed.emit(ContentListnerEvents.NEW, feed.fetchRecent());
   });
-  utilityBot.on(DevEvents.DB_TEST, () => {
+  helperBot.on(DevEvents.DB_TEST, () => {
     console.log("dbtest invoked");
     db.query("SELECT NOW()")
       .then((res) => console.log(`Time on database is ${res.rows[0].now}`))
@@ -751,7 +647,7 @@ if (process.env.NODE_ENV === "dev") {
       });
   });
 
-  utilityBot.on(
+  helperBot.on(
     DevEvents.THREAD_DIGEST_SEND,
     mainBotHandlers.handleThreadDigestSend
   );

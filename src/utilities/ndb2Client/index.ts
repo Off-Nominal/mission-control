@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { NDB2API, PredictionLifeCycle } from "./types";
+import mcconfig from "../../mcconfig";
 
 const isNdb2ApiResponse = (
   response: any
@@ -123,7 +124,7 @@ const handleError = (err: any): [string, string] => {
 };
 
 export class Ndb2Client {
-  private baseURL = process.env.NDB2_API_BASEURL;
+  private baseURL = mcconfig.ndb2.baseUrl;
   private client: AxiosInstance;
   private seasons: NDB2API.Season[] = [];
 
@@ -366,7 +367,7 @@ export class Ndb2Client {
   }
 }
 
-const ndbKey = process.env.NDB2_CLIENT_ID;
+const ndbKey = mcconfig.ndb2.clientId;
 export const ndb2Client = new Ndb2Client(ndbKey);
 
 ndb2Client.initialize().catch((err) => {
