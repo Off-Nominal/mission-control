@@ -49,7 +49,6 @@ import {
   StreamHostEvents,
   HelperBotEvents,
 } from "./types/eventEnums";
-import LaunchListener from "./listeners/launchListener/launchListener";
 import { Logger, LogStatus } from "./utilities/logger";
 import { LogInitiator } from "./types/logEnums";
 
@@ -129,6 +128,7 @@ export type FeedList = {
 
 import webhooksRouter from "./routers/webhooks";
 import { NDB2API } from "./utilities/ndb2Client/types";
+import launchListener from "./services/launchListener";
 
 api.use("/webhooks", webhooksRouter(ndb2Bot, db));
 api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
@@ -142,22 +142,12 @@ api.listen(mcconfig.api.port, () => {
  *  RLL Event Listener
  ************************************/
 
-const launchListener = new LaunchListener(mcconfig.providers.rll.key);
 launchListener.on(RLLEvents.READY, (message) => {
   bootChecklist.rllClient = true;
   bootLog.addLog(LogStatus.SUCCESS, message);
 });
 launchListener.on(RLLEvents.BOOT_ERROR, (message) => {
   bootLog.addLog(LogStatus.FAILURE, message);
-});
-launchListener.on(RLLEvents.ERROR, (err) => {
-  const logger = new Logger(
-    "Rocketlaunch.live Client Error",
-    LogInitiator.RLL,
-    err.event
-  );
-  logger.addLog(LogStatus.FAILURE, err.error);
-  logger.sendLog(helperBot);
 });
 
 /***********************************
