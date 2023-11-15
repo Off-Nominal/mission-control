@@ -1,9 +1,12 @@
 import EventEmitter = require("events");
 import { SanityDocument } from "@sanity/types/dist/dts";
 
-import { FeedWatcher } from "../feedListener/feedWatcher";
-import { FeedParserEntry, FeedWatcherEvents } from "../feedListener/feedTypes";
-import { newsFeedMapper } from "../feedListener/mappers";
+import { FeedWatcher } from "../../listeners/feedListener/feedWatcher";
+import {
+  FeedParserEntry,
+  FeedWatcherEvents,
+} from "../../listeners/feedListener/feedTypes";
+import { newsFeedMapper } from "../../listeners/feedListener/mappers";
 
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
 import { shouldFilter } from "./helpers";

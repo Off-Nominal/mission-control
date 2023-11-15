@@ -9,10 +9,9 @@ import {
   Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
-import { LogInitiator } from "../../../types/logEnums";
 import { NDB2WebhookEvent } from "../../../types/routerTypes";
 import fetchGuild from "../../../utilities/fetchGuild";
-import { Logger, LogStatus } from "../../../utilities/logger";
+import { Logger, LogStatus, LogInitiator } from "../../../services/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionResponse } from "./generatePredictionResponse";
 import { generatePublicNotice } from "./generatePublicNotice";

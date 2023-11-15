@@ -6,7 +6,7 @@ import { marsTime } from "../actions/marstime/marsTime";
 import shunt from "../actions/shunt";
 import letters from "../../../helpers/pollIndicators";
 import createPollHelpEmbed from "../actions/poll/createPollHelpEmbed";
-import { HelperBotEvents } from "../../../types/eventEnums";
+import { HelperBotEvents } from "../../../discord_clients/helper";
 
 export default async function handleInteractionCreate(
   interaction: Interaction

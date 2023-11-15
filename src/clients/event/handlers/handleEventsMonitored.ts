@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import { EventWindow } from "../../../listeners/eventsListener/EventsListener";
+import { EventWindow } from "../../../services/eventsListener/EventsListener";
 import { fetchPreNotificationSubscribers } from "../../../queries/users";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
 

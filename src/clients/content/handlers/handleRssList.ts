@@ -1,7 +1,7 @@
 import { SanityDocument } from "@sanity/client";
 import { EmbedBuilder, BaseInteraction } from "discord.js";
 import { sanityClient } from "../../../cms/client";
-import { NewsFeedDocument } from "../../../listeners/newsManager/newsManager";
+import { NewsFeedDocument } from "../../../services/newsfeedListener/NewsManager";
 import mcconfig from "../../../mcconfig";
 
 export interface NewsCategoryDocument extends SanityDocument {

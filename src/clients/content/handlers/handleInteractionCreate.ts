@@ -1,10 +1,10 @@
 import { BaseInteraction, InteractionReplyOptions } from "discord.js";
 import { ContentListener } from "../../../listeners/contentListener/contentListener";
-import { ContentBotEvents } from "../../../types/eventEnums";
 
 import { createPodcastHelpEmbed } from "../actions/createPodcastHelpEmbed";
 import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
+import { ContentBotEvents } from "../../../discord_clients/content";
 
 export default function handleInteractionCreate(
   interaction: BaseInteraction,

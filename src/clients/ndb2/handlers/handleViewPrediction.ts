@@ -5,8 +5,7 @@ import {
   GuildMember,
 } from "discord.js";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-import { Logger, LogStatus } from "../../../utilities/logger";
-import { LogInitiator } from "../../../types/logEnums";
+import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import {
   Ndb2MsgSubscription,

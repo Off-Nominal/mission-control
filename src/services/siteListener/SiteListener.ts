@@ -1,9 +1,12 @@
+import EventEmitter = require("events");
 import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
-import EventEmitter = require("events");
-import { SiteListenerEvents } from "../../types/eventEnums";
-import { Logger } from "../../utilities/logger";
 import { GitHubAgent } from "../../providers/github";
+
+export enum SiteListenerEvents {
+  UPDATE = "siteUpdate",
+  READY = "ready",
+}
 
 export type SiteListenerOptions = {
   interval?: number;

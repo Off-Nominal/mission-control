@@ -8,8 +8,7 @@ import {
 import fetchGuild from "../../../utilities/fetchGuild";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generateNewSeasonEmbed } from "./embedGenerators/generateNewSeasonEmbed";
-import { LogInitiator } from "../../../types/logEnums";
-import { LogStatus, Logger } from "../../../utilities/logger";
+import { LogStatus, Logger, LogInitiator } from "../../../services/logger";
 import mcconfig from "../../../mcconfig";
 
 export const sendSeasonStartNotice = async (

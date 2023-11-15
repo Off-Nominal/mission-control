@@ -6,14 +6,20 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import { LogInitiator } from "../types/logEnums";
-import mcconfig from "../mcconfig";
+import mcconfig from "../../mcconfig";
 
 export enum LogStatus {
   SUCCESS = "✅",
   FAILURE = "❌",
   INFO = "💬",
   WARNING = "⚠️",
+}
+
+export enum LogInitiator {
+  SERVER = "Server",
+  DISCORD = "Discord",
+  RLL = "RLL CLient",
+  NDB2 = "NDB2",
 }
 
 export class Logger {

@@ -7,9 +7,9 @@ import {
   GuildScheduledEventEntityType,
 } from "discord.js";
 import { setEventSubscriptions } from "../../../queries/users";
-import { EventBotEvents } from "../../../types/eventEnums";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import mcconfig from "../../../mcconfig";
+import { EventBotEvents } from "../../../discord_clients/events";
 
 enum AllowedCommands {
   START = "start",

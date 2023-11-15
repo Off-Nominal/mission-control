@@ -10,7 +10,7 @@ import handleNewVote from "./handleNewVote";
 import handleViewScore from "./handleViewScore";
 import handleListPredictions from "./handleListPredictions";
 import handleSearchPredictions from "./handleSearchPredictions";
-import handleViewLeaderboards from "./handleviewLeaderboards";
+import handleViewLeaderboards from "./handleViewLeaderboards";
 
 export default {
   handleReady,

@@ -5,8 +5,7 @@ import {
   CacheType,
   ChatInputCommandInteraction,
 } from "discord.js";
-import { LogStatus, Logger } from "../../../utilities/logger";
-import { LogInitiator } from "../../../types/logEnums";
+import { LogStatus, LogInitiator, Logger } from "../../../services/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { generateLeaderboardEmbed } from "../actions/embedGenerators/generateLeaderboardEmbed";
 import { NDB2API } from "../../../utilities/ndb2Client/types";

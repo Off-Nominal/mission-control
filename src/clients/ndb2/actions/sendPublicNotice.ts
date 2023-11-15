@@ -1,13 +1,13 @@
 import { userMention, messageLink } from "@discordjs/builders";
-import { Client as DbClient } from "pg";
 import { Client, GuildMember } from "discord.js";
-import ndb2MsgSubscriptionQueries, {
+import {
   Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
+  addSubscription,
+  fetchSubByType,
 } from "../../../queries/ndb2_msg_subscriptions";
-import { LogInitiator } from "../../../types/logEnums";
 import fetchGuild from "../../../utilities/fetchGuild";
-import { Logger, LogStatus } from "../../../utilities/logger";
+import { Logger, LogStatus, LogInitiator } from "../../../services/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
@@ -45,15 +45,12 @@ const getLoggerFields = (
 export const sendPublicNotice = async (
   client: Client,
   predictor: GuildMember,
-  db: DbClient,
   prediction: NDB2API.EnhancedPrediction,
   type:
     | NDB2WebhookEvent.JUDGED_PREDICTION
     | NDB2WebhookEvent.RETIRED_PREDICTION
     | NDB2WebhookEvent.TRIGGERED_PREDICTION
 ) => {
-  const { addSubscription, fetchSubByType } = ndb2MsgSubscriptionQueries(db);
-
   const [loggerTitle, loggerMessage] = getLoggerFields(
     type,
     prediction.triggerer?.discord_id

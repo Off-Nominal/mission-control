@@ -14,15 +14,14 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../../commands/ndb2";
-import { LogInitiator } from "../../../../types/logEnums";
-import { Logger, LogStatus } from "../../../../utilities/logger";
+import { Logger, LogInitiator, LogStatus } from "../../../../services/logger";
 import { ndb2Client } from "../../../../utilities/ndb2Client";
 import { NDB2API } from "../../../../utilities/ndb2Client/types";
 import ndb2InteractionCache from "../../../../utilities/ndb2Client/ndb2InteractionCache";
-import { Ndb2Events } from "../../../../types/eventEnums";
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
 import mcconfig from "../../../../mcconfig";
+import { Ndb2Events } from "../../../../discord_clients/ndb2";
 
 export const handleSlashCommandInteraction = async (
   interaction: ChatInputCommandInteraction

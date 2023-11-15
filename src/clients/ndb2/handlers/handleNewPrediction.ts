@@ -1,3 +1,4 @@
+import mcconfig from "../../../mcconfig";
 import { add, isFuture } from "date-fns";
 import {
   Message,
@@ -8,11 +9,9 @@ import {
 } from "discord.js";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 import { ndb2Client } from "../../../utilities/ndb2Client";
-import { Logger, LogStatus } from "../../../utilities/logger";
-import { LogInitiator } from "../../../types/logEnums";
+import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
-import mcconfig from "../../../mcconfig";
 import {
   Ndb2MsgSubscriptionType,
   addSubscription,

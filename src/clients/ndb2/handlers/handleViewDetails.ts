@@ -4,8 +4,7 @@ import {
   ButtonInteraction,
   ButtonStyle,
 } from "discord.js";
-import { LogInitiator } from "../../../types/logEnums";
-import { Logger, LogStatus } from "../../../utilities/logger";
+import { Logger, LogInitiator, LogStatus } from "../../../services/logger";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
 import { generatePredictionDetailsEmbed } from "../actions/embedGenerators/generatePredictionDetailsEmbed";

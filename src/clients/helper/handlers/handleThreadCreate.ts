@@ -1,9 +1,8 @@
+import mcconfig from "../../../mcconfig";
 import { channelMention, ThreadChannel } from "discord.js";
-import { LogInitiator } from "../../../types/logEnums";
-import { Logger, LogStatus } from "../../../utilities/logger";
+import { LogInitiator, Logger, LogStatus } from "../../../services/logger";
 import fetchGuild from "../../../utilities/fetchGuild";
 import joinThread from "../../actions/joinThread";
-import mcconfig from "../../../mcconfig";
 
 export default async function handleThreadCreate(thread: ThreadChannel) {
   const logger = new Logger(

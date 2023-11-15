@@ -7,8 +7,7 @@ import {
 } from "discord.js";
 import fetchGuild from "../../../utilities/fetchGuild";
 import { NDB2API } from "../../../utilities/ndb2Client/types";
-import { LogInitiator } from "../../../types/logEnums";
-import { LogStatus, Logger } from "../../../utilities/logger";
+import { LogInitiator, LogStatus, Logger } from "../../../services/logger";
 import { generateSeasonResultsEmbed } from "./embedGenerators/generateSeasonResultsEmbed";
 import { ndb2Client } from "../../../utilities/ndb2Client";
 import mcconfig from "../../../mcconfig";

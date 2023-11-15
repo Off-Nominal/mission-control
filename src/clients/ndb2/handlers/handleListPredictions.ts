@@ -5,8 +5,7 @@ import {
   CacheType,
   ChatInputCommandInteraction,
 } from "discord.js";
-import { LogStatus, Logger } from "../../../utilities/logger";
-import { LogInitiator } from "../../../types/logEnums";
+import { LogStatus, Logger, LogInitiator } from "../../../services/logger";
 import {
   SearchOptions,
   SortByOption,

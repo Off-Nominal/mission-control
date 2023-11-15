@@ -1,11 +1,12 @@
 import { Message } from "discord.js";
 import { parseCommands } from "../../../helpers/parseCommands";
-import { DevEvents, HelperBotEvents } from "../../../types/eventEnums";
+import { DevEvents } from "../../../types/eventEnums";
 import {
   findTempsToConvert,
   createTempConversionEmbed,
 } from "../actions/translateTemp";
 import mcconfig from "../../../mcconfig";
+import { HelperBotEvents } from "../../../discord_clients/helper";
 
 export enum AllowedPrefix {
   SHUNT = "!shunt",

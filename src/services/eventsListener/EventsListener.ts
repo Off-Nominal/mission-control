@@ -4,7 +4,11 @@ import {
   GuildScheduledEventStatus,
 } from "discord.js";
 import EventEmitter = require("events");
-import { EventListenerEvents } from "../../types/eventEnums";
+
+export enum EventListenerEvents {
+  MONITOR = "eventsMonitored",
+  READY = "ready",
+}
 
 const FIVE_MINS_IN_MS = 300000;
 const MS_IN_A_SEC = 1000;

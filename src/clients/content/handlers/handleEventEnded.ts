@@ -1,17 +1,16 @@
 import { ChannelType, Client, GuildScheduledEvent } from "discord.js";
-import { Feed, FeedList } from "../../..";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 import mcconfig from "../../../mcconfig";
+import feedListeners from "../../../services/feedListeners";
 
 export default async function handleEventEnded(
   event: GuildScheduledEvent,
-  client: Client,
-  feeds: FeedList
+  client: Client
 ) {
-  const offNomEpisode = feeds[Feed.OFF_NOMINAL_YOUTUBE].getEpisodeByUrl(
+  const offNomEpisode = feedListeners.yt.getEpisodeByUrl(
     event.entityMetadata.location
   );
-  const happyHourEpisode = feeds[Feed.HAPPY_HOUR].getEpisodeByUrl(
+  const happyHourEpisode = feedListeners.hh.getEpisodeByUrl(
     event.entityMetadata.location
   );
 

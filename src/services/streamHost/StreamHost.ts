@@ -7,13 +7,16 @@ import {
 } from "discord.js";
 import EventEmitter = require("events");
 import createPollEmbed from "../../clients/helper/actions/poll/createPollEmbed";
-import { StreamHostEvents } from "../../types/eventEnums";
 import {
   generatePartyMessages,
   PartyMessage,
   streamTitleEmbed,
   TitleSuggestion,
 } from "./partyMessages";
+
+export enum StreamHostEvents {
+  PARTY_MESSAGE = "partyMessage",
+}
 
 const MS_IN_A_MINUTE = 60000;
 const MAX_TITLE_SUGGESTIONS = 36;
