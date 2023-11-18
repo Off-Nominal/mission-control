@@ -1,6 +1,8 @@
 import EventEmitter = require("events");
 import { feedRequest } from "./feedRequest";
-import { FeedParserEntry, FeedWatcherEvents } from "./feedTypes";
+import { FeedParserEntry, FeedWatcherEvents } from "./types";
+export * from "./types";
+export * from "./mappers";
 
 const DEFAULT_FEED_CHECK_TIME_IN_SECONDS = 60;
 const DEFAULT_RETRY_ATTEMPTS = 3;

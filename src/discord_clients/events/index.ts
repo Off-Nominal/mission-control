@@ -12,8 +12,7 @@ import contentBot from "../content";
 import feedListeners from "../../services/feedListeners";
 import streamHost from "../../services/streamHost";
 import eventsListener from "../../services/eventsListener";
-import { handleError, setPresence } from "../common_handlers";
-import joinThread from "../../clients/actions/joinThread";
+import { handleError, joinThread, setPresence } from "../common_handlers";
 
 export enum EventBotEvents {
   START = "eventStarted",
@@ -32,8 +31,9 @@ const eventsBot = new Client({
 
 // Handlers
 eventsBot.once("ready", (client) => setPresence(client, "/events help"));
-eventsBot.on("threadCreate", joinThread);
 eventsBot.on("error", handleError);
+
+eventsBot.on("threadCreate", joinThread);
 
 // eventsBot.on(
 //   "guildScheduledEventUpdate",

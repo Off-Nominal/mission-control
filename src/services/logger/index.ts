@@ -45,7 +45,7 @@ class BootLogger extends Logger {
 
   constructor(title: string, initiator: LogInitiator, eventName: string) {
     super(title, initiator, eventName);
-    console.log("*** BOOTING... ***");
+    console.log("*** BOOTING ***");
   }
 
   logItemSuccess(item: keyof BootChecklist) {
@@ -67,7 +67,7 @@ class BootLogger extends Logger {
       if (booted) {
         this.addLog(
           LogStatus.SUCCESS,
-          "Boot Checklist complete. The Off-Nominal Discord Bot is online."
+          "Boot Checklist complete. Mission Control is online 🚀"
         );
         this.sendLog(client);
         console.log("*** BOOTUP COMPLETE ***");

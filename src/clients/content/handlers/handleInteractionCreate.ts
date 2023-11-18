@@ -1,7 +1,6 @@
 import { BaseInteraction, InteractionReplyOptions } from "discord.js";
 import { ContentListener } from "../../../listeners/contentListener/contentListener";
 
-import { createPodcastHelpEmbed } from "../actions/createPodcastHelpEmbed";
 import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
 import { ContentBotEvents } from "../../../discord_clients/content";
@@ -25,10 +24,6 @@ export default function handleInteractionCreate(
 
   if (subCommand === "rss") {
     return interaction.client.emit(ContentBotEvents.RSS_LIST, interaction);
-  }
-
-  if (subCommand === "help") {
-    return interaction.reply({ embeds: [createPodcastHelpEmbed()] });
   }
 
   const show = options.getString("show", true);

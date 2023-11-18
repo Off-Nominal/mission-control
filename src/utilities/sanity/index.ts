@@ -1,5 +1,6 @@
+import mcconfig from "../../mcconfig";
 import { SanityClient } from "@sanity/client";
-import mcconfig from "../mcconfig";
+export * from "./types";
 
 const client = require("@sanity/client");
 const imageUrlBuilder = require("@sanity/image-url");

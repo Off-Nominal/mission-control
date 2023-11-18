@@ -1,4 +1,4 @@
-import { FeedParserEntry } from "./feedTypes";
+import { FeedParserEntry } from "./types";
 import axios from "axios";
 
 const FeedParser = require("feedparser");

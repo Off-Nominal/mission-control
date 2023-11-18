@@ -3,7 +3,7 @@ import { ContentListener } from "../../listeners/contentListener/contentListener
 import {
   simpleCastFeedMapper,
   youtubeFeedMapper,
-} from "../../listeners/feedListener/mappers";
+} from "../../utilities/FeedWatcher";
 import { ContentListnerEvents } from "../../types/eventEnums";
 import deployWeMartians from "../../utilities/deployWeMartians";
 import handlers from "../../clients/handlers";

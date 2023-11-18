@@ -9,8 +9,7 @@ import {
 import mcconfig from "../../mcconfig";
 import handlers from "../../clients/handlers";
 import { NDB2API } from "../../providers/ndb2";
-import { handleError, setPresence } from "../common_handlers";
-import joinThread from "../../clients/actions/joinThread";
+import { handleError, joinThread, setPresence } from "../common_handlers";
 
 export enum Ndb2Events {
   NEW_PREDICTION = "new_prediction",
@@ -32,8 +31,9 @@ const ndb2Bot = new Client({
 
 // // Handlers
 ndb2Bot.once("ready", (client) => setPresence(client, "/ndb help"));
-ndb2Bot.on("threadCreate", joinThread);
 ndb2Bot.on("error", handleError);
+
+ndb2Bot.on("threadCreate", joinThread);
 
 // ndb2Bot.on(Events.InteractionCreate, (interaction) => {
 //   handlers.ndb2.handleInteractionCreate(interaction);

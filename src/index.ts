@@ -3,10 +3,7 @@ import mcconfig from "./mcconfig";
 // Boot Logger
 import bootLogger from "./services/logger";
 import { LogStatus } from "./services/logger/Logger";
-bootLogger.addLog(LogStatus.INFO, "Off-Nominal Discord App in Startup.");
-
-// Handlers
-// import handlers from "./clients/handlers";
+bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
 
 // Services
 // import launchListener from "./services/launchListener";
@@ -48,8 +45,6 @@ db.connect()
 // import { ContentBotEvents } from "./discord_clients/content";
 // import { EventListenerEvents } from "./services/eventsListener/EventsListener";
 // import { SiteListenerEvents } from "./services/siteListener/SiteListener";
-
-// Database
 
 // export enum Feed {
 //   WEMARTIANS = "wm",

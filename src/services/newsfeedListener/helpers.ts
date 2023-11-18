@@ -1,6 +1,6 @@
-import { NewsFeedDocument } from "./NewsManager";
 import { compileExpression } from "filtrex";
-import { FeedParserEntry } from "../../listeners/feedListener/feedTypes";
+import { FeedParserEntry } from "../../utilities/FeedWatcher/types";
+import { NewsFeedDocument } from "../../utilities/sanity";
 
 const getFilterTerms = (filter: string) => {
   const expressionTerms = ["and", "or", "not", "if", "then", "else"];

@@ -1,31 +1,24 @@
 import EventEmitter = require("events");
-import { SanityDocument } from "@sanity/types/dist/dts";
 
-import { FeedWatcher } from "../../listeners/feedListener/feedWatcher";
 import {
+  FeedWatcher,
+  newsFeedMapper,
   FeedParserEntry,
   FeedWatcherEvents,
-} from "../../listeners/feedListener/feedTypes";
-import { newsFeedMapper } from "../../listeners/feedListener/mappers";
-
+} from "../../utilities/FeedWatcher";
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
 import { shouldFilter } from "./helpers";
 import { sub } from "date-fns";
 
-import { sanityClient, sanityImageUrlBuilder } from "../../cms/client";
+import {
+  NewsFeedDocument,
+  sanityClient,
+  sanityImageUrlBuilder,
+} from "../../utilities/sanity";
 import { NewsManagerEvents } from "../../types/eventEnums";
 import { isFulfilled } from "../../helpers/allSettledTypeGuard";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
-
-export interface NewsFeedDocument extends SanityDocument {
-  url: string;
-  name: string;
-  filter?: string;
-  thumbnail: string;
-  diagnostic: string;
-  category: string;
-}
 
 export type CmsNewsFeed = {
   data: NewsFeedDocument;
