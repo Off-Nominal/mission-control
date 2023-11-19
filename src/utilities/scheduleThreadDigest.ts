@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
 import getNextTime from "../helpers/getNextTime";
-import { HelperBotEvents } from "../providers/discord_clients/helper";
+import { HelperBotEvents } from "../providers/helper-bot";
 
 export default function scheduleThreadDigest(client: Client) {
   const nextThreadDigestTime = getNextTime({ hour: 12 });

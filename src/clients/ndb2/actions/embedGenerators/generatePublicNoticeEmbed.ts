@@ -1,8 +1,11 @@
 import { bold, EmbedBuilder, userMention } from "@discordjs/builders";
 import { APIEmbedField, ClientUser, GuildMember } from "discord.js";
 import embedFields from "./fields";
-import { NDB2API, PredictionLifeCycle } from "../../../../providers/ndb2";
-import { NDB2WebhookEvent } from "../../../../api/controllers/webhooks";
+import {
+  NDB2API,
+  PredictionLifeCycle,
+} from "../../../../providers/ndb2-client";
+import { NDB2WebhookEvent } from "../../../../services/ndb2/webhooks";
 
 const getAuthor = (
   type:

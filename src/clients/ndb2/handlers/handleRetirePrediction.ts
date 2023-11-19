@@ -9,7 +9,7 @@ import {
   LogInitiator,
   LogStatus,
 } from "../../../services/logger/Logger";
-import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 import cache from "../../../providers/cache";
 
 export default async function handleRetirePrediction(

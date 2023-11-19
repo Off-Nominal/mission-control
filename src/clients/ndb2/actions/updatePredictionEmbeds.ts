@@ -13,8 +13,8 @@ import {
   LogStatus,
   LogInitiator,
 } from "../../../services/logger/Logger";
-import { NDB2API } from "../../../providers/ndb2";
-import { NDB2WebhookEvent } from "../../../api/controllers/webhooks";
+import { NDB2API } from "../../../providers/ndb2-client";
+import { NDB2WebhookEvent } from "../../../services/ndb2/webhooks";
 
 import {
   Ndb2MsgSubscription,

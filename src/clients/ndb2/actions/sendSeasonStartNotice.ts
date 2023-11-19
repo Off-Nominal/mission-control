@@ -13,7 +13,7 @@ import {
   LogInitiator,
 } from "../../../services/logger/Logger";
 import mcconfig from "../../../mcconfig";
-import { NDB2API } from "../../../providers/ndb2";
+import { NDB2API } from "../../../providers/ndb2-client";
 
 export const sendSeasonStartNotice = async (
   client: Client,

@@ -5,7 +5,7 @@ import {
   LogStatus,
 } from "../../../services/logger/Logger";
 import { ButtonCommand } from "./handleInteractionCreate/button";
-import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 
 export default async function handleNewBet(
   interaction: ButtonInteraction,

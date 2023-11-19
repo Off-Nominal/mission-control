@@ -15,9 +15,9 @@ import {
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
 import mcconfig from "../../../mcconfig";
-import { NDB2API } from "../../../providers/ndb2";
+import { NDB2API } from "../../../providers/ndb2-client";
 import cache from "../../../providers/cache";
-import { NDB2WebhookEvent } from "../../../api/controllers/webhooks";
+import { NDB2WebhookEvent } from "../../../services/ndb2/webhooks";
 
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 

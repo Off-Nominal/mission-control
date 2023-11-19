@@ -11,7 +11,7 @@ import {
   Logger,
 } from "../../../services/logger/Logger";
 import { generateListPredictionsEmbed } from "../actions/embedGenerators/generateListPredictionsEmbed";
-import ndb2Client, { SearchOptions } from "../../../providers/ndb2";
+import ndb2Client, { SearchOptions } from "../../../providers/ndb2-client";
 
 export default async function handleSearchPredictions(
   interaction: ChatInputCommandInteraction<CacheType>

@@ -7,10 +7,6 @@ bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
 
 // Providers
 import { providers } from "./providers";
-import SetDiscordClientPresence from "./services/set-discord-client-presence";
-import JoinDiscordThread from "./services/join-discord-thread";
-import SendHelp from "./services/send-help";
-import NewsFeed from "./services/news-feed";
 
 providers.db
   .connect()
@@ -24,10 +20,19 @@ providers.db
   });
 
 // Services
+import SetDiscordClientPresence from "./services/set-discord-client-presence";
+import JoinDiscordThread from "./services/join-discord-thread";
+import SendHelp from "./services/send-help";
+import NewsFeed from "./services/news-feed";
+import AddModsToThread from "./services/add-mods-to-thread";
+import NDB2 from "./services/ndb2";
+
 SetDiscordClientPresence(providers);
 JoinDiscordThread(providers);
 SendHelp(providers);
 NewsFeed(providers);
+AddModsToThread(providers);
+NDB2(providers);
 
 // import launchListener from "./services/launchListener";
 // import siteChecker from "./services/siteListener";

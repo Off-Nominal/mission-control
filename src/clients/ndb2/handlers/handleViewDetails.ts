@@ -10,7 +10,7 @@ import {
   LogStatus,
 } from "../../../services/logger/Logger";
 import { generatePredictionDetailsEmbed } from "../actions/embedGenerators/generatePredictionDetailsEmbed";
-import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 
 export default async function handleViewDetails(
   interaction: ButtonInteraction,

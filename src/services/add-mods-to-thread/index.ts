@@ -1,21 +1,8 @@
-import mcconfig from "../../../mcconfig";
-import { Client, ThreadChannel, channelMention } from "discord.js";
-import {
-  LogInitiator,
-  LogStatus,
-  Logger,
-} from "../../../services/logger/Logger";
-import fetchGuild from "../../../utilities/fetchGuild";
-
-// Find Off-Nominal Discord Guild, fetch members to prevent partials
-export function populateGuildMembers(client: Client) {
-  const guild = fetchGuild(client);
-  guild.members
-    .fetch()
-    .catch((err) =>
-      console.error("Error fetching partials for Guild Members", err)
-    );
-}
+import mcconfig from "../../mcconfig";
+import { ThreadChannel, channelMention } from "discord.js";
+import { Providers } from "../../providers";
+import { LogInitiator, LogStatus, Logger } from "../logger/Logger";
+import fetchGuild from "../../utilities/fetchGuild";
 
 export function addModsToThread(thread: ThreadChannel) {
   const logger = new Logger(
@@ -53,4 +40,8 @@ export function addModsToThread(thread: ThreadChannel) {
         );
       });
   });
+}
+
+export default function AddModsToThread({ helperBot }: Providers) {
+  helperBot.on("threadCreate", addModsToThread);
 }

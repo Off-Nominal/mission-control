@@ -22,8 +22,8 @@ import {
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
 import mcconfig from "../../../../mcconfig";
-import { Ndb2Events } from "../../../../providers/discord_clients/ndb2";
-import ndb2Client, { NDB2API } from "../../../../providers/ndb2";
+import { Ndb2Events } from "../../../../providers/ndb2-bot";
+import ndb2Client, { NDB2API } from "../../../../providers/ndb2-client";
 import cache from "../../../../providers/cache";
 
 export const handleSlashCommandInteraction = async (

@@ -6,9 +6,9 @@ import {
   Events,
   ModalSubmitInteraction,
 } from "discord.js";
-import mcconfig from "../../../mcconfig";
-import handlers from "../../../clients/handlers";
-import { NDB2API } from "../../ndb2";
+import mcconfig from "../../mcconfig";
+import handlers from "../../clients/handlers";
+import { NDB2API } from "../ndb2-client";
 
 export enum Ndb2Events {
   NEW_PREDICTION = "new_prediction",

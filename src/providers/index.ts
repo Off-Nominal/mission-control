@@ -1,13 +1,11 @@
 import mcconfig from "../mcconfig";
-
-import {
-  contentBot,
-  helperBot,
-  ndb2Bot,
-  eventsBot,
-} from "../providers/discord_clients";
-import api from "../api";
+import contentBot from "./content-bot";
+import helperBot from "./helper-bot";
+import ndb2Bot from "./ndb2-bot";
+import eventsBot from "./events-bot";
+import api from "./api";
 import db from "../db";
+import ndb2Client from "./ndb2-client";
 import { sanityClient, sanityImageUrlBuilder } from "../providers/sanity";
 
 export const providers = {
@@ -20,6 +18,7 @@ export const providers = {
   db,
   sanityClient,
   sanityImageUrlBuilder,
+  ndb2Client,
 };
 
 export type Providers = typeof providers;

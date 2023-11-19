@@ -1,5 +1,5 @@
 import { APIEmbedField, EmbedBuilder, TimestampStyles, time } from "discord.js";
-import { NDB2API } from "../../../../providers/ndb2";
+import { NDB2API } from "../../../../providers/ndb2-client";
 
 const MAX_TEXT_LENGTH = 500;
 

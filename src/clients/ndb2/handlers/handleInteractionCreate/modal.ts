@@ -4,7 +4,7 @@ import {
   LogInitiator,
   LogStatus,
 } from "../../../../services/logger/Logger";
-import { Ndb2Events } from "../../../../providers/discord_clients/ndb2";
+import { Ndb2Events } from "../../../../providers/ndb2-bot";
 
 export const handleModalInteraction = (interaction: Interaction<CacheType>) => {
   const logger = new Logger(

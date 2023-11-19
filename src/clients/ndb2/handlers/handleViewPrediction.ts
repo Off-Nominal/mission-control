@@ -16,7 +16,7 @@ import {
   addSubscription,
   fetchSubByType,
 } from "../../../queries/ndb2_msg_subscriptions";
-import { NDB2API } from "../../../providers/ndb2";
+import { NDB2API } from "../../../providers/ndb2-client";
 
 export default async function handleViewPrediction(
   interaction: ChatInputCommandInteraction<CacheType>,

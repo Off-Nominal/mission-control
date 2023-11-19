@@ -1,17 +1,5 @@
-import {
-  Client,
-  Collection,
-  GuildScheduledEvent,
-  GuildScheduledEventManager,
-} from "discord.js";
-import mcconfig from "../../../mcconfig";
-import handlers from "../../../clients/handlers";
-import launchListener from "../../../services/launchListener";
-import contentBot from "../content";
-// import handleError from "../../clients/actions/handleError";
-import feedListeners from "../../../services/feedListeners";
-import streamHost from "../../../services/streamHost";
-import eventsListener from "../../../services/eventsListener";
+import { Client } from "discord.js";
+import mcconfig from "../../mcconfig";
 
 export enum EventBotEvents {
   START = "eventStarted",

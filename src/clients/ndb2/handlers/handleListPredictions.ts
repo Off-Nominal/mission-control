@@ -15,7 +15,7 @@ import ndb2Client, {
   PredictionLifeCycle,
   SearchOptions,
   SortByOption,
-} from "../../../providers/ndb2";
+} from "../../../providers/ndb2-client";
 
 export default async function handleListPredictions(
   interaction: ChatInputCommandInteraction<CacheType>

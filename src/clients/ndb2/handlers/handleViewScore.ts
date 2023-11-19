@@ -12,7 +12,7 @@ import {
 } from "../../../services/logger/Logger";
 import { generateScoresEmbed } from "../actions/embedGenerators/generateScoresEmbed";
 import fetchGuild from "../../../utilities/fetchGuild";
-import ndb2Client from "../../../providers/ndb2";
+import ndb2Client from "../../../providers/ndb2-client";
 
 export default async function handleVewScore(
   interaction: ChatInputCommandInteraction<CacheType>

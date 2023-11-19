@@ -18,7 +18,7 @@ import {
   Ndb2MsgSubscriptionType,
   addSubscription,
 } from "../../../queries/ndb2_msg_subscriptions";
-import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 
 export default async function handleNewPrediction(
   interaction: ModalSubmitInteraction

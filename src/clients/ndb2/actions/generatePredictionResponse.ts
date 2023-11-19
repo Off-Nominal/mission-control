@@ -6,7 +6,7 @@ import {
   GuildMember,
 } from "discord.js";
 import { generatePredictionEmbed } from "./embedGenerators/generatePredictionEmbed";
-import { NDB2API, PredictionLifeCycle } from "../../../providers/ndb2";
+import { NDB2API, PredictionLifeCycle } from "../../../providers/ndb2-client";
 
 export const generatePredictionResponse = (
   predictor: GuildMember | undefined,

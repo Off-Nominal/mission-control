@@ -7,8 +7,8 @@ import {
   GuildMember,
 } from "discord.js";
 import { generatePublicNoticeEmbed } from "./embedGenerators/generatePublicNoticeEmbed";
-import { NDB2API } from "../../../providers/ndb2";
-import { NDB2WebhookEvent } from "../../../api/controllers/webhooks";
+import { NDB2API } from "../../../providers/ndb2-client";
+import { NDB2WebhookEvent } from "../../../services/ndb2/webhooks";
 
 export const generatePublicNotice = (
   prediction: NDB2API.EnhancedPrediction,

@@ -13,7 +13,7 @@ import {
 } from "../../../services/logger/Logger";
 import { generateSeasonResultsEmbed } from "./embedGenerators/generateSeasonResultsEmbed";
 import mcconfig from "../../../mcconfig";
-import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 
 export const sendSeasonEndNotice = async (
   client: Client,

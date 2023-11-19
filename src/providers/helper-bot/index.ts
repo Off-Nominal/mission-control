@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, Client, Partials } from "discord.js";
-import mcconfig from "../../../mcconfig";
-import handlers from "../../../clients/handlers";
-import scheduleThreadDigest from "../../../utilities/scheduleThreadDigest";
-import reportGenerator from "../../../services/reportGenerator";
-import { addModsToThread, populateGuildMembers } from "./handlers";
+import mcconfig from "../../mcconfig";
+import handlers from "../../clients/handlers";
+import scheduleThreadDigest from "../../utilities/scheduleThreadDigest";
+import reportGenerator from "../../services/reportGenerator";
+import fetchGuild from "../../utilities/fetchGuild";
 
 export enum HelperBotEvents {
   SUMMARY_CREATE = "summaryReportCreate",
@@ -26,12 +26,19 @@ const helperBot = new Client({
   ],
 });
 
+// Find Off-Nominal Discord Guild, fetch members to prevent partials
+export function populateGuildMembers(client: Client) {
+  const guild = fetchGuild(client);
+  guild.members
+    .fetch()
+    .catch((err) =>
+      console.error("Error fetching partials for Guild Members", err)
+    );
+}
 // Handlers
 
-helperBot.once("ready", populateGuildMembers);
 helperBot.on("error", console.error);
-
-helperBot.on("threadCreate", addModsToThread);
+helperBot.once("ready", populateGuildMembers);
 
 // helperBot.once("ready", scheduleThreadDigest);
 // helperBot.on("messageCreate", handlers.helper.handleMessageCreate);

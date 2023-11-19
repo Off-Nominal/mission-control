@@ -1,7 +1,10 @@
 import { APIEmbedField, EmbedBuilder } from "discord.js";
 import embedFields from "./fields";
 import { getPredictedPrefix } from "./helpers";
-import { NDB2API, PredictionLifeCycle } from "../../../../providers/ndb2";
+import {
+  NDB2API,
+  PredictionLifeCycle,
+} from "../../../../providers/ndb2-client";
 
 const thumbnails = {
   open: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134394/Discord%20Assets/4236484_aggyej.png",

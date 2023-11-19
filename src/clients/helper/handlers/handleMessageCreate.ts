@@ -6,7 +6,7 @@ import {
   createTempConversionEmbed,
 } from "../actions/translateTemp";
 import mcconfig from "../../../mcconfig";
-import { HelperBotEvents } from "../../../providers/discord_clients/helper";
+import { HelperBotEvents } from "../../../providers/helper-bot";
 
 export enum AllowedPrefix {
   SHUNT = "!shunt",

@@ -1,7 +1,6 @@
 import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
 
 import { Providers } from "../../providers";
-import { contentBot } from "../../providers/discord_clients";
 import { NewsManagerEvents } from "../../types/eventEnums";
 import { NewsManager } from "./NewsManager";
 import { listRSSFeeds } from "./list-rss-feeds";

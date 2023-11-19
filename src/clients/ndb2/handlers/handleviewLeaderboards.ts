@@ -11,7 +11,7 @@ import {
   Logger,
 } from "../../../services/logger/Logger";
 import { generateLeaderboardEmbed } from "../actions/embedGenerators/generateLeaderboardEmbed";
-import ndb2Client, { NDB2API } from "../../../providers/ndb2";
+import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 
 export default async function handleViewLeaderboards(
   interaction: ChatInputCommandInteraction<CacheType>

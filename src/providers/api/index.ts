@@ -1,7 +1,5 @@
-import mcconfig from "../mcconfig";
+import mcconfig from "../../mcconfig";
 import express from "express";
-
-import webhooksRouter from "./controllers/webhooks";
 
 const api = express();
 
@@ -12,8 +10,6 @@ if (mcconfig.env !== "production") {
   api.use(morgan("dev"));
 }
 
-// Routers
-api.use("/webhooks", webhooksRouter);
 api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
 
 export default api;
