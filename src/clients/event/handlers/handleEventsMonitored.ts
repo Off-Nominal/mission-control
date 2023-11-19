@@ -1,7 +1,7 @@
 import { GuildMember } from "discord.js";
 import { EventWindow } from "../../../services/eventsListener/EventsListener";
 import { fetchPreNotificationSubscribers } from "../../../providers/db/queries/users";
-import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
+import createEventAnnouncementEmbed from "../../../actions/create-event-announcement-embed";
 
 export default async function handleEventsMonitored(
   eventWindows: EventWindow[]

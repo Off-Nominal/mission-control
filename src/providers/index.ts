@@ -9,6 +9,7 @@ import { sanityClient, sanityImageUrlBuilder } from "../providers/sanity";
 import cache from "./cache";
 import githubAgent from "./github-client";
 import rssProviders from "./rss-providers";
+import youtube from "./youtube";
 
 export const providers = {
   api,
@@ -23,6 +24,7 @@ export const providers = {
   cache,
   githubAgent,
   rssProviders,
+  youtube,
 };
 
 export type Providers = typeof providers;

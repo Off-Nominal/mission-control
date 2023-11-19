@@ -1,7 +1,7 @@
 import { formatDistance } from "date-fns";
 import { Collection, GuildMember, GuildScheduledEvent } from "discord.js";
 import { fetchNewEventSubscribers } from "../../../providers/db/queries/users";
-import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
+import createEventAnnouncementEmbed from "../../../actions/create-event-announcement-embed";
 
 export default async function handleGuildScheduledEventCreate(
   event: GuildScheduledEvent

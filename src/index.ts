@@ -19,6 +19,7 @@ import DeployWeMartiansSite from "./services/deploy-wemartians-site";
 import ThreadDigest from "./services/thread-digest";
 import ContentSearch from "./services/content-search";
 import StarshipSiteListener from "./services/starship-site-listener";
+import ContentPost from "./services/content-post";
 
 SetDiscordClientPresence(providers);
 JoinDiscordThread(providers);
@@ -30,23 +31,11 @@ DeployWeMartiansSite(providers);
 ThreadDigest(providers);
 ContentSearch(providers);
 StarshipSiteListener(providers);
+ContentPost(providers);
 
 // import launchListener from "./services/launchListener";
-// import feedListeners from "./services/feedListeners";
 
-// import { ContentListener } from "./listeners/contentListener/contentListener";
-
-// import {
-//   ContentListnerEvents,
-//   DevEvents,
-//   MemberManagerEvents,
-//   NewsManagerEvents,
-//   RLLEvents,
-// } from "./types/eventEnums";
-
-// import newsFeedListener from "./services/newsfeedListener";
 // import eventsListener from "./services/eventsListener";
-// import { SiteListenerEvents } from "./services/siteListener/SiteListener";
 
 /***********************************
  *  API Initialization
