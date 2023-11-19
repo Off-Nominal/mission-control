@@ -5,17 +5,15 @@ import bootLogger from "./services/logger";
 import { LogStatus } from "./services/logger/Logger";
 bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
 
-// Services
-// import launchListener from "./services/launchListener";
-// import siteChecker from "./services/siteListener";
-// import feedListeners from "./services/feedListeners";
-
 // Providers
-import { contentBot, helperBot, ndb2Bot, eventsBot } from "./discord_clients";
-import api from "./api";
-import db from "./db";
+import { providers } from "./providers";
+import SetDiscordClientPresence from "./services/set-discord-client-presence";
+import JoinDiscordThread from "./services/join-discord-thread";
+import SendHelp from "./services/send-help";
+import NewsFeed from "./services/news-feed";
 
-db.connect()
+providers.db
+  .connect()
   .then(() => {
     bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
     bootLogger.logItemSuccess("db");
@@ -24,6 +22,16 @@ db.connect()
     console.error(err);
     bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
   });
+
+// Services
+SetDiscordClientPresence(providers);
+JoinDiscordThread(providers);
+SendHelp(providers);
+NewsFeed(providers);
+
+// import launchListener from "./services/launchListener";
+// import siteChecker from "./services/siteListener";
+// import feedListeners from "./services/feedListeners";
 
 // import ndb2Client from "./providers/ndb2";
 // import cache from "./providers/cache";
@@ -70,7 +78,7 @@ db.connect()
  *  API Initialization
  ************************************/
 
-api.listen(mcconfig.api.port, () => {
+providers.api.listen(mcconfig.api.port, () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
   bootLogger.logItemSuccess("api");
 });
@@ -122,45 +130,45 @@ api.listen(mcconfig.api.port, () => {
 //  *  NDB2 Bot Event Handlers
 //  ************************************/
 
-ndb2Bot.once("ready", () => {
+providers.ndb2Bot.once("ready", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
   bootLogger.logItemSuccess("ndb2Bot");
 });
 
-ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
+providers.ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
 
 // /***********************************
 //  *  Utility Bot Event Handlers
 //  ************************************/
 
-helperBot.once("ready", () => {
+providers.helperBot.once("ready", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Helper Bot ready");
   bootLogger.logItemSuccess("helperBot");
 });
 
-helperBot.login(mcconfig.discord.clients.helper.token);
+providers.helperBot.login(mcconfig.discord.clients.helper.token);
 
 // /***********************************
 //  *  Content Bot Event Handlers
 //  ************************************/
 
-contentBot.once("ready", () => {
+providers.contentBot.once("ready", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Content Bot ready");
   bootLogger.logItemSuccess("contentBot");
 });
 
-contentBot.login(mcconfig.discord.clients.content.token);
+providers.contentBot.login(mcconfig.discord.clients.content.token);
 
 // /***********************************
 //  *  Event Bot Event Handlers
 //  ************************************/
 
-eventsBot.once("ready", () => {
+providers.eventsBot.once("ready", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Event Bot ready");
   bootLogger.logItemSuccess("eventsBot");
 });
 
-eventsBot.login(mcconfig.discord.clients.events.token);
+providers.eventsBot.login(mcconfig.discord.clients.events.token);
 
 // /***********************************
 //  *  Feed Listeners Event Handlers
@@ -260,7 +268,7 @@ eventsBot.login(mcconfig.discord.clients.events.token);
  *  Boot Logger
  ************************************/
 
-bootLogger.checkBoot(helperBot);
+bootLogger.checkBoot(providers.helperBot);
 
 // /***********************************
 //  *  Dev Test Event Handlers

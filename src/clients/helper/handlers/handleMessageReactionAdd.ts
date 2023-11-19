@@ -4,7 +4,7 @@ import {
   PartialUser,
   User,
 } from "discord.js";
-import { HelperBotEvents } from "../../../discord_clients/helper";
+import { HelperBotEvents } from "../../../providers/discord_clients/helper";
 
 export default async function handleMessageReactionAdd(
   messageReact: MessageReaction | PartialMessageReaction,

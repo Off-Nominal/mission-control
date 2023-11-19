@@ -1,10 +1,9 @@
 import { ChatInputCommandInteraction, Client, Partials } from "discord.js";
-import mcconfig from "../../mcconfig";
-import handlers from "../../clients/handlers";
-import scheduleThreadDigest from "../../utilities/scheduleThreadDigest";
-import reportGenerator from "../../services/reportGenerator";
+import mcconfig from "../../../mcconfig";
+import handlers from "../../../clients/handlers";
+import scheduleThreadDigest from "../../../utilities/scheduleThreadDigest";
+import reportGenerator from "../../../services/reportGenerator";
 import { addModsToThread, populateGuildMembers } from "./handlers";
-import { handleError, joinThread, setPresence } from "../common_handlers";
 
 export enum HelperBotEvents {
   SUMMARY_CREATE = "summaryReportCreate",
@@ -28,11 +27,10 @@ const helperBot = new Client({
 });
 
 // Handlers
-helperBot.once("ready", (client) => setPresence(client, "/help"));
-helperBot.once("ready", populateGuildMembers);
-helperBot.on("error", handleError);
 
-helperBot.on("threadCreate", joinThread);
+helperBot.once("ready", populateGuildMembers);
+helperBot.on("error", console.error);
+
 helperBot.on("threadCreate", addModsToThread);
 
 // helperBot.once("ready", scheduleThreadDigest);

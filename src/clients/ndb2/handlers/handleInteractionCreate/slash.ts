@@ -22,7 +22,7 @@ import {
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
 import mcconfig from "../../../../mcconfig";
-import { Ndb2Events } from "../../../../discord_clients/ndb2";
+import { Ndb2Events } from "../../../../providers/discord_clients/ndb2";
 import ndb2Client, { NDB2API } from "../../../../providers/ndb2";
 import cache from "../../../../providers/cache";
 

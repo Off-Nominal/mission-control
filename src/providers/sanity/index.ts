@@ -1,6 +1,19 @@
 import mcconfig from "../../mcconfig";
-import { SanityClient } from "@sanity/client";
-export * from "./types";
+import { SanityClient, SanityDocument } from "@sanity/client";
+
+export interface NewsFeedDocument extends SanityDocument {
+  url: string;
+  name: string;
+  filter?: string;
+  thumbnail: string;
+  diagnostic: string;
+  category: string;
+}
+
+export interface NewsCategoryDocument extends SanityDocument {
+  name: string;
+  feeds: NewsFeedDocument[];
+}
 
 const client = require("@sanity/client");
 const imageUrlBuilder = require("@sanity/image-url");

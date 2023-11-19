@@ -14,7 +14,7 @@ import {
   NewsFeedDocument,
   sanityClient,
   sanityImageUrlBuilder,
-} from "../../utilities/sanity";
+} from "../../providers/sanity";
 import { NewsManagerEvents } from "../../types/eventEnums";
 import { isFulfilled } from "../../helpers/allSettledTypeGuard";
 

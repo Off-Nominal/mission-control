@@ -4,7 +4,7 @@ import {
   Logger,
   LogStatus,
 } from "../../../../services/logger/Logger";
-import { Ndb2Events } from "../../../../discord_clients/ndb2";
+import { Ndb2Events } from "../../../../providers/discord_clients/ndb2";
 
 export enum ButtonCommand {
   ENDORSE = "Endorse",

@@ -7,7 +7,7 @@ import {
 import { ContentListnerEvents } from "../../types/eventEnums";
 import deployWeMartians from "../../utilities/deployWeMartians";
 import handlers from "../../clients/handlers";
-import { contentBot, eventsBot } from "../../discord_clients";
+import { contentBot, eventsBot } from "../../providers/discord_clients";
 import streamHost from "../streamHost";
 
 // WeMartians

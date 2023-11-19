@@ -1,10 +1,6 @@
-import mcconfig from "../../mcconfig";
 import { EmbedBuilder, Interaction } from "discord.js";
-import { sanityClient } from "../../utilities/sanity";
-import { NewsCategoryDocument } from "../../utilities/sanity/types";
-import { SanityClient } from "@sanity/client";
 
-export function sendHelp(interaction: Interaction) {
+export function sendContentBotHelp(interaction: Interaction) {
   if (!interaction.isChatInputCommand()) return;
 
   const { options } = interaction;
@@ -50,37 +46,4 @@ export function sendHelp(interaction: Interaction) {
     ]);
 
   interaction.reply({ embeds: [embed] });
-}
-
-export function listRSSFeeds(interaction: Interaction, client: SanityClient) {
-  if (!interaction.isChatInputCommand()) return;
-
-  const { options } = interaction;
-  const subCommand = options.getSubcommand(false);
-
-  if (subCommand !== "rss") {
-    return;
-  }
-
-  const query =
-    '*[_type == "newsCategory"] | order(name) {name, _id, "feeds": *[_type == "newsFeed" && references(^._id)] | order(name) {name, url}}';
-
-  client
-    .fetch<NewsCategoryDocument[]>(query)
-    .catch((err) => console.error(err))
-    .then((categories: NewsCategoryDocument[]) => {
-      const feedsFields = categories.map((category) => {
-        const feeds = category.feeds.map((feed) => feed.name).join("\n");
-        return { name: category.name, value: feeds };
-      });
-
-      const embed = new EmbedBuilder({
-        title: "Currently Subscribed RSS Feeds",
-        description: `These are the feeds currently being posted in <#${mcconfig.discord.channels.news}>.`,
-        fields: feedsFields,
-      });
-
-      return interaction.reply({ embeds: [embed], ephemeral: true });
-    })
-    .catch((err) => console.error(err));
 }

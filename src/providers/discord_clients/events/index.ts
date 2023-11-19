@@ -4,15 +4,14 @@ import {
   GuildScheduledEvent,
   GuildScheduledEventManager,
 } from "discord.js";
-import mcconfig from "../../mcconfig";
-import handlers from "../../clients/handlers";
-import launchListener from "../../services/launchListener";
+import mcconfig from "../../../mcconfig";
+import handlers from "../../../clients/handlers";
+import launchListener from "../../../services/launchListener";
 import contentBot from "../content";
 // import handleError from "../../clients/actions/handleError";
-import feedListeners from "../../services/feedListeners";
-import streamHost from "../../services/streamHost";
-import eventsListener from "../../services/eventsListener";
-import { handleError, joinThread, setPresence } from "../common_handlers";
+import feedListeners from "../../../services/feedListeners";
+import streamHost from "../../../services/streamHost";
+import eventsListener from "../../../services/eventsListener";
 
 export enum EventBotEvents {
   START = "eventStarted",
@@ -30,10 +29,8 @@ const eventsBot = new Client({
 });
 
 // Handlers
-eventsBot.once("ready", (client) => setPresence(client, "/events help"));
-eventsBot.on("error", handleError);
 
-eventsBot.on("threadCreate", joinThread);
+eventsBot.on("error", console.error);
 
 // eventsBot.on(
 //   "guildScheduledEventUpdate",

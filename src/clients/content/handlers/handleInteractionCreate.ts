@@ -3,7 +3,6 @@ import { ContentListener } from "../../../listeners/contentListener/contentListe
 
 import { createSearchResultsEmbed } from "../actions/createSearchResultsEmbed";
 import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
-import { ContentBotEvents } from "../../../discord_clients/content";
 
 export default function handleInteractionCreate(
   interaction: BaseInteraction,
@@ -23,7 +22,7 @@ export default function handleInteractionCreate(
   const subCommand = options.getSubcommand(false);
 
   if (subCommand === "rss") {
-    return interaction.client.emit(ContentBotEvents.RSS_LIST, interaction);
+    // return interaction.client.emit(ContentBotEvents.RSS_LIST, interaction);
   }
 
   const show = options.getString("show", true);

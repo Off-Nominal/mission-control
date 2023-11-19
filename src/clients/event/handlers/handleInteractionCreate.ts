@@ -9,7 +9,7 @@ import {
 import { setEventSubscriptions } from "../../../queries/users";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import mcconfig from "../../../mcconfig";
-import { EventBotEvents } from "../../../discord_clients/events";
+import { EventBotEvents } from "../../../providers/discord_clients/events";
 
 enum AllowedCommands {
   START = "start",

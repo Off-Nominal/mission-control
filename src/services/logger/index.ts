@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { helperBot } from "../../discord_clients";
+import { helperBot } from "../../providers/discord_clients";
 import { LogInitiator, LogStatus, Logger } from "./Logger";
 
 type BootChecklist = {

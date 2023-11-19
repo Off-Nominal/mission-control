@@ -5,7 +5,7 @@ import express from "express";
 import { GuildMember, userMention } from "discord.js";
 
 // Providers
-import { ndb2Bot } from "../../../discord_clients";
+import { ndb2Bot } from "../../../providers/discord_clients";
 import {
   LogInitiator,
   Logger,

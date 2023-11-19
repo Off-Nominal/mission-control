@@ -4,7 +4,7 @@ import {
   EmbedBuilder,
   GuildScheduledEventStatus,
 } from "discord.js";
-import { sanityClient } from "../../utilities/sanity";
+import { sanityClient } from "../../providers/sanity";
 
 type SanityMessage = {
   message: string;

@@ -1,7 +1,7 @@
 import mcconfig from "../../mcconfig";
 import { LogStatus, LogInitiator, Logger } from "../logger/Logger";
 import { RLLEvents } from "../../types/eventEnums";
-import { helperBot } from "../../discord_clients";
+import { helperBot } from "../../providers/discord_clients";
 import LaunchListener from "./LaunchListener";
 
 const launchListener = new LaunchListener(mcconfig.providers.rll.key);

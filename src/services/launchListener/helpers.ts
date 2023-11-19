@@ -10,7 +10,7 @@ import {
   TimestampStyles,
 } from "discord.js";
 
-import { sanityClient, sanityImageUrlBuilder } from "../../utilities/sanity";
+import { sanityClient, sanityImageUrlBuilder } from "../../providers/sanity";
 import { RLLEntity } from "rocket-launch-live-client";
 
 export const getLaunchDate = (launch: RLLEntity.Launch): null | Date => {
