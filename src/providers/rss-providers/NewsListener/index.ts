@@ -15,10 +15,15 @@ import {
   sanityClient,
   sanityImageUrlBuilder,
 } from "../../sanity";
-import { NewsManagerEvents } from "../../../types/eventEnums";
 import { isFulfilled } from "../../../helpers/allSettledTypeGuard";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
+
+export enum NewsManagerEvents {
+  NEW = "newNews",
+  READY = "ready",
+  ERROR = "error",
+}
 
 export type CmsNewsFeed = {
   data: NewsFeedDocument;

@@ -70,92 +70,6 @@ providers.api.listen(mcconfig.api.port, () => {
 // });
 
 // /***********************************
-//  *  News Feed Listener Setup
-//  ************************************/
-
-// newsFeedListener.on(NewsManagerEvents.READY, (message) => {
-//   bootChecklist.newsFeed = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// newsFeedListener.on(NewsManagerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// newsFeedListener.initialize();
-
-// /***********************************
-//  *  Events Listener Setup
-//  ************************************/
-
-// /***********************************
-//  *  Feed Listeners Event Handlers
-//  ************************************/
-
-// feedListeners.wm.on(ContentListnerEvents.READY, (message) => {
-//   bootChecklist.wmFeedListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// feedListeners.wm.on(ContentListnerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// feedListeners.meco.on(ContentListnerEvents.READY, (message) => {
-//   bootChecklist.mecoFeedListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// feedListeners.meco.on(ContentListnerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// feedListeners.ofn.on(ContentListnerEvents.READY, (message) => {
-//   bootChecklist.ofnFeedListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// feedListeners.ofn.on(ContentListnerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// feedListeners.rpr.on(ContentListnerEvents.READY, (message) => {
-//   bootChecklist.rprFeedListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// feedListeners.rpr.on(ContentListnerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// feedListeners.hl.on(ContentListnerEvents.READY, (message) => {
-//   bootChecklist.hlFeedListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// feedListeners.hl.on(ContentListnerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// feedListeners.hh.on(ContentListnerEvents.READY, (message) => {
-//   bootChecklist.hhFeedListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// feedListeners.hh.on(ContentListnerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// feedListeners.yt.on(ContentListnerEvents.READY, (message) => {
-//   bootChecklist.ytFeedListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// feedListeners.yt.on(ContentListnerEvents.ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// feedListeners.wm.initialize();
-// feedListeners.meco.initialize();
-// feedListeners.ofn.initialize();
-// feedListeners.rpr.initialize();
-// feedListeners.hl.initialize();
-// feedListeners.hh.initialize();
-// feedListeners.yt.initialize();
-
-// /***********************************
 //  *  Event Listeners Event Handlers
 //  ************************************/
 
@@ -163,23 +77,6 @@ providers.api.listen(mcconfig.api.port, () => {
 //   bootChecklist.eventsListener = true;
 //   bootLog.addLog(LogStatus.SUCCESS, message);
 // });
-
-// /***********************************
-//  *  Site Listeners Event Handlers
-//  ************************************/
-
-// siteChecker.starship.on(SiteListenerEvents.READY, () => {
-//   bootChecklist.starshipSiteChecker = true;
-//   bootLog.addLog(
-//     LogStatus.SUCCESS,
-//     `Site listener monitoring Starship Website`
-//   );
-// });
-// siteChecker.starship.on(SiteListenerEvents.UPDATE, (update) =>
-//   helperBot.emit(HelperBotEvents.STARSHIP_UPDATE, update)
-// );
-
-// siteChecker.starship.initialize();
 
 /***********************************
  *  Boot Logger
@@ -210,8 +107,4 @@ bootLogger.checkBoot(providers.helperBot);
 //       });
 //   });
 
-//   helperBot.on(
-//     DevEvents.THREAD_DIGEST_SEND,
-//     handlers.helper.handleThreadDigestSend
-//   );
 // }

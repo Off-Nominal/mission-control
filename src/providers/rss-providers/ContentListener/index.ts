@@ -1,12 +1,19 @@
 import { GuildScheduledEvent, GuildScheduledEventStatus } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../../actions/post-to-content-channel";
-import { ContentListnerEvents } from "../../../types/eventEnums";
 import { FeedWatcherEvents } from "../FeedWatcher/types";
 import { FeedWatcher } from "../FeedWatcher";
 const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;
+
+export enum ContentListenerEvents {
+  NEW = "newContent",
+  STREAM_START = "streamStarted",
+  STREAM_END = "streamEnded",
+  READY = "ready",
+  ERROR = "error",
+}
 
 export type ContentListenerOptions = {
   processor?: (item: any, showTitle: string) => ContentFeedItem;
@@ -39,7 +46,7 @@ export class ContentListener extends FeedWatcher {
         .reverse(); // map entries from RSS feed to episode format using processor
 
       this.emit(
-        ContentListnerEvents.READY,
+        ContentListenerEvents.READY,
         `${this.title} feed loaded with ${this.episodes.length} items.`
       );
       this.on(FeedWatcherEvents.ERROR, (error) =>
@@ -47,7 +54,7 @@ export class ContentListener extends FeedWatcher {
       );
     } catch (err) {
       this.emit(
-        ContentListnerEvents.ERROR,
+        ContentListenerEvents.ERROR,
         `Attempted to initialize ${this.title} multiple times, could not fetch data.`
       );
       console.error(err);
@@ -62,7 +69,7 @@ export class ContentListener extends FeedWatcher {
       entries.forEach((episode) => {
         const mappedEpisode = this.processor(episode, this.title);
         this.episodes.push(mappedEpisode);
-        this.emit(ContentListnerEvents.NEW, mappedEpisode);
+        this.emit(ContentListenerEvents.NEW, mappedEpisode);
       });
     });
   }
@@ -100,10 +107,10 @@ export class ContentListener extends FeedWatcher {
     }
 
     if (event.status === GuildScheduledEventStatus.Completed) {
-      this.emit(ContentListnerEvents.STREAM_END, event);
+      this.emit(ContentListenerEvents.STREAM_END, event);
     }
     if (event.status === GuildScheduledEventStatus.Active) {
-      this.emit(ContentListnerEvents.STREAM_START, event);
+      this.emit(ContentListenerEvents.STREAM_START, event);
     }
   }
 }

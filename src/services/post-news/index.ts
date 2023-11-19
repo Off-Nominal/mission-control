@@ -3,8 +3,8 @@ import {
   postContent,
   ContentFeedItem,
 } from "../../actions/post-to-content-channel";
-import { NewsManagerEvents } from "../../types/eventEnums";
 import { listRSSFeeds } from "./list-rss-feeds";
+import { NewsManagerEvents } from "../../providers/rss-providers/NewsListener";
 
 export default function PostNews({
   contentBot,
