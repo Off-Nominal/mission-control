@@ -4,11 +4,7 @@ import {
   deleteSubById,
   Ndb2MsgSubscriptionType,
 } from "../../../queries/ndb2_msg_subscriptions";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 import cache from "../../../providers/cache";
 

@@ -1,6 +1,6 @@
 import { Channel, ChannelType, Client } from "discord.js";
-import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
-import mcconfig from "../../../mcconfig";
+import createUniqueResultEmbed from "../services/content-search/createUniqueResultEmbed";
+import mcconfig from "../mcconfig";
 
 export type ContentFeedItem = {
   author: string;
@@ -15,7 +15,7 @@ export type ContentFeedItem = {
   albumArt?: string;
 };
 
-export default async function handleNewContent(
+export async function postContent(
   content: ContentFeedItem,
   client: Client,
   target: "news" | "content",

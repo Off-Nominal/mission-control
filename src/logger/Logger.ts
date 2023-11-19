@@ -6,7 +6,7 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import mcconfig from "../../mcconfig";
+import mcconfig from "../mcconfig";
 
 export enum LogStatus {
   SUCCESS = "✅",

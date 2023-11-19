@@ -5,11 +5,7 @@ import {
   GuildMember,
 } from "discord.js";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import {
   Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,

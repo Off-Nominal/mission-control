@@ -1,9 +1,5 @@
 import { ButtonInteraction, channelMention, userMention } from "discord.js";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import {
   fetchSubByType,
   Ndb2MsgSubscriptionType,

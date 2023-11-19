@@ -1,9 +1,5 @@
 import { ButtonInteraction, userMention } from "discord.js";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { ButtonCommand } from "./handleInteractionCreate/button";
 import ndb2Client, { NDB2API } from "../../../providers/ndb2-client";
 

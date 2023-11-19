@@ -1,7 +1,7 @@
 import { ChannelType, Client, GuildScheduledEvent } from "discord.js";
-import createUniqueResultEmbed from "../actions/createUniqueResultEmbed";
+import createUniqueResultEmbed from "../../../services/content-search/createUniqueResultEmbed";
 import mcconfig from "../../../mcconfig";
-import feedListeners from "../../../services/feedListeners";
+import feedListeners from "../../../providers/rss-providers";
 
 export default async function handleEventEnded(
   event: GuildScheduledEvent,

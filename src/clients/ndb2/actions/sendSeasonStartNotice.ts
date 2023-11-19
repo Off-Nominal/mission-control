@@ -5,13 +5,9 @@ import {
   Client,
   GuildTextBasedChannel,
 } from "discord.js";
-import fetchGuild from "../../../utilities/fetchGuild";
+import fetchGuild from "../../../helpers/fetchGuild";
 import { generateNewSeasonEmbed } from "./embedGenerators/generateNewSeasonEmbed";
-import {
-  LogStatus,
-  Logger,
-  LogInitiator,
-} from "../../../services/logger/Logger";
+import { LogStatus, Logger, LogInitiator } from "../../../logger/Logger";
 import mcconfig from "../../../mcconfig";
 import { NDB2API } from "../../../providers/ndb2-client";
 

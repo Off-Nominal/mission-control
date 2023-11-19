@@ -1,5 +1,4 @@
 import { Client } from "discord.js";
-import { helperBot } from "../../providers/discord_clients";
 import { LogInitiator, LogStatus, Logger } from "./Logger";
 
 type BootChecklist = {
@@ -89,7 +88,7 @@ class BootLogger extends Logger {
           LogStatus.FAILURE,
           `Boot Checklist still incomplete after 15 attempts, logger aborted. Failed items:\n${failures}`
         );
-        this.sendLog(helperBot);
+        this.sendLog(client);
         console.log("*** BOOTUP FAILURE CHECK LOGS ***");
         clearInterval(bootChecker);
       }

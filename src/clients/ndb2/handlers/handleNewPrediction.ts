@@ -8,11 +8,7 @@ import {
   userMention,
 } from "discord.js";
 import { generatePredictionResponse } from "../actions/generatePredictionResponse";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 import {
   Ndb2MsgSubscriptionType,

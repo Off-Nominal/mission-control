@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-import { ContentFeedItem } from "../handlers/handleNewContent";
+import { ContentFeedItem } from "../../actions/post-to-content-channel";
 
 export default function createUniqueResultEmbed(feedItem: ContentFeedItem) {
   const { author, title, url, description, summary, date, thumbnail, source } =

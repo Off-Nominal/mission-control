@@ -5,8 +5,8 @@ import {
   newsFeedMapper,
   FeedParserEntry,
   FeedWatcherEvents,
-} from "../../utilities/FeedWatcher";
-import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
+} from "../FeedWatcher";
+import { ContentFeedItem } from "../../../actions/post-to-content-channel";
 import { shouldFilter } from "./helpers";
 import { sub } from "date-fns";
 
@@ -14,9 +14,9 @@ import {
   NewsFeedDocument,
   sanityClient,
   sanityImageUrlBuilder,
-} from "../../providers/sanity";
-import { NewsManagerEvents } from "../../types/eventEnums";
-import { isFulfilled } from "../../helpers/allSettledTypeGuard";
+} from "../../sanity";
+import { NewsManagerEvents } from "../../../types/eventEnums";
+import { isFulfilled } from "../../../helpers/allSettledTypeGuard";
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
 

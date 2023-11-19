@@ -1,5 +1,5 @@
 import { Message, EmbedBuilder } from "discord.js";
-import fetchGuild from "../../../utilities/fetchGuild";
+import fetchGuild from "../../../helpers/fetchGuild";
 import mcconfig from "../../../mcconfig";
 
 export default async function handleSendDelinquents(message: Message) {

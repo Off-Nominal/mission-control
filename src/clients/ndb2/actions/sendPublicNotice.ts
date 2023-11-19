@@ -6,12 +6,8 @@ import {
   addSubscription,
   fetchSubByType,
 } from "../../../queries/ndb2_msg_subscriptions";
-import fetchGuild from "../../../utilities/fetchGuild";
-import {
-  Logger,
-  LogStatus,
-  LogInitiator,
-} from "../../../services/logger/Logger";
+import fetchGuild from "../../../helpers/fetchGuild";
+import { Logger, LogStatus, LogInitiator } from "../../../logger/Logger";
 import { add } from "date-fns";
 import { generatePublicNotice } from "./generatePublicNotice";
 import mcconfig from "../../../mcconfig";

@@ -1,5 +1,5 @@
 import { stripHtml } from "string-strip-html";
-import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
+import { ContentFeedItem } from "../../../actions/post-to-content-channel";
 import { FeedParserEntry } from "./types";
 
 export const youtubeFeedMapper = (

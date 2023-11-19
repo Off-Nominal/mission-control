@@ -1,9 +1,7 @@
 import { ChatInputCommandInteraction, Client, Partials } from "discord.js";
 import mcconfig from "../../mcconfig";
-import handlers from "../../clients/handlers";
-import scheduleThreadDigest from "../../utilities/scheduleThreadDigest";
 import reportGenerator from "../../services/reportGenerator";
-import fetchGuild from "../../utilities/fetchGuild";
+import fetchGuild from "../../helpers/fetchGuild";
 
 export enum HelperBotEvents {
   SUMMARY_CREATE = "summaryReportCreate",
@@ -60,10 +58,6 @@ helperBot.once("ready", populateGuildMembers);
 //   }
 // );
 // helperBot.on(HelperBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
-// helperBot.on(
-//   HelperBotEvents.THREAD_DIGEST_SEND,
-//   handlers.helper.handleThreadDigestSend
-// );
 // helperBot.on(
 //   HelperBotEvents.STARSHIP_UPDATE,
 //   handlers.helper.handleStarshipSiteUpdate

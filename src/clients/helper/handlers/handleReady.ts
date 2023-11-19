@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
 import { generatePresenceData } from "../../../helpers/generatePresenceData";
-import fetchGuild from "../../../utilities/fetchGuild";
+import fetchGuild from "../../../helpers/fetchGuild";
 
 export default function handleReady(client: Client) {
   client.user.setPresence(generatePresenceData("/help"));

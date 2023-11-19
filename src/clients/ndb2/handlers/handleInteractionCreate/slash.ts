@@ -14,11 +14,7 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { Ndb2Subcommand } from "../../../../commands/ndb2";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../../logger/Logger";
 import { validateUserDateInput } from "../../helpers/validateUserDateInput";
 import { add, isBefore, isFuture } from "date-fns";
 import mcconfig from "../../../../mcconfig";

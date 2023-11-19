@@ -1,5 +1,5 @@
 import { ChannelType, Client } from "discord.js";
-import { ContentFeedItem } from "../../content/handlers/handleNewContent";
+import { ContentFeedItem } from "../../../actions/post-to-content-channel";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import createEventAnnouncementEmbed from "../actions/createEventAnnouncementEmbed";
 import fetchYouTubeVideo from "../actions/fetchYouTubeVideo";

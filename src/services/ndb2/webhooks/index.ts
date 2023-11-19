@@ -5,7 +5,7 @@ import express, { Router } from "express";
 import { Client, GuildMember, userMention } from "discord.js";
 
 // Providers
-import { LogInitiator, Logger, LogStatus } from "../../logger/Logger";
+import { LogInitiator, Logger, LogStatus } from "../../../logger/Logger";
 
 // Actions
 import { updatePredictionEmbeds } from "../../../clients/ndb2/actions/updatePredictionEmbeds";
@@ -14,7 +14,7 @@ import {
   Ndb2MsgSubscription,
   fetchActiveSubs,
 } from "../../../queries/ndb2_msg_subscriptions";
-import fetchGuild from "../../../utilities/fetchGuild";
+import fetchGuild from "../../../helpers/fetchGuild";
 import { sendSeasonStartNotice } from "../../../clients/ndb2/actions/sendSeasonStartNotice";
 import { sendSeasonEndNotice } from "../../../clients/ndb2/actions/sendSeasonEndNotice";
 

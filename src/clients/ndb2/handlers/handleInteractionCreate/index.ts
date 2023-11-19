@@ -1,9 +1,5 @@
 import { Interaction } from "discord.js";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../../logger/Logger";
 import { handleModalInteraction } from "./modal";
 import { handleButtonInteraction } from "./button";
 import { handleSlashCommandInteraction } from "./slash";

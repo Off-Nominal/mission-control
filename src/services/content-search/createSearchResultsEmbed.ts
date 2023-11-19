@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { EmbedBuilder } from "discord.js";
-import { ContentFeedItem } from "../handlers/handleNewContent";
+import { ContentFeedItem } from "../../actions/post-to-content-channel";
 
 export const createSearchResultsEmbed = (
   results: Fuse.default.FuseResult<ContentFeedItem>[],

@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import fetchGuild from "../../../utilities/fetchGuild";
+import fetchGuild from "../../../helpers/fetchGuild";
 import { EventBotEvents } from "../../../providers/events-bot";
 
 export default async function handleReady(client: Client) {

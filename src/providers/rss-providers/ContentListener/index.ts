@@ -1,9 +1,9 @@
 import { GuildScheduledEvent, GuildScheduledEventStatus } from "discord.js";
 import Fuse from "fuse.js";
-import { ContentFeedItem } from "../../clients/content/handlers/handleNewContent";
-import { ContentListnerEvents } from "../../types/eventEnums";
-import { FeedWatcherEvents } from "../../utilities/FeedWatcher/types";
-import { FeedWatcher } from "../../utilities/FeedWatcher";
+import { ContentFeedItem } from "../../../actions/post-to-content-channel";
+import { ContentListnerEvents } from "../../../types/eventEnums";
+import { FeedWatcherEvents } from "../FeedWatcher/types";
+import { FeedWatcher } from "../FeedWatcher";
 const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;

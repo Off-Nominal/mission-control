@@ -1,14 +1,7 @@
 import mcconfig from "../../mcconfig";
-import { ContentListener } from "../../listeners/contentListener/contentListener";
-import {
-  simpleCastFeedMapper,
-  youtubeFeedMapper,
-} from "../../utilities/FeedWatcher";
-import { ContentListnerEvents } from "../../types/eventEnums";
-import deployWeMartians from "../../utilities/deployWeMartians";
-import handlers from "../../clients/handlers";
-import { contentBot, eventsBot } from "../../providers/discord_clients";
-import streamHost from "../streamHost";
+import { ContentListener } from "./ContentListener";
+import { simpleCastFeedMapper, youtubeFeedMapper } from "./FeedWatcher";
+import { NewsManager } from "./NewsListener";
 
 // WeMartians
 const wmFeedListener = new ContentListener(mcconfig.content.rss.wm, {
@@ -16,7 +9,6 @@ const wmFeedListener = new ContentListener(mcconfig.content.rss.wm, {
   searchOptions: mcconfig.content.rss.searchOptions.default,
 });
 // wmFeedListener.on(ContentListnerEvents.NEW, (content) => {
-//   deployWeMartians();
 //   setTimeout(() => {
 //     handlers.content.handleNewContent(content, contentBot, "content");
 //   }, 600000);
@@ -72,11 +64,14 @@ const ytFeedListener = new ContentListener(mcconfig.content.rss.ofn_yt, {
   processor: youtubeFeedMapper,
   searchOptions: mcconfig.content.rss.searchOptions.youtube,
 });
+
 // ytFeedListener.on(ContentListnerEvents.NEW, (content) => {
 //   handlers.events.handleNewContent(content, eventsBot);
 // });
 // ytFeedListener.on(ContentListnerEvents.STREAM_START, streamHost.startParty);
 // ytFeedListener.on(ContentListnerEvents.STREAM_END, streamHost.endParty);
+
+const newsFeedListener = new NewsManager();
 
 export default {
   yt: ytFeedListener,
@@ -86,4 +81,5 @@ export default {
   ofn: ofnFeedListener,
   meco: mecoFeedListener,
   wm: wmFeedListener,
+  news: newsFeedListener,
 };

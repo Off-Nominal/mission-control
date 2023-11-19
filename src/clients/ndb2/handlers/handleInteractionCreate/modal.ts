@@ -1,9 +1,5 @@
 import { CacheType, Interaction } from "discord.js";
-import {
-  Logger,
-  LogInitiator,
-  LogStatus,
-} from "../../../../services/logger/Logger";
+import { Logger, LogInitiator, LogStatus } from "../../../../logger/Logger";
 import { Ndb2Events } from "../../../../providers/ndb2-bot";
 
 export const handleModalInteraction = (interaction: Interaction<CacheType>) => {

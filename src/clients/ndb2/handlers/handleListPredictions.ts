@@ -5,11 +5,7 @@ import {
   CacheType,
   ChatInputCommandInteraction,
 } from "discord.js";
-import {
-  LogStatus,
-  Logger,
-  LogInitiator,
-} from "../../../services/logger/Logger";
+import { LogStatus, Logger, LogInitiator } from "../../../logger/Logger";
 import { generateListPredictionsEmbed } from "../actions/embedGenerators/generateListPredictionsEmbed";
 import ndb2Client, {
   PredictionLifeCycle,

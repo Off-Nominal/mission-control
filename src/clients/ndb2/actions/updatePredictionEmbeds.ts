@@ -8,11 +8,7 @@ import {
 } from "discord.js";
 
 // Providers
-import {
-  Logger,
-  LogStatus,
-  LogInitiator,
-} from "../../../services/logger/Logger";
+import { Logger, LogStatus, LogInitiator } from "../../../logger/Logger";
 import { NDB2API } from "../../../providers/ndb2-client";
 import { NDB2WebhookEvent } from "../../../services/ndb2/webhooks";
 
@@ -22,7 +18,7 @@ import {
 } from "../../../queries/ndb2_msg_subscriptions";
 
 // Actions
-import fetchGuild from "../../../utilities/fetchGuild";
+import fetchGuild from "../../../helpers/fetchGuild";
 import { generatePredictionResponse } from "./generatePredictionResponse";
 import { generatePublicNotice } from "./generatePublicNotice";
 

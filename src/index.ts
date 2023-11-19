@@ -1,8 +1,8 @@
 import mcconfig from "./mcconfig";
 
 // Boot Logger
-import bootLogger from "./services/logger";
-import { LogStatus } from "./services/logger/Logger";
+import bootLogger from "./logger";
+import { LogStatus } from "./logger/Logger";
 bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
 
 // Providers
@@ -23,16 +23,20 @@ providers.db
 import SetDiscordClientPresence from "./services/set-discord-client-presence";
 import JoinDiscordThread from "./services/join-discord-thread";
 import SendHelp from "./services/send-help";
-import NewsFeed from "./services/news-feed";
+import PostNews from "./services/post-news";
 import AddModsToThread from "./services/add-mods-to-thread";
 import NDB2 from "./services/ndb2";
+import DeployWeMartiansSite from "./services/deploy-wemartians-site";
+import ThreadDigest from "./services/thread-digest";
 
 SetDiscordClientPresence(providers);
 JoinDiscordThread(providers);
 SendHelp(providers);
-NewsFeed(providers);
+PostNews(providers);
 AddModsToThread(providers);
 NDB2(providers);
+DeployWeMartiansSite(providers);
+ThreadDigest(providers);
 
 // import launchListener from "./services/launchListener";
 // import siteChecker from "./services/siteListener";

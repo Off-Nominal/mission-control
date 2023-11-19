@@ -5,13 +5,9 @@ import {
   CacheType,
   ChatInputCommandInteraction,
 } from "discord.js";
-import {
-  LogStatus,
-  LogInitiator,
-  Logger,
-} from "../../../services/logger/Logger";
+import { LogStatus, LogInitiator, Logger } from "../../../logger/Logger";
 import { generateScoresEmbed } from "../actions/embedGenerators/generateScoresEmbed";
-import fetchGuild from "../../../utilities/fetchGuild";
+import fetchGuild from "../../../helpers/fetchGuild";
 import ndb2Client from "../../../providers/ndb2-client";
 
 export default async function handleVewScore(

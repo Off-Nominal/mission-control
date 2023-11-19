@@ -87,3 +87,5 @@ export class GitHubAgent {
     }
   }
 }
+
+export default new GitHubAgent();

@@ -1,9 +1,5 @@
 import { ButtonInteraction, CacheType } from "discord.js";
-import {
-  LogInitiator,
-  Logger,
-  LogStatus,
-} from "../../../../services/logger/Logger";
+import { LogInitiator, Logger, LogStatus } from "../../../../logger/Logger";
 import { Ndb2Events } from "../../../../providers/ndb2-bot";
 
 export enum ButtonCommand {

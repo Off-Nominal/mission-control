@@ -12,16 +12,11 @@ import {
   messageLink,
   hyperlink,
   Client,
-  ForumChannel,
 } from "discord.js";
-import { isFulfilled, isRejected } from "../../../helpers/allSettledTypeGuard";
-import { fillMessageCache } from "../../../helpers/fillMessageCache";
-import {
-  LogInitiator,
-  Logger,
-  LogStatus,
-} from "../../../services/logger/Logger";
-import fetchGuild from "../../../utilities/fetchGuild";
+import { isFulfilled, isRejected } from "../../helpers/allSettledTypeGuard";
+import { fillMessageCache } from "../../helpers/fillMessageCache";
+import { LogInitiator, Logger, LogStatus } from "../../logger/Logger";
+import fetchGuild from "../../helpers/fetchGuild";
 
 type ThreadData = {
   thread: ThreadChannel;
@@ -37,7 +32,7 @@ type ThreadDigests = {
   [key: string]: ThreadDigest;
 };
 
-export default async function handleThreadDigestSend(client: Client) {
+export default async function sendThreadDigest(client: Client) {
   const logger = new Logger(
     "Thread Digest Log",
     LogInitiator.SERVER,

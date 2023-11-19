@@ -1,8 +1,8 @@
 import mcconfig from "../../mcconfig";
 import { ThreadChannel, channelMention } from "discord.js";
 import { Providers } from "../../providers";
-import { LogInitiator, LogStatus, Logger } from "../logger/Logger";
-import fetchGuild from "../../utilities/fetchGuild";
+import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
+import fetchGuild from "../../helpers/fetchGuild";
 
 export function addModsToThread(thread: ThreadChannel) {
   const logger = new Logger(

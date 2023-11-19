@@ -1,4 +1,4 @@
-import mcconfig from "../mcconfig";
+import mcconfig from "../../mcconfig";
 import { Client } from "pg";
 
 const db = new Client({
