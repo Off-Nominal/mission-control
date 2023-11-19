@@ -5,7 +5,7 @@ import {
   Ndb2MsgSubscriptionType,
   addSubscription,
   fetchSubByType,
-} from "../../../queries/ndb2_msg_subscriptions";
+} from "../../../providers/db/queries/ndb2_msg_subscriptions";
 import fetchGuild from "../../../helpers/fetchGuild";
 import { Logger, LogStatus, LogInitiator } from "../../../logger/Logger";
 import { add } from "date-fns";

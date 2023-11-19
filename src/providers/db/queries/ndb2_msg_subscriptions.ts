@@ -1,5 +1,5 @@
 import { Client } from "pg";
-import db from "../providers/db";
+import db from "..";
 
 export enum Ndb2MsgSubscriptionType {
   CONTEXT = "context",

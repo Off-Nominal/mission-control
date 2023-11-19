@@ -1,4 +1,4 @@
-import db from "../providers/db";
+import db from "..";
 
 type User = {
   id: number;

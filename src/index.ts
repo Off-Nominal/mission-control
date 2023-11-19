@@ -28,6 +28,7 @@ import AddModsToThread from "./services/add-mods-to-thread";
 import NDB2 from "./services/ndb2";
 import DeployWeMartiansSite from "./services/deploy-wemartians-site";
 import ThreadDigest from "./services/thread-digest";
+import ContentSearch from "./services/content-search";
 
 SetDiscordClientPresence(providers);
 JoinDiscordThread(providers);
@@ -37,6 +38,7 @@ AddModsToThread(providers);
 NDB2(providers);
 DeployWeMartiansSite(providers);
 ThreadDigest(providers);
+ContentSearch(providers);
 
 // import launchListener from "./services/launchListener";
 // import siteChecker from "./services/siteListener";

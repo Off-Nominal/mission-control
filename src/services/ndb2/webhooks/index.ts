@@ -13,7 +13,7 @@ import { sendPublicNotice } from "../../../clients/ndb2/actions/sendPublicNotice
 import {
   Ndb2MsgSubscription,
   fetchActiveSubs,
-} from "../../../queries/ndb2_msg_subscriptions";
+} from "../../../providers/db/queries/ndb2_msg_subscriptions";
 import fetchGuild from "../../../helpers/fetchGuild";
 import { sendSeasonStartNotice } from "../../../clients/ndb2/actions/sendSeasonStartNotice";
 import { sendSeasonEndNotice } from "../../../clients/ndb2/actions/sendSeasonEndNotice";

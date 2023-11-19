@@ -16,8 +16,4 @@ export default function handleMessageCreate(message: Message) {
     }
     message.client.emit(DevEvents.NEW_ENTRIES, show);
   }
-
-  if (prefix === "!threaddigest") {
-    message.client.emit(DevEvents.THREAD_DIGEST_SEND);
-  }
 }

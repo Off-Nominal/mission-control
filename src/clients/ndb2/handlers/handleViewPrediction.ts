@@ -11,7 +11,7 @@ import {
   Ndb2MsgSubscriptionType,
   addSubscription,
   fetchSubByType,
-} from "../../../queries/ndb2_msg_subscriptions";
+} from "../../../providers/db/queries/ndb2_msg_subscriptions";
 import { NDB2API } from "../../../providers/ndb2-client";
 
 export default async function handleViewPrediction(

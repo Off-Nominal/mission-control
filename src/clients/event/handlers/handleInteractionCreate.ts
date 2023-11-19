@@ -6,7 +6,7 @@ import {
   GuildScheduledEventPrivacyLevel,
   GuildScheduledEventEntityType,
 } from "discord.js";
-import { setEventSubscriptions } from "../../../queries/users";
+import { setEventSubscriptions } from "../../../providers/db/queries/users";
 import createDiscordEvent from "../actions/createDiscordEvent";
 import mcconfig from "../../../mcconfig";
 import { EventBotEvents } from "../../../providers/events-bot";

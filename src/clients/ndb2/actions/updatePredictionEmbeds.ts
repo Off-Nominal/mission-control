@@ -15,7 +15,7 @@ import { NDB2WebhookEvent } from "../../../services/ndb2/webhooks";
 import {
   Ndb2MsgSubscription,
   Ndb2MsgSubscriptionType,
-} from "../../../queries/ndb2_msg_subscriptions";
+} from "../../../providers/db/queries/ndb2_msg_subscriptions";
 
 // Actions
 import fetchGuild from "../../../helpers/fetchGuild";
