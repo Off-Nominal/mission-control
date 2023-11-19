@@ -1,7 +1,8 @@
 import EventEmitter = require("events");
 import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
-import { GitHubAgent } from "../../providers/github-client";
+import { GitHubAgent } from "../../../providers/github-client";
+import mcconfig from "../../../mcconfig";
 
 export enum SiteListenerEvents {
   UPDATE = "siteUpdate",
@@ -45,9 +46,14 @@ export class SiteListener extends EventEmitter {
   //cooldown
   private lastMessage: Date;
 
-  constructor(url: string, options: SiteListenerOptions) {
+  constructor(
+    url: string,
+    gitHubAgent: GitHubAgent,
+    options: SiteListenerOptions
+  ) {
     super();
     this.url = url;
+    this.gitHubAgent = gitHubAgent;
 
     if (options.interval) {
       this.interval = options.interval * 1000;
@@ -201,7 +207,9 @@ export class SiteListener extends EventEmitter {
       throw err;
     }
 
-    const contents = await this.gitHubAgent.getContents();
+    const contents = await this.gitHubAgent.getContents(
+      mcconfig.siteTracker.starship.owner
+    );
     this.updateMetadata(contents);
 
     return diffUrl;
@@ -221,35 +229,24 @@ export class SiteListener extends EventEmitter {
     this.extractMetadata(contents, "log.json");
   }
 
-  private async initializeAgent() {
-    this.gitHubAgent = new GitHubAgent();
-
-    try {
-      //Authorize Agent with GitHub
-      await this.gitHubAgent.initialize();
-
-      //Fetches metadata for all the files we need to work with
-      const contents = await this.gitHubAgent.getContents();
-      this.updateMetadata(contents);
-
-      //Loads log files into memory
-      const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
-      this.logs = logsResponse.data;
-    } catch (err) {
-      throw err;
-    }
-  }
-
   public async initialize() {
     try {
-      await this.initializeAgent();
+      //Fetches metadata for all the files we need to work with
+      const contents = await this.gitHubAgent.getContents(
+        mcconfig.siteTracker.starship.owner
+      );
+      this.updateMetadata(contents);
+
+      const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
+      this.logs = logsResponse.data;
+
       setInterval(() => {
         this.checkSite();
       }, this.interval);
       this.emit(SiteListenerEvents.READY);
     } catch (err) {
       console.error(
-        "Error initializing GitHub Agent, site tracking is inactive."
+        "Error initializing Site Tracker, site tracking is inactive."
       );
       console.error(err);
     }

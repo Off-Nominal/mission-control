@@ -9,6 +9,8 @@ import {
 import mcconfig from "../../mcconfig";
 import handlers from "../../clients/handlers";
 import { NDB2API } from "../ndb2-client";
+import bootLogger from "../../logger";
+import { LogStatus } from "../../logger/Logger";
 
 export enum Ndb2Events {
   NEW_PREDICTION = "new_prediction",
@@ -28,9 +30,15 @@ const ndb2Bot = new Client({
   intents: [mcconfig.discord.intents.simpleIntents],
 });
 
-// // Handlers
+// Handlers
 
 ndb2Bot.on("error", console.error);
+ndb2Bot.once("ready", () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
+  bootLogger.logItemSuccess("ndb2Bot");
+});
+
+ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
 
 // ndb2Bot.on(Events.InteractionCreate, (interaction) => {
 //   handlers.ndb2.handleInteractionCreate(interaction);

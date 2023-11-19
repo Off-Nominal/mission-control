@@ -1,6 +1,8 @@
 const { createAppAuth } = require("@octokit/auth-app");
 import axios, { AxiosRequestConfig } from "axios";
 import mcconfig from "../../mcconfig";
+import bootLogger from "../../logger";
+import { LogStatus } from "../../logger/Logger";
 
 const BASEURL = mcconfig.providers.github.baseUrl;
 
@@ -36,7 +38,10 @@ export class GitHubAgent {
       this.token = token;
       this.authConfig = {
         ...config,
-        headers: { ...config.headers, Authorization: `Bearer ${this.token}` },
+        headers: {
+          ...config.headers,
+          Authorization: `Bearer ${this.token}`,
+        },
       };
     } catch (err) {
       throw err;
@@ -51,8 +56,8 @@ export class GitHubAgent {
     }
   }
 
-  public async getContents() {
-    const url = `${BASEURL}/repos/${mcconfig.siteTracker.starship.owner}/${REPO}/contents/?ref=${BRANCH}`;
+  public async getContents(owner: string) {
+    const url = `${BASEURL}/repos/${owner}/${REPO}/contents/?ref=${BRANCH}`;
     try {
       const { data } = await axios.get(url, config);
       return data;
@@ -88,4 +93,18 @@ export class GitHubAgent {
   }
 }
 
-export default new GitHubAgent();
+const gitHubAgent = new GitHubAgent();
+
+//Authorize Agent with GitHub
+gitHubAgent
+  .initialize()
+  .then(() => {
+    bootLogger.addLog(LogStatus.SUCCESS, "GitHub Client Authorized");
+    bootLogger.logItemSuccess("githubAgent");
+  })
+  .catch((err) => {
+    console.error(err);
+    bootLogger.addLog(LogStatus.FAILURE, "GitHub Client failed to Authorized");
+  });
+
+export default gitHubAgent;

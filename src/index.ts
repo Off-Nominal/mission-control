@@ -8,17 +8,6 @@ bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
 // Providers
 import { providers } from "./providers";
 
-providers.db
-  .connect()
-  .then(() => {
-    bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
-    bootLogger.logItemSuccess("db");
-  })
-  .catch((err) => {
-    console.error(err);
-    bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
-  });
-
 // Services
 import SetDiscordClientPresence from "./services/set-discord-client-presence";
 import JoinDiscordThread from "./services/join-discord-thread";
@@ -29,6 +18,7 @@ import NDB2 from "./services/ndb2";
 import DeployWeMartiansSite from "./services/deploy-wemartians-site";
 import ThreadDigest from "./services/thread-digest";
 import ContentSearch from "./services/content-search";
+import StarshipSiteListener from "./services/starship-site-listener";
 
 SetDiscordClientPresence(providers);
 JoinDiscordThread(providers);
@@ -39,15 +29,11 @@ NDB2(providers);
 DeployWeMartiansSite(providers);
 ThreadDigest(providers);
 ContentSearch(providers);
+StarshipSiteListener(providers);
 
 // import launchListener from "./services/launchListener";
-// import siteChecker from "./services/siteListener";
 // import feedListeners from "./services/feedListeners";
 
-// import ndb2Client from "./providers/ndb2";
-// import cache from "./providers/cache";
-
-// import handleError from "./clients/actions/handleError";
 // import { ContentListener } from "./listeners/contentListener/contentListener";
 
 // import {
@@ -59,31 +45,8 @@ ContentSearch(providers);
 // } from "./types/eventEnums";
 
 // import newsFeedListener from "./services/newsfeedListener";
-// import { HelperBotEvents } from "./discord_clients/helper";
 // import eventsListener from "./services/eventsListener";
-// import { ContentBotEvents } from "./discord_clients/content";
-// import { EventListenerEvents } from "./services/eventsListener/EventsListener";
 // import { SiteListenerEvents } from "./services/siteListener/SiteListener";
-
-// export enum Feed {
-//   WEMARTIANS = "wm",
-//   MAIN_ENGINE_CUT_OFF = "meco",
-//   OFF_NOMINAL_PODCAST = "ofn",
-//   RED_PLANET_REVIEW = "rpr",
-//   MECO_HEADLINES = "hl",
-//   OFF_NOMINAL_YOUTUBE = "yt",
-//   HAPPY_HOUR = "hh",
-// }
-
-// export type FeedList = {
-//   [Feed.WEMARTIANS]: ContentListener;
-//   [Feed.MAIN_ENGINE_CUT_OFF]: ContentListener;
-//   [Feed.OFF_NOMINAL_PODCAST]: ContentListener;
-//   [Feed.RED_PLANET_REVIEW]: ContentListener;
-//   [Feed.HAPPY_HOUR]: ContentListener;
-//   [Feed.MECO_HEADLINES]: ContentListener;
-//   [Feed.OFF_NOMINAL_YOUTUBE]: ContentListener;
-// };
 
 /***********************************
  *  API Initialization
@@ -123,63 +86,6 @@ providers.api.listen(mcconfig.api.port, () => {
 // /***********************************
 //  *  Events Listener Setup
 //  ************************************/
-
-// /***********************************
-//  *  Member Manager Setup
-//  ************************************/
-
-// // const memberManager = new MemberManager();
-// // memberManager.on(MemberManagerEvents.SEND_DELINQUENTS, () => {
-// //   handlers.helper.handleSendDelinquents(utilityBot);
-// // });
-
-// /***********************************
-//  *  Feed Listener Setup
-//  ************************************/
-
-// /***********************************
-//  *  NDB2 Bot Event Handlers
-//  ************************************/
-
-providers.ndb2Bot.once("ready", () => {
-  bootLogger.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
-  bootLogger.logItemSuccess("ndb2Bot");
-});
-
-providers.ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
-
-// /***********************************
-//  *  Utility Bot Event Handlers
-//  ************************************/
-
-providers.helperBot.once("ready", () => {
-  bootLogger.addLog(LogStatus.SUCCESS, "Helper Bot ready");
-  bootLogger.logItemSuccess("helperBot");
-});
-
-providers.helperBot.login(mcconfig.discord.clients.helper.token);
-
-// /***********************************
-//  *  Content Bot Event Handlers
-//  ************************************/
-
-providers.contentBot.once("ready", () => {
-  bootLogger.addLog(LogStatus.SUCCESS, "Content Bot ready");
-  bootLogger.logItemSuccess("contentBot");
-});
-
-providers.contentBot.login(mcconfig.discord.clients.content.token);
-
-// /***********************************
-//  *  Event Bot Event Handlers
-//  ************************************/
-
-providers.eventsBot.once("ready", () => {
-  bootLogger.addLog(LogStatus.SUCCESS, "Event Bot ready");
-  bootLogger.logItemSuccess("eventsBot");
-});
-
-providers.eventsBot.login(mcconfig.discord.clients.events.token);
 
 // /***********************************
 //  *  Feed Listeners Event Handlers

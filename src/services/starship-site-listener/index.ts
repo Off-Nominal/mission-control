@@ -2,16 +2,23 @@ import {
   ChannelType,
   Client,
   EmbedBuilder,
-  time,
   TimestampStyles,
+  time,
 } from "discord.js";
-import { GithubUpdateEmbedData } from "../../../services/siteListener/SiteListener";
-import mcconfig from "../../../mcconfig";
+import bootLogger from "../../logger";
+import { LogStatus } from "../../logger/Logger";
+import { Providers } from "../../providers";
+import {
+  GithubUpdateEmbedData,
+  SiteListener,
+  SiteListenerEvents,
+} from "./SiteListener";
+import mcconfig from "../../mcconfig";
 
-export default async function handleStarshipSiteUpdate(
+async function sendStarshipSiteUpdate(
+  client: Client,
   update: GithubUpdateEmbedData
 ) {
-  const client: Client = this;
   const embed = new EmbedBuilder();
 
   embed
@@ -49,4 +56,32 @@ export default async function handleStarshipSiteUpdate(
   } catch (err) {
     console.error(err);
   }
+}
+
+export default function StarshipSiteListener({
+  githubAgent,
+  helperBot,
+}: Providers) {
+  const starship = new SiteListener(
+    "https://www.spacex.com/vehicles/starship/",
+    githubAgent,
+    {
+      interval: 15,
+      cooldown: 600,
+    }
+  );
+
+  starship.on(SiteListenerEvents.READY, () => {
+    bootLogger.addLog(
+      LogStatus.SUCCESS,
+      `Site listener monitoring Starship Website`
+    );
+    bootLogger.logItemSuccess("starshipSiteChecker");
+  });
+
+  starship.on(SiteListenerEvents.UPDATE, (update) =>
+    sendStarshipSiteUpdate(helperBot, update)
+  );
+
+  starship.initialize();
 }

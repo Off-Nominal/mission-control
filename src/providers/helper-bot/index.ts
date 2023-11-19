@@ -1,7 +1,9 @@
 import { ChatInputCommandInteraction, Client, Partials } from "discord.js";
 import mcconfig from "../../mcconfig";
+import bootLogger from "../../logger";
 import reportGenerator from "../../services/reportGenerator";
 import fetchGuild from "../../helpers/fetchGuild";
+import { LogStatus } from "../../logger/Logger";
 
 export enum HelperBotEvents {
   SUMMARY_CREATE = "summaryReportCreate",
@@ -37,6 +39,12 @@ export function populateGuildMembers(client: Client) {
 
 helperBot.on("error", console.error);
 helperBot.once("ready", populateGuildMembers);
+helperBot.once("ready", () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "Helper Bot ready");
+  bootLogger.logItemSuccess("helperBot");
+});
+
+helperBot.login(mcconfig.discord.clients.helper.token);
 
 // helperBot.once("ready", scheduleThreadDigest);
 // helperBot.on("messageCreate", handlers.helper.handleMessageCreate);

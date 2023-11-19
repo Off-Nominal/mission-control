@@ -1,5 +1,7 @@
 import { Client } from "discord.js";
 import mcconfig from "../../mcconfig";
+import bootLogger from "../../logger";
+import { LogStatus } from "../../logger/Logger";
 
 export enum EventBotEvents {
   START = "eventStarted",
@@ -19,6 +21,12 @@ const eventsBot = new Client({
 // Handlers
 
 eventsBot.on("error", console.error);
+eventsBot.once("ready", () => {
+  bootLogger.addLog(LogStatus.SUCCESS, "Event Bot ready");
+  bootLogger.logItemSuccess("eventsBot");
+});
+
+eventsBot.login(mcconfig.discord.clients.events.token);
 
 // eventsBot.on(
 //   "guildScheduledEventUpdate",

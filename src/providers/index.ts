@@ -7,7 +7,7 @@ import db from "./db";
 import ndb2Client from "./ndb2-client";
 import { sanityClient, sanityImageUrlBuilder } from "../providers/sanity";
 import cache from "./cache";
-import githubClient from "./github-client";
+import githubAgent from "./github-client";
 import rssProviders from "./rss-providers";
 
 export const providers = {
@@ -21,7 +21,7 @@ export const providers = {
   sanityImageUrlBuilder,
   ndb2Client,
   cache,
-  githubClient,
+  githubAgent,
   rssProviders,
 };
 

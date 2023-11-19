@@ -7,6 +7,7 @@ type BootChecklist = {
   contentBot: boolean;
   eventsBot: boolean;
   ndb2Bot: boolean;
+  githubAgent: boolean;
   starshipSiteChecker: boolean;
   wmFeedListener: boolean;
   mecoFeedListener: boolean;
@@ -28,6 +29,7 @@ class BootLogger extends Logger {
     contentBot: false,
     eventsBot: false,
     ndb2Bot: false,
+    githubAgent: false,
     starshipSiteChecker: false,
     wmFeedListener: false,
     mecoFeedListener: false,
