@@ -10,11 +10,11 @@ import {
   generateEventCreateOptionsFromLaunch,
   generateEventEditOptionsFromLaunch,
   getLaunchDate,
-} from "./helpers";
-import { RLLEvents } from "../../types/eventEnums";
+} from "../helpers";
+import { RLLEvents } from "../../../types/eventEnums";
 import EventEmitter = require("events");
-import { truncateText } from "../../helpers/truncateText";
-import { isRejected } from "../../helpers/allSettledTypeGuard";
+import { truncateText } from "../../../helpers/truncateText";
+import { isRejected } from "../../../helpers/allSettledTypeGuard";
 import {
   rllc,
   RLLClient,
@@ -31,16 +31,10 @@ export default class LaunchListener extends EventEmitter {
   private watcher: RLLWatcher;
   private eventsManager: GuildScheduledEventManager;
 
-  constructor(key) {
+  constructor(client: RLLClient) {
     super();
     this.events = new Map<number, GuildScheduledEvent>();
-
-    try {
-      this.client = rllc(key);
-    } catch (err) {
-      console.error(err);
-      this.emit(RLLEvents.BOOT_ERROR, `RLL Client failed to initialize.`);
-    }
+    this.client = client;
 
     try {
       this.watcher = this.client.watch(WATCHER_INTERVAL, {

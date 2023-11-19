@@ -10,6 +10,7 @@ import cache from "./cache";
 import githubAgent from "./github-client";
 import rssProviders from "./rss-providers";
 import youtube from "./youtube";
+import rllClient from "./rllc";
 
 export const providers = {
   api,
@@ -25,6 +26,7 @@ export const providers = {
   githubAgent,
   rssProviders,
   youtube,
+  rllClient,
 };
 
 export type Providers = typeof providers;

@@ -20,6 +20,7 @@ import ThreadDigest from "./services/thread-digest";
 import ContentSearch from "./services/content-search";
 import StarshipSiteListener from "./services/starship-site-listener";
 import ContentPost from "./services/content-post";
+import AnnounceStream from "./services/announce-stream";
 
 SetDiscordClientPresence(providers);
 JoinDiscordThread(providers);
@@ -32,6 +33,7 @@ ThreadDigest(providers);
 ContentSearch(providers);
 StarshipSiteListener(providers);
 ContentPost(providers);
+AnnounceStream(providers);
 
 // import launchListener from "./services/launchListener";
 
