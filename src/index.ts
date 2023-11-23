@@ -32,6 +32,7 @@ import CelebrateMembership from "./services/celebrate-membership";
 import LaunchEvents from "./services/launch-events";
 import EventNotifications from "./services/event-notifications";
 import StartEvent from "./services/start-event";
+import StreamHost from "./services/stream-host";
 
 const services = [
   SetDiscordClientPresence,
@@ -57,13 +58,10 @@ const services = [
   LaunchEvents,
   EventNotifications,
   StartEvent,
+  StreamHost,
 ];
 
 services.map((service) => service(providers));
-
-// import launchListener from "./services/launchListener";
-
-// import eventsListener from "./services/eventsListener";
 
 /***********************************
  *  API Initialization
@@ -73,27 +71,6 @@ providers.api.listen(mcconfig.api.port, () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
   bootLogger.logItemSuccess("api");
 });
-
-// /***********************************
-//  *  RLL Event Listener
-//  ************************************/
-
-// launchListener.on(RLLEvents.READY, (message) => {
-//   bootChecklist.rllClient = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
-// launchListener.on(RLLEvents.BOOT_ERROR, (message) => {
-//   bootLog.addLog(LogStatus.FAILURE, message);
-// });
-
-// /***********************************
-//  *  Event Listeners Event Handlers
-//  ************************************/
-
-// eventsListener.on(EventListenerEvents.READY, (message) => {
-//   bootChecklist.eventsListener = true;
-//   bootLog.addLog(LogStatus.SUCCESS, message);
-// });
 
 /***********************************
  *  Boot Logger
