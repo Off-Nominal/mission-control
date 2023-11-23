@@ -7,6 +7,8 @@ export async function setSubscriptions(
 ) {
   if (!interaction.isChatInputCommand()) return;
 
+  if (interaction.commandName !== "events") return;
+
   const { options } = interaction;
   const subCommand = options.getSubcommand(false);
 

@@ -3,6 +3,7 @@ import {
   GuildMember,
   GuildScheduledEvent,
   GuildScheduledEventStatus,
+  MessageCreateOptions,
   MessagePayload,
 } from "discord.js";
 import EventEmitter = require("events");
@@ -13,6 +14,7 @@ import {
   TitleSuggestion,
 } from "./partyMessages";
 import { createPollEmbed } from "../../actions/create-poll-embed";
+import { SanityClient } from "@sanity/client";
 
 export enum StreamHostEvents {
   PARTY_MESSAGE = "partyMessage",
@@ -21,16 +23,18 @@ export enum StreamHostEvents {
 const MS_IN_A_MINUTE = 60000;
 const MAX_TITLE_SUGGESTIONS = 36;
 
-export class StreamHost extends EventEmitter {
+export class ManagedStream extends EventEmitter {
   private active: boolean;
   private activeEvent: GuildScheduledEvent<GuildScheduledEventStatus.Active> =
     null;
   private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
+  private sanityClient: SanityClient;
 
-  constructor() {
+  constructor(sanityClient: SanityClient) {
     super();
+    this.sanityClient = sanityClient;
     this.sendPartyMessage = this.sendPartyMessage.bind(this);
     this.startParty = this.startParty.bind(this);
     this.endParty = this.endParty.bind(this);
@@ -66,7 +70,7 @@ export class StreamHost extends EventEmitter {
 
     this.active = true;
     this.activeEvent = event;
-    this.partyMessages = await generatePartyMessages(event);
+    this.partyMessages = await generatePartyMessages(event, this.sanityClient);
 
     this.initiatePartyMessageSchedule();
     setTimeout(() => {
@@ -82,25 +86,16 @@ export class StreamHost extends EventEmitter {
     this.partyMessageTimers.forEach((timer) => clearTimeout(timer));
   }
 
-  public endParty() {
+  public endParty(): MessageCreateOptions {
     if (!this.active) {
       return;
     }
 
-    this.emit(
-      StreamHostEvents.PARTY_MESSAGE,
-      {
-        content: "Thanks for hanging out everyone!",
-        embeds: [
-          createPollEmbed(
-            "Vote on your favourite title suggestion",
-            this.titleSuggestions.map(
-              (sugg) => `**"${sugg.title}"** by *${sugg.suggester.displayName}*`
-            )
-          ),
-        ],
-      },
-      this.activeEvent
+    const embed = createPollEmbed(
+      "Vote on your favourite title suggestion",
+      this.titleSuggestions.map(
+        (sugg) => `**"${sugg.title}"** by *${sugg.suggester.displayName}*`
+      )
     );
 
     this.clearMessageTimers();
@@ -108,6 +103,11 @@ export class StreamHost extends EventEmitter {
     this.activeEvent = null;
     this.partyMessages = null;
     this.titleSuggestions = [];
+
+    return {
+      content: "Thanks for hanging out everyone!",
+      embeds: [embed],
+    };
   }
 
   public eventActive() {

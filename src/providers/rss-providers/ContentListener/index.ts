@@ -9,8 +9,6 @@ const defaultProcessor = (item, showTitle: string) => item;
 
 export enum ContentListenerEvents {
   NEW = "newContent",
-  STREAM_START = "streamStarted",
-  STREAM_END = "streamEnded",
   READY = "ready",
   ERROR = "error",
 }
@@ -33,7 +31,7 @@ export class ContentListener extends FeedWatcher {
     super(feedUrl, { interval: options.rssInterval });
     this.processor = options.processor || defaultProcessor;
     this.searchOptions = options.searchOptions || null;
-    this.verifyEvent = this.verifyEvent.bind(this);
+    this.isStream = this.isStream.bind(this);
   }
 
   public async initialize() {
@@ -93,24 +91,11 @@ export class ContentListener extends FeedWatcher {
     return this.episodes.find((episode) => episode.url === url);
   }
 
-  public verifyEvent(
-    event: GuildScheduledEvent<
-      GuildScheduledEventStatus.Active | GuildScheduledEventStatus.Completed
-    >
-  ) {
-    const stream = this.episodes.find(
-      (episode) => episode.url === event.entityMetadata?.location
-    );
+  public isStream(
+    event: GuildScheduledEvent<GuildScheduledEventStatus>
+  ): boolean {
+    const stream = this.getEpisodeByUrl(event.entityMetadata.location);
 
-    if (!stream) {
-      return;
-    }
-
-    if (event.status === GuildScheduledEventStatus.Completed) {
-      this.emit(ContentListenerEvents.STREAM_END, event);
-    }
-    if (event.status === GuildScheduledEventStatus.Active) {
-      this.emit(ContentListenerEvents.STREAM_START, event);
-    }
+    return !!stream;
   }
 }

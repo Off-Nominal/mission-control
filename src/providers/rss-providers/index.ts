@@ -102,8 +102,6 @@ ytFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
 ytFeedListener.initialize();
-// ytFeedListener.on(ContentListnerEvents.STREAM_START, streamHost.startParty);
-// ytFeedListener.on(ContentListnerEvents.STREAM_END, streamHost.endParty);
 
 const newsFeedListener = new NewsManager();
 newsFeedListener.once(NewsManagerEvents.READY, (message) => {

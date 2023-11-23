@@ -1,10 +1,10 @@
+import { SanityClient } from "@sanity/client";
 import {
   GuildMember,
   GuildScheduledEvent,
   EmbedBuilder,
   GuildScheduledEventStatus,
 } from "discord.js";
-import { sanityClient } from "../../providers/sanity";
 
 type SanityMessage = {
   message: string;
@@ -23,7 +23,8 @@ export type TitleSuggestion = {
 };
 
 export const generatePartyMessages = (
-  event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Active>,
+  sanityClient: SanityClient
 ): Promise<PartyMessage[]> => {
   const standardMessages: PartyMessage[] = [
     {
