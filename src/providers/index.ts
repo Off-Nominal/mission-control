@@ -11,7 +11,7 @@ import cache from "./cache";
 import githubAgent from "./github-client";
 import rssProviders from "./rss-providers";
 import youtube from "./youtube";
-import rllClient from "./rllc";
+import { rllClient, rllWatcher } from "./rllc";
 
 export const providers = {
   mcconfig,
@@ -29,6 +29,7 @@ export const providers = {
   rssProviders,
   youtube,
   rllClient,
+  rllWatcher,
 };
 
 export type Providers = typeof providers;

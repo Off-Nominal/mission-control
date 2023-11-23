@@ -46,7 +46,7 @@
     "mars-date-utils": "^1.1.1",
     "morgan": "^1.10.0",
     "pg": "^8.7.1",
-    "rocket-launch-live-client": "^0.3.0",
+    "rocket-launch-live-client": "^1.0.2",
     "string-strip-html": "^8.2.9",
     "uuid": "^8.3.2"
   },

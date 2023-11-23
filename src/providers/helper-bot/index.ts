@@ -34,7 +34,6 @@ export function populateGuildMembers(client: Client) {
       console.error("Error fetching partials for Guild Members", err)
     );
 }
-// Handlers
 
 helperBot.on("error", console.error);
 helperBot.once("ready", populateGuildMembers);
@@ -44,12 +43,5 @@ helperBot.once("ready", () => {
 });
 
 helperBot.login(mcconfig.discord.clients.helper.token);
-
-// helperBot.on("guildMemberUpdate", handlers.helper.handleGuildMemberUpdate);
-
-// helperBot.on(
-//   HelperBotEvents.STARSHIP_UPDATE,
-//   handlers.helper.handleStarshipSiteUpdate
-// );
 
 export default helperBot;

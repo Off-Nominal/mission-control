@@ -14,23 +14,22 @@ import { sanityClient, sanityImageUrlBuilder } from "../../providers/sanity";
 import { RLLEntity } from "rocket-launch-live-client";
 
 export const getLaunchDate = (launch: RLLEntity.Launch): null | Date => {
-  if (!launch.t0 && !launch.win_open) {
-    return null;
-  }
-
   if (launch.t0) {
     return new Date(launch.t0);
-  } else {
+  }
+
+  if (launch.win_open) {
     return new Date(launch.win_open);
   }
+
+  return null;
 };
 
 const generateDescription = (
   launch: RLLEntity.Launch,
+  launchDate: Date,
   credit: string | null
 ): string => {
-  const launchDate = getLaunchDate(launch);
-
   const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
     launchDate,
     TimestampStyles.LongDateTime
@@ -40,18 +39,20 @@ const generateDescription = (
   return launch.launch_description + infoString + idString + creditString;
 };
 
-const getStreamUrl = (launch: RLLEntity.Launch) => {
-  const streamMedia = launch.media.find(
+const getStreamUrl = (launch: RLLEntity.Launch): string => {
+  const streamMedia = launch.media?.find(
     (media) => media.ldfeatured || media.featured
   );
 
-  if (!streamMedia) {
-    return "Unavailable";
+  if (streamMedia?.youtube_vidid) {
+    return `https://www.youtube.com/watch?v=${streamMedia.youtube_vidid}`;
   }
 
-  return streamMedia.youtube_vidid
-    ? `https://www.youtube.com/watch?v=${streamMedia.youtube_vidid}`
-    : streamMedia.media_url;
+  if (streamMedia?.media_url) {
+    return streamMedia.media_url;
+  }
+
+  return "Unavailable";
 };
 
 const generateScheduledStartTime = (winOpen: Date): Date =>
@@ -67,20 +68,23 @@ const generateScheduledEndTime = (
 
 export const generateEventCreateOptionsFromLaunch = (
   launch: RLLEntity.Launch,
+  launchDate: Date,
   banner: {
     url: string;
     credit: string;
   } | null
 ): GuildScheduledEventCreateOptions => {
-  const launchDate = getLaunchDate(launch);
-
   const options: GuildScheduledEventCreateOptions = {
     name: launch.name,
     scheduledStartTime: generateScheduledStartTime(launchDate),
     scheduledEndTime: generateScheduledEndTime(launchDate, launch.win_close),
     privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
     entityType: GuildScheduledEventEntityType.External,
-    description: generateDescription(launch, banner ? banner.credit : null),
+    description: generateDescription(
+      launch,
+      launchDate,
+      banner ? banner.credit : null
+    ),
     entityMetadata: { location: getStreamUrl(launch) },
   };
 
@@ -97,8 +101,9 @@ type EditOptions = GuildScheduledEventEditOptions<
 >;
 
 export const generateEventEditOptionsFromLaunch = (
-  event: GuildScheduledEvent,
+  event: GuildScheduledEvent<GuildScheduledEventStatus>,
   launch: RLLEntity.Launch,
+  launchDate: Date,
   banner: {
     url: string;
     credit: string;
@@ -108,7 +113,7 @@ export const generateEventEditOptionsFromLaunch = (
 
   // Location
   const url = getStreamUrl(launch);
-  if (event.entityMetadata.location !== url) {
+  if (event.entityMetadata?.location !== url) {
     newData.entityMetadata = { location: url };
   }
 
@@ -122,14 +127,13 @@ export const generateEventEditOptionsFromLaunch = (
     newData.image = banner.url;
   }
 
-  // Times
-  const launchDate = getLaunchDate(launch);
+  // Time
+  const timesDoNotMatch = event.scheduledStartAt
+    ? add(event.scheduledStartAt, { minutes: 15 }).toISOString() !==
+      launchDate.toISOString()
+    : false;
 
-  const timesDoNotMatch =
-    add(event.scheduledStartAt, { minutes: 15 }).toISOString() !==
-    launchDate.toISOString();
-
-  if (timesDoNotMatch && !event.isActive()) {
+  if (timesDoNotMatch) {
     newData.scheduledStartTime = generateScheduledStartTime(launchDate);
     newData.scheduledEndTime = generateScheduledEndTime(
       launchDate,
@@ -141,6 +145,7 @@ export const generateEventEditOptionsFromLaunch = (
   if (newData.scheduledStartTime || newData.image) {
     newData.description = generateDescription(
       launch,
+      launchDate,
       banner ? banner.credit : null
     );
   }

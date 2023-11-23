@@ -19,6 +19,7 @@ type BootChecklist = {
   eventsListener: boolean;
   newsFeed: boolean;
   rllClient: boolean;
+  rllWatcher: boolean;
   api: boolean;
 };
 
@@ -41,6 +42,7 @@ class BootLogger extends Logger {
     eventsListener: false,
     newsFeed: false,
     rllClient: false,
+    rllWatcher: false,
     api: false,
   };
 

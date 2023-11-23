@@ -28,6 +28,8 @@ import Shunt from "./services/shunt";
 import Poll from "./services/poll";
 import MarsTime from "./services/mars-time";
 import ChannelSummary from "./services/channel-summary";
+import CelebrateMembership from "./services/celebrate-membership";
+import LaunchEvents from "./services/launch-events";
 
 const services = [
   SetDiscordClientPresence,
@@ -49,6 +51,8 @@ const services = [
   Poll,
   MarsTime,
   ChannelSummary,
+  CelebrateMembership,
+  LaunchEvents,
 ];
 
 services.map((service) => service(providers));

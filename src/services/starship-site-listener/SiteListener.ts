@@ -1,8 +1,8 @@
 import EventEmitter = require("events");
 import axios, { AxiosResponse } from "axios";
 import { sub } from "date-fns";
-import { GitHubAgent } from "../../../providers/github-client";
-import mcconfig from "../../../mcconfig";
+import { GitHubAgent } from "../../providers/github-client";
+import mcconfig from "../../mcconfig";
 
 export enum SiteListenerEvents {
   UPDATE = "siteUpdate",
