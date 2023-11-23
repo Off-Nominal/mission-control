@@ -1,12 +1,10 @@
-import { formatDistance } from "date-fns";
 import { Collection, GuildMember, GuildScheduledEvent } from "discord.js";
-import { fetchNewEventSubscribers } from "../../../providers/db/queries/users";
-import createEventAnnouncementEmbed from "../../../actions/create-event-announcement-embed";
+import { User } from "../../providers/db/models/User";
+import { formatDistance } from "date-fns";
+import createEventAnnouncementEmbed from "../../actions/create-event-announcement-embed";
 
-export default async function handleGuildScheduledEventCreate(
-  event: GuildScheduledEvent
-) {
-  const query = await fetchNewEventSubscribers();
+export async function notifyNewEvent(event: GuildScheduledEvent, user: User) {
+  const query = await user.fetchNewEventSubscribers();
   const memberIds = query.rows.map((user) => user.discord_id);
   let subscribers: Collection<string, GuildMember>;
 

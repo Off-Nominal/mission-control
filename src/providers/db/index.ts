@@ -1,7 +1,9 @@
-import { Client } from "pg";
 import mcconfig from "../../mcconfig";
+import { Client } from "pg";
 import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
+import { User } from "./models/User";
+import { Test } from "./models/Test";
 
 const db = new Client({
   connectionString: mcconfig.database.url,
@@ -20,4 +22,11 @@ db.connect()
     bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
   });
 
-export default db;
+// Models
+const test = new Test(db);
+const user = new User(db);
+
+export const models = {
+  user,
+  test,
+};

@@ -1,7 +1,7 @@
 import { parseCommands } from "../../helpers/parseCommands";
 import { Providers } from "../../providers";
 
-export default function DBTest({ db, helperBot, mcconfig }: Providers) {
+export default function DBTest({ models, helperBot, mcconfig }: Providers) {
   if (mcconfig.env !== "dev") return;
 
   helperBot.on("messageCreate", (message) => {
@@ -12,7 +12,8 @@ export default function DBTest({ db, helperBot, mcconfig }: Providers) {
     if (prefix !== "!dbtest") return;
 
     console.log("[DEV]: dbtest invoked");
-    db.query("SELECT NOW()")
+    models.test
+      .testDB()
       .then((res) =>
         console.log(`[DEV]: Time on database is ${res.rows[0].now}`)
       )

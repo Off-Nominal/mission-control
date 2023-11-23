@@ -32,10 +32,6 @@ eventsBot.login(mcconfig.discord.clients.events.token);
 //   "guildScheduledEventUpdate",
 //   handlers.events.handleGuildScheduledEventUpdate
 // );
-// eventsBot.on(
-//   "guildScheduledEventCreate",
-//   handlers.events.handleGuildScheduledEventCreate
-// );
 // eventsBot.on("guildScheduledEventUpdate", eventsListener.updateEvent);
 // eventsBot.on("guildScheduledEventUpdate", (oldEvent, newEvent) => {
 //   launchListener.clearEvent(oldEvent, newEvent);
