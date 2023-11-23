@@ -30,6 +30,7 @@ import MarsTime from "./services/mars-time";
 import ChannelSummary from "./services/channel-summary";
 import CelebrateMembership from "./services/celebrate-membership";
 import LaunchEvents from "./services/launch-events";
+import EventNotifications from "./services/event-notifications";
 
 const services = [
   SetDiscordClientPresence,
@@ -53,6 +54,7 @@ const services = [
   ChannelSummary,
   CelebrateMembership,
   LaunchEvents,
+  EventNotifications,
 ];
 
 services.map((service) => service(providers));
