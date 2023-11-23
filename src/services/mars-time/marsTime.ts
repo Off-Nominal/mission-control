@@ -1,7 +1,7 @@
 import axios from "axios";
 import { EmbedBuilder } from "discord.js";
 import { MarsDate } from "mars-date-utils";
-import { Spacecraft, spacecraftData } from "./constants";
+import { Spacecraft, spacecraftData } from "./config";
 
 type JPLFeature = {
   type: string;

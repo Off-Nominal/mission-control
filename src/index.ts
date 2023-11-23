@@ -26,6 +26,8 @@ import WarnDeprecatedCommands from "./services/warn-deprecated-commands";
 import DBTest from "./services/db-test";
 import Shunt from "./services/shunt";
 import Poll from "./services/poll";
+import MarsTime from "./services/mars-time";
+import ChannelSummary from "./services/channel-summary";
 
 const services = [
   SetDiscordClientPresence,
@@ -45,6 +47,8 @@ const services = [
   DBTest,
   Shunt,
   Poll,
+  MarsTime,
+  ChannelSummary,
 ];
 
 services.map((service) => service(providers));

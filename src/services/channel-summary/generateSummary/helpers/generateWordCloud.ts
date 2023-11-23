@@ -4,7 +4,7 @@ import {
   UploadApiOptions,
   UploadApiResponse,
 } from "cloudinary";
-import mcconfig from "../../../../../mcconfig";
+import mcconfig from "../../../../mcconfig";
 const cloudinary = require("cloudinary").v2;
 
 // Word Cloud API - https://wordcloudapi.com

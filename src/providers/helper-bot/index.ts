@@ -1,7 +1,6 @@
-import { ChatInputCommandInteraction, Client, Partials } from "discord.js";
+import { Client, Partials } from "discord.js";
 import mcconfig from "../../mcconfig";
 import bootLogger from "../../logger";
-import reportGenerator from "../../services/reportGenerator";
 import fetchGuild from "../../helpers/fetchGuild";
 import { LogStatus } from "../../logger/Logger";
 
@@ -46,26 +45,8 @@ helperBot.once("ready", () => {
 
 helperBot.login(mcconfig.discord.clients.helper.token);
 
-// helperBot.once("ready", scheduleThreadDigest);
-// helperBot.on("messageCreate", handlers.helper.handleMessageCreate);
 // helperBot.on("guildMemberUpdate", handlers.helper.handleGuildMemberUpdate);
-// helperBot.on("messageReactionAdd", handlers.helper.handleMessageReactionAdd);
 
-// helperBot.on("interactionCreate", (interaction) => {
-//   handlers.helper.handleInteractionCreate(interaction);
-// });
-
-// helperBot.on(
-//   HelperBotEvents.SEND_DELINQUENTS,
-//   handlers.helper.handleSendDelinquents
-// );
-// helperBot.on(
-//   HelperBotEvents.SUMMARY_CREATE,
-//   (interaction: ChatInputCommandInteraction) => {
-//     reportGenerator.handleReportRequest(interaction);
-//   }
-// );
-// helperBot.on(HelperBotEvents.SUMMARY_SEND, reportGenerator.handleSendRequest);
 // helperBot.on(
 //   HelperBotEvents.STARSHIP_UPDATE,
 //   handlers.helper.handleStarshipSiteUpdate

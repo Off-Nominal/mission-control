@@ -12,12 +12,12 @@ import {
   getNews,
   getTwitter,
   getYouTube,
-} from "../../clients/helper/actions/generateSummary/filters";
+} from "./generateSummary/filters";
 import {
   generateDiscussionSummary,
   generateLinkSummary,
   generateTwitterSummary,
-} from "../../clients/helper/actions/generateSummary/reportFieldGenerators";
+} from "./generateSummary/reportFieldGenerators";
 import { fetchMessagesInLast } from "../../helpers/fetchMessagesInLast";
 
 export type ReportGeneratorError = {
