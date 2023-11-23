@@ -1,9 +1,6 @@
-import { Interaction, Message } from "discord.js";
-import createPollEmbed from "../actions/poll/createPollEmbed";
+import { Interaction } from "discord.js";
 import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
 import { marsTime } from "../actions/marstime/marsTime";
-import letters from "../../../helpers/pollIndicators";
-import createPollHelpEmbed from "../actions/poll/createPollHelpEmbed";
 import { HelperBotEvents } from "../../../providers/helper-bot";
 
 export default async function handleInteractionCreate(
@@ -26,26 +23,5 @@ export default async function handleInteractionCreate(
     }
 
     interaction.client.emit(HelperBotEvents.SUMMARY_CREATE, interaction);
-  }
-
-  if (commandName === "poll") {
-    if (subCommand === "help") {
-      const embed = createPollHelpEmbed();
-      return await interaction.reply({ embeds: [embed] });
-    }
-
-    const question = options.getString("question");
-    const answers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-      .map((num) => options.getString(`choice-${num.toString()}`))
-      .filter((answer) => !!answer);
-    const poll = createPollEmbed(question, answers);
-
-    try {
-      await interaction.reply({ embeds: [poll] });
-      const reply = (await interaction.fetchReply()) as Message<boolean>;
-      await Promise.all(answers.map((answer, i) => reply.react(letters[i])));
-    } catch (err) {
-      console.error(err);
-    }
   }
 }

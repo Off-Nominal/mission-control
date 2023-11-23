@@ -6,13 +6,13 @@ import {
   MessagePayload,
 } from "discord.js";
 import EventEmitter = require("events");
-import createPollEmbed from "../../clients/helper/actions/poll/createPollEmbed";
 import {
   generatePartyMessages,
   PartyMessage,
   streamTitleEmbed,
   TitleSuggestion,
 } from "./partyMessages";
+import { createPollEmbed } from "../../actions/create-poll-embed";
 
 export enum StreamHostEvents {
   PARTY_MESSAGE = "partyMessage",

@@ -9,19 +9,18 @@ import handleNewVote from "./handleNewVote";
 import handleViewScore from "./handleViewScore";
 import handleListPredictions from "./handleListPredictions";
 import handleSearchPredictions from "./handleSearchPredictions";
-import handleViewLeaderboards from "./handleViewLeaderboards";
 
 export default {
-  handleInteractionCreate,
-  handleNewPrediction,
-  handleNewBet,
-  handleViewPrediction,
-  handleViewDetails,
-  handleRetirePrediction,
-  handleTriggerPrediction,
-  handleNewVote,
-  handleViewScore,
-  handleListPredictions,
-  handleSearchPredictions,
-  handleViewLeaderboards,
+  // handleInteractionCreate,
+  // handleNewPrediction,
+  // handleNewBet,
+  // handleViewPrediction,
+  // handleViewDetails,
+  // handleRetirePrediction,
+  // handleTriggerPrediction,
+  // handleNewVote,
+  // handleViewScore,
+  // handleListPredictions,
+  // handleSearchPredictions,
+  // handleViewLeaderboards,
 };

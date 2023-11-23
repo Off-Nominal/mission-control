@@ -1,4 +1,6 @@
-export default [
+import { EmbedBuilder } from "discord.js";
+
+export const letters = [
   "🇦",
   "🇧",
   "🇨",
@@ -36,3 +38,16 @@ export default [
   "8️⃣",
   "9️⃣",
 ];
+
+export function createPollEmbed(question: string, answers: string[]) {
+  const optionsString = answers
+    .map((option, index) => `${letters[index]} - ${option}`)
+    .join("\n\n");
+
+  const embed = new EmbedBuilder({
+    title: question,
+    description: optionsString,
+  });
+
+  return embed;
+}

@@ -126,7 +126,8 @@ export default async function sendThreadDigest(client: Client) {
   filteredThreadData.forEach((threadData) => {
     if (
       threadData.thread.parent.type !== ChannelType.GuildForum &&
-      !threadDigests[threadData.thread.parentId]
+      !threadDigests[threadData.thread.parentId] &&
+      threadData.thread.parent.type !== ChannelType.GuildMedia
     ) {
       threadDigests[threadData.thread.parentId] = {
         channel: threadData.thread.parent,

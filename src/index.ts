@@ -24,6 +24,8 @@ import AnnounceStream from "./services/announce-stream";
 import TranslateTemperature from "./services/translate-temperature";
 import WarnDeprecatedCommands from "./services/warn-deprecated-commands";
 import DBTest from "./services/db-test";
+import Shunt from "./services/shunt";
+import Poll from "./services/poll";
 
 const services = [
   SetDiscordClientPresence,
@@ -41,6 +43,8 @@ const services = [
   TranslateTemperature,
   WarnDeprecatedCommands,
   DBTest,
+  Shunt,
+  Poll,
 ];
 
 services.map((service) => service(providers));
