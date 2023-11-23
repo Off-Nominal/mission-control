@@ -1,5 +1,5 @@
 import { Channel, ChannelType, Client } from "discord.js";
-import createUniqueResultEmbed from "../services/content-search/createUniqueResultEmbed";
+import createUniqueResultEmbed from "./create-unique-result-embed";
 import mcconfig from "../mcconfig";
 
 export type ContentFeedItem = {

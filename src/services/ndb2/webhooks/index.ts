@@ -10,18 +10,19 @@ import { LogInitiator, Logger, LogStatus } from "../../../logger/Logger";
 // Actions
 import { updatePredictionEmbeds } from "../../../clients/ndb2/actions/updatePredictionEmbeds";
 import { sendPublicNotice } from "../../../clients/ndb2/actions/sendPublicNotice";
-import {
-  Ndb2MsgSubscription,
-  fetchActiveSubs,
-} from "../../../providers/db/queries/ndb2_msg_subscriptions";
 import fetchGuild from "../../../helpers/fetchGuild";
 import { sendSeasonStartNotice } from "../../../clients/ndb2/actions/sendSeasonStartNotice";
 import { sendSeasonEndNotice } from "../../../clients/ndb2/actions/sendSeasonEndNotice";
 
 import { NDB2WebhookEvent, isNdb2WebhookEvent } from "./types";
+import { Ndb2MsgSubscription } from "../../../providers/db/models/Ndb2MsgSubscription";
+import { API } from "../../../providers/db/models/types";
 export * from "./types";
 
-export default function createWebooksRouter(ndb2Bot: Client): Router {
+export default function createWebooksRouter(
+  ndb2Bot: Client,
+  ndb2MsgSubscription: Ndb2MsgSubscription
+): Router {
   const router = express.Router();
 
   router.post("/ndb2", async (req, res) => {
@@ -88,9 +89,9 @@ export default function createWebooksRouter(ndb2Bot: Client): Router {
     }
 
     // Fetch subscriptions to events
-    let subs: Ndb2MsgSubscription[];
+    let subs: API.Ndb2MsgSubscription[];
     try {
-      subs = await fetchActiveSubs(data.id);
+      subs = await ndb2MsgSubscription.fetchActiveSubs(data.id);
       logger.addLog(
         LogStatus.SUCCESS,
         `Successfully fetched ${subs.length} subscriptions to process for this event.`

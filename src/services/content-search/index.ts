@@ -3,7 +3,7 @@ import { Providers } from "../../providers";
 import rssProviders from "../../providers/rss-providers";
 import { ContentListener } from "../../providers/rss-providers/ContentListener";
 import { createSearchResultsEmbed } from "./createSearchResultsEmbed";
-import createUniqueResultEmbed from "./createUniqueResultEmbed";
+import createUniqueResultEmbed from "../../actions/create-unique-result-embed";
 
 export default function ContentSearch({ contentBot }: Providers) {
   contentBot.on("interactionCreate", (interaction: BaseInteraction) => {

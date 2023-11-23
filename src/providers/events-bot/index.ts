@@ -3,14 +3,6 @@ import mcconfig from "../../mcconfig";
 import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
 
-export enum EventBotEvents {
-  START = "eventStarted",
-  END = "eventEnded",
-  RETRIEVED = "eventsRetrieved",
-  NEW_TITLE = "newStreamTitle",
-  VIEW_TITLES = "viewStreamTitles",
-}
-
 const eventsBot = new Client({
   intents: [
     mcconfig.discord.intents.simpleIntents,
