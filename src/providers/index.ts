@@ -1,3 +1,4 @@
+import mcconfig from "../mcconfig";
 import contentBot from "./content-bot";
 import helperBot from "./helper-bot";
 import ndb2Bot from "./ndb2-bot";
@@ -13,6 +14,7 @@ import youtube from "./youtube";
 import rllClient from "./rllc";
 
 export const providers = {
+  mcconfig,
   api,
   contentBot,
   helperBot,

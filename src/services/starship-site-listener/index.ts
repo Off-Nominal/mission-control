@@ -13,11 +13,12 @@ import {
   SiteListener,
   SiteListenerEvents,
 } from "./SiteListener";
-import mcconfig from "../../mcconfig";
 
 async function sendStarshipSiteUpdate(
   client: Client,
-  update: GithubUpdateEmbedData
+  update: GithubUpdateEmbedData,
+  targetChannel: string,
+  path: string
 ) {
   const embed = new EmbedBuilder();
 
@@ -40,16 +41,14 @@ async function sendStarshipSiteUpdate(
       },
       {
         name: "History",
-        value: `[Recent Changes](https://github.com/${mcconfig.siteTracker.starship.owner}/${mcconfig.siteTracker.starship.repo}/blob/${mcconfig.siteTracker.starship.branch}/log.json)`,
+        value: `[Recent Changes](https://github.com/${path}/log.json)`,
         inline: true,
       },
     ])
     .setTimestamp();
 
   try {
-    const channel = await client.channels.fetch(
-      mcconfig.discord.channels.boca_chica
-    );
+    const channel = await client.channels.fetch(targetChannel);
     if (channel.type !== ChannelType.GuildText) return;
     await channel.send({ embeds: [embed] });
     console.log(`Discord successfully notified of changes to ${update.url}`);
@@ -61,6 +60,7 @@ async function sendStarshipSiteUpdate(
 export default function StarshipSiteListener({
   githubAgent,
   helperBot,
+  mcconfig,
 }: Providers) {
   const starship = new SiteListener(
     "https://www.spacex.com/vehicles/starship/",
@@ -80,7 +80,12 @@ export default function StarshipSiteListener({
   });
 
   starship.on(SiteListenerEvents.UPDATE, (update) =>
-    sendStarshipSiteUpdate(helperBot, update)
+    sendStarshipSiteUpdate(
+      helperBot,
+      update,
+      mcconfig.discord.channels.boca_chica,
+      `${mcconfig.siteTracker.starship.owner}/${mcconfig.siteTracker.starship.repo}/blob/${mcconfig.siteTracker.starship.branch}`
+    )
   );
 
   starship.initialize();

@@ -2,7 +2,6 @@ import { Client } from "discord.js";
 import { Providers } from "../../providers";
 import getNextTime from "../../helpers/getNextTime";
 import sendThreadDigest from "./sendThreadDigest";
-import mcconfig from "../../mcconfig";
 import { parseCommands } from "../../helpers/parseCommands";
 
 function scheduleThreadDigest(client: Client) {
@@ -14,7 +13,7 @@ function scheduleThreadDigest(client: Client) {
   }, nextThreadDigestInterval);
 }
 
-export default function ThreadDigest({ helperBot }: Providers) {
+export default function ThreadDigest({ helperBot, mcconfig }: Providers) {
   helperBot.on("ready", (client) => {
     scheduleThreadDigest(client);
   });

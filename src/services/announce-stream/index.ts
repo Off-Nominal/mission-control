@@ -4,7 +4,6 @@ import { Providers } from "../../providers";
 import { ContentListenerEvents } from "../../providers/rss-providers/ContentListener";
 import { youtube_v3 } from "googleapis";
 import fetchYouTubeVideo from "../../actions/fetch-youtube-video";
-import mcconfig from "../../mcconfig";
 import generateEventDetailsFromYouTube from "./generateEventDetailsFromYouTube";
 import createDiscordEvent from "../../actions/create-discord-event";
 import createEventAnnouncementEmbed from "../../actions/create-event-announcement-embed";
@@ -12,7 +11,8 @@ import createEventAnnouncementEmbed from "../../actions/create-event-announcemen
 async function announceNewStream(
   content: ContentFeedItem,
   discordClient: Client,
-  youtubeClient: youtube_v3.Youtube
+  youtubeClient: youtube_v3.Youtube,
+  targetChannel: string
 ) {
   try {
     const [video] = await fetchYouTubeVideo(youtubeClient, content.id);
@@ -25,9 +25,7 @@ async function announceNewStream(
     const eventDetails = generateEventDetailsFromYouTube(video);
     const event = await createDiscordEvent(eventDetails, discordClient);
     const embed = createEventAnnouncementEmbed(event, "new");
-    const channel = await discordClient.channels.fetch(
-      mcconfig.discord.channels.announcements
-    );
+    const channel = await discordClient.channels.fetch(targetChannel);
     if (channel.type !== ChannelType.GuildAnnouncement) return;
     await channel.send({ embeds: [embed] });
   } catch (err) {
@@ -39,13 +37,15 @@ export default function AnnounceStream({
   eventsBot,
   rssProviders,
   youtube,
+  mcconfig,
 }: Providers) {
+  const targetChannel = mcconfig.discord.channels.announcements;
   // Youtube RSS Content
   rssProviders.yt.on(ContentListenerEvents.NEW, (content) => {
-    announceNewStream(content, eventsBot, youtube);
+    announceNewStream(content, eventsBot, youtube, targetChannel);
   });
 
   rssProviders.hh.on(ContentListenerEvents.NEW, (content) => {
-    announceNewStream(content, eventsBot, youtube);
+    announceNewStream(content, eventsBot, youtube, targetChannel);
   });
 }
