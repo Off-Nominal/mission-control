@@ -1,9 +1,7 @@
-import { GuildBasedChannel, Interaction, Message } from "discord.js";
+import { Interaction, Message } from "discord.js";
 import createPollEmbed from "../actions/poll/createPollEmbed";
-import { generateHelpEmbed } from "../actions/generateHelpEmbed";
 import generateSummaryHelpEmbed from "../actions/generateSummary/generateSummaryHelpEmbed";
 import { marsTime } from "../actions/marstime/marsTime";
-import shunt from "../actions/shunt";
 import letters from "../../../helpers/pollIndicators";
 import createPollHelpEmbed from "../actions/poll/createPollHelpEmbed";
 import { HelperBotEvents } from "../../../providers/helper-bot";
@@ -15,16 +13,6 @@ export default async function handleInteractionCreate(
 
   const { options, commandName } = interaction;
   const subCommand = options.getSubcommand(false);
-
-  if (commandName === "shunt") {
-    const channel = options.getChannel("channel", true) as GuildBasedChannel;
-    const topic = options.getString("topic", true);
-    shunt(interaction, channel, topic);
-  }
-
-  if (commandName === "help") {
-    interaction.reply({ embeds: [generateHelpEmbed()] });
-  }
 
   if (commandName === "marstime") {
     const spacecraft = options.getString("spacecraft");

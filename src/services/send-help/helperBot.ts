@@ -1,7 +1,16 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, Interaction } from "discord.js";
 
-export const generateHelpEmbed = () => {
-  return new EmbedBuilder()
+export function sendHelperBotHelp(interaction: Interaction) {
+  if (!interaction.isChatInputCommand()) return;
+
+  const { options } = interaction;
+  const subCommand = options.getSubcommand(false);
+
+  if (subCommand !== "help") {
+    return;
+  }
+
+  const embed = new EmbedBuilder()
     .setTitle("How do you use these Discord bots anyway?")
     .setDescription(
       "Many bots have their own help commands. Here's a list to call them up. Consider sending them a direct message with this command in order to keep the channel free of clutter."
@@ -32,4 +41,6 @@ export const generateHelpEmbed = () => {
           "`/summary` with a `duration` integer in hours. Type `/summary help` for more info.",
       },
     ]);
-};
+
+  interaction.reply({ embeds: [embed] });
+}
