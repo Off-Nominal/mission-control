@@ -1,59 +1,10 @@
-import { Message, EmbedBuilder } from "discord.js";
+import { EmbedBuilder, Message } from "discord.js";
+import { Providers } from "../../providers";
+import { Temperature, Unit } from "./Temperature";
 
 const regex = new RegExp(
   /(?<=^|[\s(=])(?<sign>[-+]?)(?<temp1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<temp2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?°?\s?(?<unit>C|celsius|F|fahrenheit|kelvin)\b/gi
 );
-
-type Unit = "C" | "F" | "K";
-
-class Temperature {
-  public celsius: number;
-  public fahrenheit: number;
-  public kelvin: number;
-
-  constructor(value: number, unit: Unit) {
-    if (unit === "C") {
-      this.celsius = value;
-
-      this.kelvin = this.round(this.CtoK(value));
-      this.fahrenheit = this.round(this.CtoF(value));
-    }
-
-    if (unit === "K") {
-      this.kelvin = value;
-
-      this.celsius = this.round(this.KtoC(value));
-      this.fahrenheit = this.round(this.CtoF(this.celsius));
-    }
-
-    if (unit === "F") {
-      this.fahrenheit = value;
-
-      this.celsius = this.round(this.FtoC(value));
-      this.kelvin = this.round(this.CtoK(this.celsius));
-    }
-  }
-
-  private round(value) {
-    return Math.round(value * 10) / 10;
-  }
-
-  private CtoF(val) {
-    return val * 1.8 + 32;
-  }
-
-  private CtoK(val) {
-    return val + 273.15;
-  }
-
-  private FtoC(val) {
-    return (val - 32) / 1.8;
-  }
-
-  private KtoC(val) {
-    return val - 273.15;
-  }
-}
 
 const numConvert = (str: string) => Number(str.replaceAll(",", ""));
 
@@ -109,3 +60,17 @@ export const createTempConversionEmbed = (temps: Temperature[]) => {
 
   return embed;
 };
+
+export default function TranslateTemperature({ helperBot }: Providers) {
+  helperBot.on("messageCreate", async (message) => {
+    const temperaturesToConvert = findTempsToConvert(message);
+    if (temperaturesToConvert.length) {
+      const embeds = [createTempConversionEmbed(temperaturesToConvert)];
+      try {
+        await message.channel.send({ embeds });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  });
+}

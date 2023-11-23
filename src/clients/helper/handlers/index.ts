@@ -1,4 +1,3 @@
-import handleMessageCreate from "./handleMessageCreate";
 import handleGuildMemberUpdate from "./handleGuildMemberUpdate";
 import handleMessageReactionAdd from "./handleMessageReactionAdd";
 import handleInteractionCreate from "./handleInteractionCreate";

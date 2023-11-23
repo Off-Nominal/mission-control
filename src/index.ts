@@ -21,19 +21,29 @@ import ContentSearch from "./services/content-search";
 import StarshipSiteListener from "./services/starship-site-listener";
 import ContentPost from "./services/content-post";
 import AnnounceStream from "./services/announce-stream";
+import TranslateTemperature from "./services/translate-temperature";
+import WarnDeprecatedCommands from "./services/warn-deprecated-commands";
+import DBTest from "./services/db-test";
 
-SetDiscordClientPresence(providers);
-JoinDiscordThread(providers);
-SendHelp(providers);
-PostNews(providers);
-AddModsToThread(providers);
-NDB2(providers);
-DeployWeMartiansSite(providers);
-ThreadDigest(providers);
-ContentSearch(providers);
-StarshipSiteListener(providers);
-ContentPost(providers);
-AnnounceStream(providers);
+const services = [
+  SetDiscordClientPresence,
+  JoinDiscordThread,
+  AddModsToThread,
+  SendHelp,
+  PostNews,
+  NDB2,
+  DeployWeMartiansSite,
+  ThreadDigest,
+  ContentSearch,
+  StarshipSiteListener,
+  ContentPost,
+  AnnounceStream,
+  TranslateTemperature,
+  WarnDeprecatedCommands,
+  DBTest,
+];
+
+services.map((service) => service(providers));
 
 // import launchListener from "./services/launchListener";
 
@@ -87,15 +97,6 @@ bootLogger.checkBoot(providers.helperBot);
 //   helperBot.on(DevEvents.NEW_ENTRIES, (show) => {
 //     const feed = feedListeners[show] as ContentListener;
 //     feed.emit(ContentListnerEvents.NEW, feed.fetchRecent());
-//   });
-//   helperBot.on(DevEvents.DB_TEST, () => {
-//     console.log("dbtest invoked");
-//     db.query("SELECT NOW()")
-//       .then((res) => console.log(`Time on database is ${res.rows[0].now}`))
-//       .catch((err) => {
-//         console.error("Could not connect to db");
-//         console.error(err);
-//       });
 //   });
 
 // }
