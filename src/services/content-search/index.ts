@@ -5,12 +5,22 @@ import { ContentListener } from "../../providers/rss-providers/ContentListener";
 import { createSearchResultsEmbed } from "./createSearchResultsEmbed";
 import createUniqueResultEmbed from "../../actions/create-unique-result-embed";
 
+const allowedSubcommands = ["search", "recent", "episode-number"];
+
 export default function ContentSearch({ contentBot }: Providers) {
   contentBot.on("interactionCreate", (interaction: BaseInteraction) => {
     if (!interaction.isChatInputCommand()) return;
 
-    const { options } = interaction;
+    const { options, commandName } = interaction;
+
+    if (commandName !== "content") return;
+
     const subCommand = options.getSubcommand(false);
+
+    if (allowedSubcommands.indexOf(subCommand) === -1) {
+      return;
+    }
+
     const show = options.getString("show", true);
 
     if (show === "news") {

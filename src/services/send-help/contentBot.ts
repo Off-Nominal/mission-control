@@ -3,12 +3,15 @@ import { EmbedBuilder, Interaction } from "discord.js";
 export function sendContentBotHelp(interaction: Interaction) {
   if (!interaction.isChatInputCommand()) return;
 
-  const { options } = interaction;
-  const subCommand = options.getSubcommand(false);
+  const { commandName, options } = interaction;
 
-  if (subCommand !== "help") {
+  if (commandName !== "content") {
     return;
   }
+
+  const subCommand = options.getSubcommand(false);
+
+  if (subCommand !== "help") return;
 
   const embed = new EmbedBuilder();
 

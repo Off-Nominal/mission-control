@@ -3,7 +3,7 @@ import { EmbedBuilder, Interaction } from "discord.js";
 export function sendHelperBotHelp(interaction: Interaction) {
   if (!interaction.isChatInputCommand()) return;
 
-  const { options, commandName } = interaction;
+  const { commandName } = interaction;
 
   if (commandName !== "help") {
     return;
