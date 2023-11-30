@@ -16,7 +16,7 @@ export function sendHelperBotHelp(interaction: Interaction) {
     )
     .addFields([
       { name: "Content", value: "`/content help`", inline: true },
-      { name: "NostradamBot", value: "`!ndb help`", inline: true },
+      { name: "NostradamBot2", value: "`/predict help`", inline: true },
       { name: "Launch Alerts", value: "`!l help`", inline: true },
       { name: "Terminal Count", value: "`!tc help`", inline: true },
       { name: "Tracking Station", value: "`!map help`", inline: true },
