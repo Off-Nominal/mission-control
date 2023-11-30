@@ -58,5 +58,5 @@ export function sendNdb2Help(interaction: Interaction) {
     ],
   });
 
-  interaction.reply({ embeds: [embed] });
+  interaction.reply({ embeds: [embed], ephemeral: true });
 }
