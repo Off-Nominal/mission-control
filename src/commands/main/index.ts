@@ -2,7 +2,7 @@ import {
   APIApplicationCommandOptionChoice,
   SlashCommandBuilder,
 } from "discord.js";
-import { spacecraftData } from "../../clients/helper/actions/marstime/constants";
+import { spacecraftData } from "../../services/mars-time/config";
 
 // Help
 const helpCommand = new SlashCommandBuilder()
