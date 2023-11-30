@@ -61,7 +61,7 @@ const services = [
   WarnDeprecatedCommands,
 ];
 
-services.map((service) => service(providers));
+services.forEach((service) => service(providers));
 
 /***********************************
  *  API Initialization
@@ -77,19 +77,3 @@ providers.api.listen(mcconfig.api.port, () => {
  ************************************/
 
 bootLogger.checkBoot(providers.helperBot);
-
-// /***********************************
-//  *  Dev Test Event Handlers
-//  *  Only runs in Dev environment
-//  *  to enable simulated events
-//  ************************************/
-
-// if (mcconfig.env === "dev") {
-//   helperBot.on("messageCreate", handlers.dev.handleMessageCreate);
-
-//   helperBot.on(DevEvents.NEW_ENTRIES, (show) => {
-//     const feed = feedListeners[show] as ContentListener;
-//     feed.emit(ContentListnerEvents.NEW, feed.fetchRecent());
-//   });
-
-// }

@@ -3,11 +3,13 @@ import createUniqueResultEmbed from "../../actions/create-unique-result-embed";
 import { postContent } from "../../actions/post-to-content-channel";
 import { Providers } from "../../providers";
 import { ContentListenerEvents } from "../../providers/rss-providers/ContentListener";
+import { parseCommands } from "../../helpers/parseCommands";
 
 export default function ContentPost({
   eventsBot,
   rssProviders,
   contentBot,
+  helperBot,
   mcconfig,
 }: Providers) {
   // Podcast RSS Content
@@ -32,6 +34,26 @@ export default function ContentPost({
 
   rssProviders.hl.on(ContentListenerEvents.NEW, (content) => {
     postContent(content, contentBot, "content");
+  });
+
+  // Dev command to manually trigger a content item for testing
+  helperBot.on("messageCreate", (message) => {
+    if (mcconfig.env !== "dev") return;
+
+    const [prefix, show] = parseCommands(message);
+
+    if (prefix !== "!content") return;
+
+    if (!show) {
+      message.reply({
+        content: "Please add a show title as an argument",
+      });
+      return;
+    }
+    rssProviders[show].emit(
+      ContentListenerEvents.NEW,
+      rssProviders[show].fetchRecent()
+    );
   });
 
   // YouTube Streams

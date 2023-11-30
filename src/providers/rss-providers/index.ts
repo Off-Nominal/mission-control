@@ -103,6 +103,7 @@ ytFeedListener.once(ContentListenerEvents.ERROR, (message) => {
 });
 ytFeedListener.initialize();
 
+// News Feed Listener
 const newsFeedListener = new NewsManager();
 newsFeedListener.once(NewsManagerEvents.READY, (message) => {
   bootLogger.addLog(LogStatus.SUCCESS, message);
