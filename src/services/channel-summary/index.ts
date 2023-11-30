@@ -30,10 +30,12 @@ export default function ChannelSummary({ helperBot }: Providers) {
 
     if (subCommand === "help") {
       interaction.reply({ embeds: [generateSummaryHelpEmbed()] });
+      return;
     }
 
     if (subCommand === "duration") {
       reportGenerator.handleReportRequest(interaction);
+      return;
     }
   });
 
