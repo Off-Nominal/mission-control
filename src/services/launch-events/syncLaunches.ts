@@ -29,7 +29,7 @@ const getDiscordEventByLaunchId = (
 
     const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
 
-    if (rllId?.length) {
+    if (rllId?.length && rllId[0] === launchId.toString()) {
       return event;
     }
   }
@@ -59,7 +59,7 @@ export async function syncEvents(
   launches: Map<number, RLLEntity.Launch>,
   eventsBot: Client,
   eventType: "new" | "change" | "ready"
-) {
+): Promise<void> {
   const logger = new Logger(
     "Launch Events",
     LogInitiator.RLL,
@@ -93,11 +93,15 @@ export async function syncEvents(
 
   try {
     currentEvents = await eventsManager.fetch();
-    logger.addLog(LogStatus.SUCCESS, "Events fetched successfully.");
+    const eventCount = currentEvents.size;
+    logger.addLog(
+      LogStatus.SUCCESS,
+      `${eventCount} Events fetched successfully.`
+    );
   } catch (err) {
     logger.addLog(LogStatus.FAILURE, "Could not fetch Events.");
     logger.sendLog(eventsBot);
-    return Promise.reject("Could not fetch Events.");
+    return Promise.reject();
   }
 
   const counts = {

@@ -1,5 +1,3 @@
-import { ChannelType } from "discord.js";
-import createUniqueResultEmbed from "../../actions/create-unique-result-embed";
 import { postContent } from "../../actions/post-to-content-channel";
 import { Providers } from "../../providers";
 import { ContentListenerEvents } from "../../providers/rss-providers/ContentListener";

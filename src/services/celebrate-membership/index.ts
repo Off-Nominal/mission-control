@@ -195,9 +195,9 @@ export default function CelebrateMembership({
 
       await channel.send(message);
       logger.addLog(LogStatus.SUCCESS, "New Role Update Complete!");
-      logger.sendLog(newMember.client);
     } catch (err) {
       console.error(err);
     }
+    logger.sendLog(newMember.client);
   });
 }
