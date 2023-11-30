@@ -31,7 +31,7 @@ export default function AddPrediction({
     const { options, commandName } = interaction;
     const subCommand = options.getSubcommand(false);
 
-    if (commandName !== "predict" || subCommand !== "retire") {
+    if (commandName !== "predict" || subCommand !== "new") {
       return;
     }
 

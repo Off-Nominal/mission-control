@@ -8,7 +8,7 @@ const mcconfig = {
     url: process.env.DATABASE_URL,
   },
   api: {
-    port: process.env.PORT || 8081,
+    port: process.env.PORT || 8080,
   },
   discord: {
     guildId: process.env.DISCORD_GUILD_ID,
