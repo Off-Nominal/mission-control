@@ -10,21 +10,17 @@ import {
 // Providers
 import { Logger, LogStatus, LogInitiator } from "../../../logger/Logger";
 import { NDB2API } from "../../../providers/ndb2-client";
-import { NDB2WebhookEvent } from "../../../services/ndb2/webhooks";
-
-import {
-  Ndb2MsgSubscription,
-  Ndb2MsgSubscriptionType,
-} from "../../../providers/db/queries/ndb2_msg_subscriptions";
+import { NDB2WebhookEvent } from "../webhooks";
 
 // Actions
 import fetchGuild from "../../../helpers/fetchGuild";
 import { generatePredictionResponse } from "./generatePredictionResponse";
 import { generatePublicNotice } from "./generatePublicNotice";
+import { API } from "../../../providers/db/models/types";
 
 export const updatePredictionEmbeds = async (
   client: Client,
-  subs: Ndb2MsgSubscription[],
+  subs: API.Ndb2MsgSubscription[],
   predictor: GuildMember | undefined,
   prediction: NDB2API.EnhancedPrediction
 ) => {
@@ -44,8 +40,8 @@ export const updatePredictionEmbeds = async (
 
   for (const sub of subs) {
     if (
-      sub.type !== Ndb2MsgSubscriptionType.VIEW &&
-      sub.type !== Ndb2MsgSubscriptionType.TRIGGER_NOTICE
+      sub.type !== API.Ndb2MsgSubscriptionType.VIEW &&
+      sub.type !== API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE
     ) {
       continue;
     }
@@ -58,7 +54,7 @@ export const updatePredictionEmbeds = async (
       }
     });
 
-    if (sub.type === Ndb2MsgSubscriptionType.TRIGGER_NOTICE && !triggerer) {
+    if (sub.type === API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE && !triggerer) {
       triggerer = prediction.triggerer
         ? guild.members
             .fetch(prediction.triggerer.discord_id)
@@ -90,7 +86,7 @@ export const updatePredictionEmbeds = async (
           )}) fetched succesfully `
         );
 
-        if (sub.type === Ndb2MsgSubscriptionType.VIEW) {
+        if (sub.type === API.Ndb2MsgSubscriptionType.VIEW) {
           if (!viewResponse) {
             viewResponse = generatePredictionResponse(predictor, prediction);
             logger.addLog(

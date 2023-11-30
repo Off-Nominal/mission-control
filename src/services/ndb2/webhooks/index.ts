@@ -8,11 +8,11 @@ import { Client, GuildMember, userMention } from "discord.js";
 import { LogInitiator, Logger, LogStatus } from "../../../logger/Logger";
 
 // Actions
-import { updatePredictionEmbeds } from "../../../clients/ndb2/actions/updatePredictionEmbeds";
-import { sendPublicNotice } from "../../../clients/ndb2/actions/sendPublicNotice";
+import { updatePredictionEmbeds } from "../actions/updatePredictionEmbeds";
+import { sendPublicNotice } from "../actions/sendPublicNotice";
 import fetchGuild from "../../../helpers/fetchGuild";
-import { sendSeasonStartNotice } from "../../../clients/ndb2/actions/sendSeasonStartNotice";
-import { sendSeasonEndNotice } from "../../../clients/ndb2/actions/sendSeasonEndNotice";
+import { sendSeasonStartNotice } from "../actions/sendSeasonStartNotice";
+import { sendSeasonEndNotice } from "../actions/sendSeasonEndNotice";
 
 import { NDB2WebhookEvent, isNdb2WebhookEvent } from "./types";
 import { Ndb2MsgSubscription } from "../../../providers/db/models/Ndb2MsgSubscription";
@@ -134,7 +134,13 @@ export default function createWebooksRouter(
       event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
       event_name === NDB2WebhookEvent.JUDGED_PREDICTION
     ) {
-      sendPublicNotice(ndb2Bot, predictor, data, event_name);
+      sendPublicNotice(
+        ndb2Bot,
+        ndb2MsgSubscription,
+        predictor,
+        data,
+        event_name
+      );
     }
   });
 

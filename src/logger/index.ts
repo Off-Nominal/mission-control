@@ -16,7 +16,6 @@ type BootChecklist = {
   hlFeedListener: boolean;
   hhFeedListener: boolean;
   ytFeedListener: boolean;
-  eventsListener: boolean;
   newsFeed: boolean;
   rllClient: boolean;
   rllWatcher: boolean;
@@ -39,7 +38,6 @@ class BootLogger extends Logger {
     hlFeedListener: false,
     hhFeedListener: false,
     ytFeedListener: false,
-    eventsListener: false,
     newsFeed: false,
     rllClient: false,
     rllWatcher: false,

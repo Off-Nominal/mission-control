@@ -1,4 +1,3 @@
-import { ChannelType } from "discord.js";
 import { Providers } from "../../providers";
 import { ManagedStream, StreamHostEvents } from "./ManagedStream";
 

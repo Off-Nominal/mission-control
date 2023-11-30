@@ -5,7 +5,7 @@ import {
   NDB2API,
   PredictionLifeCycle,
 } from "../../../../providers/ndb2-client";
-import { NDB2WebhookEvent } from "../../../../services/ndb2/webhooks";
+import { NDB2WebhookEvent } from "../../webhooks";
 
 const getAuthor = (
   type:

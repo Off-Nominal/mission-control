@@ -1,11 +1,5 @@
 import { userMention, messageLink } from "@discordjs/builders";
 import { Client, GuildMember } from "discord.js";
-import {
-  Ndb2MsgSubscription,
-  Ndb2MsgSubscriptionType,
-  addSubscription,
-  fetchSubByType,
-} from "../../../providers/db/queries/ndb2_msg_subscriptions";
 import fetchGuild from "../../../helpers/fetchGuild";
 import { Logger, LogStatus, LogInitiator } from "../../../logger/Logger";
 import { add } from "date-fns";
@@ -13,7 +7,9 @@ import { generatePublicNotice } from "./generatePublicNotice";
 import mcconfig from "../../../mcconfig";
 import { NDB2API } from "../../../providers/ndb2-client";
 import cache from "../../../providers/cache";
-import { NDB2WebhookEvent } from "../../../services/ndb2/webhooks";
+import { NDB2WebhookEvent } from "../webhooks";
+import { API } from "../../../providers/db/models/types";
+import { Ndb2MsgSubscription } from "../../../providers/db/models/Ndb2MsgSubscription";
 
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 
@@ -43,7 +39,8 @@ const getLoggerFields = (
 };
 
 export const sendPublicNotice = async (
-  client: Client,
+  discordClient: Client,
+  ndb2Model: Ndb2MsgSubscription,
   predictor: GuildMember,
   prediction: NDB2API.EnhancedPrediction,
   type:
@@ -58,7 +55,7 @@ export const sendPublicNotice = async (
 
   const logger = new Logger(loggerTitle, LogInitiator.NDB2, loggerMessage);
 
-  const guild = fetchGuild(client);
+  const guild = fetchGuild(discordClient);
 
   const triggerer: Promise<GuildMember | null> = prediction.triggerer
     ? guild.members
@@ -82,14 +79,20 @@ export const sendPublicNotice = async (
 
   let channelId: string;
   let messageId: string;
-  let context: Promise<Ndb2MsgSubscription[]>;
+  let context: Promise<API.Ndb2MsgSubscription[]>;
 
   // Retired predictions post notice in the channel they are retired
   if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
-    context = fetchSubByType(prediction.id, Ndb2MsgSubscriptionType.RETIREMENT);
+    context = ndb2Model.fetchSubByType(
+      prediction.id,
+      API.Ndb2MsgSubscriptionType.RETIREMENT
+    );
   } else {
     // Judgements and Triggers go in their original channel
-    context = fetchSubByType(prediction.id, Ndb2MsgSubscriptionType.CONTEXT);
+    context = ndb2Model.fetchSubByType(
+      prediction.id,
+      API.Ndb2MsgSubscriptionType.CONTEXT
+    );
   }
 
   const channel = context.then(([contextSub]) => {
@@ -117,7 +120,7 @@ export const sendPublicNotice = async (
         type,
         predictor,
         triggerer,
-        client,
+        discordClient,
         { channelId, messageId }
       );
 
@@ -125,8 +128,8 @@ export const sendPublicNotice = async (
         .send(response)
         .then((message) => {
           if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
-            addSubscription(
-              Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+            ndb2Model.addSubscription(
+              API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
               prediction.id,
               message.channel.id,
               message.id,
@@ -157,8 +160,8 @@ export const sendPublicNotice = async (
             }
           }
           if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
-            addSubscription(
-              Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
+            ndb2Model.addSubscription(
+              API.Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
               prediction.id,
               message.channel.id,
               message.id
@@ -184,6 +187,6 @@ export const sendPublicNotice = async (
       logger.addLog(LogStatus.FAILURE, `Could not send public notice.`);
     })
     .finally(() => {
-      return logger.sendLog(client);
+      return logger.sendLog(discordClient);
     });
 };
