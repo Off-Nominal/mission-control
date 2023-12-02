@@ -1,5 +1,6 @@
+import { GuildScheduledEvent, ThreadChannel } from "discord.js";
 import { Providers } from "../../providers";
-import { ManagedStream, StreamHostEvents } from "./ManagedStream";
+import { ManagedStream } from "./ManagedStream";
 
 export default function StreamHost({
   eventsBot,
@@ -27,6 +28,26 @@ export default function StreamHost({
     }
   });
 
+  const getStreamEventForumPost = (
+    event: GuildScheduledEvent
+  ): ThreadChannel => {
+    const title = event.name;
+
+    const channel = eventsBot.channels.cache.get(
+      mcconfig.discord.channels.livechat
+    );
+
+    if (!channel.isThreadOnly()) return;
+
+    const thread = channel.threads.cache.find((thread) => {
+      return thread.name === title && thread.ownerId === eventsBot.user.id;
+    });
+
+    if (!thread) return;
+
+    return thread;
+  };
+
   eventsBot.on("guildScheduledEventUpdate", (oldEvent, newEvent) => {
     const isStream = rssProviders.yt.isStream(newEvent);
 
@@ -34,32 +55,15 @@ export default function StreamHost({
       return;
     }
 
+    // Event started
     if (newEvent.isActive() && oldEvent.isScheduled()) {
-      streamHost.startParty(newEvent);
+      const forumPost = getStreamEventForumPost(newEvent);
+      streamHost.startParty(newEvent, forumPost);
     }
 
+    // Event ended
     if (newEvent.isCompleted() && oldEvent.isActive()) {
-      const message = streamHost.endParty();
-
-      const channel = eventsBot.channels.cache.get(
-        mcconfig.discord.channels.livechat
-      );
-
-      if (!channel.isTextBased()) return;
-
-      channel.send(message);
-    }
-  });
-
-  streamHost.on(StreamHostEvents.PARTY_MESSAGE, async (message, event) => {
-    try {
-      const channel = await event.client.channels.fetch(
-        mcconfig.discord.channels.livechat
-      );
-      if (!channel.isTextBased()) return;
-      channel.send(message);
-    } catch (err) {
-      console.error(err);
+      streamHost.endParty();
     }
   });
 }
