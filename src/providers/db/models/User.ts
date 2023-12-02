@@ -1,8 +1,32 @@
 import { Client } from "pg";
 import { API } from "./types";
+import { isBefore, sub } from "date-fns";
 
 export class User {
   private db: Client;
+  private cache: {
+    fetchPreNotificationSubscribers: {
+      timestamp: Date;
+      data: API.User[];
+      isFresh: () => boolean;
+    };
+  } = {
+    fetchPreNotificationSubscribers: {
+      timestamp: null,
+      data: null,
+      isFresh: () => {
+        if (!this.cache.fetchPreNotificationSubscribers.timestamp) {
+          return false;
+        }
+
+        const now = new Date();
+        return isBefore(
+          this.cache.fetchPreNotificationSubscribers.timestamp,
+          sub(now, { minutes: 4 })
+        );
+      },
+    },
+  };
 
   constructor(db: Client) {
     this.db = db;
@@ -46,9 +70,19 @@ export class User {
     );
   };
 
-  public fetchPreNotificationSubscribers = async () => {
-    return await this.db.query<API.User>(
-      "SELECT discord_id, pre_notification FROM users WHERE pre_notification IS NOT NULL"
-    );
+  public fetchPreNotificationSubscribers = (): Promise<API.User[]> => {
+    if (this.cache.fetchPreNotificationSubscribers.isFresh()) {
+      return Promise.resolve(this.cache.fetchPreNotificationSubscribers.data);
+    }
+
+    return this.db
+      .query<API.User>(
+        "SELECT discord_id, pre_notification FROM users WHERE pre_notification IS NOT NULL"
+      )
+      .then((result) => {
+        this.cache.fetchPreNotificationSubscribers.timestamp = new Date();
+        this.cache.fetchPreNotificationSubscribers.data = result.rows;
+        return result.rows;
+      });
   };
 }

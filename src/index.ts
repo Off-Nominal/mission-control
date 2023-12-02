@@ -54,7 +54,7 @@ const services = [
   SetDiscordClientPresence,
   Shunt,
   StarshipSiteListener,
-  StreamHost, //
+  StreamHost,
   ThreadDigest,
   TranslateTemperature,
   WarnDeprecatedCommands,
