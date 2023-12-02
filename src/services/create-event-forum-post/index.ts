@@ -1,6 +1,9 @@
 import {
+  ForumChannel,
+  GuildForumTag,
   GuildForumThreadCreateOptions,
   GuildScheduledEvent,
+  MediaChannel,
   ThreadAutoArchiveDuration,
 } from "discord.js";
 import { Providers } from "../../providers";
@@ -8,6 +11,8 @@ import { monitorEvents } from "../../actions/monitor-events";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { parseCommands } from "../../helpers/parseCommands";
 import fetchGuild from "../../helpers/fetchGuild";
+import { ContentListener } from "../../providers/rss-providers/ContentListener";
+import { getRllIdFromEvent } from "../../helpers/getRllIdfromEvent";
 
 const PRE_EVENT_NOTICE_IN_MIN = 30;
 
@@ -18,9 +23,25 @@ const postIsNeeded = (eventWindow) => {
   );
 };
 
+const getTag = (
+  channel: ForumChannel | MediaChannel,
+  type: "stream" | "launch" | "other"
+): GuildForumTag | undefined => {
+  if (type === "launch") {
+    return channel.availableTags.find((tag) => tag.name === "Launch");
+  }
+
+  if (type === "stream") {
+    return channel.availableTags.find((tag) => tag.name === "Off-Nominal");
+  }
+
+  return undefined;
+};
+
 const createForumPost = async (
   event: GuildScheduledEvent,
-  channelId: string
+  channelId: string,
+  type: "stream" | "launch" | "other"
 ) => {
   const logger = new Logger(
     "CreateEventForumPost",
@@ -36,16 +57,19 @@ const createForumPost = async (
     return;
   }
 
-  const tag = channel.availableTags.find((tag) => tag.name === "Launch");
+  const tag = getTag(channel, type);
 
   const options: GuildForumThreadCreateOptions = {
     message: {
       content: event.url,
     },
     name: `${event.name}`,
-    appliedTags: [tag.id],
     autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
   };
+
+  if (tag) {
+    options.appliedTags = [tag.id];
+  }
 
   try {
     await channel.threads.create(options);
@@ -58,15 +82,42 @@ const createForumPost = async (
   logger.sendLog(event.client);
 };
 
+const getType = (
+  event: GuildScheduledEvent,
+  rssProvider: ContentListener
+): "stream" | "launch" | "other" => {
+  let type: "stream" | "launch" | "other" = "other";
+
+  const isStream = rssProvider.isStream(event);
+  if (isStream) {
+    type = "stream";
+  }
+
+  const rllId = getRllIdFromEvent(event);
+  if (rllId) {
+    type = "launch";
+  }
+
+  return type;
+};
+
 export default function CreateEventForumPost({
   eventsBot,
   helperBot,
   mcconfig,
+  rssProviders,
 }: Providers) {
   monitorEvents(eventsBot, (eventWindow) => {
     const makePost = postIsNeeded(eventWindow);
+
     if (makePost) {
-      createForumPost(eventWindow.event, mcconfig.discord.channels.livechat);
+      const type = getType(eventWindow.event, rssProviders.yt);
+
+      createForumPost(
+        eventWindow.event,
+        mcconfig.discord.channels.livechat,
+        type
+      );
     }
   });
 
@@ -76,7 +127,7 @@ export default function CreateEventForumPost({
       return;
     }
 
-    const [prefix] = parseCommands(message);
+    const [prefix, eventId] = parseCommands(message);
 
     if (prefix !== "!eventforum") {
       return;
@@ -85,12 +136,14 @@ export default function CreateEventForumPost({
     // fill cache
     const guild = fetchGuild(eventsBot);
     try {
-      const events = await guild.scheduledEvents?.fetch();
+      const event = await guild.scheduledEvents?.fetch(eventId);
 
-      if (!events.at(0)) {
+      if (!event) {
         return;
       }
-      createForumPost(events.at(0), mcconfig.discord.channels.livechat);
+      const type = getType(event, rssProviders.yt);
+
+      createForumPost(event, mcconfig.discord.channels.livechat, type);
     } catch (err) {
       console.log(err);
     }
