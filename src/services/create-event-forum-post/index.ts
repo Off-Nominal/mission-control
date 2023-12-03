@@ -1,104 +1,49 @@
 import {
+  Client,
   ForumChannel,
-  GuildForumTag,
-  GuildForumThreadCreateOptions,
+  Guild,
   GuildScheduledEvent,
   MediaChannel,
-  ThreadAutoArchiveDuration,
 } from "discord.js";
 import { Providers } from "../../providers";
 import { monitorEvents } from "../../actions/monitor-events";
-import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { parseCommands } from "../../helpers/parseCommands";
 import fetchGuild from "../../helpers/fetchGuild";
+import {
+  createForumPost,
+  doesWindowMatch,
+  fetchExistingPost,
+  getType,
+  updateForumPostForEvent,
+} from "./helpers";
 import { ContentListener } from "../../providers/rss-providers/ContentListener";
-import { getRllIdFromEvent } from "../../helpers/getRllIdfromEvent";
 
-const PRE_EVENT_NOTICE_IN_MIN = 30;
-
-const postIsNeeded = (eventWindow) => {
-  return (
-    PRE_EVENT_NOTICE_IN_MIN > eventWindow.minTime &&
-    PRE_EVENT_NOTICE_IN_MIN < eventWindow.maxTime
-  );
-};
-
-const getTag = (
+const handleForumPostRequest = async (
+  event: GuildScheduledEvent,
   channel: ForumChannel | MediaChannel,
-  type: "stream" | "launch" | "other"
-): GuildForumTag | undefined => {
-  if (type === "launch") {
-    return channel.availableTags.find((tag) => tag.name === "Launch");
-  }
-
-  if (type === "stream") {
-    return channel.availableTags.find((tag) => tag.name === "Off-Nominal");
-  }
-
-  return undefined;
-};
-
-const createForumPost = async (
-  event: GuildScheduledEvent,
-  channelId: string,
-  type: "stream" | "launch" | "other"
-) => {
-  const logger = new Logger(
-    "CreateEventForumPost",
-    LogInitiator.DISCORD,
-    `Creating Forum thread for Event ${event.id} - ${event.name}`
-  );
-
-  const channel = event.client.channels.cache.get(channelId);
-
-  if (!channel.isThreadOnly()) {
-    logger.addLog(LogStatus.FAILURE, "Channel is not a forum");
-    logger.sendLog(event.client);
-    return;
-  }
-
-  const tag = getTag(channel, type);
-
-  const options: GuildForumThreadCreateOptions = {
-    message: {
-      content: event.url,
-    },
-    name: `${event.name}`,
-    autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
-  };
-
-  if (tag) {
-    options.appliedTags = [tag.id];
-  }
-
-  try {
-    await channel.threads.create(options);
-    logger.addLog(LogStatus.SUCCESS, "Forum thread created");
-  } catch (err) {
-    console.error(err);
-    logger.addLog(LogStatus.FAILURE, `Error creating forum thread: ${err}`);
-  }
-
-  logger.sendLog(event.client);
-};
-
-const getType = (
-  event: GuildScheduledEvent,
   rssProvider: ContentListener
-): "stream" | "launch" | "other" => {
-  let type: "stream" | "launch" | "other" = "other";
+) => {
+  const existingPost = await fetchExistingPost(event, channel);
 
-  const isStream = rssProvider.isStream(event);
-  if (isStream) {
-    type = "stream";
+  if (existingPost) {
+    updateForumPostForEvent(existingPost, event.url);
+  } else {
+    const type = getType(event, rssProvider);
+    createForumPost(event, channel, type);
   }
+};
 
-  const rllId = getRllIdFromEvent(event);
-  if (rllId) {
-    type = "launch";
+const getLivechatForumChannel = async (
+  client: Client,
+  id: string
+): Promise<ForumChannel | MediaChannel> => {
+  const channel = await client.channels.cache.get(id);
+  if (!channel || !channel.isThreadOnly()) {
+    throw new Error(
+      "Livechat Forum Channel could not be found or is not a thread-only channel. This should happen."
+    );
   }
-
-  return type;
+  return channel;
 };
 
 export default function CreateEventForumPost({
@@ -107,18 +52,33 @@ export default function CreateEventForumPost({
   mcconfig,
   rssProviders,
 }: Providers) {
-  monitorEvents(eventsBot, (eventWindow) => {
-    const makePost = postIsNeeded(eventWindow);
+  eventsBot.once("ready", async () => {
+    // fill cache with active threads and a subset of archived threads
+    const channel = await getLivechatForumChannel(
+      eventsBot,
+      mcconfig.discord.channels.livechat
+    );
+    await channel.threads.fetchActive();
+    await channel.threads.fetchArchived({
+      fetchAll: true,
+      limit: 100,
+      type: "public",
+    });
+  });
 
-    if (makePost) {
-      const type = getType(eventWindow.event, rssProviders.yt);
+  monitorEvents(eventsBot, async (eventWindow) => {
+    const channel = await getLivechatForumChannel(
+      eventsBot,
+      mcconfig.discord.channels.livechat
+    );
 
-      createForumPost(
-        eventWindow.event,
-        mcconfig.discord.channels.livechat,
-        type
-      );
+    const windowMatches = doesWindowMatch(eventWindow);
+
+    if (!windowMatches) {
+      return;
     }
+
+    handleForumPostRequest(eventWindow.event, channel, rssProviders.yt);
   });
 
   // dev helper to trigger new forum post
@@ -135,17 +95,23 @@ export default function CreateEventForumPost({
 
     // fill cache
     const guild = fetchGuild(eventsBot);
+    let event: GuildScheduledEvent;
+
     try {
-      const event = await guild.scheduledEvents?.fetch(eventId);
-
-      if (!event) {
-        return;
-      }
-      const type = getType(event, rssProviders.yt);
-
-      createForumPost(event, mcconfig.discord.channels.livechat, type);
+      event = await guild.scheduledEvents?.fetch(eventId);
     } catch (err) {
       console.log(err);
     }
+
+    if (!event) {
+      return;
+    }
+
+    const channel = await getLivechatForumChannel(
+      eventsBot,
+      mcconfig.discord.channels.livechat
+    );
+
+    handleForumPostRequest(event, channel, rssProviders.yt);
   });
 }
