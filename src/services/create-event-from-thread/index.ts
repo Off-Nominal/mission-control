@@ -27,24 +27,33 @@ export default function CreateEventFromThread({
   const messageCache: Record<string, Message> = {};
 
   eventsBot.on("threadCreate", async (thread) => {
-    console.log("triggered");
     // ignore everything not in livechat
     if (thread.parent.id !== mcconfig.discord.channels.livechat) {
-      console.log("thread not in livechat");
       return;
     }
+
+    const logger = new Logger(
+      "CreateEventFromForumPost",
+      LogInitiator.DISCORD,
+      "threadCreate Event"
+    );
 
     let owner: ThreadMember;
     try {
       owner = await thread.fetchOwner();
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Thread owner resolved: ${owner.guildMember.displayName}`
+      );
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return;
     }
 
     // ignore bot posts
     if (owner.user.bot) {
-      console.log("thread owner is a bot");
+      logger.addLog(LogStatus.SUCCESS, `Owner is a bot, ignoring...`);
+      logger.sendLog(eventsBot);
       return;
     }
 
@@ -66,10 +75,28 @@ export default function CreateEventFromThread({
 
     try {
       const message = await thread.send(messageOptions);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        `Send message to ask for event if necessary.`
+      );
       messageCache[thread.id] = message;
+      logger.addLog(LogStatus.INFO, `Added message to cache.`);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
+
+    setTimeout(async () => {
+      if (messageCache[thread.id]) {
+        try {
+          await messageCache[thread.id].delete();
+          delete messageCache[thread.id];
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }, 1000 * 60 * 60 * 6); // 6 hours
+
+    logger.sendLog(eventsBot);
   });
 
   // Handle Button Press
@@ -198,15 +225,15 @@ export default function CreateEventFromThread({
 
     // delete message in cache
     try {
-      await messageCache[interaction.channelId]?.delete();
+      if (messageCache[interaction.channelId]) {
+        await messageCache[interaction.channelId]?.delete();
+        delete messageCache[interaction.channelId];
+      }
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, "Could not delete message with button");
       logger.sendLog(interaction.client);
       console.error(err);
     }
-
-    // remove from cache
-    delete messageCache[interaction.channelId];
 
     logger.sendLog(interaction.client);
   });
