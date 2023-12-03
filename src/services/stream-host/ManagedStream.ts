@@ -107,12 +107,6 @@ export class ManagedStream extends EventEmitter {
       )
     );
 
-    this.clearMessageTimers();
-
-    this.active = false;
-    this.partyMessages = null;
-    this.titleSuggestions = [];
-
     const message = {
       content: "Thanks for hanging out everyone!",
       embeds: [embed],
@@ -120,7 +114,11 @@ export class ManagedStream extends EventEmitter {
 
     this.forumPost.send(message);
 
+    this.clearMessageTimers();
     this.forumPost = null;
+    this.active = false;
+    this.partyMessages = null;
+    this.titleSuggestions = [];
   }
 
   public eventActive() {
