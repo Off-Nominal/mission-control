@@ -17,7 +17,7 @@ import fetchGuild from "../../helpers/fetchGuild";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { isRejected } from "../../helpers/allSettledTypeGuard";
 import { truncateText } from "../../helpers/truncateText";
-import { getRllIdFromEvent } from "../../helpers/getRllIdfromEvent";
+import { getRllIdFromEvent } from "../../helpers/getRllId";
 
 const MAX_WINDOW_IN_DAYS = 7;
 

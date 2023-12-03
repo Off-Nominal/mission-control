@@ -23,9 +23,8 @@ import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 export default function CreateEventFromThread({
   eventsBot,
   mcconfig,
+  cache,
 }: Providers) {
-  const messageCache: Record<string, Message> = {};
-
   eventsBot.on("threadCreate", async (thread) => {
     // ignore everything not in livechat
     if (thread.parent.id !== mcconfig.discord.channels.livechat) {
@@ -79,17 +78,17 @@ export default function CreateEventFromThread({
         LogStatus.SUCCESS,
         `Send message to ask for event if necessary.`
       );
-      messageCache[thread.id] = message;
+      cache.createEventFromThread[thread.id] = message;
       logger.addLog(LogStatus.INFO, `Added message to cache.`);
     } catch (err) {
       console.error(err);
     }
 
     setTimeout(async () => {
-      if (messageCache[thread.id]) {
+      if (cache.createEventFromThread[thread.id]) {
         try {
-          await messageCache[thread.id].delete();
-          delete messageCache[thread.id];
+          await cache.createEventFromThread[thread.id].delete();
+          delete cache.createEventFromThread[thread.id];
         } catch (err) {
           console.error(err);
         }
@@ -225,9 +224,9 @@ export default function CreateEventFromThread({
 
     // delete message in cache
     try {
-      if (messageCache[interaction.channelId]) {
-        await messageCache[interaction.channelId]?.delete();
-        delete messageCache[interaction.channelId];
+      if (cache.createEventFromThread[interaction.channelId]) {
+        await cache.createEventFromThread[interaction.channelId]?.delete();
+        delete cache.createEventFromThread[interaction.channelId];
       }
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, "Could not delete message with button");

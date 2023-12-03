@@ -10,10 +10,7 @@ import {
 } from "discord.js";
 import { EventWindow } from "../../actions/monitor-events";
 import { ContentListener } from "../../providers/rss-providers/ContentListener";
-import {
-  getRllIdFromEvent,
-  getRllIdFromText,
-} from "../../helpers/getRllIdfromEvent";
+import { getRllIdFromEvent, getRllIdFromText } from "../../helpers/getRllId";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 const PRE_EVENT_NOTICE_IN_MIN = 30;
