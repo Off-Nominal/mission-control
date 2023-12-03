@@ -55,7 +55,7 @@ export default function ContentPost({
   });
 
   // YouTube Streams
-  eventsBot.on("guildScheduledEventUpdate", async (oldEvent, newEvent) => {
+  contentBot.on("guildScheduledEventUpdate", async (oldEvent, newEvent) => {
     const isStream = rssProviders.yt.isStream(newEvent);
 
     if (!isStream) return;
@@ -71,6 +71,8 @@ export default function ContentPost({
 
     if (!episode) return;
 
-    postContent(episode, eventsBot, "content");
+    if (oldEvent.isActive() && newEvent.isCompleted()) {
+      postContent(episode, eventsBot, "content");
+    }
   });
 }

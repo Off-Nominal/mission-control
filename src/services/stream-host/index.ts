@@ -1,6 +1,7 @@
 import { GuildScheduledEvent, ThreadChannel } from "discord.js";
 import { Providers } from "../../providers";
 import { ManagedStream } from "./ManagedStream";
+import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 export default function StreamHost({
   eventsBot,
@@ -8,7 +9,7 @@ export default function StreamHost({
   sanityClient,
   mcconfig,
 }: Providers) {
-  const streamHost = new ManagedStream(sanityClient);
+  const streamHost = new ManagedStream(sanityClient, eventsBot);
 
   eventsBot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
@@ -28,9 +29,9 @@ export default function StreamHost({
     }
   });
 
-  const getStreamEventForumPost = (
+  const getStreamEventForumPost = async (
     event: GuildScheduledEvent
-  ): ThreadChannel => {
+  ): Promise<ThreadChannel> => {
     const title = event.name;
 
     const channel = eventsBot.channels.cache.get(
@@ -39,7 +40,7 @@ export default function StreamHost({
 
     if (!channel.isThreadOnly()) return;
 
-    const thread = channel.threads.cache.find((thread) => {
+    const thread = await channel.threads.cache.find((thread) => {
       return thread.name === title && thread.ownerId === eventsBot.user.id;
     });
 
@@ -55,15 +56,35 @@ export default function StreamHost({
       return;
     }
 
+    const logger = new Logger(
+      "StreamHost",
+      LogInitiator.DISCORD,
+      "Stream Event Change"
+    );
+
     // Event started
     if (newEvent.isActive() && oldEvent.isScheduled()) {
-      const forumPost = getStreamEventForumPost(newEvent);
-      streamHost.startParty(newEvent, forumPost);
+      logger.addLog(LogStatus.INFO, "Event started");
+      getStreamEventForumPost(newEvent)
+        .then((forumPost) => {
+          logger.addLog(LogStatus.SUCCESS, "Found forum thread");
+          streamHost.startParty(newEvent, forumPost);
+          logger.addLog(LogStatus.SUCCESS, "Started stream party");
+        })
+        .catch((err) => {
+          logger.addLog(LogStatus.FAILURE, "Failed to find forum thread");
+        })
+        .finally(() => {
+          logger.sendLog(eventsBot);
+        });
     }
 
     // Event ended
     if (newEvent.isCompleted() && oldEvent.isActive()) {
+      logger.addLog(LogStatus.INFO, "Event ended");
       streamHost.endParty();
+      logger.addLog(LogStatus.SUCCESS, "Started stream party");
+      logger.sendLog(eventsBot);
     }
   });
 }

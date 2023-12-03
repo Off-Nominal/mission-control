@@ -1,4 +1,5 @@
 import {
+  Client,
   CommandInteraction,
   GuildMember,
   GuildScheduledEvent,
@@ -16,6 +17,7 @@ import {
 } from "./partyMessages";
 import { createPollEmbed } from "../../actions/create-poll-embed";
 import { SanityClient } from "@sanity/client";
+import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 const MS_IN_A_MINUTE = 60000;
 const MAX_TITLE_SUGGESTIONS = 36;
@@ -25,17 +27,14 @@ export class ManagedStream extends EventEmitter {
   private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
-  private sanityClient: SanityClient;
   private forumPost: ThreadChannel | null = null;
 
-  constructor(sanityClient: SanityClient) {
+  constructor(private sanityClient: SanityClient, private client: Client) {
     super();
     this.sanityClient = sanityClient;
     this.sendPartyMessage = this.sendPartyMessage.bind(this);
     this.startParty = this.startParty.bind(this);
     this.endParty = this.endParty.bind(this);
-    this.initiatePartyMessageSchedule =
-      this.initiatePartyMessageSchedule.bind(this);
     this.clearMessageTimers = this.clearMessageTimers.bind(this);
     this.logSuggestion = this.logSuggestion.bind(this);
     this.viewSuggestions = this.viewSuggestions.bind(this);
@@ -44,19 +43,7 @@ export class ManagedStream extends EventEmitter {
   private sendPartyMessage(
     message: string | MessagePayload | MessageCreateOptions
   ) {
-    try {
-      this.forumPost.send(message);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  private initiatePartyMessageSchedule() {
-    this.partyMessageTimers = this.partyMessages.map((msg) => {
-      return setTimeout(() => {
-        this.sendPartyMessage(msg.text);
-      }, msg.waitTime * MS_IN_A_MINUTE);
-    });
+    return this.forumPost.send(message);
   }
 
   public async startParty(
@@ -69,12 +56,39 @@ export class ManagedStream extends EventEmitter {
 
     this.forumPost = forumPost;
     this.active = true;
-    this.partyMessages = await generatePartyMessages(event, this.sanityClient);
+    const logger = new Logger(
+      "StreamHost",
+      LogInitiator.DISCORD,
+      "Party Start"
+    );
 
-    this.initiatePartyMessageSchedule();
-    setTimeout(() => {
-      this.sendPartyMessage({ embeds: [streamTitleEmbed] });
+    try {
+      this.partyMessages = await generatePartyMessages(
+        event,
+        this.sanityClient
+      );
+      logger.addLog(LogStatus.SUCCESS, "Party messages generated");
+    } catch (err) {
+      logger.addLog(LogStatus.FAILURE, "Error generating party messages");
+      logger.sendLog(this.client);
+      return;
+    }
+
+    this.partyMessageTimers = this.partyMessages.map((msg) => {
+      return setTimeout(() => {
+        this.sendPartyMessage(msg.text);
+      }, msg.waitTime * MS_IN_A_MINUTE);
     });
+
+    try {
+      await this.sendPartyMessage({ embeds: [streamTitleEmbed] });
+      logger.addLog(LogStatus.SUCCESS, "Send party welcome message");
+    } catch (err) {
+      logger.addLog(LogStatus.FAILURE, "Error sending party welcome message");
+      return;
+    }
+
+    logger.sendLog(this.client);
   }
 
   private clearMessageTimers() {
@@ -94,7 +108,7 @@ export class ManagedStream extends EventEmitter {
     );
 
     this.clearMessageTimers();
-    this.forumPost = null;
+
     this.active = false;
     this.partyMessages = null;
     this.titleSuggestions = [];
@@ -105,6 +119,8 @@ export class ManagedStream extends EventEmitter {
     };
 
     this.forumPost.send(message);
+
+    this.forumPost = null;
   }
 
   public eventActive() {
