@@ -19,10 +19,7 @@ const helperBot = new Client({
     Partials.Reaction,
     Partials.GuildMember,
   ],
-  intents: [
-    mcconfig.discord.intents.simpleIntents,
-    mcconfig.discord.intents.utilityIntents,
-  ],
+  intents: [mcconfig.discord.clients.helper.intents],
 });
 
 // Find Off-Nominal Discord Guild, fetch members to prevent partials

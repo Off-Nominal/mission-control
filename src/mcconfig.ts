@@ -36,35 +36,47 @@ const mcconfig = {
       anomaly: process.env.DISCORD_ROLE_ID_ANOMALY,
       nfrs: process.env.DISCORD_ROLE_ID_NFRS,
     },
-    intents: {
-      simpleIntents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.DirectMessages,
-      ],
-      utilityIntents: [
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.MessageContent,
-      ],
-      eventIntents: [GatewayIntentBits.GuildScheduledEvents],
-    },
     clients: {
       helper: {
         token: process.env.DISCORD_CLIENT_TOKEN_ID_HELPER_BOT,
         appId: process.env.DISCORD_CLIENT_APP_ID_HELPER_BOT,
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.DirectMessages,
+          GatewayIntentBits.GuildMembers,
+          GatewayIntentBits.GuildMessageReactions,
+          GatewayIntentBits.MessageContent,
+        ],
       },
       content: {
         token: process.env.DISCORD_CLIENT_TOKEN_ID_CONTENT_BOT,
         appId: process.env.DISCORD_CLIENT_APP_ID_CONTENT_BOT,
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.DirectMessages,
+        ],
       },
       events: {
         token: process.env.DISCORD_CLIENT_TOKEN_ID_EVENT_BOT,
         appId: process.env.DISCORD_CLIENT_APP_ID_EVENT_BOT,
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.DirectMessages,
+          GatewayIntentBits.GuildMembers,
+          GatewayIntentBits.GuildScheduledEvents,
+        ],
       },
       ndb2: {
         token: process.env.DISCORD_CLIENT_TOKEN_ID_NDB2_BOT,
         appId: process.env.DISCORD_CLIENT_APP_ID_NDB2_BOT,
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.DirectMessages,
+        ],
       },
     },
   },

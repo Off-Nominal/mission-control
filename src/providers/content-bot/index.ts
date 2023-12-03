@@ -4,7 +4,7 @@ import mcconfig from "../../mcconfig";
 import { Client } from "discord.js";
 
 const contentBot = new Client({
-  intents: mcconfig.discord.intents.simpleIntents,
+  intents: mcconfig.discord.clients.content.intents,
 });
 
 contentBot.on("error", console.error);

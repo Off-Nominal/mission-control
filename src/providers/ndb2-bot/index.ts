@@ -18,7 +18,7 @@ export enum Ndb2Events {
 }
 
 const ndb2Bot = new Client({
-  intents: [mcconfig.discord.intents.simpleIntents],
+  intents: [mcconfig.discord.clients.ndb2.intents],
 });
 
 // Handlers

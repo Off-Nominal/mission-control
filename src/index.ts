@@ -33,6 +33,7 @@ import LaunchEvents from "./services/launch-events";
 import EventNotifications from "./services/event-notifications";
 import StreamHost from "./services/stream-host";
 import CreateEventForumPost from "./services/create-event-forum-post";
+import CreateEventFromThread from "./services/create-event-from-thread";
 
 const services = [
   AddModsToThread,
@@ -59,6 +60,7 @@ const services = [
   TranslateTemperature,
   WarnDeprecatedCommands,
   CreateEventForumPost,
+  CreateEventFromThread,
 ];
 
 services.forEach((service) => service(providers));

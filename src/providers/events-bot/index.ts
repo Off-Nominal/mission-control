@@ -4,10 +4,7 @@ import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
 
 const eventsBot = new Client({
-  intents: [
-    mcconfig.discord.intents.simpleIntents,
-    mcconfig.discord.intents.eventIntents,
-  ],
+  intents: [mcconfig.discord.clients.events.intents],
 });
 
 // Handlers
