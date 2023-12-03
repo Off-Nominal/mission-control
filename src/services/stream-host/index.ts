@@ -1,5 +1,7 @@
+import { GuildScheduledEvent, ThreadChannel } from "discord.js";
 import { Providers } from "../../providers";
-import { ManagedStream, StreamHostEvents } from "./ManagedStream";
+import { ManagedStream } from "./ManagedStream";
+import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 export default function StreamHost({
   eventsBot,
@@ -7,7 +9,7 @@ export default function StreamHost({
   sanityClient,
   mcconfig,
 }: Providers) {
-  const streamHost = new ManagedStream(sanityClient);
+  const streamHost = new ManagedStream(sanityClient, eventsBot);
 
   eventsBot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
@@ -27,6 +29,26 @@ export default function StreamHost({
     }
   });
 
+  const getStreamEventForumPost = async (
+    event: GuildScheduledEvent
+  ): Promise<ThreadChannel> => {
+    const title = event.name;
+
+    const channel = eventsBot.channels.cache.get(
+      mcconfig.discord.channels.livechat
+    );
+
+    if (!channel.isThreadOnly()) return;
+
+    const thread = await channel.threads.cache.find((thread) => {
+      return thread.name === title && thread.ownerId === eventsBot.user.id;
+    });
+
+    if (!thread) return;
+
+    return thread;
+  };
+
   eventsBot.on("guildScheduledEventUpdate", (oldEvent, newEvent) => {
     const isStream = rssProviders.yt.isStream(newEvent);
 
@@ -34,32 +56,35 @@ export default function StreamHost({
       return;
     }
 
+    const logger = new Logger(
+      "StreamHost",
+      LogInitiator.DISCORD,
+      "Stream Event Change"
+    );
+
+    // Event started
     if (newEvent.isActive() && oldEvent.isScheduled()) {
-      streamHost.startParty(newEvent);
+      logger.addLog(LogStatus.INFO, "Event started");
+      getStreamEventForumPost(newEvent)
+        .then((forumPost) => {
+          logger.addLog(LogStatus.SUCCESS, "Found forum thread");
+          streamHost.startParty(newEvent, forumPost);
+          logger.addLog(LogStatus.SUCCESS, "Started stream party");
+        })
+        .catch((err) => {
+          logger.addLog(LogStatus.FAILURE, "Failed to find forum thread");
+        })
+        .finally(() => {
+          logger.sendLog(eventsBot);
+        });
     }
 
+    // Event ended
     if (newEvent.isCompleted() && oldEvent.isActive()) {
-      const message = streamHost.endParty();
-
-      const channel = eventsBot.channels.cache.get(
-        mcconfig.discord.channels.livechat
-      );
-
-      if (!channel.isTextBased()) return;
-
-      channel.send(message);
-    }
-  });
-
-  streamHost.on(StreamHostEvents.PARTY_MESSAGE, async (message, event) => {
-    try {
-      const channel = await event.client.channels.fetch(
-        mcconfig.discord.channels.livechat
-      );
-      if (!channel.isTextBased()) return;
-      channel.send(message);
-    } catch (err) {
-      console.error(err);
+      logger.addLog(LogStatus.INFO, "Event ended");
+      streamHost.endParty();
+      logger.addLog(LogStatus.SUCCESS, "Started stream party");
+      logger.sendLog(eventsBot);
     }
   });
 }

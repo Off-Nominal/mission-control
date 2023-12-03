@@ -1,10 +1,12 @@
 import {
+  Client,
   CommandInteraction,
   GuildMember,
   GuildScheduledEvent,
   GuildScheduledEventStatus,
   MessageCreateOptions,
   MessagePayload,
+  ThreadChannel,
 } from "discord.js";
 import EventEmitter = require("events");
 import {
@@ -15,78 +17,85 @@ import {
 } from "./partyMessages";
 import { createPollEmbed } from "../../actions/create-poll-embed";
 import { SanityClient } from "@sanity/client";
-
-export enum StreamHostEvents {
-  PARTY_MESSAGE = "partyMessage",
-}
+import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 const MS_IN_A_MINUTE = 60000;
 const MAX_TITLE_SUGGESTIONS = 36;
 
 export class ManagedStream extends EventEmitter {
   private active: boolean;
-  private activeEvent: GuildScheduledEvent<GuildScheduledEventStatus.Active> =
-    null;
   private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
-  private sanityClient: SanityClient;
+  private forumPost: ThreadChannel | null = null;
 
-  constructor(sanityClient: SanityClient) {
+  constructor(private sanityClient: SanityClient, private client: Client) {
     super();
     this.sanityClient = sanityClient;
     this.sendPartyMessage = this.sendPartyMessage.bind(this);
     this.startParty = this.startParty.bind(this);
     this.endParty = this.endParty.bind(this);
-    this.initiatePartyMessageSchedule =
-      this.initiatePartyMessageSchedule.bind(this);
     this.clearMessageTimers = this.clearMessageTimers.bind(this);
     this.logSuggestion = this.logSuggestion.bind(this);
     this.viewSuggestions = this.viewSuggestions.bind(this);
   }
 
   private sendPartyMessage(
-    message: string | MessagePayload,
-    event: GuildScheduledEvent<GuildScheduledEventStatus.Active> = this
-      .activeEvent
+    message: string | MessagePayload | MessageCreateOptions
   ) {
-    this.emit(StreamHostEvents.PARTY_MESSAGE, message, event);
-  }
-
-  private initiatePartyMessageSchedule() {
-    this.partyMessageTimers = this.partyMessages.map((msg) => {
-      return setTimeout(() => {
-        this.sendPartyMessage(msg.text);
-      }, msg.waitTime * MS_IN_A_MINUTE);
-    });
+    return this.forumPost.send(message);
   }
 
   public async startParty(
-    event: GuildScheduledEvent<GuildScheduledEventStatus.Active>
+    event: GuildScheduledEvent<GuildScheduledEventStatus.Active>,
+    forumPost: ThreadChannel
   ) {
     if (this.active) {
       return;
     }
 
+    this.forumPost = forumPost;
     this.active = true;
-    this.activeEvent = event;
-    this.partyMessages = await generatePartyMessages(event, this.sanityClient);
+    const logger = new Logger(
+      "StreamHost",
+      LogInitiator.DISCORD,
+      "Party Start"
+    );
 
-    this.initiatePartyMessageSchedule();
-    setTimeout(() => {
-      this.emit(
-        StreamHostEvents.PARTY_MESSAGE,
-        { embeds: [streamTitleEmbed] },
-        this.activeEvent
+    try {
+      this.partyMessages = await generatePartyMessages(
+        event,
+        this.sanityClient
       );
+      logger.addLog(LogStatus.SUCCESS, "Party messages generated");
+    } catch (err) {
+      logger.addLog(LogStatus.FAILURE, "Error generating party messages");
+      logger.sendLog(this.client);
+      return;
+    }
+
+    this.partyMessageTimers = this.partyMessages.map((msg) => {
+      return setTimeout(() => {
+        this.sendPartyMessage(msg.text);
+      }, msg.waitTime * MS_IN_A_MINUTE);
     });
+
+    try {
+      await this.sendPartyMessage({ embeds: [streamTitleEmbed] });
+      logger.addLog(LogStatus.SUCCESS, "Send party welcome message");
+    } catch (err) {
+      logger.addLog(LogStatus.FAILURE, "Error sending party welcome message");
+      return;
+    }
+
+    logger.sendLog(this.client);
   }
 
   private clearMessageTimers() {
     this.partyMessageTimers.forEach((timer) => clearTimeout(timer));
   }
 
-  public endParty(): MessageCreateOptions {
+  public endParty(): void {
     if (!this.active) {
       return;
     }
@@ -98,16 +107,18 @@ export class ManagedStream extends EventEmitter {
       )
     );
 
-    this.clearMessageTimers();
-    this.active = false;
-    this.activeEvent = null;
-    this.partyMessages = null;
-    this.titleSuggestions = [];
-
-    return {
+    const message = {
       content: "Thanks for hanging out everyone!",
       embeds: [embed],
     };
+
+    this.forumPost.send(message);
+
+    this.clearMessageTimers();
+    this.forumPost = null;
+    this.active = false;
+    this.partyMessages = null;
+    this.titleSuggestions = [];
   }
 
   public eventActive() {

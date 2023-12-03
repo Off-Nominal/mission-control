@@ -17,6 +17,7 @@ import fetchGuild from "../../helpers/fetchGuild";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { isRejected } from "../../helpers/allSettledTypeGuard";
 import { truncateText } from "../../helpers/truncateText";
+import { getRllIdFromEvent } from "../../helpers/getRllId";
 
 const MAX_WINDOW_IN_DAYS = 7;
 
@@ -25,11 +26,9 @@ const getDiscordEventByLaunchId = (
   launchId: number
 ): GuildScheduledEvent<GuildScheduledEventStatus> | null => {
   for (const event of events.values()) {
-    if (!event.description) continue;
+    const rllId = getRllIdFromEvent(event);
 
-    const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
-
-    if (rllId?.length && rllId[0] === launchId.toString()) {
+    if (rllId === launchId) {
       return event;
     }
   }

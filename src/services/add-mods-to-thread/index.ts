@@ -1,10 +1,13 @@
-import { ThreadChannel, channelMention } from "discord.js";
+import { AnyThreadChannel, ThreadChannel, channelMention } from "discord.js";
 import { Providers } from "../../providers";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import fetchGuild from "../../helpers/fetchGuild";
 import helperBot from "../../providers/helper-bot";
 
-export function addRoleToThread(thread: ThreadChannel, role: string) {
+export function addRoleToThread(
+  thread: AnyThreadChannel<boolean>,
+  role: string
+) {
   const logger = new Logger(
     "Mod Thread Membership",
     LogInitiator.DISCORD,
@@ -57,7 +60,9 @@ export function addRoleToThread(thread: ThreadChannel, role: string) {
 }
 
 export default function AddModsToThread({ helperBot, mcconfig }: Providers) {
-  helperBot.on("threadCreate", (thread) =>
-    addRoleToThread(thread, mcconfig.discord.roles.mods)
-  );
+  helperBot.on("threadCreate", (thread) => {
+    if (thread.parent.id !== mcconfig.discord.channels.livechat) {
+      addRoleToThread(thread, mcconfig.discord.roles.mods);
+    }
+  });
 }
