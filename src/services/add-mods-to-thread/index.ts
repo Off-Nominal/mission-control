@@ -60,7 +60,9 @@ export function addRoleToThread(
 }
 
 export default function AddModsToThread({ helperBot, mcconfig }: Providers) {
-  helperBot.on("threadCreate", (thread) =>
-    addRoleToThread(thread, mcconfig.discord.roles.mods)
-  );
+  helperBot.on("threadCreate", (thread) => {
+    if (thread.parent.id !== mcconfig.discord.channels.livechat) {
+      addRoleToThread(thread, mcconfig.discord.roles.mods);
+    }
+  });
 }
