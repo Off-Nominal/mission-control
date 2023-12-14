@@ -8,9 +8,12 @@ import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 export default function EventNotifications({ eventsBot, models }: Providers) {
   // Handle New Event notifications
-  eventsBot.on("guildScheduledEventCreate", (event) =>
-    notifyNewEvent(event, models.user)
-  );
+  eventsBot.on("guildScheduledEventCreate", (event) => {
+    if (!event.isScheduled()) {
+      return;
+    }
+    notifyNewEvent(event, models.user);
+  });
 
   const notifySubscribers = async (eventWindow: EventWindow) => {
     const subscribers = await models.user.fetchPreNotificationSubscribers();

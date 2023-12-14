@@ -1,11 +1,15 @@
-import { Client, GuildScheduledEvent } from "discord.js";
+import {
+  Client,
+  GuildScheduledEvent,
+  GuildScheduledEventStatus,
+} from "discord.js";
 import fetchGuild from "../helpers/fetchGuild";
 
 const MS_IN_A_SEC = 1000;
 const SEC_IN_AN_MIN = 60;
 
 export type EventWindow = {
-  event: GuildScheduledEvent;
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>;
   minTime: number;
   maxTime: number;
 };
@@ -20,22 +24,22 @@ export function monitorEvents(
 
     const events = await guild.scheduledEvents.fetch();
 
-    const eventWindows = events.map((event): EventWindow => {
+    events.forEach((event) => {
+      if (!event.isScheduled() || !event.scheduledStartAt) {
+        return;
+      }
+
       const eventStartTimeStamp = event.scheduledStartAt.getTime();
       const now = Date.now();
 
       const maxTime = (eventStartTimeStamp - now) / MS_IN_A_SEC / SEC_IN_AN_MIN;
       const minTime = maxTime - 5;
 
-      return {
+      callback({
         event,
         minTime,
         maxTime,
-      };
-    });
-
-    eventWindows.forEach((eventWindow) => {
-      callback(eventWindow);
+      });
     });
   }, 5 * SEC_IN_AN_MIN * MS_IN_A_SEC);
 }

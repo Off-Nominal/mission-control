@@ -3,6 +3,7 @@ import {
   ForumChannel,
   Guild,
   GuildScheduledEvent,
+  GuildScheduledEventStatus,
   MediaChannel,
 } from "discord.js";
 import { Providers } from "../../providers";
@@ -19,14 +20,14 @@ import {
 import { ContentListener } from "../../providers/rss-providers/ContentListener";
 
 const handleForumPostRequest = async (
-  event: GuildScheduledEvent,
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
   channel: ForumChannel | MediaChannel,
   rssProvider: ContentListener
 ) => {
   const existingPost = await fetchExistingPost(event, channel);
 
   if (existingPost) {
-    updateForumPostForEvent(existingPost, event.url);
+    updateForumPostForEvent(event, existingPost, event.url);
   } else {
     const type = getType(event, rssProvider);
     createForumPost(event, channel, type);
@@ -95,7 +96,12 @@ export default function CreateEventForumPost({
 
     // fill cache
     const guild = fetchGuild(eventsBot);
-    let event: GuildScheduledEvent;
+
+    if (!guild) {
+      return;
+    }
+
+    let event: GuildScheduledEvent | undefined = undefined;
 
     try {
       event = await guild.scheduledEvents?.fetch(eventId);
@@ -103,7 +109,7 @@ export default function CreateEventForumPost({
       console.log(err);
     }
 
-    if (!event) {
+    if (event === undefined || !event.isScheduled()) {
       return;
     }
 
