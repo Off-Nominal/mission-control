@@ -12,6 +12,7 @@ import { EventWindow } from "../../actions/monitor-events";
 import { ContentListener } from "../../providers/rss-providers/ContentListener";
 import { getRllIdFromEvent, getRllIdFromText } from "../../helpers/getRllId";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
+import createEventAnnouncementEmbed from "../../actions/create-event-announcement-embed";
 
 const PRE_EVENT_NOTICE_IN_MIN = 30;
 
@@ -40,11 +41,15 @@ export const fetchExistingPost = async (
 };
 
 export const updateForumPostForEvent = async (
+  event: GuildScheduledEvent,
   thread: ThreadChannel,
   url: string
 ) => {
+  const embed = createEventAnnouncementEmbed(event, "thread", {});
+
   const message: MessageCreateOptions = {
-    content: `Looks like we're back! Here is the updated event information.\n\n${url}`,
+    content: `Looks like we're back! Here is the updated event information.`,
+    embeds: [embed],
   };
 
   try {
@@ -110,11 +115,12 @@ export const createForumPost = async (
 
   const tag = getTag(channel, type);
 
+  const embed = createEventAnnouncementEmbed(event, "thread");
+
   const options: GuildForumThreadCreateOptions = {
     message: {
-      // add rllId if it exists
-      content:
-        event.url + (typeof type === "number" ? `\n\nrllId=[${type}]` : ""),
+      content: event.description,
+      embeds: [embed],
     },
     name: `${event.name}`,
     autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,

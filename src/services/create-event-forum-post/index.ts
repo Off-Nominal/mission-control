@@ -26,7 +26,7 @@ const handleForumPostRequest = async (
   const existingPost = await fetchExistingPost(event, channel);
 
   if (existingPost) {
-    updateForumPostForEvent(existingPost, event.url);
+    updateForumPostForEvent(event, existingPost, event.url);
   } else {
     const type = getType(event, rssProvider);
     createForumPost(event, channel, type);

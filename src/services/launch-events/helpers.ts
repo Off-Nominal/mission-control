@@ -30,7 +30,7 @@ const generateDescription = (
   launchDate: Date,
   credit: string | null
 ): string => {
-  const infoString = `\n\nStream is set to begin 15 minutes before liftoff time of ${time(
+  const infoString = `\n\nThis Discord Event is configured to begin 15 minutes before liftoff. Your local launch time is ${time(
     launchDate,
     TimestampStyles.LongDateTime
   )}, ${time(launchDate, TimestampStyles.RelativeTime)}`;

@@ -7,7 +7,7 @@ import {
 
 export default function createEventAnnouncementEmbed(
   event: GuildScheduledEvent,
-  type: "new" | "pre",
+  type: "new" | "pre" | "thread",
   options?: {
     thumbnail?: string;
   }
@@ -15,21 +15,16 @@ export default function createEventAnnouncementEmbed(
   const thumbnail =
     options?.thumbnail ||
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1642095232/Discord%20Assets/offnominal_2021-01_w4buun.png";
-  const author =
-    type === "pre" ? "📅 Event Happening Soon!" : "🎉 New Live Event!";
 
   const embed = new EmbedBuilder({
     title: event.name,
-    author: {
-      name: author,
-    },
     description: event.description || "No event description provided.",
     thumbnail: {
       url: thumbnail,
     },
     fields: [
       {
-        name: "Date/Time",
+        name: "Discord Event Date/Time (15 mins before T-0)",
         value: `${time(
           event.scheduledStartAt,
           TimestampStyles.LongDateTime
@@ -40,7 +35,10 @@ export default function createEventAnnouncementEmbed(
       },
       {
         name: "Watch here",
-        value: `[Event URL](${event.entityMetadata.location})`,
+        value:
+          event.entityMetadata.location === "Unavailable"
+            ? "No stream available"
+            : `[Event URL](${event.entityMetadata.location})`,
         inline: true,
       },
       {
@@ -50,6 +48,15 @@ export default function createEventAnnouncementEmbed(
       },
     ],
   });
+
+  if (type === "new" || type === "pre") {
+    const author =
+      type === "new" ? "🎉 New Live Event!" : "📅 Event Happening Soon!";
+
+    embed.setAuthor({
+      name: author,
+    });
+  }
 
   if (event.image) {
     embed.setImage(
