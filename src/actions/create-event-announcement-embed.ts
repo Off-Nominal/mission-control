@@ -3,10 +3,11 @@ import {
   EmbedBuilder,
   time,
   TimestampStyles,
+  GuildScheduledEventStatus,
 } from "discord.js";
 
 export default function createEventAnnouncementEmbed(
-  event: GuildScheduledEvent,
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
   type: "new" | "pre" | "thread",
   options?: {
     thumbnail?: string;
@@ -15,6 +16,11 @@ export default function createEventAnnouncementEmbed(
   const thumbnail =
     options?.thumbnail ||
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1642095232/Discord%20Assets/offnominal_2021-01_w4buun.png";
+
+  let streamValue = "No stream available";
+  if (event.entityMetadata && event.entityMetadata.location != "Unavailable") {
+    streamValue = `[Event URL](${event.entityMetadata.location})`;
+  }
 
   const embed = new EmbedBuilder({
     title: event.name,
@@ -26,19 +32,16 @@ export default function createEventAnnouncementEmbed(
       {
         name: "Discord Event Date/Time (15 mins before T-0)",
         value: `${time(
-          event.scheduledStartAt,
+          event.scheduledStartAt || new Date(0),
           TimestampStyles.LongDateTime
         )} (time local to you)\n(${time(
-          event.scheduledStartAt,
+          event.scheduledStartAt || new Date(0),
           TimestampStyles.RelativeTime
         )})`,
       },
       {
         name: "Watch here",
-        value:
-          event.entityMetadata.location === "Unavailable"
-            ? "No stream available"
-            : `[Event URL](${event.entityMetadata.location})`,
+        value: streamValue,
         inline: true,
       },
       {

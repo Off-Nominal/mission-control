@@ -1,11 +1,22 @@
-import { Client, GuildScheduledEventCreateOptions } from "discord.js";
+import {
+  Client,
+  GuildScheduledEvent,
+  GuildScheduledEventCreateOptions,
+  GuildScheduledEventStatus,
+} from "discord.js";
 import fetchGuild from "../helpers/fetchGuild";
 
 export default async function createDiscordEvent(
   options: GuildScheduledEventCreateOptions,
   client: Client
-) {
+): Promise<GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>> {
   const guild = fetchGuild(client);
   const eventManager = guild.scheduledEvents;
-  return await eventManager.create(options);
+  const event = await eventManager.create(options);
+
+  if (!event.isScheduled()) {
+    throw new Error("Event was not scheduled");
+  } else {
+    return event;
+  }
 }

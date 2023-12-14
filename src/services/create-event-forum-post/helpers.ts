@@ -1,8 +1,10 @@
 import {
   ForumChannel,
+  Guild,
   GuildForumTag,
   GuildForumThreadCreateOptions,
   GuildScheduledEvent,
+  GuildScheduledEventStatus,
   MediaChannel,
   MessageCreateOptions,
   ThreadAutoArchiveDuration,
@@ -28,7 +30,7 @@ export const fetchExistingPost = async (
 
   for (const thread of channel.threads.cache.values()) {
     const firstMessage = await thread.fetchStarterMessage();
-    const threadRllId = getRllIdFromText(firstMessage.content);
+    const threadRllId = getRllIdFromText(firstMessage?.content || "");
 
     if (
       thread.name === event.name &&
@@ -41,7 +43,7 @@ export const fetchExistingPost = async (
 };
 
 export const updateForumPostForEvent = async (
-  event: GuildScheduledEvent,
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
   thread: ThreadChannel,
   url: string
 ) => {
@@ -103,7 +105,7 @@ export const getType = (
 };
 
 export const createForumPost = async (
-  event: GuildScheduledEvent,
+  event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
   channel: ForumChannel | MediaChannel,
   type: ForumType
 ) => {
@@ -119,7 +121,7 @@ export const createForumPost = async (
 
   const options: GuildForumThreadCreateOptions = {
     message: {
-      content: event.description,
+      content: event.description ?? undefined,
       embeds: [embed],
     },
     name: `${event.name}`,
