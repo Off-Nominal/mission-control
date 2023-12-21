@@ -25,6 +25,8 @@ export namespace API {
       ndb_season_end: boolean;
     };
 
+    export type FetchSettingsByDiscordId = Base;
+
     export type FetchNewEventSubscribers = {
       discord_id: string;
     };

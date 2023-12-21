@@ -63,6 +63,15 @@ export class UserNotifications {
   //   );
   // };
 
+  public fetchSettingsByDiscordId = async (discordId: string) => {
+    return await this.db
+      .query<API.UserNotification.FetchSettingsByDiscordId>(
+        `SELECT * FROM user_notifications WHERE user_id = (SELECT id FROM users WHERE discord_id = $1)`,
+        [discordId]
+      )
+      .then((res) => res.rows[0]);
+  };
+
   public fetchNewEventSubscribers = async () => {
     return await this.db.query<API.UserNotification.FetchNewEventSubscribers>(
       `SELECT 
