@@ -2,9 +2,9 @@ import mcconfig from "../../mcconfig";
 import { Client } from "pg";
 import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
-import { User } from "./models/User";
 import { Test } from "./models/Test";
 import { Ndb2MsgSubscription } from "./models/Ndb2MsgSubscription";
+import { UserNotifications } from "./models/UserNotifications";
 
 const db = new Client({
   connectionString: mcconfig.database.url,
@@ -25,11 +25,11 @@ db.connect()
 
 // Models
 const test = new Test(db);
-const user = new User(db);
+const userNotifications = new UserNotifications(db);
 const ndb2MsgSubscription = new Ndb2MsgSubscription(db);
 
 export const models = {
-  user,
+  userNotifications,
   test,
   ndb2MsgSubscription,
 };

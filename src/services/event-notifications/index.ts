@@ -12,11 +12,12 @@ export default function EventNotifications({ eventsBot, models }: Providers) {
     if (!event.isScheduled()) {
       return;
     }
-    notifyNewEvent(event, models.user);
+    notifyNewEvent(event, models.userNotifications);
   });
 
   const notifySubscribers = async (eventWindow: EventWindow) => {
-    const subscribers = await models.user.fetchPreNotificationSubscribers();
+    const subscribers =
+      await models.userNotifications.fetchPreNotificationSubscribers();
 
     const recipients = subscribers
       .filter((sub) => {
@@ -74,11 +75,25 @@ export default function EventNotifications({ eventsBot, models }: Providers) {
     });
   };
 
-  // Handle pre-event notifications based on user settings
-  monitorEvents(eventsBot, notifySubscribers);
+  // // Handle pre-event notifications based on user settings
+  // monitorEvents(eventsBot, notifySubscribers);
 
-  // Handle subscriptions
-  eventsBot.on("interactionCreate", (interaction) => {
-    setSubscriptions(interaction, models.user);
-  });
+  // // Handle subscriptions
+  // eventsBot.on("interactionCreate", (interaction) => {
+  //   if (
+  //     !interaction.isChatInputCommand() ||
+  //     interaction.commandName !== "events"
+  //   ) {
+  //     return;
+  //   }
+
+  //   const { options } = interaction;
+  //   const subCommand = options.getSubcommand(false);
+
+  //   if (subCommand !== "subscribe" && subCommand !== "unsubscribe") {
+  //     return;
+  //   }
+
+  //   setSubscriptions(interaction, models.userNotifications, subCommand);
+  // });
 }

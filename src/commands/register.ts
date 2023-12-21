@@ -4,7 +4,7 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 
 // command imports
-import mainCommands from "./main";
+import helperCommands from "./helper";
 import contentCommands from "./content";
 import eventsCommands from "./events";
 import ndb2Commands from "./ndb2";
@@ -24,7 +24,7 @@ Promise.all([
   register(
     mcconfig.discord.clients.helper.appId,
     mcconfig.discord.clients.helper.token,
-    mainCommands
+    helperCommands
   ),
   register(
     mcconfig.discord.clients.content.appId,

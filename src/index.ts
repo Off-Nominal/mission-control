@@ -34,6 +34,7 @@ import EventNotifications from "./services/event-notifications";
 import StreamHost from "./services/stream-host";
 import CreateEventForumPost from "./services/create-event-forum-post";
 import CreateEventFromThread from "./services/create-event-from-thread";
+import NotificationsSetter from "./services/notifications-setter";
 
 const services = [
   AddModsToThread,
@@ -61,6 +62,7 @@ const services = [
   WarnDeprecatedCommands,
   CreateEventForumPost,
   CreateEventFromThread,
+  NotificationsSetter,
 ];
 
 services.forEach((service) => service(providers));

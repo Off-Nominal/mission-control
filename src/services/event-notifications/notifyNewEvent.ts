@@ -4,15 +4,15 @@ import {
   GuildScheduledEvent,
   GuildScheduledEventStatus,
 } from "discord.js";
-import { User } from "../../providers/db/models/User";
 import { formatDistance } from "date-fns";
 import createEventAnnouncementEmbed from "../../actions/create-event-announcement-embed";
+import { UserNotifications } from "../../providers/db/models/UserNotifications";
 
 export async function notifyNewEvent(
   event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
-  user: User
+  userNotifications: UserNotifications
 ) {
-  const query = await user.fetchNewEventSubscribers();
+  const query = await userNotifications.fetchNewEventSubscribers();
   const memberIds = query.rows.map((user) => user.discord_id);
   let subscribers: Collection<string, GuildMember>;
 

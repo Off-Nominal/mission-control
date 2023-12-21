@@ -1,8 +1,12 @@
 import {
   APIApplicationCommandOptionChoice,
+  ApplicationCommandOptionType,
   SlashCommandBuilder,
+  SlashCommandSubcommandBuilder,
+  SlashCommandSubcommandGroupBuilder,
 } from "discord.js";
 import { spacecraftData } from "../../services/mars-time/config";
+import { notificationSubcommandGroup } from "./notifications";
 
 // Help
 const helpCommand = new SlashCommandBuilder()
@@ -123,12 +127,31 @@ const pollCommand = new SlashCommandBuilder()
     command.setName("help").setDescription("Get help with polls")
   );
 
+// Notifications
+const notificationsCommand = new SlashCommandBuilder()
+  .setName("notifications")
+  .setDescription("Manage your notifications")
+  .addSubcommand((command) =>
+    command
+      .setName("view")
+      .setDescription("View your current notification settings")
+  )
+  .addSubcommandGroup(notificationSubcommandGroup)
+  .addSubcommand((command) =>
+    command
+      .setName("unsubscribe")
+      .setDescription(
+        "Clears all notification options. This is nuclear, what have we done to you?"
+      )
+  );
+
 const commands = [
   helpCommand,
   shuntCommand,
   marstimeCommand,
   summaryCommand,
   pollCommand,
+  notificationsCommand,
 ].map((command) => command.toJSON());
 
 export default commands;

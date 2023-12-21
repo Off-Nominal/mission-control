@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS user_notifications (
     events_pre INT,
     events_forum_thread BOOLEAN NOT NULL DEFAULT FALSE,
     events_exclusions_starlink BOOLEAN NOT NULL DEFAULT FALSE,
-    events_exclusions_unknown_chinese BOOLEAN NOT NULL DEFAULT FALSE,
+    events_exclusions_unknown_china BOOLEAN NOT NULL DEFAULT FALSE,
     ndb_new BOOLEAN NOT NULL DEFAULT FALSE,
     ndb_prediction_closed BOOLEAN NOT NULL DEFAULT FALSE,
     ndb_bet_closed BOOLEAN NOT NULL DEFAULT FALSE,
