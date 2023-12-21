@@ -12,8 +12,8 @@ export async function notifyNewEvent(
   event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
   userNotifications: UserNotifications
 ) {
-  const query = await userNotifications.fetchNewEventSubscribers();
-  const memberIds = query.rows.map((user) => user.discord_id);
+  const result = await userNotifications.fetchNewEventSubscribers();
+  const memberIds = result.map((user) => user.discord_id);
   let subscribers: Collection<string, GuildMember>;
 
   try {

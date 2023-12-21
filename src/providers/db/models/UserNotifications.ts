@@ -63,7 +63,26 @@ export class UserNotifications {
   //   );
   // };
 
-  public fetchSettingsByDiscordId = async (discordId: string) => {
+  public setNotification = async (
+    discordId: string,
+    notification: { key: keyof API.UserNotification.BaseSettings; value: any }
+  ): Promise<API.UserNotification.SetNotification> => {
+    // prevent SQL Injection
+    if (!API.UserNotification.isUserNotification(notification.key)) {
+      throw new TypeError("Invalid key");
+    }
+
+    return await this.db
+      .query(
+        `UPDATE user_notifications SET ${notification.key} = $1 WHERE user_id = (SELECT id FROM users WHERE discord_id = $2)`,
+        [notification.value, discordId]
+      )
+      .then((res) => true);
+  };
+
+  public fetchSettingsByDiscordId = async (
+    discordId: string
+  ): Promise<API.UserNotification.FetchSettingsByDiscordId> => {
     return await this.db
       .query<API.UserNotification.FetchSettingsByDiscordId>(
         `SELECT * FROM user_notifications WHERE user_id = (SELECT id FROM users WHERE discord_id = $1)`,
@@ -72,15 +91,18 @@ export class UserNotifications {
       .then((res) => res.rows[0]);
   };
 
-  public fetchNewEventSubscribers = async () => {
-    return await this.db.query<API.UserNotification.FetchNewEventSubscribers>(
-      `SELECT 
+  public fetchNewEventSubscribers =
+    async (): Promise<API.UserNotification.FetchNewEventSubscribers> => {
+      return await this.db
+        .query<API.UserNotification.FetchNewEventSubscribers>(
+          `SELECT 
           u.discord_id 
         FROM user_notifications un
         JOIN users u ON u.id = un.user_id
         WHERE un.events_new IS TRUE`
-    );
-  };
+        )
+        .then((res) => res.rows[0]);
+    };
 
   public fetchPreNotificationSubscribers = (): Promise<
     API.UserNotification.FetchPreNotificationSubscribers[]
