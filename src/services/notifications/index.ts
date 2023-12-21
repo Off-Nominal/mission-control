@@ -1,5 +1,7 @@
 import { Providers } from "../../providers";
 import { API } from "../../providers/db/models/types";
+import NewEventNotifications from "./events_new";
+import PreEventNotifications from "./events_pre";
 import { generateViewSettingsEmbed } from "./generateViewSettingsEmbed";
 
 const commandMap = {
@@ -17,7 +19,13 @@ const commandMap = {
   ["ndb-season_ended"]: "ndb_season_end",
 };
 
-export default function Notifications({ helperBot, models }: Providers) {
+export default function Notifications(providers: Providers) {
+  const { helperBot, models } = providers;
+
+  // Notification Services
+  NewEventNotifications(providers);
+  PreEventNotifications(providers);
+
   // View settings
   helperBot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
@@ -60,6 +68,7 @@ export default function Notifications({ helperBot, models }: Providers) {
     }
   });
 
+  // Set settings
   helperBot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
@@ -84,7 +93,7 @@ export default function Notifications({ helperBot, models }: Providers) {
     let value: any = options.getBoolean("setting");
 
     if (subCommand === "events-pre_event") {
-      if (value === true) {
+      if (value === false) {
         value = null;
       } else {
         value = options.getInteger("minutes");
@@ -105,6 +114,9 @@ export default function Notifications({ helperBot, models }: Providers) {
       return;
     }
 
-    interaction.reply("setting updated!");
+    interaction.reply({
+      content: `Successfully set \`${setting}\` to \`${value}\`! View all your settings with \`/notifications view\``,
+      ephemeral: true,
+    });
   });
 }

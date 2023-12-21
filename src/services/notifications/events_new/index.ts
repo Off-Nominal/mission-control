@@ -4,11 +4,12 @@ import {
   GuildScheduledEvent,
   GuildScheduledEventStatus,
 } from "discord.js";
+import createEventAnnouncementEmbed from "../../../actions/create-event-announcement-embed";
+import { Providers } from "../../../providers";
+import { UserNotifications } from "../../../providers/db/models/UserNotifications";
 import { formatDistance } from "date-fns";
-import createEventAnnouncementEmbed from "../../actions/create-event-announcement-embed";
-import { UserNotifications } from "../../providers/db/models/UserNotifications";
 
-export async function notifyNewEvent(
+async function notifyNewEvent(
   event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
   userNotifications: UserNotifications
 ) {
@@ -38,5 +39,17 @@ export async function notifyNewEvent(
       );
       console.error(err);
     }
+  });
+}
+
+export default function NewEventNotifications({
+  eventsBot,
+  models,
+}: Providers) {
+  eventsBot.on("guildScheduledEventCreate", (event) => {
+    if (!event.isScheduled()) {
+      return;
+    }
+    notifyNewEvent(event, models.userNotifications);
   });
 }

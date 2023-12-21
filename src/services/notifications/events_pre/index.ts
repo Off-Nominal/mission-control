@@ -1,20 +1,13 @@
 import { DMChannel, GuildMember } from "discord.js";
-import createEventAnnouncementEmbed from "../../actions/create-event-announcement-embed";
-import { EventWindow, monitorEvents } from "../../actions/monitor-events";
-import { Providers } from "../../providers";
-import { notifyNewEvent } from "./notifyNewEvent";
-import { setSubscriptions } from "./setSubscriptions";
-import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
+import createEventAnnouncementEmbed from "../../../actions/create-event-announcement-embed";
+import { EventWindow, monitorEvents } from "../../../actions/monitor-events";
+import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
+import { Providers } from "../../../providers";
 
-export default function EventNotifications({ eventsBot, models }: Providers) {
-  // Handle New Event notifications
-  eventsBot.on("guildScheduledEventCreate", (event) => {
-    if (!event.isScheduled()) {
-      return;
-    }
-    notifyNewEvent(event, models.userNotifications);
-  });
-
+export default function PreEventNotifications({
+  eventsBot,
+  models,
+}: Providers) {
   const notifySubscribers = async (eventWindow: EventWindow) => {
     const subscribers =
       await models.userNotifications.fetchPreNotificationSubscribers();
@@ -22,8 +15,8 @@ export default function EventNotifications({ eventsBot, models }: Providers) {
     const recipients = subscribers
       .filter((sub) => {
         return (
-          sub.pre_notification > eventWindow.minTime &&
-          sub.pre_notification < eventWindow.maxTime
+          sub.events_pre > eventWindow.minTime &&
+          sub.events_pre < eventWindow.maxTime
         );
       })
       .map((sub) => sub.discord_id);
@@ -75,25 +68,6 @@ export default function EventNotifications({ eventsBot, models }: Providers) {
     });
   };
 
-  // // Handle pre-event notifications based on user settings
-  // monitorEvents(eventsBot, notifySubscribers);
-
-  // // Handle subscriptions
-  // eventsBot.on("interactionCreate", (interaction) => {
-  //   if (
-  //     !interaction.isChatInputCommand() ||
-  //     interaction.commandName !== "events"
-  //   ) {
-  //     return;
-  //   }
-
-  //   const { options } = interaction;
-  //   const subCommand = options.getSubcommand(false);
-
-  //   if (subCommand !== "subscribe" && subCommand !== "unsubscribe") {
-  //     return;
-  //   }
-
-  //   setSubscriptions(interaction, models.userNotifications, subCommand);
-  // });
+  // Handle pre-event notifications based on user settings
+  monitorEvents(eventsBot, notifySubscribers);
 }

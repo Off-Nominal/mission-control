@@ -49,18 +49,17 @@ export namespace API {
 
     export type FetchNewEventSubscribers = {
       discord_id: string;
-    }[];
+    };
 
     export type FetchPreNotificationSubscribers = {
       discord_id: string;
-      pre_notification: number;
+      events_pre: number;
     };
 
     export const isUserNotification = (
       setting: string
     ): setting is keyof BaseSettings => {
       return setting in baseSettings;
-      return true;
     };
   }
 
