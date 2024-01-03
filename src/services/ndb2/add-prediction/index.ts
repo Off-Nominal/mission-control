@@ -5,6 +5,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
   TimestampStyles,
+  messageLink,
   time,
   userMention,
 } from "discord.js";
@@ -21,6 +22,7 @@ export default function AddPrediction({
   ndb2Bot,
   ndb2Client,
   models,
+  notifications,
 }: Providers) {
   // Handles request for new prediction modal
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -208,6 +210,13 @@ export default function AddPrediction({
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction view embed message subscription logged`
+      );
+
+      // notify users
+      notifications.emit(
+        "ndb_new",
+        prediction,
+        messageLink(reply.channelId, reply.id)
       );
     } catch (err) {
       logger.addLog(

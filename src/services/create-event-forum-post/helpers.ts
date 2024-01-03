@@ -1,4 +1,5 @@
 import {
+  Client,
   ForumChannel,
   Guild,
   GuildForumTag,
@@ -12,7 +13,10 @@ import {
 } from "discord.js";
 import { EventWindow } from "../../actions/monitor-events";
 import { ContentListener } from "../../providers/rss-providers/ContentListener";
-import { getRllIdFromEvent, getRllIdFromText } from "../../helpers/getRllId";
+import {
+  getRllIdFromEvent,
+  getRLLMetadataFromText,
+} from "../../helpers/rll_utils";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import createEventAnnouncementEmbed from "../../actions/create-event-announcement-embed";
 
@@ -28,14 +32,21 @@ export const fetchExistingPost = async (
 ): Promise<ThreadChannel | undefined> => {
   const rllId = getRllIdFromEvent(event);
 
+  if (!rllId) {
+    return undefined;
+  }
+
   for (const thread of channel.threads.cache.values()) {
     const firstMessage = await thread.fetchStarterMessage();
-    const threadRllId = getRllIdFromText(firstMessage?.content || "");
+    const threadRllId = getRLLMetadataFromText(
+      firstMessage?.content || "",
+      "rllId"
+    );
 
     if (
       thread.name === event.name &&
       thread.ownerId === event.client.user.id &&
-      rllId === threadRllId
+      rllId.toString() === threadRllId
     ) {
       return thread;
     }
@@ -108,13 +119,7 @@ export const createForumPost = async (
   event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
   channel: ForumChannel | MediaChannel,
   type: ForumType
-) => {
-  const logger = new Logger(
-    "CreateEventForumPost",
-    LogInitiator.DISCORD,
-    `Creating Forum thread for Event ${event.id} - ${event.name}`
-  );
-
+): Promise<ThreadChannel> => {
   const tag = getTag(channel, type);
 
   const embed = createEventAnnouncementEmbed(event, "thread");
@@ -132,13 +137,18 @@ export const createForumPost = async (
     options.appliedTags = [tag.id];
   }
 
-  try {
-    await channel.threads.create(options);
-    logger.addLog(LogStatus.SUCCESS, "Forum thread created");
-  } catch (err) {
-    console.error(err);
-    logger.addLog(LogStatus.FAILURE, `Error creating forum thread: ${err}`);
-  }
+  return channel.threads.create(options);
+};
 
-  logger.sendLog(event.client);
+export const getLivechatForumChannel = async (
+  client: Client,
+  id: string
+): Promise<ForumChannel | MediaChannel> => {
+  const channel = await client.channels.cache.get(id);
+  if (!channel || !channel.isThreadOnly()) {
+    throw new Error(
+      "Livechat Forum Channel could not be found or is not a thread-only channel. This should happen."
+    );
+  }
+  return channel;
 };

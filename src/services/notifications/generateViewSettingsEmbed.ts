@@ -9,9 +9,9 @@ export const generateViewSettingsEmbed = (
     events_pre: "Notify me in advance that an event is about to start.",
     events_forum_thread:
       "Automatically add me to the Forum Thread for a live event.",
-    events_exclude_starlink:
+    events_exclusions_starlink:
       "Exclude Starlink launches from all my Event related notifications and actions.",
-    events_exclude_unknown_china:
+    events_exclusions_unknown_china:
       "Exclude unknown Chinese launches from all my Event related notifications and actions.",
   };
 

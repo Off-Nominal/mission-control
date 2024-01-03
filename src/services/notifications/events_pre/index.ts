@@ -1,16 +1,46 @@
 import { DMChannel, GuildMember } from "discord.js";
 import createEventAnnouncementEmbed from "../../../actions/create-event-announcement-embed";
-import { EventWindow, monitorEvents } from "../../../actions/monitor-events";
+import {
+  EventWindow,
+  checkEvents,
+  monitorEvents,
+} from "../../../actions/monitor-events";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
+import {
+  eventNameIncludes,
+  getCountryFromEvent,
+  getProviderIdFromEvent,
+  isSpaceX,
+} from "../../../helpers/rll_utils";
+import { parseCommands } from "../../../helpers/parseCommands";
 
 export default function PreEventNotifications({
   eventsBot,
+  mcconfig,
+  helperBot,
   models,
+  notifications,
 }: Providers) {
   const notifySubscribers = async (eventWindow: EventWindow) => {
+    if (!eventWindow.event.guild) {
+      return;
+    }
+
+    const providerId = getProviderIdFromEvent(eventWindow.event);
+
+    // determine event type
+    const isStarlink =
+      isSpaceX(providerId) && eventNameIncludes(eventWindow.event, "starlink");
+    const isUnknownChina =
+      getCountryFromEvent(eventWindow.event)?.toLowerCase() === "china" &&
+      eventNameIncludes(eventWindow.event, "tbd");
+
     const subscribers =
-      await models.userNotifications.fetchPreNotificationSubscribers();
+      await models.userNotifications.fetchPreNotificationSubscribers({
+        isStarlink,
+        isUnknownChina,
+      });
 
     const recipients = subscribers
       .filter((sub) => {
@@ -28,46 +58,31 @@ export default function PreEventNotifications({
     const content = `Happening soon: ${eventWindow.event.name}\n\nThere is an event in the Off-Nominal Discord happening soon!\n\nYou are receiving this DM because you subscribed via the \`/events\` command. If you want to change this, you can update your settings with \`/events subscribe\` or \`/events unsubscribe\` (note: This must be done in the server and not via DM.)`;
     const embed = createEventAnnouncementEmbed(eventWindow.event, "pre");
 
-    recipients.forEach(async (recipient) => {
-      const logger = new Logger(
-        "EventNotifications",
-        LogInitiator.DISCORD,
-        "Send DMs for Pre-Notification"
-      );
-
-      let user: GuildMember;
-
-      try {
-        user = await eventWindow.event.guild.members.fetch(recipient);
-      } catch (err) {
-        console.error(err);
-        logger.addLog(LogStatus.FAILURE, "Failed to fetch User");
-        logger.sendLog(eventsBot);
-        return;
-      }
-
-      let dmChannel: DMChannel;
-
-      try {
-        dmChannel = await user.createDM();
-      } catch (err) {
-        console.error(err);
-        logger.addLog(LogStatus.FAILURE, "Failed to create DM Channel");
-        logger.sendLog(eventsBot);
-        return;
-      }
-
-      try {
-        await dmChannel.send({ content, embeds: [embed] });
-      } catch (err) {
-        console.error(err);
-        logger.addLog(LogStatus.FAILURE, "Failed to send DM");
-        logger.sendLog(eventsBot);
-        return;
-      }
+    notifications.queueDMs(eventWindow.event.guild, recipients, {
+      content,
+      embeds: [embed],
     });
   };
 
   // Handle pre-event notifications based on user settings
-  monitorEvents(eventsBot, notifySubscribers);
+  monitorEvents(eventsBot, (eventWindow) =>
+    notifications.emit("events_pre", eventWindow)
+  );
+
+  notifications.on("events_pre", notifySubscribers);
+
+  // dev use only
+  helperBot.on("messageCreate", (message) => {
+    if (mcconfig.env !== "dev") {
+      return;
+    }
+
+    const [prefix] = parseCommands(message);
+
+    if (prefix !== "!eventpre") {
+      return;
+    }
+
+    checkEvents(eventsBot, notifySubscribers);
+  });
 }

@@ -1,10 +1,12 @@
 import { Providers } from "../../providers";
 import { API } from "../../providers/db/models/types";
+import EventForumThreadAdd from "./event_forum_post";
 import NewEventNotifications from "./events_new";
 import PreEventNotifications from "./events_pre";
 import { generateViewSettingsEmbed } from "./generateViewSettingsEmbed";
+import NewNDBPredictionNotifications from "./ndb_new";
 
-const commandMap = {
+const commandMap: Record<string, keyof API.UserNotification.BaseSettings> = {
   ["events-new"]: "events_new",
   ["events-pre_event"]: "events_pre",
   ["events-add_to_forum_thread"]: "events_forum_thread",
@@ -25,6 +27,8 @@ export default function Notifications(providers: Providers) {
   // Notification Services
   NewEventNotifications(providers);
   PreEventNotifications(providers);
+  EventForumThreadAdd(providers);
+  NewNDBPredictionNotifications(providers);
 
   // View settings
   helperBot.on("interactionCreate", async (interaction) => {
@@ -80,15 +84,16 @@ export default function Notifications(providers: Providers) {
     }
 
     const subCommand = options.getSubcommand(false);
-    const setting = commandMap[subCommand];
 
-    if (!API.UserNotification.isUserNotification(setting)) {
+    if (subCommand === null || !(subCommand in commandMap)) {
       interaction.reply({
         content: "Something went wrong. Please try again later.",
         ephemeral: true,
       });
       return;
     }
+
+    const setting = commandMap[subCommand];
 
     let value: any = options.getBoolean("setting");
 

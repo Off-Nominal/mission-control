@@ -12,6 +12,7 @@ import rssProviders from "./rss-providers";
 import youtube from "./youtube";
 import { rllClient, rllWatcher } from "./rllc";
 import { models } from "./db";
+import notifications from "./notifications";
 
 export const providers = {
   mcconfig,
@@ -30,6 +31,7 @@ export const providers = {
   youtube,
   rllClient,
   rllWatcher,
+  notifications,
 };
 
 export type Providers = typeof providers;

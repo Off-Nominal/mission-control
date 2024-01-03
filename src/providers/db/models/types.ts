@@ -7,12 +7,15 @@ export namespace API {
   }
 
   export namespace UserNotification {
-    export type BaseSettings = {
+    export type EventNotificationSettings = {
       events_new: boolean;
       events_pre: number | null;
       events_forum_thread: boolean;
       events_exclusions_starlink: boolean;
       events_exclusions_unknown_china: boolean;
+    };
+
+    export type NDBNotificationSettings = {
       ndb_new: boolean;
       ndb_prediction_closed: boolean;
       ndb_bet_closed: boolean;
@@ -21,6 +24,9 @@ export namespace API {
       ndb_bet_retired: boolean;
       ndb_season_end: boolean;
     };
+
+    export type BaseSettings = EventNotificationSettings &
+      NDBNotificationSettings;
 
     export type Base = {
       id: number;
@@ -47,14 +53,22 @@ export namespace API {
 
     export type SetNotification = boolean;
 
-    export type FetchNewEventSubscribers = {
+    type Subscriber = {
       discord_id: string;
     };
 
-    export type FetchPreNotificationSubscribers = {
-      discord_id: string;
+    export type FetchNewEventSubscribers = Subscriber;
+    export type FetchForumThreadSubscribers = Subscriber;
+    export type FetchPreNotificationSubscribers = Subscriber & {
       events_pre: number;
     };
+    export type FetchNewPredictionSubscribers = Subscriber;
+    export type IsOwnPredictionClosedSubscribed = { exists: boolean };
+    export type FetchOwnBetClosedSubscribers = Subscriber;
+    export type FetchOwnPredictionJudgedSubscribers = Subscriber;
+    export type FetchOwnBetJudgedSubscribers = Subscriber;
+    export type FetchOwnBetRetiredSubscribers = Subscriber;
+    export type FetchSeasonEndSubscribers = Subscriber;
 
     export const isUserNotification = (
       setting: string

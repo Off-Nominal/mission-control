@@ -17,7 +17,7 @@ import fetchGuild from "../../helpers/fetchGuild";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { isRejected } from "../../helpers/allSettledTypeGuard";
 import { truncateText } from "../../helpers/truncateText";
-import { getRllIdFromEvent } from "../../helpers/getRllId";
+import { getRllIdFromEvent } from "../../helpers/rll_utils";
 
 const MAX_WINDOW_IN_DAYS = 7;
 
@@ -161,11 +161,11 @@ export async function syncEvents(
 
     // Ignore non-RLL event
     if (!event.description) continue;
-    const rllId = event.description.match(new RegExp(/(?<=\[)(.*?)(?=\])/gm));
-    if (!rllId?.length) continue;
+    const rllId = getRllIdFromEvent(event);
+    if (!rllId) continue;
 
     // Fetch the launch referenced in the event
-    const launch = launches.get(parseInt(rllId[0]));
+    const launch = launches.get(rllId);
 
     // This event is no longer on the API, delete it
     if (!launch) {

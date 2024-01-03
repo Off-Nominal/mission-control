@@ -21,8 +21,13 @@ export const generatePredictionDetailsEmbed = (
   const yesVotes = prediction.votes.filter((vote) => vote.vote);
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
 
+  const status =
+    prediction.status === PredictionLifeCycle.CLOSED
+      ? "VOTING"
+      : prediction.status.toUpperCase();
+
   const embed = new EmbedBuilder({
-    title: "Detailed View - Status: " + prediction.status.toUpperCase(),
+    title: "Detailed View - Status: " + status,
     description:
       userMention(prediction.predictor.discord_id) +
       " " +

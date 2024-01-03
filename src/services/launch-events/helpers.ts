@@ -30,13 +30,31 @@ const generateDescription = (
   launchDate: Date,
   credit: string | null
 ): string => {
-  const infoString = `\n\nThis Discord Event is configured to begin 15 minutes before liftoff. Your local launch time is ${time(
+  // General info
+  const infoString = `This Discord Event is configured to begin 15 minutes before liftoff. Your local launch time is ${time(
     launchDate,
     TimestampStyles.LongDateTime
   )}, ${time(launchDate, TimestampStyles.RelativeTime)}`;
-  const idString = `\n\nrllId=[${launch.id.toString()}]\n\nData provided by RocketLaunch.live`;
-  const creditString = credit ? `\n\nEvent banner courtesy of ${credit}` : "";
-  return launch.launch_description + infoString + idString + creditString;
+
+  // RLL Metadata
+  const idString = `rllId=[${launch.id.toString()}]`;
+  const providerId = `providerId=[${launch.provider.id.toString()}]`;
+  const country = `country=[${launch.pad.location.country}]`;
+  const metaData = [idString, providerId, country].join("\n");
+
+  // Credits
+  let dataCreditString =
+    "Data provided by [RocketLaunch.live](https://www.rocketlaunch.live).";
+  if (credit) {
+    dataCreditString += ` Event data courtesy of ${credit}`;
+  }
+
+  return [
+    launch.launch_description,
+    infoString,
+    dataCreditString,
+    metaData,
+  ].join("\n\n");
 };
 
 const getStreamUrl = (launch: RLLEntity.Launch): string => {
