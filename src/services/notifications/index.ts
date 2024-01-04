@@ -4,7 +4,13 @@ import EventForumThreadAdd from "./event_forum_post";
 import NewEventNotifications from "./events_new";
 import PreEventNotifications from "./events_pre";
 import { generateViewSettingsEmbed } from "./generateViewSettingsEmbed";
+import NDBBetClosedNotifications from "./ndb_bet_closed";
+import NDBBetJudgedNotifications from "./ndb_bet_judged";
+import NDBBetRetiredNotifications from "./ndb_bet_retired";
 import NewNDBPredictionNotifications from "./ndb_new";
+import NDBPredictionClosedNotifications from "./ndb_prediction_closed";
+import NDBPredictionJudgedNotifications from "./ndb_prediction_judged";
+import NDBSeasonEndNotifications from "./ndb_season_end";
 
 const commandMap: Record<string, keyof API.UserNotification.BaseSettings> = {
   ["events-new"]: "events_new",
@@ -29,6 +35,12 @@ export default function Notifications(providers: Providers) {
   PreEventNotifications(providers);
   EventForumThreadAdd(providers);
   NewNDBPredictionNotifications(providers);
+  NDBPredictionClosedNotifications(providers);
+  NDBBetClosedNotifications(providers);
+  NDBPredictionJudgedNotifications(providers);
+  NDBBetJudgedNotifications(providers);
+  NDBBetRetiredNotifications(providers);
+  NDBSeasonEndNotifications(providers);
 
   // View settings
   helperBot.on("interactionCreate", async (interaction) => {

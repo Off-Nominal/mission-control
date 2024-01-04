@@ -2,26 +2,30 @@ import mcconfig from "../../../mcconfig";
 
 // Modules
 import express, { Router } from "express";
-import { Client, GuildMember, userMention } from "discord.js";
+import { Client, GuildMember, messageLink, userMention } from "discord.js";
 
 // Providers
 import { LogInitiator, Logger, LogStatus } from "../../../logger/Logger";
 
 // Actions
 import { updatePredictionEmbeds } from "../actions/updatePredictionEmbeds";
-import { sendPublicNotice } from "../actions/sendPublicNotice";
+import { triggeredPredictionWebhookHandler } from "./handlers/triggered_prediction";
 import fetchGuild from "../../../helpers/fetchGuild";
-import { sendSeasonStartNotice } from "../actions/sendSeasonStartNotice";
-import { sendSeasonEndNotice } from "../actions/sendSeasonEndNotice";
+import { seasonStartWebhookHandler } from "./handlers/season_start";
+import { seasonEndWebhookHandler } from "./handlers/season_end";
 
-import { NDB2WebhookEvent, isNdb2WebhookEvent } from "./types";
+import { NDB2Webhook, NDB2WebhookEvent, verifyWebhookPayload } from "./types";
 import { Ndb2MsgSubscription } from "../../../providers/db/models/Ndb2MsgSubscription";
 import { API } from "../../../providers/db/models/types";
+import { NotificationsProvider } from "../../../providers/notifications";
+import { retiredPredictionWebhookHandler } from "./handlers/retired_prediction";
+import { judgedPredictionWebhookHandler } from "./handlers/judged_prediction";
 export * from "./types";
 
 export default function createWebooksRouter(
   ndb2Bot: Client,
-  ndb2MsgSubscription: Ndb2MsgSubscription
+  ndb2MsgSubscription: Ndb2MsgSubscription,
+  notifications: NotificationsProvider
 ): Router {
   const router = express.Router();
 
@@ -46,25 +50,24 @@ export default function createWebooksRouter(
       logger.addLog(LogStatus.SUCCESS, "Webhook credentials verified.");
     }
 
-    const { event_name, data } = req.body;
+    let webhookData: NDB2Webhook;
 
-    // verify body
-    if (!isNdb2WebhookEvent(event_name)) {
+    try {
+      webhookData = verifyWebhookPayload(req.body.event_name, req.body.data);
+    } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `Webhook body data was not a recognized Webhook event, rejecting. Event name was '${event_name}'.`
+        `Webhook body data was not a recognized Webhook event, rejecting. Event name was '${req.body.event_name}'.`
       );
       logger.sendLog(ndb2Bot);
       return res.json("no thank u");
-    } else {
-      logger.addLog(LogStatus.INFO, `Event is '${event_name}'`);
     }
 
     // tell the API to go away
     res.json("thank u");
     logger.addLog(LogStatus.INFO, "Responded to webhook.");
 
-    if (event_name === NDB2WebhookEvent.NEW_PREDICTION) {
+    if (webhookData.event === NDB2WebhookEvent.NEW_PREDICTION) {
       logger.addLog(
         LogStatus.INFO,
         "Event was NEW PREDICTION, which is currently ignored."
@@ -72,26 +75,27 @@ export default function createWebooksRouter(
       return logger.sendLog(ndb2Bot);
     }
 
-    if (event_name === NDB2WebhookEvent.SEASON_START) {
+    if (webhookData.event === NDB2WebhookEvent.SEASON_START) {
       logger.addLog(
         LogStatus.INFO,
         "Event was SEASON START, generating embed notice."
       );
-      return sendSeasonStartNotice(ndb2Bot, data);
+      return seasonStartWebhookHandler(ndb2Bot, webhookData.data);
     }
 
-    if (event_name === NDB2WebhookEvent.SEASON_END) {
+    if (webhookData.event === NDB2WebhookEvent.SEASON_END) {
       logger.addLog(
         LogStatus.INFO,
         "Event was SEASON END, generating embed notice."
       );
-      return sendSeasonEndNotice(ndb2Bot, data);
+
+      return seasonEndWebhookHandler(ndb2Bot, webhookData.data);
     }
 
     // Fetch subscriptions to events
     let subs: API.Ndb2MsgSubscription[];
     try {
-      subs = await ndb2MsgSubscription.fetchActiveSubs(data.id);
+      subs = await ndb2MsgSubscription.fetchActiveSubs(webhookData.data.id);
       logger.addLog(
         LogStatus.SUCCESS,
         `Successfully fetched ${subs.length} subscriptions to process for this event.`
@@ -110,7 +114,9 @@ export default function createWebooksRouter(
     // Fetch Guild Member for Predictor
     let predictor: GuildMember | undefined = undefined;
     try {
-      predictor = await guild.members.fetch(data.predictor.discord_id);
+      predictor = await guild.members.fetch(
+        webhookData.data.predictor.discord_id
+      );
       logger.addLog(
         LogStatus.SUCCESS,
         `Successfully fetched predictor User ${userMention(predictor.id)}.`
@@ -119,28 +125,55 @@ export default function createWebooksRouter(
       logger.addLog(
         LogStatus.FAILURE,
         `Failed to fetch predictor User ${userMention(
-          data.predictor.discord_id
-        )} for this event, will fallback to defauls.`
+          webhookData.data.predictor.discord_id
+        )} for this event, will fallback to defaults.`
       );
     }
 
     logger.addLog(LogStatus.INFO, `Passing log to update functions.`);
     logger.sendLog(ndb2Bot);
 
-    updatePredictionEmbeds(ndb2Bot, subs, predictor, data);
+    updatePredictionEmbeds(ndb2Bot, subs, predictor, webhookData.data);
 
-    if (
-      event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
-      event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
-      event_name === NDB2WebhookEvent.JUDGED_PREDICTION
-    ) {
-      sendPublicNotice(
+    if (webhookData.event === NDB2WebhookEvent.RETIRED_PREDICTION) {
+      const { data } = webhookData;
+      retiredPredictionWebhookHandler(
         ndb2Bot,
+        guild,
         ndb2MsgSubscription,
         predictor,
-        data,
-        event_name
-      );
+        webhookData.data
+      ).then((message) => {
+        notifications.emit("ndb_bet_retired", data, message.url);
+      });
+    }
+
+    if (webhookData.event === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
+      const { data } = webhookData;
+      triggeredPredictionWebhookHandler(
+        ndb2Bot,
+        guild,
+        ndb2MsgSubscription,
+        predictor,
+        webhookData.data
+      ).then((message) => {
+        notifications.emit("ndb_prediction_closed", data, message.url);
+        notifications.emit("ndb_bet_closed", data, message.url);
+      });
+    }
+
+    if (webhookData.event === NDB2WebhookEvent.JUDGED_PREDICTION) {
+      const { data } = webhookData;
+      judgedPredictionWebhookHandler(
+        ndb2Bot,
+        guild,
+        ndb2MsgSubscription,
+        predictor,
+        webhookData.data
+      ).then((message) => {
+        notifications.emit("ndb_prediction_judged", data, message.url);
+        notifications.emit("ndb_bet_judged", data, message.url);
+      });
     }
   });
 

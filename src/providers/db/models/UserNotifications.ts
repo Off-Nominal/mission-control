@@ -157,7 +157,7 @@ export class UserNotifications {
       .then((res) => res.rows);
   }
 
-  public fetchOwnPredictionClosedSubscribers(
+  public fetchIsOwnPredictionClosedSubscribed(
     discordId: string
   ): Promise<boolean> {
     return this.db
@@ -172,5 +172,78 @@ export class UserNotifications {
         [discordId]
       )
       .then((res) => res.rows[0].exists);
+  }
+
+  public fetchBetClosedSubscribers(): Promise<
+    API.UserNotification.FetchBetClosedSubscribers[]
+  > {
+    return this.db
+      .query<API.UserNotification.FetchBetClosedSubscribers>(
+        `SELECT 
+          u.discord_id 
+        FROM user_notifications un
+        JOIN users u ON u.id = un.user_id
+        WHERE un.ndb_bet_closed IS TRUE`
+      )
+      .then((res) => res.rows);
+  }
+
+  public fetchIsOwnPredictionJudgedSubscribed(
+    discordId: string
+  ): Promise<boolean> {
+    return this.db
+      .query<API.UserNotification.IsOwnPredictionJudgedSubscribed>(
+        `SELECT EXISTS(
+          SELECT
+            u.discord_id
+          FROM user_notifications un
+          JOIN users u ON u.id = un.user_id
+          WHERE un.ndb_prediction_judged IS TRUE AND u.discord_id = $1
+        )`,
+        [discordId]
+      )
+      .then((res) => res.rows[0].exists);
+  }
+
+  public fetchBetJudgedSubscribers(): Promise<
+    API.UserNotification.FetchBetJudgedSubscribers[]
+  > {
+    return this.db
+      .query<API.UserNotification.FetchBetJudgedSubscribers>(
+        `SELECT 
+        u.discord_id 
+      FROM user_notifications un
+      JOIN users u ON u.id = un.user_id
+      WHERE un.ndb_bet_judged IS TRUE`
+      )
+      .then((res) => res.rows);
+  }
+
+  public fetchBetRetiredSubscribers(): Promise<
+    API.UserNotification.FetchBetRetiredSubscribers[]
+  > {
+    return this.db
+      .query<API.UserNotification.FetchBetRetiredSubscribers>(
+        `SELECT 
+        u.discord_id 
+      FROM user_notifications un
+      JOIN users u ON u.id = un.user_id
+      WHERE un.ndb_bet_retired IS TRUE`
+      )
+      .then((res) => res.rows);
+  }
+
+  public fetchSeasonEndSubscribers(): Promise<
+    API.UserNotification.FetchSeasonEndSubscribers[]
+  > {
+    return this.db
+      .query<API.UserNotification.FetchSeasonEndSubscribers>(
+        `SELECT 
+        u.discord_id 
+      FROM user_notifications un
+      JOIN users u ON u.id = un.user_id
+      WHERE un.ndb_season_end IS TRUE`
+      )
+      .then((res) => res.rows);
   }
 }

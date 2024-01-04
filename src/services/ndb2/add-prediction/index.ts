@@ -213,11 +213,7 @@ export default function AddPrediction({
       );
 
       // notify users
-      notifications.emit(
-        "ndb_new",
-        prediction,
-        messageLink(reply.channelId, reply.id)
-      );
+      notifications.emit("ndb_new", prediction, reply.url);
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,

@@ -21,6 +21,21 @@ type IMCNotificationEvent = {
     thread: ThreadChannel
   ];
   ndb_new: [prediction: NDB2API.EnhancedPrediction, messageLink: string];
+  ndb_prediction_closed: [
+    prediction: NDB2API.EnhancedPrediction,
+    messageLink: string
+  ];
+  ndb_bet_closed: [prediction: NDB2API.EnhancedPrediction, messageLink: string];
+  ndb_bet_retired: [
+    prediction: NDB2API.EnhancedPrediction,
+    messageLink: string
+  ];
+  ndb_prediction_judged: [
+    prediction: NDB2API.EnhancedPrediction,
+    messageLink: string
+  ];
+  ndb_bet_judged: [prediction: NDB2API.EnhancedPrediction, messageLink: string];
+  ndb_season_end: [NDB2API.Season, messageLink: string];
 };
 
 export class NotificationsProvider extends TypedEventEmitter<IMCNotificationEvent> {

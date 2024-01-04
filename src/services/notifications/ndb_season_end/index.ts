@@ -4,34 +4,31 @@ import fetchGuild from "../../../helpers/fetchGuild";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { API } from "../../../providers/db/models/types";
 
-export default function NewNDBPredictionNotifications({
+export default function NDBSeasonEndNotifications({
   models,
   ndb2Bot,
   notifications,
 }: Providers) {
-  notifications.on("ndb_new", async (prediction, messageLink) => {
+  notifications.on("ndb_season_end", async (season, messageLink) => {
     const logger = new Logger(
       "New Notification Event",
       LogInitiator.NDB2,
-      "ndb_new"
+      "ndb_season_end"
     );
 
     const embed = generateNotificationEmbed({
-      type: "ndb_new",
-      text: prediction.text,
+      type: "ndb_season_end",
+      name: season.name,
       messageLink,
-      predictionId: prediction.id,
+      seasonId: season.id,
     });
 
     const guild = fetchGuild(ndb2Bot);
 
-    let subscribers: API.UserNotification.FetchNewPredictionSubscribers[];
+    let subscribers: API.UserNotification.FetchSeasonEndSubscribers[];
 
     try {
-      subscribers =
-        await models.userNotifications.fetchNewPredictionSubscribers({
-          exclude: prediction.predictor.discord_id,
-        });
+      subscribers = await models.userNotifications.fetchSeasonEndSubscribers();
       logger.addLog(
         LogStatus.SUCCESS,
         `${subscribers.length} Subscribers fetched`

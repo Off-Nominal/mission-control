@@ -14,10 +14,10 @@ import SearchPredictions from "./search-predictions";
 import TriggerPrediction from "./trigger-prediction";
 
 export default function NDB2(providers: Providers) {
-  const { api, ndb2Bot, models } = providers;
+  const { api, ndb2Bot, models, notifications } = providers;
   api.use(
     "/webhooks",
-    createWebooksRouter(ndb2Bot, models.ndb2MsgSubscription)
+    createWebooksRouter(ndb2Bot, models.ndb2MsgSubscription, notifications)
   );
 
   // handles incorrect slash commands

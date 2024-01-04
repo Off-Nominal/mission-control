@@ -53,7 +53,7 @@ export namespace API {
 
     export type SetNotification = boolean;
 
-    type Subscriber = {
+    export type Subscriber = {
       discord_id: string;
     };
 
@@ -64,10 +64,10 @@ export namespace API {
     };
     export type FetchNewPredictionSubscribers = Subscriber;
     export type IsOwnPredictionClosedSubscribed = { exists: boolean };
-    export type FetchOwnBetClosedSubscribers = Subscriber;
-    export type FetchOwnPredictionJudgedSubscribers = Subscriber;
-    export type FetchOwnBetJudgedSubscribers = Subscriber;
-    export type FetchOwnBetRetiredSubscribers = Subscriber;
+    export type FetchBetClosedSubscribers = Subscriber;
+    export type IsOwnPredictionJudgedSubscribed = { exists: boolean };
+    export type FetchBetJudgedSubscribers = Subscriber;
+    export type FetchBetRetiredSubscribers = Subscriber;
     export type FetchSeasonEndSubscribers = Subscriber;
 
     export const isUserNotification = (
