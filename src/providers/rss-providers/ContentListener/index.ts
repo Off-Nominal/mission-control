@@ -20,10 +20,10 @@ export type ContentListenerOptions = {
 };
 
 export class ContentListener extends FeedWatcher {
-  episodes: ContentFeedItem[];
-  title: string;
-  albumArt: string;
-  fuse: Fuse<ContentFeedItem>;
+  private episodes: ContentFeedItem[] = [];
+  public title: string | null = null;
+  public albumArt: string | undefined = undefined;
+  private fuse: Fuse<ContentFeedItem> | undefined;
   searchOptions: Fuse.IFuseOptions<ContentFeedItem> | null;
   processor: (item: any, showTitle: string) => ContentFeedItem;
 
