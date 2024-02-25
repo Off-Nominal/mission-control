@@ -3,7 +3,7 @@ import { GatewayIntentBits } from "discord.js";
 require("dotenv").config();
 
 const mcconfig = {
-  env: process.env.NODE_ENV || "development",
+  env: process.env.NODE_ENV || "dev",
   database: {
     url: process.env.DATABASE_URL,
   },

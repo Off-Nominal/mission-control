@@ -19,7 +19,7 @@ export default function ThreadDigest({ helperBot, mcconfig }: Providers) {
   });
 
   // allows for manual thread digest send in dev
-  if (mcconfig.env === "development") {
+  if (mcconfig.env === "dev") {
     helperBot.on("messageCreate", (message) => {
       if (message.author.bot) return;
 
