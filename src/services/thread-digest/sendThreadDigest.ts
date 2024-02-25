@@ -39,7 +39,14 @@ export default async function sendThreadDigest(client: Client) {
     "Scheduled Digest Send"
   );
 
-  const guild = fetchGuild(this);
+  const guild = fetchGuild(client);
+
+  if (!guild) {
+    logger.addLog(LogStatus.FAILURE, "Guild not found.");
+    logger.sendLog(client);
+    return;
+  }
+
   logger.addLog(
     LogStatus.INFO,
     `Guild resolved: ${guild.name} (ID: ${guild.id})`
@@ -56,7 +63,7 @@ export default async function sendThreadDigest(client: Client) {
     activePublicThreads = activeThreads.threads.filter(
       (thread) =>
         thread.type === ChannelType.PublicThread &&
-        thread.parent.type === ChannelType.GuildText
+        thread.parent?.type === ChannelType.GuildText
     );
     logger.addLog(
       LogStatus.INFO,
@@ -124,10 +131,15 @@ export default async function sendThreadDigest(client: Client) {
   const threadDigests: ThreadDigests = {};
 
   filteredThreadData.forEach((threadData) => {
+    if (!threadData.thread.parentId) {
+      return;
+    }
+
     if (
-      threadData.thread.parent.type !== ChannelType.GuildForum &&
+      threadData.thread.parent !== null &&
+      threadData.thread.parent?.type !== ChannelType.GuildForum &&
       !threadDigests[threadData.thread.parentId] &&
-      threadData.thread.parent.type !== ChannelType.GuildMedia
+      threadData.thread.parent?.type !== ChannelType.GuildMedia
     ) {
       threadDigests[threadData.thread.parentId] = {
         channel: threadData.thread.parent,
@@ -164,16 +176,23 @@ export default async function sendThreadDigest(client: Client) {
       fields,
     });
 
-    let lastMessage: Message;
+    let lastMessage: Message | undefined;
 
     try {
       const messages = await currentDigest.channel.messages.fetch({ limit: 1 });
+
       if (messages.size === 0) {
         throw `Message collection size is zero for ${channelMention(
           currentDigest.channel.id
         )}`;
       }
       lastMessage = messages.first();
+
+      if (!lastMessage) {
+        throw `Last message is undefined for ${channelMention(
+          currentDigest.channel.id
+        )}`;
+      }
       logger.addLog(
         LogStatus.SUCCESS,
         `Fetched ${hyperlink(
@@ -192,7 +211,8 @@ export default async function sendThreadDigest(client: Client) {
     }
 
     if (
-      lastMessage?.author.id === this.user.id &&
+      lastMessage &&
+      lastMessage?.author.id === client.user?.id &&
       lastMessage.embeds.length > 0 &&
       lastMessage.embeds[0]?.data?.title === "Active Discord Threads"
     ) {
