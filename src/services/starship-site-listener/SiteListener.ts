@@ -42,6 +42,7 @@ export class SiteListener extends EventEmitter {
   //data
   private metadata: { [key: string]: VersionData } = {};
   private logs: ChangeLog[];
+  private currentHTML: string;
 
   //cooldown
   private lastMessage: Date;
@@ -66,7 +67,7 @@ export class SiteListener extends EventEmitter {
   }
 
   private async checkSite() {
-    // Fetch the tracked site's HEAD record
+    // Fetch the tracked site
     // We're going to see if there is a change from our most recently tracked etag
     let response: AxiosResponse<never>;
     try {
@@ -88,6 +89,19 @@ export class SiteListener extends EventEmitter {
 
     // No new changes, short circuit
     if (!isNewEtag) {
+      console.log("No new changes detected, etag the same.");
+      console.log(newEtag);
+      return;
+    }
+
+    const html = response.data;
+    const lastUpdate = response.headers["last-modified"];
+    // Determine if new contents are actually different from the last tracked etag
+
+    console.log("current", this.currentHTML);
+    console.log("new", html);
+    if (this.currentHTML === html) {
+      console.log("No new changes detected.");
       return;
     }
 
@@ -98,7 +112,7 @@ export class SiteListener extends EventEmitter {
     // Saves change information to Github
     let diffUrl: string;
     try {
-      diffUrl = await this.saveChange(newEtag);
+      diffUrl = await this.saveChange(newEtag, html, lastUpdate);
     } catch (err) {
       return console.error(err);
     }
@@ -134,26 +148,7 @@ export class SiteListener extends EventEmitter {
     return index === -1;
   }
 
-  private async saveChange(etag) {
-    // Fetch the HTML in the new update
-    let html: string;
-    let etagCheck: string;
-    let lastUpdate: string;
-
-    try {
-      const response = await axios.get(this.url);
-      html = response.data;
-      etagCheck = response.headers.etag.replace(/"/gi, "");
-      lastUpdate = response.headers["last-modified"];
-    } catch (err) {
-      console.error(err);
-    }
-
-    // Check that the GET request's Etag is consistent to the HEAD request we made
-    if (etagCheck !== etag) {
-      throw "Etag Mismatch, the GET request and HEAD request are different. Ignoring this change for now.";
-    }
-
+  private async saveChange(etag: string, html: string, lastUpdate: string) {
     // upload html to contents
     let diffUrl = "";
 
@@ -165,6 +160,7 @@ export class SiteListener extends EventEmitter {
         html,
         etag
       );
+      console.log(response.data);
       diffUrl = response.data.commit.html_url;
     } catch (err) {
       throw err;
@@ -239,6 +235,11 @@ export class SiteListener extends EventEmitter {
 
       const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
       this.logs = logsResponse.data;
+
+      const contentResponse = await axios.get(
+        this.metadata["contents.html"].rawUrl
+      );
+      this.currentHTML = contentResponse.data;
 
       setInterval(() => {
         this.checkSite();
