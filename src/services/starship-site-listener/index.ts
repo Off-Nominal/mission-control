@@ -49,7 +49,7 @@ async function sendStarshipSiteUpdate(
 
   try {
     const channel = await client.channels.fetch(targetChannel);
-    if (channel.type !== ChannelType.GuildText) return;
+    if (channel === null || channel.type !== ChannelType.GuildText) return;
     await channel.send({ embeds: [embed] });
     console.log(`Discord successfully notified of changes to ${update.url}`);
   } catch (err) {

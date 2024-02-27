@@ -43,7 +43,7 @@ export class SiteListener extends EventEmitter {
 
   //data
   private metadata: { [key: string]: VersionData } = {};
-  private logs: ChangeLog[];
+  private logs: ChangeLog[] = [];
 
   //cooldown
   private lastMessage: Date;
@@ -150,15 +150,18 @@ export class SiteListener extends EventEmitter {
     return durationSinceLastUpdate < this.cooldown;
   }
 
-  private isNewEtag(newEtag) {
+  private isNewEtag(newEtag: any) {
+    if (typeof newEtag !== "string") {
+      return false;
+    }
     const index = this.logs.findIndex((log) => log.etag === newEtag);
     return index === -1;
   }
 
-  private async saveChange(etag) {
+  private async saveChange(etag: string) {
     // Fetch the HTML in the new update
-    let html: string;
-    let etagCheck: string;
+    let html = "";
+    let etagCheck = "";
     let lastUpdate: string;
 
     try {

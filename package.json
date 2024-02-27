@@ -32,6 +32,7 @@
     "@sanity/client": "^3.3.3",
     "@sanity/image-url": "^1.0.1",
     "@sanity/types": "^2.30.5",
+    "@types/node-schedule": "^2.1.6",
     "axios": "^1.6.0",
     "cloudinary": "^1.27.0",
     "date-fns": "^2.25.0",
