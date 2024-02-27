@@ -74,6 +74,7 @@ export default async function sendThreadDigest(client: Client) {
       LogStatus.FAILURE,
       "Failed to fetch active threads from API."
     );
+    logger.sendLog(client);
     return console.error(err);
   }
 
@@ -81,6 +82,7 @@ export default async function sendThreadDigest(client: Client) {
     LogStatus.INFO,
     "Fetching messages in time window to fill caches for counting."
   );
+
   const settledPromises = await Promise.allSettled(
     activePublicThreads.map((thread) => fillMessageCache(thread, 72))
   );

@@ -6,7 +6,7 @@ import {
   time,
 } from "discord.js";
 import bootLogger from "../../logger";
-import { LogStatus } from "../../logger/Logger";
+import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { Providers } from "../../providers";
 import {
   GithubUpdateEmbedData,
@@ -49,7 +49,7 @@ async function sendStarshipSiteUpdate(
 
   try {
     const channel = await client.channels.fetch(targetChannel);
-    if (channel.type !== ChannelType.GuildText) return;
+    if (channel === null || channel.type !== ChannelType.GuildText) return;
     await channel.send({ embeds: [embed] });
     console.log(`Discord successfully notified of changes to ${update.url}`);
   } catch (err) {
@@ -66,7 +66,7 @@ export default function StarshipSiteListener({
     "https://www.spacex.com/vehicles/starship/",
     githubAgent,
     {
-      interval: 15,
+      interval: 30,
       cooldown: 600,
     }
   );
@@ -87,6 +87,16 @@ export default function StarshipSiteListener({
       `${mcconfig.siteTracker.starship.owner}/${mcconfig.siteTracker.starship.repo}/blob/${mcconfig.siteTracker.starship.branch}`
     )
   );
+
+  starship.on(SiteListenerEvents.ERROR, (err) => {
+    const logger = new Logger(
+      "Starship Site Check",
+      LogInitiator.SERVER,
+      "siteChecker"
+    );
+    logger.addLog(LogStatus.FAILURE, err);
+    logger.sendLog(helperBot);
+  });
 
   starship.initialize();
 }

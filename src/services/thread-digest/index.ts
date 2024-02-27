@@ -1,21 +1,15 @@
-import { Client } from "discord.js";
 import { Providers } from "../../providers";
-import getNextTime from "../../helpers/getNextTime";
 import sendThreadDigest from "./sendThreadDigest";
 import { parseCommands } from "../../helpers/parseCommands";
-
-function scheduleThreadDigest(client: Client) {
-  const nextThreadDigestTime = getNextTime({ hour: 12 });
-  const nextThreadDigestInterval = nextThreadDigestTime.getTime() - Date.now();
-  setTimeout(() => {
-    sendThreadDigest(client);
-    scheduleThreadDigest(client);
-  }, nextThreadDigestInterval);
-}
+import schedule from "node-schedule";
 
 export default function ThreadDigest({ helperBot, mcconfig }: Providers) {
+  const digestSchedule = "0 12 * * * ";
+
   helperBot.on("ready", (client) => {
-    scheduleThreadDigest(client);
+    schedule.scheduleJob(digestSchedule, () => {
+      sendThreadDigest(client);
+    });
   });
 
   // allows for manual thread digest send in dev
