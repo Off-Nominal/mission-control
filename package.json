@@ -6,14 +6,14 @@
   "scripts": {
     "clear": "rm -rf ./dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "NODE_ENV=dev nodemon ./dist/index.js -e ts --exec \"npm run compile\"",
-    "build": "tsc && node ./dist/commands/register.js",
-    "compile": "npm run clear && tsc && node ./dist/index.js",
-    "start": "node ./dist/index.js",
+    "dev": "NODE_ENV=dev nodemon --env-file=.env ./dist/index.js -e ts --exec \"npm run compile\"",
+    "build": "tsc && node --env-file=.env ./dist/commands/register.js",
+    "compile": "npm run clear && tsc && node --env-file=.env ./dist/index.js",
+    "start": "node --env-file=.env ./dist/index.js",
     "log": "heroku logs -a off-nominal-mission-control --tail",
     "log:all": "heroku logs -a off-nominal-mission-control -n 1500",
     "deploy": "git push heroku master",
-    "db:reset": "node seeds/seed.js",
+    "db:reset": "node --env-file=.env seeds/seed.js",
     "db:connect:prod": "heroku pg:psql postgresql-deep-62451 --app off-nominal-mission-control"
   },
   "repository": {
@@ -37,7 +37,6 @@
     "date-fns": "^2.25.0",
     "discord-api-types": "^0.37.65",
     "discord.js": "^14.14.0",
-    "dotenv": "^8.2.0",
     "express": "^4.18.2",
     "feedparser": "^2.2.10",
     "filtrex": "^3.0.0",

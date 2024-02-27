@@ -1,7 +1,5 @@
 import { GatewayIntentBits } from "discord.js";
 
-require("dotenv").config();
-
 const mcconfig = {
   env: process.env.NODE_ENV || "dev",
   database: {
@@ -99,7 +97,10 @@ const mcconfig = {
       baseUrl: "https://api.github.com",
       botInstallId: process.env.PROV_GITHUB_BOT_INSTALL_ID,
       appId: process.env.PROV_GITHUB_APP_ID,
-      privateKey: process.env.PROV_GITHUB_PRIVATE_KEY,
+      privateKey: Buffer.from(
+        process.env.PROV_GITHUB_PRIVATE_KEY_BASE64 || "",
+        "base64"
+      ).toString("ascii"),
       clientId: process.env.PROV_GITHUB_CLIENT_ID,
       clientSecret: process.env.PROV_GITHUB_CLIENT_SECRET,
     },

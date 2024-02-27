@@ -1,6 +1,3 @@
-const dotenv = require("dotenv");
-dotenv.config();
-
 const empty = (db) => {
   if (process.env.NODE_ENV === "production") {
     return console.error("Cannot run seeding in production.");
