@@ -84,25 +84,34 @@ export default async function sendThreadDigest(client: Client) {
     "Fetching messages in time window to fill caches for counting."
   );
 
-  const settledPromises = await Promise.allSettled(
-    activePublicThreads.map((thread) => fillMessageCache(thread, 72))
-  );
-
-  const fetchedActivePublicThreads = settledPromises
-    .filter(isFulfilled)
-    .map((p) => p.value);
-
-  if (fetchedActivePublicThreads.length === activePublicThreads.size) {
-    logger.addLog(LogStatus.SUCCESS, "All thread caches filled successfully.");
-  } else {
-    logger.addLog(
-      LogStatus.FAILURE,
-      `Only successfully filled ${fetchedActivePublicThreads.length}/${activePublicThreads.size} thread caches.`
+  let fetchedActivePublicThreads: ThreadChannel[] = [];
+  try {
+    const settledPromises = await Promise.allSettled(
+      activePublicThreads.map((thread) => fillMessageCache(thread, 72))
     );
-    const errors = settledPromises.filter(isRejected).map((p) => p.reason);
-    for (const error of errors) {
-      console.error(error);
+
+    fetchedActivePublicThreads = settledPromises
+      .filter(isFulfilled)
+      .map((p) => p.value);
+    if (fetchedActivePublicThreads.length === activePublicThreads.size) {
+      logger.addLog(
+        LogStatus.SUCCESS,
+        "All thread caches filled successfully."
+      );
+    } else {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `Only successfully filled ${fetchedActivePublicThreads.length}/${activePublicThreads.size} thread caches.`
+      );
+      const errors = settledPromises.filter(isRejected).map((p) => p.reason);
+      for (const error of errors) {
+        console.error(error);
+      }
     }
+  } catch (err) {
+    logger.addLog(LogStatus.FAILURE, `Error filling message cache.`);
+    logger.sendLog(client);
+    return console.error(err);
   }
 
   const threadData: ThreadData[] = fetchedActivePublicThreads.map((thread) => {
