@@ -45,7 +45,17 @@ export class Logger {
 
     setTimeout(() => {
       if (!this.sent) {
-        this.sendLog(fallbackClient);
+        this.addLog(
+          LogStatus.FAILURE,
+          "Log was not sent after 3 minutes. Fallback Client used."
+        );
+        this.sendLog(fallbackClient)
+          .then(() => {
+            this.sent = true;
+          })
+          .catch((err) => {
+            console.error("Failed to Send Log using fallback client");
+          });
       }
     }, 180000);
   }
