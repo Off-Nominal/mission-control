@@ -38,7 +38,8 @@ export default function EventNotifications({ eventsBot, models }: Providers) {
       const logger = new Logger(
         "EventNotifications",
         LogInitiator.DISCORD,
-        "Send DMs for Pre-Notification"
+        "Send DMs for Pre-Notification",
+        eventsBot
       );
 
       let user: GuildMember;

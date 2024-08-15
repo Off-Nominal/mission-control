@@ -44,8 +44,7 @@ export const fetchExistingPost = async (
 
 export const updateForumPostForEvent = async (
   event: GuildScheduledEvent<GuildScheduledEventStatus.Scheduled>,
-  thread: ThreadChannel,
-  url: string
+  thread: ThreadChannel
 ) => {
   const embed = createEventAnnouncementEmbed(event, "thread", {});
 
@@ -60,7 +59,8 @@ export const updateForumPostForEvent = async (
     const logger = new Logger(
       "Monitor Events for Forum Posts",
       LogInitiator.DISCORD,
-      "Update existing Forum threads"
+      "Update existing Forum threads",
+      event.client
     );
     logger.addLog(LogStatus.FAILURE, `Error updating forum thread.`);
     console.error(err);
@@ -112,7 +112,8 @@ export const createForumPost = async (
   const logger = new Logger(
     "CreateEventForumPost",
     LogInitiator.DISCORD,
-    `Creating Forum thread for Event ${event.id} - ${event.name}`
+    `Creating Forum thread for Event ${event.id} - ${event.name}`,
+    event.client
   );
 
   const tag = getTag(channel, type);

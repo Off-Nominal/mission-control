@@ -75,7 +75,8 @@ export default function AddPrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 New Prediction"
+      "NDB2 New Prediction",
+      interaction.client
     );
 
     const text = interaction.fields.getTextInputValue("text");

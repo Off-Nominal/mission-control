@@ -9,7 +9,8 @@ function deploy(url: string, client: Client) {
   const logger = new Logger(
     "New WeMartians Episode",
     LogInitiator.DISCORD,
-    "Deploying Site"
+    "Deploying Site",
+    client
   );
 
   axios

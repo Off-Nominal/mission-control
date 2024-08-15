@@ -18,7 +18,8 @@ export const sendSeasonEndNotice = async (
   const logger = new Logger(
     "New Season End Notice",
     LogInitiator.NDB2,
-    "New season webhook received"
+    "New season webhook received",
+    client
   );
 
   let predictionsLeaderboard: NDB2API.PredictionsLeader[];

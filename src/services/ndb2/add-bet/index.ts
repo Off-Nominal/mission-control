@@ -15,7 +15,12 @@ export default function AddBet({ ndb2Bot, ndb2Client }: Providers) {
       return;
     }
 
-    const logger = new Logger("NDB2 Interaction", LogInitiator.NDB2, "New Bet");
+    const logger = new Logger(
+      "NDB2 Interaction",
+      LogInitiator.NDB2,
+      "New Bet",
+      interaction.client
+    );
 
     const discordId = interaction.member.user.id;
     const endorsed = command === "Endorse";

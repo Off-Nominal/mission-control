@@ -20,7 +20,8 @@ export default function ViewScore({ ndb2Client, ndb2Bot }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 Slash Command View Scores"
+      "NDB2 Slash Command View Scores",
+      interaction.client
     );
 
     const brag = options.getBoolean("brag");

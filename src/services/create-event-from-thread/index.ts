@@ -34,7 +34,8 @@ export default function CreateEventFromThread({
     const logger = new Logger(
       "CreateEventFromForumPost",
       LogInitiator.DISCORD,
-      "threadCreate Event"
+      "threadCreate Event",
+      eventsBot
     );
 
     let owner: ThreadMember;
@@ -163,7 +164,8 @@ export default function CreateEventFromThread({
     const logger = new Logger(
       "Create Event From Forum Post",
       LogInitiator.DISCORD,
-      "Modal Submission"
+      "Modal Submission",
+      interaction.client
     );
 
     const { fields } = interaction;

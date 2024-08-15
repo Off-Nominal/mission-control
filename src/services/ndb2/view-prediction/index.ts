@@ -26,7 +26,8 @@ export default function ViewPrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 Slash Command View Prediction"
+      "NDB2 Slash Command View Prediction",
+      interaction.client
     );
 
     logger.addLog(

@@ -17,7 +17,7 @@ export default function ThreadDigest({ helperBot, mcconfig }: Providers) {
     helperBot.on("messageCreate", (message) => {
       if (message.author.bot) return;
 
-      const [prefix, show] = parseCommands(message);
+      const [prefix] = parseCommands(message);
 
       if (prefix === "!threaddigest") {
         sendThreadDigest(message.client);

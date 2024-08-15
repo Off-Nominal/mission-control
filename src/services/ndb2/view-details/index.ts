@@ -19,7 +19,8 @@ export default function ViewDetails({ ndb2Client, ndb2Bot }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "View Details"
+      "View Details",
+      interaction.client
     );
 
     let prediction: NDB2API.EnhancedPrediction;

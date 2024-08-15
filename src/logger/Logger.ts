@@ -27,10 +27,27 @@ export class Logger {
   private date: Date = new Date();
   private title: string;
   private description: string;
+  private sent: boolean = false;
 
-  constructor(title: string, initiator: LogInitiator, eventName: string) {
+  constructor(
+    title: string,
+    initiator: LogInitiator,
+    eventName: string,
+    fallbackClient?: Client
+  ) {
     this.title = title;
     this.description = `Initiated by: ${initiator}\nEvent Name: ${eventName}`;
+
+    // Sends log after 3 minutes if not sent to catch errors where thread crashes
+    if (!fallbackClient) {
+      return;
+    }
+
+    setTimeout(() => {
+      if (!this.sent) {
+        this.sendLog(fallbackClient);
+      }
+    }, 180000);
   }
 
   public addLog(
@@ -70,11 +87,16 @@ export class Logger {
       const channel = await client.channels.fetch(
         mcconfig.discord.channels.bots
       );
-      if (channel.type === ChannelType.GuildText) {
-        return channel.send({ embeds: [embed] });
-      } else {
+      if (!channel) {
+        throw new Error("Channel not found.");
+      }
+
+      if (channel.type !== ChannelType.GuildText) {
         throw new Error("Tried to send log to non-text based channel.");
       }
+
+      await channel.send({ embeds: [embed] });
+      this.sent = true;
     } catch (err) {
       console.error("Failed to Send Log");
       console.error(err);

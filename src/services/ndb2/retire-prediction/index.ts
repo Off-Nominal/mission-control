@@ -28,7 +28,8 @@ export default function RetirePrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 Slash Command Retire Prediction Request"
+      "NDB2 Slash Command Retire Prediction Request",
+      interaction.client
     );
 
     logger.addLog(
@@ -143,7 +144,8 @@ export default function RetirePrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "Retire Prediction"
+      "Retire Prediction",
+      interaction.client
     );
 
     let prediction: NDB2API.EnhancedPrediction;

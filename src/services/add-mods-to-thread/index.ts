@@ -11,7 +11,8 @@ export function addRoleToThread(
   const logger = new Logger(
     "Mod Thread Membership",
     LogInitiator.DISCORD,
-    `threadCreate Event - ${channelMention(thread.id)}`
+    `threadCreate Event - ${channelMention(thread.id)}`,
+    thread.client
   );
 
   const guild = fetchGuild(thread.client);

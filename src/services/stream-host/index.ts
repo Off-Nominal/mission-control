@@ -59,7 +59,8 @@ export default function StreamHost({
     const logger = new Logger(
       "StreamHost",
       LogInitiator.DISCORD,
-      "Stream Event Change"
+      "Stream Event Change",
+      eventsBot
     );
 
     // Event started

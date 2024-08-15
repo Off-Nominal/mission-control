@@ -36,24 +36,25 @@ export default async function sendThreadDigest(client: Client) {
   const logger = new Logger(
     "Thread Digest Log",
     LogInitiator.SERVER,
-    "Scheduled Digest Send"
+    "Scheduled Digest Send",
+    client
   );
 
+  // Fetch Guild
   const guild = fetchGuild(client);
-
   if (!guild) {
     logger.addLog(LogStatus.FAILURE, "Guild not found.");
     logger.sendLog(client);
     return;
+  } else {
+    logger.addLog(
+      LogStatus.INFO,
+      `Guild resolved: ${guild.name} (ID: ${guild.id})`
+    );
   }
 
-  logger.addLog(
-    LogStatus.INFO,
-    `Guild resolved: ${guild.name} (ID: ${guild.id})`
-  );
-
+  // Fetch all Active Threads
   let activePublicThreads: Collection<Snowflake, ThreadChannel>;
-
   try {
     const activeThreads = await guild.channels.fetchActiveThreads();
     logger.addLog(

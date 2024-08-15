@@ -62,7 +62,8 @@ export async function syncEvents(
   const logger = new Logger(
     "Launch Events",
     LogInitiator.RLL,
-    "Launch Sync Triggered: " + eventType
+    "Launch Sync Triggered: " + eventType,
+    eventsBot
   );
 
   const promises: Promise<RLLEntity.Launch | GuildScheduledEvent | void>[] = [];

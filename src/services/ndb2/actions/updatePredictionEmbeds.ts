@@ -27,7 +27,8 @@ export const updatePredictionEmbeds = async (
   const logger = new Logger(
     "Webhook Response",
     LogInitiator.NDB2,
-    "Update subscribed Embeds"
+    "Update subscribed Embeds",
+    client
   );
 
   const guild = fetchGuild(client);

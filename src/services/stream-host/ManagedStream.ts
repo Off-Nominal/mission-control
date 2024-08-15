@@ -59,7 +59,8 @@ export class ManagedStream extends EventEmitter {
     const logger = new Logger(
       "StreamHost",
       LogInitiator.DISCORD,
-      "Party Start"
+      "Party Start",
+      this.client
     );
 
     try {

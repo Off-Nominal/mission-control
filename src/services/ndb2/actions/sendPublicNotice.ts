@@ -53,7 +53,12 @@ export const sendPublicNotice = async (
     prediction.triggerer?.discord_id
   );
 
-  const logger = new Logger(loggerTitle, LogInitiator.NDB2, loggerMessage);
+  const logger = new Logger(
+    loggerTitle,
+    LogInitiator.NDB2,
+    loggerMessage,
+    discordClient
+  );
 
   const guild = fetchGuild(discordClient);
 

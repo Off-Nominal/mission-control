@@ -33,7 +33,8 @@ export default function NDB2(providers: Providers) {
       const logger = new Logger(
         "NDB2 Interaction",
         LogInitiator.NDB2,
-        "NDB2 Interaction Unhandled"
+        "NDB2 Interaction Unhandled",
+        interaction.client
       );
 
       logger.addLog(

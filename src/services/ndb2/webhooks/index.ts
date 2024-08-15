@@ -29,7 +29,8 @@ export default function createWebooksRouter(
     const logger = new Logger(
       "Webhook Receipt",
       LogInitiator.NDB2,
-      "A webhook was recieved from NDB2"
+      "A webhook was recieved from NDB2",
+      ndb2Bot
     );
 
     // verify source of webhook

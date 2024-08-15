@@ -37,7 +37,8 @@ export default function TriggerPrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 Trigger Prediction Request"
+      "NDB2 Trigger Prediction Request",
+      interaction.client
     );
 
     const predictionId = options.getInteger("id");
@@ -199,7 +200,8 @@ export default function TriggerPrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "Trigger Prediction"
+      "Trigger Prediction",
+      interaction.client
     );
 
     let prediction: NDB2API.EnhancedPrediction;

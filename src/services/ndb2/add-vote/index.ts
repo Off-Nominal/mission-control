@@ -18,7 +18,8 @@ export default function AddVote({ ndb2Bot, ndb2Client }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "New Vote"
+      "New Vote",
+      interaction.client
     );
 
     const discordId = interaction.member.user.id;

@@ -24,7 +24,8 @@ export default function CelebrateMembership({
     const logger = new Logger(
       "New Role Add",
       LogInitiator.DISCORD,
-      "guildMemberUpdate"
+      "guildMemberUpdate",
+      newMember.client
     );
 
     const oldRoles = oldMember.roles.cache;

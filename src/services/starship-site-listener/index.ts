@@ -92,7 +92,8 @@ export default function StarshipSiteListener({
     const logger = new Logger(
       "Starship Site Check",
       LogInitiator.SERVER,
-      "siteChecker"
+      "siteChecker",
+      helperBot
     );
     logger.addLog(LogStatus.FAILURE, err);
     logger.sendLog(helperBot);

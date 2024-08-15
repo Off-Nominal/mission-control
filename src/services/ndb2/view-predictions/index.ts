@@ -26,7 +26,8 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      `List Predictions: ${listType}`
+      `List Predictions: ${listType}`,
+      interaction.client
     );
 
     if (

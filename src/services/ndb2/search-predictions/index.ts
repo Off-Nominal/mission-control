@@ -22,7 +22,8 @@ export default function SearchPredictions({ ndb2Client, ndb2Bot }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      `Search Predictions: Keyword - ${keyword}`
+      `Search Predictions: Keyword - ${keyword}`,
+      interaction.client
     );
 
     const searchOptions: SearchOptions = {

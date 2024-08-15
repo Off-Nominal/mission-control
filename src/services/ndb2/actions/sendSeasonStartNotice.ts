@@ -18,7 +18,8 @@ export const sendSeasonStartNotice = async (
   const logger = new Logger(
     "New Season Start Notice",
     LogInitiator.NDB2,
-    "New season webhook received"
+    "New season webhook received",
+    client
   );
 
   const embed = generateNewSeasonEmbed(season);

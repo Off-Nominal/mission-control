@@ -33,7 +33,8 @@ export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      `View Leaderboards: ${leaderboardType}`
+      `View Leaderboards: ${leaderboardType}`,
+      interaction.client
     );
 
     // Leaderboard calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
