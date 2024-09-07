@@ -90,7 +90,7 @@ const mcconfig = {
     },
     sanity: {
       cmsId: process.env.PROV_SANITY_CMS_ID,
-      dataset: undefined,
+      dataset: process.env.PROV_SANITY_CMS_DATASET,
       cdn: false,
     },
     github: {

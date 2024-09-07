@@ -8,9 +8,6 @@ import { Ndb2MsgSubscription } from "./models/Ndb2MsgSubscription";
 
 const db = new Client({
   connectionString: mcconfig.database.url,
-  ssl: {
-    rejectUnauthorized: false,
-  },
 });
 
 db.connect()
