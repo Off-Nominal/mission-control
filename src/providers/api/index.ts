@@ -10,6 +10,10 @@ if (mcconfig.env !== "production") {
   api.use(morgan("dev"));
 }
 
+api.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
 
 export default api;
