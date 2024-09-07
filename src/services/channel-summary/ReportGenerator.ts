@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import {
   Collection,
   Message,
@@ -19,6 +18,7 @@ import {
   generateTwitterSummary,
 } from "./generateSummary/reportFieldGenerators";
 import { fetchMessagesInLast } from "../../helpers/fetchMessagesInLast";
+import { randomUUID } from "crypto";
 
 export type ReportGeneratorError = {
   dm: string;
@@ -130,7 +130,7 @@ export class ReportGenerator {
     hourLimit: number = 8,
     noticeId: string
   ): Promise<string> {
-    const reportId = uuidv4();
+    const reportId = randomUUID();
     this.reports[reportId] = {};
     const report = this.reports[reportId];
     const channelId = channel.id;

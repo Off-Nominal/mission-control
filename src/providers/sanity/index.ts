@@ -1,5 +1,5 @@
 import mcconfig from "../../mcconfig";
-import { SanityClient, SanityDocument } from "@sanity/client";
+import { SanityClient, SanityDocument, createClient } from "@sanity/client";
 
 export interface NewsFeedDocument extends SanityDocument {
   url: string;
@@ -15,10 +15,10 @@ export interface NewsCategoryDocument extends SanityDocument {
   feeds: NewsFeedDocument[];
 }
 
-const client = require("@sanity/client");
+// const client = require("@sanity/client");
 const imageUrlBuilder = require("@sanity/image-url");
 
-export const sanityClient: SanityClient = client({
+export const sanityClient: SanityClient = createClient({
   projectId: mcconfig.providers.sanity.cmsId,
   dataset: mcconfig.providers.sanity.dataset || mcconfig.env || "dev",
   apiVersion: "2022-06-24",
