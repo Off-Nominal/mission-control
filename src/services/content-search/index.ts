@@ -39,14 +39,16 @@ export default function ContentSearch({ contentBot }: Providers) {
 
     const feedListener = rssProviders[show] as ContentListener;
 
+    const embeds = [];
+
     const returnMessage: InteractionReplyOptions = {
-      embeds: [],
+      embeds,
     };
 
     if (subCommand === "search") {
       const term = options.getString("term");
       const results = feedListener.search(term).slice(0, 3);
-      returnMessage.embeds.push(
+      embeds.push(
         createSearchResultsEmbed(
           results,
           feedListener.title,
@@ -58,14 +60,14 @@ export default function ContentSearch({ contentBot }: Providers) {
 
     if (subCommand === "recent") {
       const episode = feedListener.fetchRecent();
-      returnMessage.embeds.push(createUniqueResultEmbed(episode));
+      embeds.push(createUniqueResultEmbed(episode));
     }
 
     if (subCommand === "episode-number") {
       const epNum = options.getInteger("episode-number");
       const episode = feedListener.getEpisodeByNumber(epNum);
       if (episode) {
-        returnMessage.embeds.push(createUniqueResultEmbed(episode));
+        embeds.push(createUniqueResultEmbed(episode));
       } else {
         returnMessage.content = "No episode with that number.";
       }

@@ -4,10 +4,7 @@ import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import fetchGuild from "../../helpers/fetchGuild";
 import helperBot from "../../providers/helper-bot";
 
-export function addRoleToThread(
-  thread: AnyThreadChannel<boolean>,
-  role: string
-) {
+export function addRoleToThread(thread: AnyThreadChannel, role: string) {
   const logger = new Logger(
     "Mod Thread Membership",
     LogInitiator.DISCORD,
