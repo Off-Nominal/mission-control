@@ -24,7 +24,7 @@ export const generateLeaderboardEmbed = (
         | NDB2API.BetsLeader
         | NDB2API.PredictionsLeader
     ) => {
-      let value: string;
+      let value: string = "";
 
       if ("points" in leader) {
         value = `Points: ${leader.points}`;

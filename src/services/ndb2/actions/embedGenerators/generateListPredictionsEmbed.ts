@@ -10,8 +10,8 @@ export const generateListPredictionsEmbed = (
     keyword?: string;
   } = {}
 ): EmbedBuilder => {
-  let title: string;
-  let description: string;
+  let title: string = "";
+  let description: string = "";
   let titleDate: "Created" | "Due";
 
   if (type === "recent") {
@@ -49,7 +49,7 @@ export const generateListPredictionsEmbed = (
   }
 
   const fields: APIEmbedField[] = predictions.map((pred) => {
-    let date: Date;
+    let date: Date = new Date(0);
 
     if (type === "recent") {
       date = new Date(pred.created_date);
@@ -60,7 +60,7 @@ export const generateListPredictionsEmbed = (
       type === "upcoming-no-bet" ||
       type === "search"
     ) {
-      date = new Date(pred.due_date);
+      date = new Date(pred.due_date || 0);
     }
 
     let value: string;

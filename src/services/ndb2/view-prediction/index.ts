@@ -34,7 +34,7 @@ export default function ViewPrediction({
       `Received a RETIRE Prediction request, validating data and initiating confirmation message.`
     );
 
-    const predictionId = options.getInteger("id");
+    const predictionId = options.getInteger("id", true);
 
     let prediction: NDB2API.EnhancedPrediction;
 
@@ -45,7 +45,24 @@ export default function ViewPrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch ([userError, logError]) {
+    } catch (err) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          ephemeral: true,
+        });
+
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, logError] = err;
+
       logger.addLog(
         LogStatus.WARNING,
         `There was an error fetching this prediction. ${logError}`
@@ -56,15 +73,20 @@ export default function ViewPrediction({
         content: `There was an error fetching this prediction. ${userError}`,
         ephemeral: true,
       });
+      return;
     }
 
     // Generate response
     let predictor: GuildMember | undefined = undefined;
 
     try {
-      predictor = await interaction.guild.members.fetch(
+      predictor = await interaction?.guild?.members.fetch(
         prediction.predictor.discord_id
       );
+      if (!predictor) {
+        throw new Error("Predictor not found");
+      }
+
       logger.addLog(
         LogStatus.SUCCESS,
         `Successfully retrieved the predictor of this prediction.`
@@ -77,7 +99,7 @@ export default function ViewPrediction({
     }
 
     // Fetch Context
-    let context: { messageId: string; channelId: string };
+    let context: { messageId: string; channelId: string } | undefined;
     let contextSub: API.Ndb2MsgSubscription;
     try {
       const contextSubs = await models.ndb2MsgSubscription.fetchSubByType(
