@@ -36,7 +36,13 @@ const getAuthor = (
   };
 };
 
-const thumbnails = {
+type ThumbnailLifeCycle =
+  | PredictionLifeCycle.RETIRED
+  | PredictionLifeCycle.CLOSED
+  | PredictionLifeCycle.SUCCESSFUL
+  | PredictionLifeCycle.FAILED;
+
+const thumbnails: Record<ThumbnailLifeCycle, string> = {
   [PredictionLifeCycle.RETIRED]:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679241808/Discord%20Assets/5267928_bsb9z6.png",
   [PredictionLifeCycle.CLOSED]:
@@ -119,11 +125,15 @@ export const generatePublicNoticeEmbed = (
     messageId: string;
   }
 ): EmbedBuilder => {
+  if (prediction.status === PredictionLifeCycle.OPEN) {
+    throw new Error("Cannot generate public notice for open prediction");
+  }
+
   const created = new Date(prediction.created_date);
-  const due = new Date(prediction.due_date);
-  const triggered = new Date(prediction.triggered_date);
-  const retired = new Date(prediction.retired_date);
-  const closed = new Date(prediction.closed_date);
+  const due = new Date(prediction.due_date || 0);
+  const triggered = new Date(prediction.triggered_date || 0);
+  const retired = new Date(prediction.retired_date || 0);
+  const closed = new Date(prediction.closed_date || 0);
 
   const endorsements = prediction.bets.filter(
     (bet) => bet.endorsed && bet.valid
