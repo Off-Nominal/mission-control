@@ -22,6 +22,20 @@ export default function AddPrediction({
   ndb2Client,
   models,
 }: Providers) {
+  // Handles request for new prediction, asks for type
+  ndb2Bot.on("interactionCreate", async (interaction) => {
+    if (!interaction.isChatInputCommand()) {
+      return;
+    }
+
+    const { options, commandName } = interaction;
+    const subCommand = options.getSubcommand(false);
+
+    if (commandName !== "predict" || subCommand !== "new") {
+      return;
+    }
+  });
+
   // Handles request for new prediction modal
   ndb2Bot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) {
