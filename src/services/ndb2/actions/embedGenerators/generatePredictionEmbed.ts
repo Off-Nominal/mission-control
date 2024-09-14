@@ -47,6 +47,7 @@ export const generatePredictionEmbed = (
   const created = new Date(prediction.created_date);
   const closed = new Date(prediction.closed_date || 0);
   const due = new Date(prediction.due_date || 0);
+  const check = new Date(prediction.check_date || 0);
   const retired = new Date(prediction.retired_date || 0);
   const triggered = new Date(prediction.triggered_date || 0);
 
@@ -56,7 +57,6 @@ export const generatePredictionEmbed = (
   const undorsements = prediction.bets.filter(
     (bet) => !bet.endorsed && bet.valid
   );
-  const invalidBets = prediction.bets.filter((bet) => !bet.valid);
 
   const yesVotes = prediction.votes.filter((vote) => vote.vote);
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
@@ -82,7 +82,9 @@ export const generatePredictionEmbed = (
   ];
 
   if (prediction.status === PredictionLifeCycle.CLOSED) {
-    fields.push(embedFields.date(due, "Original Due Date"));
+    if (prediction.driver === "date") {
+      fields.push(embedFields.date(due, "Original Due Date"));
+    }
     prediction.triggerer &&
       fields.push(
         embedFields.triggeredDate(
@@ -136,8 +138,15 @@ export const generatePredictionEmbed = (
     fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
   }
 
-  if (prediction.status === PredictionLifeCycle.OPEN) {
-    fields.push(embedFields.date(due, "Due Date"));
+  if (
+    prediction.status === PredictionLifeCycle.OPEN ||
+    prediction.status === PredictionLifeCycle.CHECKING
+  ) {
+    if (prediction.driver === "date") {
+      fields.push(embedFields.date(due, "Due Date"));
+    } else {
+      fields.push(embedFields.date(check, "Check Date"));
+    }
     fields.push(
       embedFields.season(prediction.season_id, prediction.season_applicable)
     );
@@ -152,7 +161,11 @@ export const generatePredictionEmbed = (
 
   if (prediction.status === PredictionLifeCycle.RETIRED) {
     fields.push(embedFields.date(retired, "Retired"));
-    fields.push(embedFields.date(due, "Original Due Day"));
+    if (prediction.driver === "date") {
+      fields.push(embedFields.date(due, "Original Due Date"));
+    } else {
+      fields.push(embedFields.date(check, "Original Check Date"));
+    }
     fields.push(
       embedFields.season(prediction.season_id, prediction.season_applicable)
     );

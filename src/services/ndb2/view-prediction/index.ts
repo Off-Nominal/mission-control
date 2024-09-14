@@ -29,12 +29,12 @@ export default function ViewPrediction({
       "NDB2 Slash Command View Prediction"
     );
 
+    const predictionId = options.getInteger("id", true);
+
     logger.addLog(
       LogStatus.INFO,
-      `Received a RETIRE Prediction request, validating data and initiating confirmation message.`
+      `Received a View Prediction request for prediction ID: ${predictionId}`
     );
-
-    const predictionId = options.getInteger("id", true);
 
     let prediction: NDB2API.EnhancedPrediction;
 
@@ -101,6 +101,7 @@ export default function ViewPrediction({
     // Fetch Context
     let context: { messageId: string; channelId: string } | undefined;
     let contextSub: API.Ndb2MsgSubscription;
+
     try {
       const contextSubs = await models.ndb2MsgSubscription.fetchSubByType(
         prediction.id,

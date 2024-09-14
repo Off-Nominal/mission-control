@@ -125,11 +125,11 @@ const handleError = (err: any): [string, string] => {
 };
 
 export class Ndb2Client {
-  private baseURL = mcconfig.ndb2.baseUrl;
+  private baseURL = mcconfig.ndb2.baseUrl || "";
   private client: AxiosInstance;
   private seasons: NDB2API.Season[] = [];
 
-  constructor(key) {
+  constructor(key: string | undefined) {
     this.client = axios.create({
       headers: {
         Authorization: `Bearer ${key}`,
@@ -159,7 +159,7 @@ export class Ndb2Client {
       });
   }
 
-  public getSeason(id: string | number): NDB2API.Season {
+  public getSeason(id: string | number): NDB2API.Season | undefined {
     return this.seasons.find((season) => season.id === id);
   }
 

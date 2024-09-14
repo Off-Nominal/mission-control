@@ -1,5 +1,6 @@
 export enum PredictionLifeCycle {
   OPEN = "open",
+  CHECKING = "checking",
   RETIRED = "retired",
   CLOSED = "closed",
   SUCCESSFUL = "successful",
@@ -46,6 +47,8 @@ export namespace NDB2API {
     };
   };
 
+  export type PredictionDriver = "event" | "date";
+
   export type EnhancedPrediction = {
     id: number;
     predictor: {
@@ -53,10 +56,13 @@ export namespace NDB2API {
       discord_id: string;
     };
     text: string;
+    driver: PredictionDriver;
     season_id: number;
     season_applicable: boolean;
     created_date: string;
     due_date: string | null;
+    check_date: string | null;
+    last_check_date: string | null;
     closed_date: string | null;
     triggered_date: string | null;
     triggerer: {
@@ -68,6 +74,7 @@ export namespace NDB2API {
     status: PredictionLifeCycle;
     bets: EnhancedPredictionBet[];
     votes: EnhancedPredictionVote[];
+    checks: Omit<EnhancedSnoozeCheck, "prediction_id">[];
     payouts: {
       endorse: number;
       undorse: number;
@@ -210,4 +217,24 @@ export namespace NDB2API {
   };
 
   export type GetSeasons = GeneralResponse<Season[]>;
+
+  export type SnoozeCheckResults = {
+    day: number;
+    week: number;
+    month: number;
+    quarter: number;
+    year: number;
+  };
+
+  export type EnhancedSnoozeCheck = SnoozeCheck & {
+    votes: SnoozeCheckResults;
+  };
+
+  export type SnoozeCheck = {
+    id: number;
+    prediction_id: number;
+    check_date: string;
+    closed: boolean;
+    closed_at: string | null;
+  };
 }

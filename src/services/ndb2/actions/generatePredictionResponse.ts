@@ -20,10 +20,13 @@ export const generatePredictionResponse = (
     context
   );
 
-  const actionRow = new ActionRowBuilder<ButtonBuilder>();
+  const actionRow1 = new ActionRowBuilder<ButtonBuilder>();
 
-  if (prediction.status === PredictionLifeCycle.OPEN) {
-    actionRow
+  if (
+    prediction.status === PredictionLifeCycle.OPEN ||
+    prediction.status === PredictionLifeCycle.CHECKING
+  ) {
+    actionRow1
       .addComponents(
         new ButtonBuilder()
           .setCustomId(`Endorse ${prediction.id}`)
@@ -38,8 +41,42 @@ export const generatePredictionResponse = (
       );
   }
 
+  // if (prediction.status === PredictionLifeCycle.CHECKING) {
+  //   actionRow1
+  //     .addComponents(
+  //       new ButtonBuilder()
+  //         .setCustomId(`Snooze ${prediction.id} 1`)
+  //         .setLabel("⏰ 1 Day")
+  //         .setStyle(ButtonStyle.Secondary)
+  //     )
+  //     .addComponents(
+  //       new ButtonBuilder()
+  //         .setCustomId(`Snooze ${prediction.id} 7`)
+  //         .setLabel("⏰ 1 Week")
+  //         .setStyle(ButtonStyle.Secondary)
+  //     )
+  //     .addComponents(
+  //       new ButtonBuilder()
+  //         .setCustomId(`Snooze ${prediction.id} 30`)
+  //         .setLabel("⏰ 1 Month")
+  //         .setStyle(ButtonStyle.Secondary)
+  //     )
+  //     .addComponents(
+  //       new ButtonBuilder()
+  //         .setCustomId(`Snooze ${prediction.id} 90`)
+  //         .setLabel("⏰ 1 Quarter")
+  //         .setStyle(ButtonStyle.Secondary)
+  //     )
+  //     .addComponents(
+  //       new ButtonBuilder()
+  //         .setCustomId(`Snooze ${prediction.id} 365`)
+  //         .setLabel("⏰ 1 Year")
+  //         .setStyle(ButtonStyle.Secondary)
+  //     );
+  // }
+
   if (prediction.status === PredictionLifeCycle.CLOSED) {
-    actionRow
+    actionRow1
       .addComponents(
         new ButtonBuilder()
           .setCustomId(`Affirm ${prediction.id}`)
@@ -58,20 +95,20 @@ export const generatePredictionResponse = (
     prediction.status === PredictionLifeCycle.SUCCESSFUL ||
     prediction.status === PredictionLifeCycle.FAILED
   ) {
-    actionRow.addComponents(
+    actionRow1.addComponents(
       new ButtonBuilder()
         .setCustomId(`Details ${prediction.id} Season`)
         .setLabel("Results - Season")
         .setStyle(ButtonStyle.Secondary)
     );
-    actionRow.addComponents(
+    actionRow1.addComponents(
       new ButtonBuilder()
         .setCustomId(`Details ${prediction.id} Alltime`)
         .setLabel("Results - All-Time")
         .setStyle(ButtonStyle.Secondary)
     );
   } else {
-    actionRow.addComponents(
+    actionRow1.addComponents(
       new ButtonBuilder()
         .setCustomId(`Details ${prediction.id} Season`)
         .setLabel("Details")
@@ -79,12 +116,12 @@ export const generatePredictionResponse = (
     );
   }
 
-  actionRow.addComponents(
+  actionRow1.addComponents(
     new ButtonBuilder()
       .setLabel("View on Web")
       .setURL("https://ndb.offnom.com/predictions/" + prediction.id)
       .setStyle(ButtonStyle.Link)
   );
 
-  return { embeds: [embed], components: [actionRow] };
+  return { embeds: [embed], components: [actionRow1] };
 };
