@@ -39,10 +39,10 @@ export default function AddPrediction({
     }
 
     const baseMessage = `## What type of prediction would you like to make?`;
-    const dateDriven = `__Date Driven:__ Date driven predictions are defined by a due date which you provide. If not already triggered, the system will automatically put this prediction up for a vote on the due date.`;
-    const dateExample = `__Example:__ *By the end of 2050, Elon Musk will have grown a new head.*`;
-    const eventDriven = `__Event Driven:__ Event driven predictions are defined by an accompanying trigger event which you define. The system will never automatically put this prediction up for a vote (so keep an eye on it!). However, you will provide a "check date", which is date that the system will check in on this prediction and ask you if it should be triggered. Think of it as a helpful reminder and set it at the earliest possible date you think it might come true.`;
-    const eventExample = `__Example:__ *By the time the first person walks on Mars, Elon Musk will have grown a new head.*`;
+    const dateDriven = `__Date-Driven:__ Date driven predictions are defined by a due date which you provide. If not already triggered, the system will automatically put this prediction up for a vote on the due date.`;
+    const dateExample = `_Example:_ *By the end of 2050, Jake will produce a Valves T-shirt.*`;
+    const eventDriven = `__Event-Driven:__ Event driven predictions are defined by an accompanying trigger event which you define. The system will never automatically put this prediction up for a vote (so keep an eye on it!). However, you will provide a "check date", which is date that the system will check in on this prediction and ask you if it should be triggered. Think of it as a helpful reminder and set it at the earliest possible date you think it might come true.`;
+    const eventExample = `_Example:_ *By the time the first person walks on Mars, Jake will produce a Valves T-shirt.*`;
 
     const content = [
       baseMessage,
@@ -55,62 +55,71 @@ export default function AddPrediction({
     const components = [
       new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
-          .setCustomId("New Date Driven Prediction")
-          .setLabel("Date Driven")
+          .setCustomId("new_prediction date")
+          .setLabel("Date-Driven")
           .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
-          .setCustomId("New Event Driven Prediction")
-          .setLabel("Event Driven")
-          .setStyle(ButtonStyle.Primary)
+          .setCustomId("new_prediction event")
+          .setLabel("Event-Driven")
+          .setStyle(ButtonStyle.Success)
       ),
     ];
 
     interaction.reply({ content, components, ephemeral: true });
   });
 
-  // // Handles request for new prediction modal
-  // ndb2Bot.on("interactionCreate", async (interaction) => {
-  //   if (!interaction.isChatInputCommand()) {
-  //     return;
-  //   }
+  // Handles request for new prediction modal
+  ndb2Bot.on("interactionCreate", async (interaction) => {
+    if (!interaction.isButton()) {
+      return;
+    }
 
-  //   const { options, commandName } = interaction;
-  //   const subCommand = options.getSubcommand(false);
+    const [command, driver] = interaction.customId.split(" ");
 
-  //   if (commandName !== "predict" || subCommand !== "new") {
-  //     return;
-  //   }
+    if (command !== "new_prediction" || !["date", "event"].includes(driver)) {
+      return;
+    }
 
-  //   const modal = new ModalBuilder()
-  //     .setCustomId("Prediction Modal")
-  //     .setTitle("New Nostradambot2 Prediction");
+    const titleType = driver === "date" ? "Date-Driven" : "Event-Driven";
 
-  //   const textInput = new TextInputBuilder()
-  //     .setCustomId("text")
-  //     .setLabel("Prediction")
-  //     .setPlaceholder("The Sun will rise tomorrow")
-  //     .setMaxLength(2048)
-  //     .setRequired(true)
-  //     .setStyle(TextInputStyle.Paragraph);
+    const modal = new ModalBuilder()
+      .setCustomId(`new_prediction ${driver}`)
+      .setTitle(`New ${titleType} Prediction`);
 
-  //   const dueInput = new TextInputBuilder()
-  //     .setCustomId("due")
-  //     .setLabel("Prediction Due Date (UTC, format YYYY-MM-DD)")
-  //     .setPlaceholder("YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD")
-  //     .setMaxLength(10)
-  //     .setMinLength(10)
-  //     .setRequired(true)
-  //     .setStyle(TextInputStyle.Short);
+    const placeholder =
+      driver === "date"
+        ? "By the end of 2050, Jake will produce a Valves T-shirt."
+        : "By the time the first person walks on Mars, Jake will produce a Valves T-shirt.";
 
-  //   const firstActionRow =
-  //     new ActionRowBuilder<TextInputBuilder>().addComponents(textInput);
-  //   const secondActionRow =
-  //     new ActionRowBuilder<TextInputBuilder>().addComponents(dueInput);
+    const textInput = new TextInputBuilder()
+      .setCustomId("text")
+      .setLabel("Prediction")
+      .setPlaceholder(placeholder)
+      .setMaxLength(2048)
+      .setRequired(true)
+      .setStyle(TextInputStyle.Paragraph);
 
-  //   modal.addComponents(firstActionRow, secondActionRow);
+    const id = driver === "date" ? "due_date" : "check_date";
+    const label = driver === "date" ? "Due Date" : "Check Date";
 
-  //   return await interaction.showModal(modal);
-  // });
+    const dueInput = new TextInputBuilder()
+      .setCustomId(id)
+      .setLabel(`${label} (UTC, format YYYY-MM-DD)`)
+      .setPlaceholder("YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD")
+      .setMaxLength(10)
+      .setMinLength(10)
+      .setRequired(true)
+      .setStyle(TextInputStyle.Short);
+
+    const firstActionRow =
+      new ActionRowBuilder<TextInputBuilder>().addComponents(textInput);
+    const secondActionRow =
+      new ActionRowBuilder<TextInputBuilder>().addComponents(dueInput);
+
+    modal.addComponents(firstActionRow, secondActionRow);
+
+    return await interaction.showModal(modal);
+  });
 
   // Handles actual prediction submission
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -131,24 +140,32 @@ export default function AddPrediction({
       "NDB2 New Prediction"
     );
 
-    const text = interaction.fields.getTextInputValue("text");
-    const due = interaction.fields.getTextInputValue("due");
-    const dueDate = new Date(due);
-    const discordId = interaction.member.user.id;
-    const messageId = interaction.channel?.lastMessageId;
-    const channelId = interaction.channelId;
+    const [command, driver] = interaction.customId.split(" ");
 
-    logger.addLog(
-      LogStatus.INFO,
-      `New prediction made by ${userMention(discordId)} due ${time(
-        dueDate,
-        TimestampStyles.RelativeTime
-      )}: ${text}`
+    if (command !== "new_prediction") {
+      return;
+    }
+
+    if (driver !== "date" && driver !== "event") {
+      return;
+    }
+
+    const text = interaction.fields.getTextInputValue("text");
+    const driverDateString = interaction.fields.getTextInputValue(
+      driver === "date" ? "due_date" : "check_date"
     );
 
+    if (!text || !driverDateString) {
+      interaction.reply({
+        content: `You must provide both a prediction and a due date.`,
+        ephemeral: true,
+      });
+      return;
+    }
+
     // Validate date format
-    const isDueDateValid = validateUserDateInput(due);
-    if (!isDueDateValid) {
+    const isDriverDateValid = validateUserDateInput(driverDateString);
+    if (!isDriverDateValid) {
       logger.addLog(
         LogStatus.WARNING,
         `User entered invalid timestamp, prediction rejected`
@@ -161,12 +178,26 @@ export default function AddPrediction({
       return;
     }
 
+    const driverDate = new Date(driverDateString);
+
+    const discordId = interaction.member.user.id;
+    const messageId = interaction.channel?.lastMessageId;
+    const channelId = interaction.channelId;
+
+    logger.addLog(
+      LogStatus.INFO,
+      `New ${driver}-driven prediction made by ${userMention(
+        discordId
+      )} due ${time(driverDate, TimestampStyles.RelativeTime)}: ${text}`
+    );
+
     logger.addLog(LogStatus.SUCCESS, `Due date is properly formed!`);
 
-    const due_date = add(dueDate, { days: 1 });
+    // The date is adjusted to the next day to ensure the prediction is not triggered until the day is over
+    const adjustedDriverDate = add(driverDate, { days: 1 });
 
     // Validate date is in the future
-    if (!isFuture(due_date)) {
+    if (!isFuture(adjustedDriverDate)) {
       logger.addLog(
         LogStatus.WARNING,
         `User entered timestamp in the past, prediction rejected`
@@ -183,11 +214,16 @@ export default function AddPrediction({
 
     let prediction: NDB2API.EnhancedPrediction;
 
+    const driverBody =
+      driver === "date"
+        ? { due_date: driverDate.toISOString() }
+        : { check_date: driverDate.toISOString() };
+
     try {
       const response = await ndb2Client.addPrediction(
         discordId,
         text,
-        due_date.toISOString()
+        driverBody
       );
       prediction = response.data;
       logger.addLog(

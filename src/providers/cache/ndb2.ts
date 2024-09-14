@@ -8,16 +8,12 @@ type NDB2InteractionCache = {
   retirements: { [key: string]: ChatInputCommandInteraction<CacheType> };
   triggers: { [key: string]: ChatInputCommandInteraction<CacheType> };
   triggerResponses: { [key: string]: ButtonInteraction<CacheType> };
-  newPredictionPrompts: {
-    [key: string]: ChatInputCommandInteraction<CacheType>;
-  };
 };
 
 const cache: NDB2InteractionCache = {
   retirements: {},
   triggers: {},
   triggerResponses: {},
-  newPredictionPrompts: {},
 };
 
 export default cache;

@@ -178,16 +178,14 @@ export class Ndb2Client {
   public addPrediction(
     discord_id: string,
     text: string,
-    due_date: string
+    driver: { due_date: string | Date } | { check_date: string | Date }
   ): Promise<NDB2API.AddPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = "api/predictions";
+
+    const body = Object.assign({ discord_id, text }, driver);
     return this.client
-      .post<NDB2API.AddPrediction>(url.toString(), {
-        text,
-        due_date,
-        discord_id,
-      })
+      .post<NDB2API.AddPrediction>(url.toString(), body)
       .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);
