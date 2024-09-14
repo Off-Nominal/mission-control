@@ -50,23 +50,35 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
 
     if (listType === "recent") {
       searchOptions.sort_by = [SortByOption.CREATED_DESC];
-      searchOptions.status = [PredictionLifeCycle.OPEN];
+      searchOptions.status = [
+        PredictionLifeCycle.OPEN,
+        PredictionLifeCycle.CHECKING,
+      ];
     }
 
     if (listType === "upcoming") {
-      searchOptions.sort_by = [SortByOption.DUE_ASC];
-      searchOptions.status = [PredictionLifeCycle.OPEN];
+      searchOptions.sort_by = [SortByOption.CHECK_ASC, SortByOption.DUE_ASC];
+      searchOptions.status = [
+        PredictionLifeCycle.OPEN,
+        PredictionLifeCycle.CHECKING,
+      ];
     }
 
     if (listType === "upcoming-mine") {
-      searchOptions.sort_by = [SortByOption.DUE_ASC];
-      searchOptions.status = [PredictionLifeCycle.OPEN];
+      searchOptions.sort_by = [SortByOption.CHECK_ASC, SortByOption.DUE_ASC];
+      searchOptions.status = [
+        PredictionLifeCycle.OPEN,
+        PredictionLifeCycle.CHECKING,
+      ];
       searchOptions.creator = interaction.user.id;
     }
 
     if (listType === "upcoming-no-bet") {
-      searchOptions.sort_by = [SortByOption.DUE_ASC];
-      searchOptions.status = [PredictionLifeCycle.OPEN];
+      searchOptions.sort_by = [SortByOption.CHECK_ASC, SortByOption.DUE_ASC];
+      searchOptions.status = [
+        PredictionLifeCycle.OPEN,
+        PredictionLifeCycle.CHECKING,
+      ];
       searchOptions.unbetter = interaction.user.id;
     }
 

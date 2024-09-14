@@ -12,47 +12,43 @@ export const generateListPredictionsEmbed = (
 ): EmbedBuilder => {
   let title: string = "";
   let description: string = "";
-  let titleDate: "Created" | "Due";
 
   if (type === "recent") {
     title = "Recently made open predictions";
     description =
       "Here are the ten most recently made predictions which are still open for betting.";
-    titleDate = "Created";
   }
 
   if (type === "upcoming") {
     title = "Upcoming Judgements";
     description =
       "Here are the next ten predictions that are due to be judged.";
-    titleDate = "Due";
   }
 
   if (type === "upcoming-mine") {
     title = "Your Upcoming Judgements";
     description =
       "Here are your next ten predictions that are due to be judged.";
-    titleDate = "Due";
   }
 
   if (type === "upcoming-no-bet") {
     title = "Upcoming Judgements (No Bet)";
     description =
       "Here are the next ten predictions that are due to be judged that you haven't yet placed a bet for.";
-    titleDate = "Due";
   }
 
   if (type === "search") {
     title = "Search Results";
     description = `Here are the best ten prediction matches for keyword: ${options.keyword}`;
-    titleDate = "Due";
   }
 
   const fields: APIEmbedField[] = predictions.map((pred) => {
-    let date: Date = new Date(0);
+    let date: Date = new Date();
+    let titleDate: string = "";
 
     if (type === "recent") {
       date = new Date(pred.created_date);
+      titleDate = "Created";
     }
     if (
       type === "upcoming" ||
@@ -60,7 +56,8 @@ export const generateListPredictionsEmbed = (
       type === "upcoming-no-bet" ||
       type === "search"
     ) {
-      date = new Date(pred.due_date || 0);
+      date = new Date(pred.due_date || pred.check_date);
+      titleDate = pred.driver === "date" ? "Due" : "Checking";
     }
 
     let value: string;

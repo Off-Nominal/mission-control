@@ -46,6 +46,8 @@ export enum SortByOption {
   CREATED_DESC = "created_date-desc",
   DUE_ASC = "due_date-asc",
   DUE_DESC = "due_date-desc",
+  CHECK_ASC = "check_date-asc",
+  CHECK_DESC = "check_date-desc",
   RETIRED_ASC = "retired_date-asc",
   RETIRED_DESC = "retired_date-desc",
   TRIGGERED_ASC = "triggered_date-asc",
@@ -286,7 +288,7 @@ export class Ndb2Client {
 
     if (options.status) {
       options.status.forEach((option) => {
-        params.set("status", option);
+        params.append("status", option);
       });
     }
 
@@ -296,7 +298,7 @@ export class Ndb2Client {
 
     if (options.sort_by) {
       options.sort_by.forEach((option) => {
-        params.set("sort_by", option);
+        params.append("sort_by", option);
       });
     }
 
