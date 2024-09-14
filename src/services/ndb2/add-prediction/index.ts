@@ -1,5 +1,7 @@
 import {
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   Message,
   ModalBuilder,
   TextInputBuilder,
@@ -21,6 +23,7 @@ export default function AddPrediction({
   ndb2Bot,
   ndb2Client,
   models,
+  cache,
 }: Providers) {
   // Handles request for new prediction, asks for type
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -34,55 +37,91 @@ export default function AddPrediction({
     if (commandName !== "predict" || subCommand !== "new") {
       return;
     }
+
+    const baseMessage = `## What type of prediction would you like to make?`;
+    const dateDriven = `__Date Driven:__ Date driven predictions are defined by a due date which you provide. If not already triggered, the system will automatically put this prediction up for a vote on the due date.`;
+    const dateExample = `__Example:__ *By the end of 2050, Elon Musk will have grown a new head.*`;
+    const eventDriven = `__Event Driven:__ Event driven predictions are defined by an accompanying trigger event which you define. The system will never automatically put this prediction up for a vote (so keep an eye on it!). However, you will provide a "check date", which is date that the system will check in on this prediction and ask you if it should be triggered. Think of it as a helpful reminder and set it at the earliest possible date you think it might come true.`;
+    const eventExample = `__Example:__ *By the time the first person walks on Mars, Elon Musk will have grown a new head.*`;
+
+    const content = [
+      baseMessage,
+      dateDriven,
+      dateExample,
+      eventDriven,
+      eventExample,
+    ].join("\n\n");
+
+    const components = [
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId("New Date Driven Prediction")
+          .setLabel("Date Driven")
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setCustomId("New Event Driven Prediction")
+          .setLabel("Event Driven")
+          .setStyle(ButtonStyle.Primary)
+      ),
+    ];
+
+    interaction.reply({ content, components, ephemeral: true });
   });
 
-  // Handles request for new prediction modal
-  ndb2Bot.on("interactionCreate", async (interaction) => {
-    if (!interaction.isChatInputCommand()) {
-      return;
-    }
+  // // Handles request for new prediction modal
+  // ndb2Bot.on("interactionCreate", async (interaction) => {
+  //   if (!interaction.isChatInputCommand()) {
+  //     return;
+  //   }
 
-    const { options, commandName } = interaction;
-    const subCommand = options.getSubcommand(false);
+  //   const { options, commandName } = interaction;
+  //   const subCommand = options.getSubcommand(false);
 
-    if (commandName !== "predict" || subCommand !== "new") {
-      return;
-    }
+  //   if (commandName !== "predict" || subCommand !== "new") {
+  //     return;
+  //   }
 
-    const modal = new ModalBuilder()
-      .setCustomId("Prediction Modal")
-      .setTitle("New Nostradambot2 Prediction");
+  //   const modal = new ModalBuilder()
+  //     .setCustomId("Prediction Modal")
+  //     .setTitle("New Nostradambot2 Prediction");
 
-    const textInput = new TextInputBuilder()
-      .setCustomId("text")
-      .setLabel("Prediction")
-      .setPlaceholder("The Sun will rise tomorrow")
-      .setMaxLength(2048)
-      .setRequired(true)
-      .setStyle(TextInputStyle.Paragraph);
+  //   const textInput = new TextInputBuilder()
+  //     .setCustomId("text")
+  //     .setLabel("Prediction")
+  //     .setPlaceholder("The Sun will rise tomorrow")
+  //     .setMaxLength(2048)
+  //     .setRequired(true)
+  //     .setStyle(TextInputStyle.Paragraph);
 
-    const dueInput = new TextInputBuilder()
-      .setCustomId("due")
-      .setLabel("Prediction Due Date (UTC, format YYYY-MM-DD)")
-      .setPlaceholder("YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD")
-      .setMaxLength(10)
-      .setMinLength(10)
-      .setRequired(true)
-      .setStyle(TextInputStyle.Short);
+  //   const dueInput = new TextInputBuilder()
+  //     .setCustomId("due")
+  //     .setLabel("Prediction Due Date (UTC, format YYYY-MM-DD)")
+  //     .setPlaceholder("YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD")
+  //     .setMaxLength(10)
+  //     .setMinLength(10)
+  //     .setRequired(true)
+  //     .setStyle(TextInputStyle.Short);
 
-    const firstActionRow =
-      new ActionRowBuilder<TextInputBuilder>().addComponents(textInput);
-    const secondActionRow =
-      new ActionRowBuilder<TextInputBuilder>().addComponents(dueInput);
+  //   const firstActionRow =
+  //     new ActionRowBuilder<TextInputBuilder>().addComponents(textInput);
+  //   const secondActionRow =
+  //     new ActionRowBuilder<TextInputBuilder>().addComponents(dueInput);
 
-    modal.addComponents(firstActionRow, secondActionRow);
+  //   modal.addComponents(firstActionRow, secondActionRow);
 
-    return await interaction.showModal(modal);
-  });
+  //   return await interaction.showModal(modal);
+  // });
 
   // Handles actual prediction submission
   ndb2Bot.on("interactionCreate", async (interaction) => {
-    if (!interaction.isModalSubmit()) {
+    if (
+      !interaction.isModalSubmit() ||
+      !interaction.guild ||
+      !interaction.member ||
+      !interaction.channel ||
+      !interaction.channelId ||
+      interaction.channel.isDMBased()
+    ) {
       return;
     }
 
@@ -96,7 +135,7 @@ export default function AddPrediction({
     const due = interaction.fields.getTextInputValue("due");
     const dueDate = new Date(due);
     const discordId = interaction.member.user.id;
-    const messageId = interaction.channel.lastMessageId;
+    const messageId = interaction.channel?.lastMessageId;
     const channelId = interaction.channelId;
 
     logger.addLog(
@@ -155,14 +194,30 @@ export default function AddPrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully submitted to NDB2`
       );
-    } catch ([userError, LogError]) {
+    } catch (err) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          ephemeral: true,
+        });
+
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, logError] = err;
       interaction.reply({
         ephemeral: true,
         content: `There was an error submitting the prediction to NDB2. ${userError}`,
       });
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error submitting the prediction. ${LogError}`
+        `There was an error submitting the prediction. ${logError}`
       );
       logger.sendLog(interaction.client);
       return;
@@ -207,7 +262,7 @@ export default function AddPrediction({
       console.error(err);
     }
 
-    let reply: Message<boolean>;
+    let reply: Message<boolean> | undefined = undefined;
 
     // Add subscription for embed
     try {
@@ -235,7 +290,7 @@ export default function AddPrediction({
       const botsChannel = await interaction.guild.channels.cache.find(
         (c) => c.id === mcconfig.discord.channels.bots
       );
-      if (botsChannel.isTextBased()) {
+      if (botsChannel?.isTextBased() && reply) {
         botsChannel.send({
           content: `NDB2->TC ${channelId} ${reply.id} ${prediction.text}`,
         });
