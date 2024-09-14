@@ -235,7 +235,7 @@ const embedFields = {
     return {
       name: "Current Odds",
       value:
-        `A succesful prediction would pay current endorsers at ${payouts.endorse} times their wager (days). Undorsers woud lose ${payouts.undorse} times their wager.\n\nA failed prediction would pay out current undorsers at ${payouts.undorse} their wager (days), and endorsers would lose ${payouts.endorse} times their wager.` +
+        `A succesful prediction would pay current endorsers at ${payouts.endorse} times their wager (days). Undorsers woud lose ${payouts.undorse} times their wager.\n\nA failed prediction would pay out current undorsers at ${payouts.undorse} times their wager (days), and endorsers would lose ${payouts.endorse} times their wager.` +
         `\n \u200B`,
     };
   },

@@ -6,6 +6,10 @@ import {
   PredictionLifeCycle,
 } from "../../../../providers/ndb2-client";
 
+const driver = (driver: NDB2API.PredictionDriver) => {
+  return driver === "date" ? "(Date-driven)" : "(Event-driven)";
+};
+
 export const generatePredictionDetailsEmbed = (
   prediction: NDB2API.EnhancedPrediction,
   season: boolean
@@ -22,19 +26,25 @@ export const generatePredictionDetailsEmbed = (
   const noVotes = prediction.votes.filter((vote) => !vote.vote);
 
   const embed = new EmbedBuilder({
-    title: "Detailed View - Status: " + prediction.status.toUpperCase(),
-    description:
-      userMention(prediction.predictor.discord_id) +
-      " " +
-      getPredictedPrefix(prediction.status) +
-      " " +
-      italic(prediction.text) +
+    title: [
+      "Detailed View - Status:",
+      prediction.status.toUpperCase(),
+      driver(prediction.driver),
+    ].join(" "),
+    description: [
+      userMention(prediction.predictor.discord_id),
+      getPredictedPrefix(prediction.status),
+      italic(prediction.text),
       `\n \u200B`,
+    ].join(" "),
   });
 
   const fields: APIEmbedField[] = [];
 
-  if (prediction.status === PredictionLifeCycle.OPEN) {
+  if (
+    prediction.status === PredictionLifeCycle.OPEN ||
+    prediction.status === PredictionLifeCycle.CHECKING
+  ) {
     fields.push(
       embedFields.riskAssessment(
         prediction.bets.length,
