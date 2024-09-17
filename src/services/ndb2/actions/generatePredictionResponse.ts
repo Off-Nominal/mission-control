@@ -41,40 +41,6 @@ export const generatePredictionResponse = (
       );
   }
 
-  // if (prediction.status === PredictionLifeCycle.CHECKING) {
-  //   actionRow1
-  //     .addComponents(
-  //       new ButtonBuilder()
-  //         .setCustomId(`Snooze ${prediction.id} 1`)
-  //         .setLabel("⏰ 1 Day")
-  //         .setStyle(ButtonStyle.Secondary)
-  //     )
-  //     .addComponents(
-  //       new ButtonBuilder()
-  //         .setCustomId(`Snooze ${prediction.id} 7`)
-  //         .setLabel("⏰ 1 Week")
-  //         .setStyle(ButtonStyle.Secondary)
-  //     )
-  //     .addComponents(
-  //       new ButtonBuilder()
-  //         .setCustomId(`Snooze ${prediction.id} 30`)
-  //         .setLabel("⏰ 1 Month")
-  //         .setStyle(ButtonStyle.Secondary)
-  //     )
-  //     .addComponents(
-  //       new ButtonBuilder()
-  //         .setCustomId(`Snooze ${prediction.id} 90`)
-  //         .setLabel("⏰ 1 Quarter")
-  //         .setStyle(ButtonStyle.Secondary)
-  //     )
-  //     .addComponents(
-  //       new ButtonBuilder()
-  //         .setCustomId(`Snooze ${prediction.id} 365`)
-  //         .setLabel("⏰ 1 Year")
-  //         .setStyle(ButtonStyle.Secondary)
-  //     );
-  // }
-
   if (prediction.status === PredictionLifeCycle.CLOSED) {
     actionRow1
       .addComponents(

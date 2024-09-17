@@ -132,7 +132,8 @@ export default function createWebooksRouter(
     if (
       event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
       event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
-      event_name === NDB2WebhookEvent.JUDGED_PREDICTION
+      event_name === NDB2WebhookEvent.JUDGED_PREDICTION ||
+      event_name === NDB2WebhookEvent.NEW_SNOOZE_CHECK
     ) {
       sendPublicNotice(
         ndb2Bot,

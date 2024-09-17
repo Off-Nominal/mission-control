@@ -6,117 +6,15 @@ import {
   PredictionLifeCycle,
 } from "../../../../providers/ndb2-client";
 import { NDB2WebhookEvent } from "../../webhooks";
-
-const getAuthor = (
-  type:
-    | NDB2WebhookEvent.JUDGED_PREDICTION
-    | NDB2WebhookEvent.RETIRED_PREDICTION
-    | NDB2WebhookEvent.TRIGGERED_PREDICTION,
-  predictor: GuildMember,
-  triggerer: GuildMember | null,
-  client: ClientUser
-): { name: string; icon_url: string } => {
-  if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
-    return {
-      name: predictor.displayName,
-      icon_url: predictor.displayAvatarURL(),
-    };
-  }
-
-  if (triggerer) {
-    return {
-      name: triggerer.displayName,
-      icon_url: triggerer.displayAvatarURL(),
-    };
-  }
-
-  return {
-    name: client.username,
-    icon_url: client.displayAvatarURL(),
-  };
-};
-
-type ThumbnailLifeCycle =
-  | PredictionLifeCycle.RETIRED
-  | PredictionLifeCycle.CLOSED
-  | PredictionLifeCycle.SUCCESSFUL
-  | PredictionLifeCycle.FAILED;
-
-const thumbnails: Record<ThumbnailLifeCycle, string> = {
-  [PredictionLifeCycle.RETIRED]:
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679241808/Discord%20Assets/5267928_bsb9z6.png",
-  [PredictionLifeCycle.CLOSED]:
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679692889/Discord%20Assets/3468568_cqtnle.png",
-  [PredictionLifeCycle.SUCCESSFUL]:
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134400/Discord%20Assets/4789514_yqcukf.png",
-  [PredictionLifeCycle.FAILED]:
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134579/Discord%20Assets/4789514_czvljj.png",
-};
-
-const getDescription = (
-  type:
-    | NDB2WebhookEvent.JUDGED_PREDICTION
-    | NDB2WebhookEvent.RETIRED_PREDICTION
-    | NDB2WebhookEvent.TRIGGERED_PREDICTION,
-  prediction: NDB2API.EnhancedPrediction,
-  triggererId?: string
-): string => {
-  if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
-    return (
-      `Prediction #${prediction.id} by ${userMention(
-        prediction.predictor.discord_id
-      )} has been retired by ${userMention(prediction.predictor.discord_id)}.` +
-      `\n \u200B`
-    );
-  }
-
-  if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
-    return (
-      `Prediction #${prediction.id} by ${userMention(
-        prediction.predictor.discord_id
-      )} has been triggered ${triggererId ? "manually" : "automatically"} by ${
-        triggererId ? `${userMention(triggererId)}` : "NDB2"
-      }.` + `\n \u200B`
-    );
-  }
-
-  if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
-    return (
-      `Prediction ${prediction.id} by ${userMention(
-        prediction.predictor.discord_id
-      )} has been judged ${bold(prediction.status)} by the community. ${
-        prediction.status === PredictionLifeCycle.SUCCESSFUL
-          ? "Nice work"
-          : "Better luck next time"
-      }!` + `\n \u200B`
-    );
-  }
-
-  return "Unknown notice type";
-};
-
-const getTitle = (type: NDB2WebhookEvent) => {
-  if (type === NDB2WebhookEvent.JUDGED_PREDICTION) {
-    return "Judgement Notice";
-  }
-
-  if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
-    return "Retirement Notice";
-  }
-
-  if (type === NDB2WebhookEvent.TRIGGERED_PREDICTION) {
-    return "Trigger Notice";
-  }
-
-  return "Public Notice";
-};
+import { getAuthor, getDescription, getThumbnail, getTitle } from "./helpers";
 
 export const generatePublicNoticeEmbed = (
   prediction: NDB2API.EnhancedPrediction,
   type:
     | NDB2WebhookEvent.JUDGED_PREDICTION
     | NDB2WebhookEvent.RETIRED_PREDICTION
-    | NDB2WebhookEvent.TRIGGERED_PREDICTION,
+    | NDB2WebhookEvent.TRIGGERED_PREDICTION
+    | NDB2WebhookEvent.NEW_SNOOZE_CHECK,
   predictor: GuildMember,
   triggerer: GuildMember | null,
   client: ClientUser,
@@ -149,7 +47,7 @@ export const generatePublicNoticeEmbed = (
   const embed = new EmbedBuilder({
     author: getAuthor(type, predictor, triggerer, client),
     thumbnail: {
-      url: thumbnails[prediction.status],
+      url: getThumbnail(prediction.status),
     },
     title: getTitle(type),
     description: getDescription(type, prediction, triggerer?.id),
@@ -193,6 +91,19 @@ export const generatePublicNoticeEmbed = (
       prediction.status === PredictionLifeCycle.FAILED)
   ) {
     fields.push(embedFields.date(closed, "Effective Close Date"));
+  }
+
+  if (type === NDB2WebhookEvent.NEW_SNOOZE_CHECK) {
+    fields.push({
+      name: "Is this prediction ready to be triggered?",
+      value:
+        "If so, please trigger it using the regular NDB command (`/predict trigger`) and provide the appropriate backdate for the trigger.",
+    });
+    fields.push({
+      name: "Want me to check back later?",
+      value:
+        "Choose the most appropriate snooze duration below to have me check back later. I'll use the first option that gets three votes.",
+    });
   }
 
   embed.setFields(fields);

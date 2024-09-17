@@ -17,7 +17,8 @@ const getLoggerFields = (
   type:
     | NDB2WebhookEvent.JUDGED_PREDICTION
     | NDB2WebhookEvent.RETIRED_PREDICTION
-    | NDB2WebhookEvent.TRIGGERED_PREDICTION,
+    | NDB2WebhookEvent.TRIGGERED_PREDICTION
+    | NDB2WebhookEvent.NEW_SNOOZE_CHECK,
   triggerer_id: string
 ): [string, string] => {
   if (type === NDB2WebhookEvent.RETIRED_PREDICTION) {
@@ -36,6 +37,10 @@ const getLoggerFields = (
       }`,
     ];
   }
+
+  if (type === NDB2WebhookEvent.NEW_SNOOZE_CHECK) {
+    return ["Snooze Check", "New snooze check"];
+  }
 };
 
 export const sendPublicNotice = async (
@@ -47,6 +52,7 @@ export const sendPublicNotice = async (
     | NDB2WebhookEvent.JUDGED_PREDICTION
     | NDB2WebhookEvent.RETIRED_PREDICTION
     | NDB2WebhookEvent.TRIGGERED_PREDICTION
+    | NDB2WebhookEvent.NEW_SNOOZE_CHECK
 ) => {
   const [loggerTitle, loggerMessage] = getLoggerFields(
     type,
