@@ -3,6 +3,7 @@ export enum NDB2WebhookEvent {
   RETIRED_PREDICTION = "retired_prediction",
   NEW_BET = "new_bet",
   TRIGGERED_PREDICTION = "triggered_prediction",
+  TRIGGERED_SNOOZE = "triggered_snooze_check",
   NEW_VOTE = "new_vote",
   JUDGED_PREDICTION = "judged_prediction",
   NEW_SNOOZE_CHECK = "new_snooze_check",

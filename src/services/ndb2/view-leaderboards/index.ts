@@ -1,8 +1,8 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { generateLeaderboardEmbed } from "../actions/embedGenerators/generateLeaderboardEmbed";
 import { NDB2API } from "../../../providers/ndb2-client";
+import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
+import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
 export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -68,12 +68,29 @@ export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
         | NDB2API.GetBetsLeaderboard
         | NDB2API.GetPointsLeaderboard;
 
+      let options: NDB2EmbedTemplate.Args.Leaderboard;
+
       if (leaderboardType === "predictions") {
         response = await ndb2Client.getPredictionsLeaderboard(seasonIdentifier);
+        options = {
+          type: leaderboardType,
+          leaders: response.data.leaders,
+          seasonIdentifier,
+        };
       } else if (leaderboardType === "bets") {
         response = await ndb2Client.getBetsLeaderboard(seasonIdentifier);
-      } else {
+        options = {
+          type: leaderboardType,
+          leaders: response.data.leaders,
+          seasonIdentifier,
+        };
+      } else if (leaderboardType === "points") {
         response = await ndb2Client.getPointsLeaderboard(seasonIdentifier);
+        options = {
+          type: leaderboardType,
+          leaders: response.data.leaders,
+          seasonIdentifier,
+        };
       }
 
       logger.addLog(
@@ -83,21 +100,12 @@ export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
 
       const leaders = response.data.leaders;
 
-      const embed = generateLeaderboardEmbed(
-        leaderboardType,
-        leaders,
-        seasonIdentifier
+      const [embeds, components] = generateInteractionReplyFromTemplate(
+        NDB2EmbedTemplate.View.LEADERBOARD,
+        options
       );
 
-      const actionRow = new ActionRowBuilder<ButtonBuilder>();
-      actionRow.addComponents(
-        new ButtonBuilder()
-          .setLabel("View Leaderboards on Web")
-          .setURL("https://ndb.offnom.com/")
-          .setStyle(ButtonStyle.Link)
-      );
-
-      await interaction.editReply({ embeds: [embed], components: [actionRow] });
+      await interaction.editReply({ embeds, components });
       logger.addLog(
         LogStatus.SUCCESS,
         "Successfully posted leaderboard embed to Discord"

@@ -230,6 +230,25 @@ export class Ndb2Client {
       });
   }
 
+  public addSnoozeVote(
+    predictionId: string | number,
+    snoozeCheckId: string | number,
+    discord_id: string | number,
+    value: NDB2API.SnoozeOptions
+  ): Promise<NDB2API.AddSnoozeVote> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${predictionId}/snooze_checks/${snoozeCheckId}`;
+    return this.client
+      .post<NDB2API.AddSnoozeVote>(url.toString(), {
+        discord_id,
+        value,
+      })
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
   public triggerPrediction(
     id: string | number,
     discord_id: string | null = null,

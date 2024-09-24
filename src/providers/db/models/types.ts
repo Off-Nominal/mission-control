@@ -12,6 +12,7 @@ export namespace API {
     RETIREMENT = "retirement",
     TRIGGER_NOTICE = "trigger_notice",
     JUDGEMENT_NOTICE = "judgement_notice",
+    SNOOZE_CHECK = "snooze_check",
   }
 
   export type Ndb2MsgSubscription = {

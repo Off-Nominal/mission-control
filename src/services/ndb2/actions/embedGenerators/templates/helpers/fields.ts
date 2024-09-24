@@ -8,7 +8,7 @@ import {
 import ndb2Client, {
   NDB2API,
   PredictionLifeCycle,
-} from "../../../../providers/ndb2-client";
+} from "../../../../../../providers/ndb2-client";
 
 const USER_LIST_LIMIT = 30;
 

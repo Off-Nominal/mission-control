@@ -15,8 +15,9 @@ import { Providers } from "../../../providers";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 import { add, isFuture } from "date-fns";
 import { NDB2API } from "../../../providers/ndb2-client";
-import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 import { API } from "../../../providers/db/models/types";
+import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
+import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
 export default function AddPrediction({
   mcconfig,
@@ -264,8 +265,20 @@ export default function AddPrediction({
         prediction.predictor.discord_id
       );
 
-      const reply = generatePredictionResponse(predictor, prediction);
-      interaction.reply(reply);
+      const [embeds, components] = generateInteractionReplyFromTemplate(
+        NDB2EmbedTemplate.View.STANDARD,
+        {
+          prediction,
+          displayName: predictor?.displayName,
+          avatarUrl: predictor?.displayAvatarURL(),
+        }
+      );
+
+      interaction.reply({
+        embeds,
+        components,
+      });
+
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction embed was sent to the channel.`

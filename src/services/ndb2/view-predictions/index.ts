@@ -1,4 +1,3 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import {
@@ -6,7 +5,8 @@ import {
   SearchOptions,
   SortByOption,
 } from "../../../providers/ndb2-client";
-import { generateListPredictionsEmbed } from "../actions/embedGenerators/generateListPredictionsEmbed";
+import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
+import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
 export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -91,19 +91,17 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
 
       const predictions = response.data;
 
-      const embed = generateListPredictionsEmbed(listType, predictions);
-
-      const actionRow = new ActionRowBuilder<ButtonBuilder>();
-      actionRow.addComponents(
-        new ButtonBuilder()
-          .setLabel("Advanced Search on Web")
-          .setURL("https://ndb.offnom.com/predictions")
-          .setStyle(ButtonStyle.Link)
+      const [embeds, components] = generateInteractionReplyFromTemplate(
+        NDB2EmbedTemplate.View.LIST,
+        {
+          type: listType,
+          predictions,
+        }
       );
 
       await interaction.reply({
-        embeds: [embed],
-        components: [actionRow],
+        embeds,
+        components,
         ephemeral: true,
       });
       logger.addLog(

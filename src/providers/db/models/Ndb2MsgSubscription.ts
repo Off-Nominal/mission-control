@@ -53,4 +53,12 @@ export class Ndb2MsgSubscription {
       .query("DELETE FROM ndb2_msg_subscriptions WHERE id = $1", [subId])
       .then((response) => true);
   };
+
+  public expireSubById = async (subId: number): Promise<boolean> => {
+    return this.db
+      .query("UPDATE ndb2_msg_subscriptions SET expiry = NOW() WHERE id = $1", [
+        subId,
+      ])
+      .then((response) => true);
+  };
 }

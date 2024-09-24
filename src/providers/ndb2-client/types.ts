@@ -16,6 +16,14 @@ export enum ErrorCode {
 }
 
 export namespace NDB2API {
+  export enum SnoozeOptions {
+    DAY = 1,
+    WEEK = 7,
+    MONTH = 30,
+    QUARTER = 90,
+    YEAR = 365,
+  }
+
   export type GeneralResponse<T = null> = {
     success: boolean;
     errorCode?: ErrorCode;
@@ -164,6 +172,8 @@ export namespace NDB2API {
 
   export type AddVote = GeneralResponse<EnhancedPrediction>;
 
+  export type AddSnoozeVote = GeneralResponse<EnhancedPrediction>;
+
   export type LeaderboardType = "points" | "predictions" | "bets";
 
   type GetLeaderboard<T> = GeneralResponse<{
@@ -227,7 +237,7 @@ export namespace NDB2API {
   };
 
   export type EnhancedSnoozeCheck = SnoozeCheck & {
-    votes: SnoozeCheckResults;
+    values: SnoozeCheckResults;
   };
 
   export type SnoozeCheck = {

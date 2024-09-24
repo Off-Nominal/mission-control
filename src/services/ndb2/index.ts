@@ -12,12 +12,13 @@ import RetirePrediction from "./retire-prediction";
 import ViewLeaderboards from "./view-leaderboards";
 import SearchPredictions from "./search-predictions";
 import TriggerPrediction from "./trigger-prediction";
+import AddSnoozeVote from "./add-snooze-vote";
 
 export default function NDB2(providers: Providers) {
-  const { api, ndb2Bot, models } = providers;
+  const { api, ndb2Bot, ndb2Client, models } = providers;
   api.use(
     "/webhooks",
-    createWebooksRouter(ndb2Bot, models.ndb2MsgSubscription)
+    createWebooksRouter(ndb2Bot, ndb2Client, models.ndb2MsgSubscription)
   );
 
   // handles incorrect slash commands
@@ -52,6 +53,7 @@ export default function NDB2(providers: Providers) {
   AddPrediction(providers);
   AddBet(providers);
   AddVote(providers);
+  AddSnoozeVote(providers);
   ViewDetails(providers);
   ViewPrediction(providers);
   ViewPredictions(providers);

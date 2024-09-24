@@ -1,60 +1,66 @@
-import { APIEmbedField, EmbedBuilder, TimestampStyles, time } from "discord.js";
-import { NDB2API } from "../../../../providers/ndb2-client";
+import {
+  APIEmbedField,
+  ActionRowBuilder,
+  BaseMessageOptions,
+  ButtonBuilder,
+  EmbedBuilder,
+  TimestampStyles,
+  time,
+} from "discord.js";
+import { NDB2EmbedTemplate } from "./helpers/types";
+import { getAdvancedSearchButton } from "./helpers/buttons";
 
 const MAX_TEXT_LENGTH = 500;
 
-export const generateListPredictionsEmbed = (
-  type: "recent" | "upcoming" | "upcoming-mine" | "upcoming-no-bet" | "search",
-  predictions: NDB2API.ShortEnhancedPrediction[],
-  options: {
-    keyword?: string;
-  } = {}
-): EmbedBuilder => {
+export const generatePredictionListEmbed = (
+  props: NDB2EmbedTemplate.Args.List
+): BaseMessageOptions["embeds"] => {
   let title: string = "";
   let description: string = "";
+  const options = props.options ?? {};
 
-  if (type === "recent") {
+  if (props.type === "recent") {
     title = "Recently made open predictions";
     description =
       "Here are the ten most recently made predictions which are still open for betting.";
   }
 
-  if (type === "upcoming") {
+  if (props.type === "upcoming") {
     title = "Upcoming Judgements";
     description =
       "Here are the next ten predictions that are due to be judged.";
   }
 
-  if (type === "upcoming-mine") {
+  if (props.type === "upcoming-mine") {
     title = "Your Upcoming Judgements";
     description =
       "Here are your next ten predictions that are due to be judged.";
   }
 
-  if (type === "upcoming-no-bet") {
+  if (props.type === "upcoming-no-bet") {
     title = "Upcoming Judgements (No Bet)";
     description =
       "Here are the next ten predictions that are due to be judged that you haven't yet placed a bet for.";
   }
 
-  if (type === "search") {
+  if (props.type === "search") {
     title = "Search Results";
     description = `Here are the best ten prediction matches for keyword: ${options.keyword}`;
   }
 
-  const fields: APIEmbedField[] = predictions.map((pred) => {
+  const fields: APIEmbedField[] = props.predictions.map((pred) => {
     let date: Date = new Date();
     let titleDate: string = "";
 
-    if (type === "recent") {
+    if (props.type === "recent") {
       date = new Date(pred.created_date);
       titleDate = "Created";
     }
     if (
-      type === "upcoming" ||
-      type === "upcoming-mine" ||
-      type === "upcoming-no-bet" ||
-      type === "search"
+      props.type === "upcoming" ||
+      props.type === "upcoming-mine" ||
+      props.type === "upcoming-no-bet" ||
+      props.type === "search"
     ) {
       date = new Date(pred.due_date || pred.check_date);
       titleDate = pred.driver === "date" ? "Due" : "Checking";
@@ -83,5 +89,13 @@ export const generateListPredictionsEmbed = (
     fields,
   });
 
-  return embed;
+  return [embed];
 };
+
+export const generatePredictionListComponents =
+  (): BaseMessageOptions["components"] => {
+    const actionRow = new ActionRowBuilder<ButtonBuilder>();
+    actionRow.addComponents(getAdvancedSearchButton());
+
+    return [actionRow];
+  };

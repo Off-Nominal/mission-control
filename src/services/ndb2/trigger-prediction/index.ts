@@ -204,13 +204,12 @@ export default function TriggerPrediction({
     if (!interaction.isButton()) {
       return;
     }
-    const [command, predictionId, ...args] = interaction.customId.split(" ");
+    const [command, predictionId, closed_date] =
+      interaction.customId.split(" ");
 
     if (command !== "Trigger") {
       return;
     }
-
-    const closed_date = args[0];
 
     const logger = new Logger(
       "NDB2 Interaction",
@@ -268,10 +267,9 @@ export default function TriggerPrediction({
 
     // Trigger the prediction
     try {
-      const closeDate =
-        closed_date === ""
-          ? undefined
-          : add(new Date(closed_date), { hours: 23, minutes: 59, seconds: 59 });
+      const closeDate = closed_date
+        ? add(new Date(closed_date), { hours: 23, minutes: 59, seconds: 59 })
+        : undefined;
 
       await ndb2Client.triggerPrediction(
         prediction.id,
