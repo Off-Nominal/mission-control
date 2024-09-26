@@ -23,7 +23,7 @@ const MS_IN_A_MINUTE = 60000;
 const MAX_TITLE_SUGGESTIONS = 36;
 
 export class ManagedStream extends EventEmitter {
-  private active: boolean;
+  private active: boolean = false;
   private partyMessages: PartyMessage[] | null = null;
   private partyMessageTimers: NodeJS.Timeout[] = [];
   private titleSuggestions: TitleSuggestion[] = [];
@@ -43,6 +43,9 @@ export class ManagedStream extends EventEmitter {
   private sendPartyMessage(
     message: string | MessagePayload | MessageCreateOptions
   ) {
+    if (!this.forumPost) {
+      throw new Error("No forum post to send message to");
+    }
     return this.forumPost.send(message);
   }
 
@@ -98,6 +101,10 @@ export class ManagedStream extends EventEmitter {
   public endParty(): void {
     if (!this.active) {
       return;
+    }
+
+    if (!this.forumPost) {
+      throw new Error("No forum post to send message to");
     }
 
     const embed = createPollEmbed(

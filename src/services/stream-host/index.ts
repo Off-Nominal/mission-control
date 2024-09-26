@@ -38,13 +38,21 @@ export default function StreamHost({
       mcconfig.discord.channels.livechat
     );
 
-    if (!channel.isThreadOnly()) return;
+    if (!channel) {
+      return Promise.reject("Channel not found");
+    }
+
+    if (!channel.isThreadOnly()) {
+      return Promise.reject("Channel not a thread");
+    }
 
     const thread = await channel.threads.cache.find((thread) => {
-      return thread.name === title && thread.ownerId === eventsBot.user.id;
+      return thread.name === title && thread.ownerId === eventsBot.user?.id;
     });
 
-    if (!thread) return;
+    if (!thread) {
+      return Promise.reject("Thread not found");
+    }
 
     return thread;
   };
@@ -52,7 +60,7 @@ export default function StreamHost({
   eventsBot.on("guildScheduledEventUpdate", (oldEvent, newEvent) => {
     const isStream = rssProviders.yt.isStream(newEvent);
 
-    if (!isStream) {
+    if (!isStream || !oldEvent) {
       return;
     }
 
