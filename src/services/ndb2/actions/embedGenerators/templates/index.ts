@@ -44,6 +44,7 @@ import {
   generatePredictionEditComponents,
   generatePredictionEditEmbed,
 } from "./prediction_edit";
+import { generateScoresComponents, generateScoresEmbed } from "./scores";
 
 export const generateInteractionReplyFromTemplate = (
   ...props: EmbedTemplateArgs
@@ -106,6 +107,11 @@ export const generateInteractionReplyFromTemplate = (
     case NDB2EmbedTemplate.View.PREDICTION_EDIT: {
       const embeds = generatePredictionEditEmbed(args);
       const components = generatePredictionEditComponents(args.prediction.id);
+      return [embeds, components];
+    }
+    case NDB2EmbedTemplate.View.SCORES: {
+      const embeds = generateScoresEmbed(args);
+      const components = generateScoresComponents();
       return [embeds, components];
     }
     default: {

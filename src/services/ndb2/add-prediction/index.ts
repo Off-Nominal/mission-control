@@ -41,9 +41,9 @@ export default function AddPrediction({
 
     const baseMessage = `## What type of prediction would you like to make?`;
     const dateDriven = `__Date-Driven:__ Date driven predictions are defined by a due date which you provide. If not already triggered, the system will automatically put this prediction up for a vote on the due date.`;
-    const dateExample = `_Example:_ *By the end of 2050, Jake will produce a Valves T-shirt.*`;
+    const dateExample = `_Example:_ *By the end of this year, Favourite Launch Company™ will launch at least 1 bajillion times.*`;
     const eventDriven = `__Event-Driven:__ Event driven predictions are defined by an accompanying trigger event which you define. The system will never automatically put this prediction up for a vote (so keep an eye on it!). However, you will provide a "check date", which is date that the system will check in on this prediction and ask you if it should be triggered. Think of it as a helpful reminder and set it at the earliest possible date you think it might come true.`;
-    const eventExample = `_Example:_ *By the time the first person walks on Mars, Jake will produce a Valves T-shirt.*`;
+    const eventExample = `_Example:_ *Favourite Launch Company™ will launch 1 bajillion times before Evil Launch Company™ does.*`;
 
     const content = [
       baseMessage,
