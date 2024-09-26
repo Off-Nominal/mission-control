@@ -320,6 +320,42 @@ const embedFields = {
       value,
     };
   },
+  editedFields: (fields: { check_date?: { old: string; new: string } }) => {
+    if (!fields.check_date) {
+      return {
+        name: "Edited Fields",
+        value: "No fields were edited.",
+      };
+    }
+
+    const oldDate = new Date(fields.check_date.old);
+
+    const oldDateMessage = `🗓️ ${time(
+      oldDate,
+      TimestampStyles.LongDate
+    )} (${time(oldDate, TimestampStyles.RelativeTime)}) - Original`;
+
+    const newDate = new Date(fields.check_date.new);
+
+    const newDateMessage = `🗓️ ${time(
+      newDate,
+      TimestampStyles.LongDate
+    )} (${time(newDate, TimestampStyles.RelativeTime)}) - Edited`;
+
+    return {
+      name: "Check Date",
+      value: `${oldDateMessage}\n${newDateMessage}`,
+    };
+  },
+  standardFooter: (
+    predictionId: string | number,
+    driver: NDB2API.PredictionDriver
+  ) => {
+    const driverText = driver === "event" ? "Event-driven" : "Date-driven";
+    return {
+      text: `Prediction ID: ${predictionId} (${driverText})`,
+    };
+  },
 };
 
 export default embedFields;

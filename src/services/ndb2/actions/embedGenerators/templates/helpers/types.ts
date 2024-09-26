@@ -14,6 +14,7 @@ export namespace NDB2EmbedTemplate {
     LIST = "LIST",
     DETAILS = "DETAILS",
     SCORES = "SCORES",
+    PREDICTION_EDIT = "PREDICTION_EDIT",
   }
 
   export type Context = {
@@ -64,6 +65,17 @@ export namespace NDB2EmbedTemplate {
       predictionsLeaderboard: NDB2API.PredictionsLeader[];
       betsLeaderboard: NDB2API.BetsLeader[];
       pointsLeaderboard: NDB2API.PointsLeader[];
+    };
+
+    export type PredictionEdit = {
+      prediction: NDB2API.EnhancedPrediction;
+      predictor: GuildMember;
+      edited_fields: {
+        check_date: {
+          old: string;
+          new: string;
+        };
+      };
     };
 
     export type Leaderboard = (
@@ -118,4 +130,8 @@ export type EmbedTemplateArgs =
   | [NDB2EmbedTemplate.View.LEADERBOARD, NDB2EmbedTemplate.Args.Leaderboard]
   | [NDB2EmbedTemplate.View.LIST, NDB2EmbedTemplate.Args.List]
   | [NDB2EmbedTemplate.View.DETAILS, NDB2EmbedTemplate.Args.Details]
-  | [NDB2EmbedTemplate.View.SCORES, NDB2EmbedTemplate.Args.Scores];
+  | [NDB2EmbedTemplate.View.SCORES, NDB2EmbedTemplate.Args.Scores]
+  | [
+      NDB2EmbedTemplate.View.PREDICTION_EDIT,
+      NDB2EmbedTemplate.Args.PredictionEdit
+    ];

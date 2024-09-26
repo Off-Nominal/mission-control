@@ -53,9 +53,10 @@ export const generateStandardViewEmbed = (
     thumbnail: {
       url: getThumbnail(props.prediction.status),
     },
-    footer: {
-      text: `Prediction ID: ${props.prediction.id}`,
-    },
+    footer: embedFields.standardFooter(
+      props.prediction.id,
+      props.prediction.driver
+    ),
   });
 
   // Base Fields

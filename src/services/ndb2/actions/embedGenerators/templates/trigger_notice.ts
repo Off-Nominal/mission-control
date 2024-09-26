@@ -48,9 +48,10 @@ export const generateTriggerNoticeEmbed = (
       } by ${
         props.triggerer?.id ? `${userMention(props.triggerer.id)}` : "NDB2"
       }.` + `\n \u200B`,
-    footer: {
-      text: `Prediction ID: ${props.prediction.id}`,
-    },
+    footer: embedFields.standardFooter(
+      props.prediction.id,
+      props.prediction.driver
+    ),
   });
 
   // Base Fields

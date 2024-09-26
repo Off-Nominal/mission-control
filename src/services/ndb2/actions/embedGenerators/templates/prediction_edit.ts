@@ -8,31 +8,24 @@ import {
 import { getDetailsButton, getWebButton } from "./helpers/buttons";
 import embedFields from "./helpers/fields";
 import { getThumbnail } from "./helpers/helpers";
-import { NDB2API } from "../../../../../providers/ndb2-client";
 import { NDB2EmbedTemplate } from "./helpers/types";
 
-export const generateRetireNoticeEmbed = (
-  props: NDB2EmbedTemplate.Args.Retirement
+export const generatePredictionEditEmbed = (
+  props: NDB2EmbedTemplate.Args.PredictionEdit
 ): BaseMessageOptions["embeds"] => {
-  const created = new Date(props.prediction.created_date);
-  const due = new Date(props.prediction.due_date || 0);
-  const retired = new Date(props.prediction.retired_date || 0);
-
   const embed = new EmbedBuilder({
     author: {
       name: props.predictor.displayName,
       icon_url: props.predictor.displayAvatarURL(),
     },
     thumbnail: {
-      url: getThumbnail(props.prediction.status),
+      url: "https://res.cloudinary.com/dj5enq03a/image/upload/v1727366355/Discord%20Assets/dwdqxgufmjugkxpj5x8p.png",
     },
-    title: "Retirement Notice",
+    title: "Prediction Edited",
     description:
       `Prediction #${props.prediction.id} by ${userMention(
         props.prediction.predictor.discord_id
-      )} has been retired by ${userMention(
-        props.prediction.predictor.discord_id
-      )}.` + `\n \u200B`,
+      )} has been edited. Read below for changed fields.` + `\n \u200B`,
     footer: embedFields.standardFooter(
       props.prediction.id,
       props.prediction.driver
@@ -42,16 +35,14 @@ export const generateRetireNoticeEmbed = (
         name: "Prediction",
         value: props.prediction.text + `\n \u200B`,
       },
-      embedFields.date(created, "Created", { context: props.context }),
-      embedFields.date(due, "Original Due Date"),
-      embedFields.date(retired, "Retired"),
+      embedFields.editedFields(props.edited_fields),
     ],
   });
 
   return [embed];
 };
 
-export const generateRetirementNoticeComponents = (
+export const generatePredictionEditComponents = (
   predictionId: string | number
 ): BaseMessageOptions["components"] => {
   const actionRow = new ActionRowBuilder<ButtonBuilder>();

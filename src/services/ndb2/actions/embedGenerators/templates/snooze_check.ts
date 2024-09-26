@@ -77,9 +77,10 @@ export const generateSnoozeCheckEmbed = (
     },
     title,
     description,
-    footer: {
-      text: `Prediction ID: ${props.prediction.id}`,
-    },
+    footer: embedFields.standardFooter(
+      props.prediction.id,
+      props.prediction.driver
+    ),
   });
 
   // Base Fields

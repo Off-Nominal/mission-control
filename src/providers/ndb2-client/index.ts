@@ -389,6 +389,25 @@ export class Ndb2Client {
         throw handleError(err);
       });
   }
+
+  public snoozePrediction(
+    discord_id: string,
+    predictionId: string | number,
+    check_date: string | Date
+  ): Promise<NDB2API.SnoozePrediction> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${predictionId}/snooze`;
+
+    return this.client
+      .patch<NDB2API.SnoozePrediction>(url.toString(), {
+        discord_id,
+        check_date,
+      })
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
 }
 
 const ndbKey = mcconfig.ndb2.clientId;

@@ -1,4 +1,4 @@
-import { isPast } from "date-fns";
+import { isAfter, isPast } from "date-fns";
 import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { NDB2API, PredictionLifeCycle } from "../../../providers/ndb2-client";
@@ -76,8 +76,10 @@ export default function SnoozePrediction({
       return;
     }
 
+    const discordId = interaction.member.user.id;
+
     // Only predictor can snooze a prediction proactively
-    if (prediction.predictor.discord_id !== interaction.user.id) {
+    if (prediction.predictor.discord_id !== discordId) {
       logger.addLog(
         LogStatus.WARNING,
         `Someone other than the predictor is trying to snooze this prediction. Rejecting.`
@@ -144,31 +146,55 @@ export default function SnoozePrediction({
       return;
     }
 
-    // // generate response
-    // try {
-    //   const [embeds, components] = generateInteractionReplyFromTemplate(
-    //     NDB2EmbedTemplate.View.SNOOZE_CHECK,
-    //     {
-    //       prediction,
-    //       displayName: predictor?.displayName,
-    //       avatarUrl: predictor?.displayAvatarURL(),
-    //       context,
-    //     }
-    //   );
+    // Validate Check Date is after prediction created date
+    if (!isAfter(check_date, new Date(prediction.created_date))) {
+      interaction.reply({
+        content:
+          "Your Check date is before the prediction was created. Please try again with a later date. If you are trying to trigger this prediction, use the appropriate trigger commands.",
+        ephemeral: true,
+      });
+      logger.addLog(
+        LogStatus.WARNING,
+        `User entered check date that was before prediction created date, snooze rejected`
+      );
+      logger.sendLog(interaction.client);
+      return;
+    }
 
-    //   await interaction.reply({ embeds, components });
-    //   logger.addLog(
-    //     LogStatus.SUCCESS,
-    //     `Prediction embed was successfully delivered to channel.`
-    //   );
-    // } catch (err) {
-    //   logger.addLog(
-    //     LogStatus.FAILURE,
-    //     `There was an error sending the reply to the discord.`
-    //   );
-    //   console.error(err);
-    //   logger.sendLog(interaction.client);
-    //   return;
-    // }
+    try {
+      await ndb2Client.snoozePrediction(discordId, predictionId, checkDate);
+
+      logger.addLog(LogStatus.SUCCESS, `Prediction snoozed successfully.`);
+    } catch (err) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error snoozing the prediction.`
+      );
+      console.error(err);
+      logger.sendLog(interaction.client);
+
+      await interaction.reply({
+        content:
+          "Sorry, there was an error changing this check date. Please try again later.",
+      });
+      return;
+    }
+
+    // generate response
+    try {
+      await interaction.reply({
+        content:
+          "Thanks! I've snoozed that prediction. A notice will be published in the channel it was created.",
+      });
+      logger.addLog(LogStatus.SUCCESS, `Prediction successfully snoozed..`);
+    } catch (err) {
+      logger.addLog(
+        LogStatus.FAILURE,
+        `There was an error sending the reply to the discord.`
+      );
+      console.error(err);
+      logger.sendLog(interaction.client);
+      return;
+    }
   });
 }

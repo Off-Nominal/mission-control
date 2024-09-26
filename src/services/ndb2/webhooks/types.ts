@@ -9,6 +9,7 @@ export enum NDB2WebhookEvent {
   NEW_SNOOZE_CHECK = "new_snooze_check",
   NEW_SNOOZE_VOTE = "new_snooze_vote",
   SNOOZED_PREDICTION = "snoozed_prediction",
+  PREDICTION_EDIT = "prediction_edit",
   SEASON_START = "season_start",
   SEASON_END = "season_end",
 }

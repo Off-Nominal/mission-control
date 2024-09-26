@@ -36,9 +36,10 @@ export const generateJudgementNoticeEmbed = (
           ? "Nice work"
           : "Better luck next time"
       }!` + `\n \u200B`,
-    footer: {
-      text: `Prediction ID: ${props.prediction.id}`,
-    },
+    footer: embedFields.standardFooter(
+      props.prediction.id,
+      props.prediction.driver
+    ),
     fields: [
       {
         name: "Prediction",

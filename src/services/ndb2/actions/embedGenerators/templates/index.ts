@@ -40,6 +40,10 @@ import {
   generatePredictionDetailsComponents,
   generatePredictionDetailsEmbed,
 } from "./prediction_details";
+import {
+  generatePredictionEditComponents,
+  generatePredictionEditEmbed,
+} from "./prediction_edit";
 
 export const generateInteractionReplyFromTemplate = (
   ...props: EmbedTemplateArgs
@@ -54,7 +58,7 @@ export const generateInteractionReplyFromTemplate = (
     }
     case NDB2EmbedTemplate.View.RETIREMENT: {
       const embeds = generateRetireNoticeEmbed(args);
-      const components = generateRetirementNoticeComponents(args.prediction);
+      const components = generateRetirementNoticeComponents(args.prediction.id);
       return [embeds, components];
     }
     case NDB2EmbedTemplate.View.TRIGGER: {
@@ -97,6 +101,11 @@ export const generateInteractionReplyFromTemplate = (
       const components = generatePredictionDetailsComponents(
         args.prediction.id
       );
+      return [embeds, components];
+    }
+    case NDB2EmbedTemplate.View.PREDICTION_EDIT: {
+      const embeds = generatePredictionEditEmbed(args);
+      const components = generatePredictionEditComponents(args.prediction.id);
       return [embeds, components];
     }
     default: {

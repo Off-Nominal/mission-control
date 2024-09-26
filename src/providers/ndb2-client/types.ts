@@ -174,6 +174,8 @@ export namespace NDB2API {
 
   export type AddSnoozeVote = GeneralResponse<EnhancedPrediction>;
 
+  export type SnoozePrediction = GeneralResponse<EnhancedPrediction>;
+
   export type LeaderboardType = "points" | "predictions" | "bets";
 
   type GetLeaderboard<T> = GeneralResponse<{

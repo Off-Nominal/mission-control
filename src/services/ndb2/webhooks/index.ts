@@ -31,6 +31,7 @@ import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/
 import { handleSeasonStart } from "./handlers/season_start";
 import { handleSeasonEnd } from "./handlers/season_end";
 import { getGuildFromContext, getLoggerFromContext } from "./contexts";
+import NDB2 from "..";
 
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 
@@ -67,27 +68,56 @@ export default function createWebooksRouter(
       const sendMessage = generateSender(guild);
 
       if (event_name === NDB2WebhookEvent.SEASON_START) {
+        const season: NDB2API.Season = data.season;
+
+        if (!season) {
+          logger.addLog(
+            LogStatus.FAILURE,
+            "Season data was not present in the event, cannot process any further."
+          );
+          return logger.sendLog(ndb2Bot);
+        }
+
         return handleSeasonStart({
           guild,
           client: ndb2Bot,
-          season: data,
+          season,
         });
       }
 
       if (event_name === NDB2WebhookEvent.SEASON_END) {
+        const results: NDB2API.SeasonResults = data.results;
+
+        if (!results) {
+          logger.addLog(
+            LogStatus.FAILURE,
+            "Season data was not present in the event, cannot process any further."
+          );
+          return logger.sendLog(ndb2Bot);
+        }
+
         return handleSeasonEnd({
           ndb2Client,
           guild,
           client: ndb2Bot,
-          results: data,
+          results,
         });
       }
 
       // The remaning webhook events are prediction-based
+      const prediction: NDB2API.EnhancedPrediction = data.prediction;
+
+      if (!prediction) {
+        logger.addLog(
+          LogStatus.FAILURE,
+          "Prediction data was not present in the event, cannot process any further."
+        );
+        return logger.sendLog(ndb2Bot);
+      }
 
       // Fetch subscriptions to prediction in Discord
       const subsPromise = ndb2MsgSubscription
-        .fetchActiveSubs(data.id)
+        .fetchActiveSubs(prediction.id)
         .then((subs) => {
           logger.addLog(
             LogStatus.SUCCESS,
@@ -105,7 +135,7 @@ export default function createWebooksRouter(
 
       // Fetch discord user for Prediction
       const predictorPromise = guild.members
-        .fetch(data.predictor.discord_id)
+        .fetch(prediction.predictor.discord_id)
         .then((predictor) => {
           logger.addLog(
             LogStatus.SUCCESS,
@@ -117,32 +147,33 @@ export default function createWebooksRouter(
           logger.addLog(
             LogStatus.FAILURE,
             `Failed to fetch predictor User ${userMention(
-              data.predictor.discord_id
+              prediction.predictor.discord_id
             )} for this event, will fallback to defauls.`
           );
           throw err;
         });
 
       // Fetch Triggerer User from Discord
-      const triggererPromise: Promise<GuildMember | undefined> = data.triggerer
-        ? guild.members
-            .fetch(data.triggerer.discord_id)
-            .then((triggerer) => {
-              logger.addLog(
-                LogStatus.SUCCESS,
-                "Triggerer Discord profile successfully fetched"
-              );
-              return triggerer;
-            })
-            .catch((err) => {
-              console.error(err);
-              logger.addLog(
-                LogStatus.FAILURE,
-                `Failed to fetch triggerer from Discord, cannot post notice.`
-              );
-              throw err;
-            })
-        : Promise.resolve(undefined);
+      const triggererPromise: Promise<GuildMember | undefined> =
+        prediction.triggerer
+          ? guild.members
+              .fetch(prediction.triggerer.discord_id)
+              .then((triggerer) => {
+                logger.addLog(
+                  LogStatus.SUCCESS,
+                  "Triggerer Discord profile successfully fetched"
+                );
+                return triggerer;
+              })
+              .catch((err) => {
+                console.error(err);
+                logger.addLog(
+                  LogStatus.FAILURE,
+                  `Failed to fetch triggerer from Discord, cannot post notice.`
+                );
+                throw err;
+              })
+          : Promise.resolve(undefined);
 
       Promise.all([subsPromise, predictorPromise, triggererPromise])
         .then(([subs, predictor, triggerer]) => {
@@ -157,11 +188,13 @@ export default function createWebooksRouter(
 
           const updateBulkMessages = generateBulkMessageUpdater(subs, guild);
 
-          const updateStandardViews = () => {
+          const updateStandardViews = (
+            prediction: NDB2API.EnhancedPrediction
+          ) => {
             const standardViewOptions = generateInteractionReplyFromTemplate(
               NDB2EmbedTemplate.View.STANDARD,
               {
-                prediction: data,
+                prediction,
                 displayName: predictor?.displayName,
                 avatarUrl: predictor?.displayAvatarURL(),
                 context: contextMessage,
@@ -175,21 +208,48 @@ export default function createWebooksRouter(
           };
 
           switch (event_name) {
+            case NDB2WebhookEvent.PREDICTION_EDIT: {
+              const edited_fields = data.edited_fields;
+
+              if (!edited_fields) {
+                logger.addLog(
+                  LogStatus.FAILURE,
+                  "Edited fields were not present in the event, cannot process any further."
+                );
+                return logger.sendLog(ndb2Bot);
+              }
+
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Send notice of Edit
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.PREDICTION_EDIT,
+                {
+                  prediction,
+                  predictor,
+                  edited_fields,
+                }
+              );
+
+              sendMessage(contextChannelId, embeds, components);
+              break;
+            }
             case NDB2WebhookEvent.RETIRED_PREDICTION: {
               // update VIEW subs
-              updateStandardViews();
+              updateStandardViews(prediction);
 
               break;
             }
             case NDB2WebhookEvent.TRIGGERED_PREDICTION: {
               // update VIEW subs
-              updateStandardViews();
+              updateStandardViews(prediction);
 
               // Send Trigger Notice
               const [embeds, components] = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.TRIGGER,
                 {
-                  prediction: data,
+                  prediction,
                   predictor,
                   client: ndb2Bot,
                   triggerer,
@@ -202,7 +262,7 @@ export default function createWebooksRouter(
                   // Log the trigger notice subscription
                   ndb2MsgSubscription.addSubscription(
                     API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
-                    data.id,
+                    prediction.id,
                     message.channel.id,
                     message.id,
                     add(new Date(), { hours: 36 })
@@ -214,7 +274,7 @@ export default function createWebooksRouter(
             }
             case NDB2WebhookEvent.TRIGGERED_SNOOZE: {
               // update VIEW subs
-              updateStandardViews();
+              updateStandardViews(prediction);
 
               // Shut down Snooze Notice
               const messages = fetchMessagesFromSubs(
@@ -226,7 +286,7 @@ export default function createWebooksRouter(
               const snoozeCheckMessage = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.SNOOZE_CHECK,
                 {
-                  prediction: data,
+                  prediction,
                   client: ndb2Bot,
                   context: contextMessage,
                 }
@@ -245,7 +305,7 @@ export default function createWebooksRouter(
               const triggerNoticeMessage = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.TRIGGER,
                 {
-                  prediction: data,
+                  prediction,
                   predictor,
                   client: ndb2Bot,
                   triggerer,
@@ -258,7 +318,7 @@ export default function createWebooksRouter(
                   // Log the trigger notice subscription
                   ndb2MsgSubscription.addSubscription(
                     API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
-                    data.id,
+                    prediction.id,
                     message.channel.id,
                     message.id,
                     add(new Date(), { hours: 36 })
@@ -269,13 +329,13 @@ export default function createWebooksRouter(
             }
             case NDB2WebhookEvent.JUDGED_PREDICTION: {
               // update VIEW subs
-              updateStandardViews();
+              updateStandardViews(prediction);
 
               // Send Judgement Notice
               const [embeds, components] = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.JUDGEMENT,
                 {
-                  prediction: data,
+                  prediction,
                   client: ndb2Bot,
                   context: contextMessage,
                 }
@@ -286,7 +346,7 @@ export default function createWebooksRouter(
                   // Log the trigger notice subscription
                   ndb2MsgSubscription.addSubscription(
                     API.Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
-                    data.id,
+                    prediction.id,
                     message.channel.id,
                     message.id,
                     add(new Date(), { hours: 36 })
@@ -297,18 +357,18 @@ export default function createWebooksRouter(
             }
             case NDB2WebhookEvent.NEW_BET: {
               // update VIEW subs
-              updateStandardViews();
+              updateStandardViews(prediction);
               break;
             }
             case NDB2WebhookEvent.NEW_VOTE: {
               // update VIEW subs
-              updateStandardViews();
+              updateStandardViews(prediction);
 
               // Update Trigger Notice
               const [embeds, components] = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.TRIGGER,
                 {
-                  prediction: data,
+                  prediction,
                   predictor,
                   client: ndb2Bot,
                   triggerer,
@@ -327,7 +387,7 @@ export default function createWebooksRouter(
               const [embeds, components] = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.SNOOZE_CHECK,
                 {
-                  prediction: data,
+                  prediction,
                   client: ndb2Bot,
                   context: contextMessage,
                 }
@@ -344,7 +404,7 @@ export default function createWebooksRouter(
               const [embeds, components] = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.SNOOZE_CHECK,
                 {
-                  prediction: data,
+                  prediction,
                   client: ndb2Bot,
                   context: contextMessage,
                 }
@@ -361,7 +421,7 @@ export default function createWebooksRouter(
               const [embeds, components] = generateInteractionReplyFromTemplate(
                 NDB2EmbedTemplate.View.SNOOZE_CHECK,
                 {
-                  prediction: data,
+                  prediction,
                   client: ndb2Bot,
                   context: contextMessage,
                 }
@@ -372,7 +432,7 @@ export default function createWebooksRouter(
                   // Log the trigger notice subscription
                   ndb2MsgSubscription.addSubscription(
                     API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
-                    data.id,
+                    prediction.id,
                     message.channel.id,
                     message.id,
                     add(new Date(), { hours: 36 })
