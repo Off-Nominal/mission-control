@@ -2,8 +2,6 @@ import { isAfter, isPast } from "date-fns";
 import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { NDB2API, PredictionLifeCycle } from "../../../providers/ndb2-client";
-import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
-import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 
 export default function SnoozePrediction({

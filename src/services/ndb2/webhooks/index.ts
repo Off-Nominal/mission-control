@@ -208,6 +208,32 @@ export default function createWebooksRouter(
           };
 
           switch (event_name) {
+            case NDB2WebhookEvent.UNTRIGGERED_PREDICTION: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Delete any trigger notices
+              const messages = fetchMessagesFromSubs(
+                subs,
+                [API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE],
+                guild
+              );
+
+              messages.map((mp) => {
+                return mp.then((m) => {
+                  return m.delete();
+                });
+              });
+
+              // Expire any subs for trigger notices
+              const triggerSubs = subs.filter(
+                (s) => s.type === API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE
+              );
+
+              triggerSubs.map((sub) => {
+                return ndb2MsgSubscription.expireSubById(sub.id);
+              });
+            }
             case NDB2WebhookEvent.PREDICTION_EDIT: {
               const edited_fields = data.edited_fields;
 
@@ -414,6 +440,15 @@ export default function createWebooksRouter(
                 embeds,
                 components,
               });
+
+              // Expire any subs for snooze notices
+              const triggerSubs = subs.filter(
+                (s) => s.type === API.Ndb2MsgSubscriptionType.SNOOZE_CHECK
+              );
+
+              triggerSubs.map((sub) => {
+                return ndb2MsgSubscription.expireSubById(sub.id);
+              });
               break;
             }
             case NDB2WebhookEvent.NEW_SNOOZE_CHECK: {
@@ -435,7 +470,7 @@ export default function createWebooksRouter(
                     prediction.id,
                     message.channel.id,
                     message.id,
-                    add(new Date(), { hours: 36 })
+                    add(new Date(), { hours: 24 })
                   );
                 }
               );
