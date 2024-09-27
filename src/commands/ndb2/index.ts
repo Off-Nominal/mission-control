@@ -15,6 +15,7 @@ export enum Ndb2Subcommand {
   LIST = "list",
   SEARCH = "search",
   LEADERBOARDS = "leaderboards",
+  SNOOZE = "snooze",
 }
 
 const listOptions: APIApplicationCommandOptionChoice<string>[] = [
@@ -86,6 +87,28 @@ const predictCommand = new SlashCommandBuilder()
           .setDescription(
             "Effective Date of close (if this prediction is being triggered late). Format YYYY-MM-DD"
           )
+          .setMinLength(10)
+          .setMaxLength(10)
+      )
+  )
+  .addSubcommand((command) =>
+    command
+      .setName(Ndb2Subcommand.SNOOZE)
+      .setDescription("Change the check date of an Event-driven prediction")
+      .addIntegerOption((option) =>
+        option
+          .setName("id")
+          .setDescription("Prediction ID")
+          .setRequired(true)
+          .setMaxValue(2147483647)
+      )
+      .addStringOption((option) =>
+        option
+          .setName("check_date")
+          .setDescription(
+            "What date should NDB2 check up on this prediction? Format YYYY-MM-DD"
+          )
+          .setRequired(true)
           .setMinLength(10)
           .setMaxLength(10)
       )

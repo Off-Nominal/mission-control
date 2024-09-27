@@ -3,8 +3,9 @@ import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { NDB2API } from "../../../providers/ndb2-client";
 import { API } from "../../../providers/db/models/types";
-import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 import { add } from "date-fns";
+import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
+import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
 export default function ViewPrediction({
   ndb2Client,
@@ -29,12 +30,12 @@ export default function ViewPrediction({
       "NDB2 Slash Command View Prediction"
     );
 
+    const predictionId = options.getInteger("id", true);
+
     logger.addLog(
       LogStatus.INFO,
-      `Received a RETIRE Prediction request, validating data and initiating confirmation message.`
+      `Received a View Prediction request for prediction ID: ${predictionId}`
     );
-
-    const predictionId = options.getInteger("id", true);
 
     let prediction: NDB2API.EnhancedPrediction;
 
@@ -101,6 +102,7 @@ export default function ViewPrediction({
     // Fetch Context
     let context: { messageId: string; channelId: string } | undefined;
     let contextSub: API.Ndb2MsgSubscription;
+
     try {
       const contextSubs = await models.ndb2MsgSubscription.fetchSubByType(
         prediction.id,
@@ -126,8 +128,17 @@ export default function ViewPrediction({
 
     // generate response
     try {
-      const reply = generatePredictionResponse(predictor, prediction, context);
-      await interaction.reply(reply);
+      const [embeds, components] = generateInteractionReplyFromTemplate(
+        NDB2EmbedTemplate.View.STANDARD,
+        {
+          prediction,
+          displayName: predictor?.displayName,
+          avatarUrl: predictor?.displayAvatarURL(),
+          context,
+        }
+      );
+
+      await interaction.reply({ embeds, components });
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction embed was successfully delivered to channel.`

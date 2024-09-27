@@ -46,6 +46,8 @@ export enum SortByOption {
   CREATED_DESC = "created_date-desc",
   DUE_ASC = "due_date-asc",
   DUE_DESC = "due_date-desc",
+  CHECK_ASC = "check_date-asc",
+  CHECK_DESC = "check_date-desc",
   RETIRED_ASC = "retired_date-asc",
   RETIRED_DESC = "retired_date-desc",
   TRIGGERED_ASC = "triggered_date-asc",
@@ -125,11 +127,11 @@ const handleError = (err: any): [string, string] => {
 };
 
 export class Ndb2Client {
-  private baseURL = mcconfig.ndb2.baseUrl;
+  private baseURL = mcconfig.ndb2.baseUrl || "";
   private client: AxiosInstance;
   private seasons: NDB2API.Season[] = [];
 
-  constructor(key) {
+  constructor(key: string | undefined) {
     this.client = axios.create({
       headers: {
         Authorization: `Bearer ${key}`,
@@ -159,7 +161,7 @@ export class Ndb2Client {
       });
   }
 
-  public getSeason(id: string | number): NDB2API.Season {
+  public getSeason(id: string | number): NDB2API.Season | undefined {
     return this.seasons.find((season) => season.id === id);
   }
 
@@ -178,16 +180,14 @@ export class Ndb2Client {
   public addPrediction(
     discord_id: string,
     text: string,
-    due_date: string
+    driver: { due_date: string | Date } | { check_date: string | Date }
   ): Promise<NDB2API.AddPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = "api/predictions";
+
+    const body = Object.assign({ discord_id, text }, driver);
     return this.client
-      .post<NDB2API.AddPrediction>(url.toString(), {
-        text,
-        due_date,
-        discord_id,
-      })
+      .post<NDB2API.AddPrediction>(url.toString(), body)
       .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);
@@ -223,6 +223,25 @@ export class Ndb2Client {
       .post<NDB2API.AddVote>(url.toString(), {
         discord_id,
         vote,
+      })
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public addSnoozeVote(
+    predictionId: string | number,
+    snoozeCheckId: string | number,
+    discord_id: string | number,
+    value: NDB2API.SnoozeOptions
+  ): Promise<NDB2API.AddSnoozeVote> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${predictionId}/snooze_checks/${snoozeCheckId}`;
+    return this.client
+      .post<NDB2API.AddSnoozeVote>(url.toString(), {
+        discord_id,
+        value,
       })
       .then((res) => res.data)
       .catch((err) => {
@@ -288,7 +307,7 @@ export class Ndb2Client {
 
     if (options.status) {
       options.status.forEach((option) => {
-        params.set("status", option);
+        params.append("status", option);
       });
     }
 
@@ -298,7 +317,7 @@ export class Ndb2Client {
 
     if (options.sort_by) {
       options.sort_by.forEach((option) => {
-        params.set("sort_by", option);
+        params.append("sort_by", option);
       });
     }
 
@@ -365,6 +384,25 @@ export class Ndb2Client {
 
     return this.client
       .get<NDB2API.GetBetsLeaderboard>(url.toString())
+      .then((res) => res.data)
+      .catch((err) => {
+        throw handleError(err);
+      });
+  }
+
+  public snoozePrediction(
+    discord_id: string,
+    predictionId: string | number,
+    check_date: string | Date
+  ): Promise<NDB2API.SnoozePrediction> {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/predictions/${predictionId}/snooze`;
+
+    return this.client
+      .patch<NDB2API.SnoozePrediction>(url.toString(), {
+        discord_id,
+        check_date,
+      })
       .then((res) => res.data)
       .catch((err) => {
         throw handleError(err);

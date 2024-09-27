@@ -2,7 +2,9 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { NDB2API } from "../../../providers/ndb2-client";
-import { generatePredictionDetailsEmbed } from "../actions/embedGenerators/generatePredictionDetailsEmbed";
+import { generatePredictionDetailsEmbed } from "../actions/embedGenerators/templates/prediction_details";
+import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
+import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
 export default function ViewDetails({ ndb2Client, ndb2Bot }: Providers) {
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -44,23 +46,18 @@ export default function ViewDetails({ ndb2Client, ndb2Bot }: Providers) {
 
     const userRequestedSeason = args[0] === "Season";
 
-    const embed = generatePredictionDetailsEmbed(
-      prediction,
-      userRequestedSeason
-    );
-
-    const actionRow = new ActionRowBuilder<ButtonBuilder>();
-    actionRow.addComponents(
-      new ButtonBuilder()
-        .setLabel("View on Web")
-        .setURL("https://ndb.offnom.com/predictions/" + prediction.id)
-        .setStyle(ButtonStyle.Link)
+    const [embeds, components] = generateInteractionReplyFromTemplate(
+      NDB2EmbedTemplate.View.DETAILS,
+      {
+        prediction,
+        season: userRequestedSeason,
+      }
     );
 
     try {
       interaction.reply({
-        embeds: [embed],
-        components: [actionRow],
+        embeds,
+        components,
         ephemeral: true,
       });
       logger.addLog(

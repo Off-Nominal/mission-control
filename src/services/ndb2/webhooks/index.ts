@@ -1,148 +1,488 @@
 import mcconfig from "../../../mcconfig";
 
 // Modules
-import express, { Router } from "express";
+import express, { Request, Router } from "express";
 import { Client, GuildMember, userMention } from "discord.js";
+import { add } from "date-fns";
 
 // Providers
-import { LogInitiator, Logger, LogStatus } from "../../../logger/Logger";
-
-// Actions
-import { updatePredictionEmbeds } from "../actions/updatePredictionEmbeds";
-import { sendPublicNotice } from "../actions/sendPublicNotice";
-import fetchGuild from "../../../helpers/fetchGuild";
-import { sendSeasonStartNotice } from "../actions/sendSeasonStartNotice";
-import { sendSeasonEndNotice } from "../actions/sendSeasonEndNotice";
-
-import { NDB2WebhookEvent, isNdb2WebhookEvent } from "./types";
+import { LogStatus } from "../../../logger/Logger";
+import { NDB2API, Ndb2Client } from "../../../providers/ndb2-client";
 import { Ndb2MsgSubscription } from "../../../providers/db/models/Ndb2MsgSubscription";
 import { API } from "../../../providers/db/models/types";
-export * from "./types";
+
+// Actions
+import { NDB2WebhookEvent } from "./types";
+import {
+  guildProvider,
+  logRequest,
+  validateWebhookAuthorization,
+  validateWebhookEvent,
+  webhookResponser,
+} from "./middleware";
+import {
+  getSubByType,
+  fetchMessagesFromSubs,
+  generateSender,
+  generateBulkMessageUpdater,
+} from "./helpers";
+import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
+import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
+import { handleSeasonStart } from "./handlers/season_start";
+import { handleSeasonEnd } from "./handlers/season_end";
+import { getGuildFromContext, getLoggerFromContext } from "./contexts";
+import NDB2 from "..";
+
+const fallbackContextChannelId = mcconfig.discord.channels.general;
 
 export default function createWebooksRouter(
   ndb2Bot: Client,
+  ndb2Client: Ndb2Client,
   ndb2MsgSubscription: Ndb2MsgSubscription
 ): Router {
   const router = express.Router();
 
-  router.post("/ndb2", async (req, res) => {
-    const logger = new Logger(
-      "Webhook Receipt",
-      LogInitiator.NDB2,
-      "A webhook was recieved from NDB2"
-    );
+  router.post(
+    "/ndb2",
+    [
+      validateWebhookAuthorization,
+      validateWebhookEvent,
+      webhookResponser,
+      logRequest,
+      guildProvider(ndb2Bot),
+    ],
+    async (req: Request) => {
+      const logger = getLoggerFromContext();
+      const guild = getGuildFromContext();
 
-    // verify source of webhook
-    if (req.headers.authorization !== `Bearer ${mcconfig.ndb2.clientId}`) {
-      logger.addLog(
-        LogStatus.FAILURE,
-        "Webhook did not have sufficient credentials, rejecting."
-      );
-      logger.sendLog(ndb2Bot);
-      return res.status(401).json({
-        error: "Authentication credentials missing or incorrect.",
-      });
-    } else {
-      logger.addLog(LogStatus.SUCCESS, "Webhook credentials verified.");
+      const { event_name, data } = req.body;
+
+      if (event_name === NDB2WebhookEvent.NEW_PREDICTION) {
+        logger.addLog(
+          LogStatus.INFO,
+          "Event was NEW PREDICTION, which is currently ignored."
+        );
+        return logger.sendLog(ndb2Bot);
+      }
+
+      const sendMessage = generateSender(guild);
+
+      if (event_name === NDB2WebhookEvent.SEASON_START) {
+        const season: NDB2API.Season = data.season;
+
+        if (!season) {
+          logger.addLog(
+            LogStatus.FAILURE,
+            "Season data was not present in the event, cannot process any further."
+          );
+          return logger.sendLog(ndb2Bot);
+        }
+
+        return handleSeasonStart({
+          guild,
+          client: ndb2Bot,
+          season,
+        });
+      }
+
+      if (event_name === NDB2WebhookEvent.SEASON_END) {
+        const results: NDB2API.SeasonResults = data.results;
+
+        if (!results) {
+          logger.addLog(
+            LogStatus.FAILURE,
+            "Season data was not present in the event, cannot process any further."
+          );
+          return logger.sendLog(ndb2Bot);
+        }
+
+        return handleSeasonEnd({
+          ndb2Client,
+          guild,
+          client: ndb2Bot,
+          results,
+        });
+      }
+
+      // The remaning webhook events are prediction-based
+      const prediction: NDB2API.EnhancedPrediction = data.prediction;
+
+      if (!prediction) {
+        logger.addLog(
+          LogStatus.FAILURE,
+          "Prediction data was not present in the event, cannot process any further."
+        );
+        return logger.sendLog(ndb2Bot);
+      }
+
+      // Fetch subscriptions to prediction in Discord
+      const subsPromise = ndb2MsgSubscription
+        .fetchActiveSubs(prediction.id)
+        .then((subs) => {
+          logger.addLog(
+            LogStatus.SUCCESS,
+            `Successfully fetched ${subs.length} subscriptions to process for this event.`
+          );
+          return subs;
+        })
+        .catch((err) => {
+          logger.addLog(
+            LogStatus.FAILURE,
+            `Failed to fetch message subscriptions for this event, cannot process any further.`
+          );
+          throw err;
+        });
+
+      // Fetch discord user for Prediction
+      const predictorPromise = guild.members
+        .fetch(prediction.predictor.discord_id)
+        .then((predictor) => {
+          logger.addLog(
+            LogStatus.SUCCESS,
+            `Successfully fetched predictor User ${userMention(predictor.id)}.`
+          );
+          return predictor;
+        })
+        .catch((err) => {
+          logger.addLog(
+            LogStatus.FAILURE,
+            `Failed to fetch predictor User ${userMention(
+              prediction.predictor.discord_id
+            )} for this event, will fallback to defauls.`
+          );
+          throw err;
+        });
+
+      // Fetch Triggerer User from Discord
+      const triggererPromise: Promise<GuildMember | undefined> =
+        prediction.triggerer
+          ? guild.members
+              .fetch(prediction.triggerer.discord_id)
+              .then((triggerer) => {
+                logger.addLog(
+                  LogStatus.SUCCESS,
+                  "Triggerer Discord profile successfully fetched"
+                );
+                return triggerer;
+              })
+              .catch((err) => {
+                console.error(err);
+                logger.addLog(
+                  LogStatus.FAILURE,
+                  `Failed to fetch triggerer from Discord, cannot post notice.`
+                );
+                throw err;
+              })
+          : Promise.resolve(undefined);
+
+      Promise.all([subsPromise, predictorPromise, triggererPromise])
+        .then(([subs, predictor, triggerer]) => {
+          logger.addLog(LogStatus.INFO, `Passing log to update functions.`);
+
+          const contextMessage = getSubByType(
+            subs,
+            API.Ndb2MsgSubscriptionType.CONTEXT
+          );
+          const contextChannelId =
+            contextMessage?.channelId ?? fallbackContextChannelId;
+
+          const updateBulkMessages = generateBulkMessageUpdater(subs, guild);
+
+          const updateStandardViews = (
+            prediction: NDB2API.EnhancedPrediction
+          ) => {
+            const standardViewOptions = generateInteractionReplyFromTemplate(
+              NDB2EmbedTemplate.View.STANDARD,
+              {
+                prediction,
+                displayName: predictor?.displayName,
+                avatarUrl: predictor?.displayAvatarURL(),
+                context: contextMessage,
+              }
+            );
+
+            updateBulkMessages([API.Ndb2MsgSubscriptionType.VIEW], {
+              embeds: standardViewOptions[0],
+              components: standardViewOptions[1],
+            });
+          };
+
+          switch (event_name) {
+            case NDB2WebhookEvent.UNTRIGGERED_PREDICTION: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Delete any trigger notices
+              const messages = fetchMessagesFromSubs(
+                subs,
+                [API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE],
+                guild
+              );
+
+              messages.map((mp) => {
+                return mp.then((m) => {
+                  return m.delete();
+                });
+              });
+
+              // Expire any subs for trigger notices
+              const triggerSubs = subs.filter(
+                (s) => s.type === API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE
+              );
+
+              triggerSubs.map((sub) => {
+                return ndb2MsgSubscription.expireSubById(sub.id);
+              });
+            }
+            case NDB2WebhookEvent.PREDICTION_EDIT: {
+              const edited_fields = data.edited_fields;
+
+              if (!edited_fields) {
+                logger.addLog(
+                  LogStatus.FAILURE,
+                  "Edited fields were not present in the event, cannot process any further."
+                );
+                return logger.sendLog(ndb2Bot);
+              }
+
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Send notice of Edit
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.PREDICTION_EDIT,
+                {
+                  prediction,
+                  predictor,
+                  edited_fields,
+                }
+              );
+
+              sendMessage(contextChannelId, embeds, components);
+              break;
+            }
+            case NDB2WebhookEvent.RETIRED_PREDICTION: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              break;
+            }
+            case NDB2WebhookEvent.TRIGGERED_PREDICTION: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Send Trigger Notice
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.TRIGGER,
+                {
+                  prediction,
+                  predictor,
+                  client: ndb2Bot,
+                  triggerer,
+                  context: contextMessage,
+                }
+              );
+
+              sendMessage(contextChannelId, embeds, components).then(
+                (message) => {
+                  // Log the trigger notice subscription
+                  ndb2MsgSubscription.addSubscription(
+                    API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+                    prediction.id,
+                    message.channel.id,
+                    message.id,
+                    add(new Date(), { hours: 36 })
+                  );
+                }
+              );
+
+              break;
+            }
+            case NDB2WebhookEvent.TRIGGERED_SNOOZE: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Shut down Snooze Notice
+              const messages = fetchMessagesFromSubs(
+                subs,
+                [API.Ndb2MsgSubscriptionType.SNOOZE_CHECK],
+                guild
+              );
+
+              const snoozeCheckMessage = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.SNOOZE_CHECK,
+                {
+                  prediction,
+                  client: ndb2Bot,
+                  context: contextMessage,
+                }
+              );
+
+              messages.map((mp) => {
+                return mp.then((m) => {
+                  return m.edit({
+                    embeds: snoozeCheckMessage[0],
+                    components: snoozeCheckMessage[1],
+                  });
+                });
+              });
+
+              // Send Trigger Notice
+              const triggerNoticeMessage = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.TRIGGER,
+                {
+                  prediction,
+                  predictor,
+                  client: ndb2Bot,
+                  triggerer,
+                  context: contextMessage,
+                }
+              );
+
+              sendMessage(contextChannelId, ...triggerNoticeMessage).then(
+                (message) => {
+                  // Log the trigger notice subscription
+                  ndb2MsgSubscription.addSubscription(
+                    API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+                    prediction.id,
+                    message.channel.id,
+                    message.id,
+                    add(new Date(), { hours: 36 })
+                  );
+                }
+              );
+              break;
+            }
+            case NDB2WebhookEvent.JUDGED_PREDICTION: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Send Judgement Notice
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.JUDGEMENT,
+                {
+                  prediction,
+                  client: ndb2Bot,
+                  context: contextMessage,
+                }
+              );
+
+              sendMessage(contextChannelId, embeds, components).then(
+                (message) => {
+                  // Log the trigger notice subscription
+                  ndb2MsgSubscription.addSubscription(
+                    API.Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
+                    prediction.id,
+                    message.channel.id,
+                    message.id,
+                    add(new Date(), { hours: 36 })
+                  );
+                }
+              );
+              break;
+            }
+            case NDB2WebhookEvent.NEW_BET: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+              break;
+            }
+            case NDB2WebhookEvent.NEW_VOTE: {
+              // update VIEW subs
+              updateStandardViews(prediction);
+
+              // Update Trigger Notice
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.TRIGGER,
+                {
+                  prediction,
+                  predictor,
+                  client: ndb2Bot,
+                  triggerer,
+                  context: contextMessage,
+                }
+              );
+
+              updateBulkMessages([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE], {
+                embeds,
+                components,
+              });
+              break;
+            }
+            case NDB2WebhookEvent.NEW_SNOOZE_VOTE: {
+              // update SNOOZE subs
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.SNOOZE_CHECK,
+                {
+                  prediction,
+                  client: ndb2Bot,
+                  context: contextMessage,
+                }
+              );
+
+              updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
+                embeds,
+                components,
+              });
+              break;
+            }
+            case NDB2WebhookEvent.SNOOZED_PREDICTION: {
+              // update SNOOZE subs
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.SNOOZE_CHECK,
+                {
+                  prediction,
+                  client: ndb2Bot,
+                  context: contextMessage,
+                }
+              );
+
+              updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
+                embeds,
+                components,
+              });
+
+              // Expire any subs for snooze notices
+              const triggerSubs = subs.filter(
+                (s) => s.type === API.Ndb2MsgSubscriptionType.SNOOZE_CHECK
+              );
+
+              triggerSubs.map((sub) => {
+                return ndb2MsgSubscription.expireSubById(sub.id);
+              });
+              break;
+            }
+            case NDB2WebhookEvent.NEW_SNOOZE_CHECK: {
+              // Send Snooze Check
+              const [embeds, components] = generateInteractionReplyFromTemplate(
+                NDB2EmbedTemplate.View.SNOOZE_CHECK,
+                {
+                  prediction,
+                  client: ndb2Bot,
+                  context: contextMessage,
+                }
+              );
+
+              sendMessage(contextChannelId, embeds, components).then(
+                (message) => {
+                  // Log the trigger notice subscription
+                  ndb2MsgSubscription.addSubscription(
+                    API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
+                    prediction.id,
+                    message.channel.id,
+                    message.id,
+                    add(new Date(), { hours: 24 })
+                  );
+                }
+              );
+              break;
+            }
+          }
+        })
+        .finally(() => {
+          logger.sendLog(ndb2Bot);
+        });
     }
-
-    const { event_name, data } = req.body;
-
-    // verify body
-    if (!isNdb2WebhookEvent(event_name)) {
-      logger.addLog(
-        LogStatus.FAILURE,
-        `Webhook body data was not a recognized Webhook event, rejecting. Event name was '${event_name}'.`
-      );
-      logger.sendLog(ndb2Bot);
-      return res.json("no thank u");
-    } else {
-      logger.addLog(LogStatus.INFO, `Event is '${event_name}'`);
-    }
-
-    // tell the API to go away
-    res.json("thank u");
-    logger.addLog(LogStatus.INFO, "Responded to webhook.");
-
-    if (event_name === NDB2WebhookEvent.NEW_PREDICTION) {
-      logger.addLog(
-        LogStatus.INFO,
-        "Event was NEW PREDICTION, which is currently ignored."
-      );
-      return logger.sendLog(ndb2Bot);
-    }
-
-    if (event_name === NDB2WebhookEvent.SEASON_START) {
-      logger.addLog(
-        LogStatus.INFO,
-        "Event was SEASON START, generating embed notice."
-      );
-      return sendSeasonStartNotice(ndb2Bot, data);
-    }
-
-    if (event_name === NDB2WebhookEvent.SEASON_END) {
-      logger.addLog(
-        LogStatus.INFO,
-        "Event was SEASON END, generating embed notice."
-      );
-      return sendSeasonEndNotice(ndb2Bot, data);
-    }
-
-    // Fetch subscriptions to events
-    let subs: API.Ndb2MsgSubscription[];
-    try {
-      subs = await ndb2MsgSubscription.fetchActiveSubs(data.id);
-      logger.addLog(
-        LogStatus.SUCCESS,
-        `Successfully fetched ${subs.length} subscriptions to process for this event.`
-      );
-    } catch (err) {
-      logger.addLog(
-        LogStatus.FAILURE,
-        `Failed to fetch message subscriptions for this event, cannot process any further.`
-      );
-      logger.sendLog(ndb2Bot);
-      return console.error(err);
-    }
-
-    const guild = fetchGuild(ndb2Bot);
-
-    // Fetch Guild Member for Predictor
-    let predictor: GuildMember | undefined = undefined;
-    try {
-      predictor = await guild.members.fetch(data.predictor.discord_id);
-      logger.addLog(
-        LogStatus.SUCCESS,
-        `Successfully fetched predictor User ${userMention(predictor.id)}.`
-      );
-    } catch (err) {
-      logger.addLog(
-        LogStatus.FAILURE,
-        `Failed to fetch predictor User ${userMention(
-          data.predictor.discord_id
-        )} for this event, will fallback to defauls.`
-      );
-    }
-
-    logger.addLog(LogStatus.INFO, `Passing log to update functions.`);
-    logger.sendLog(ndb2Bot);
-
-    updatePredictionEmbeds(ndb2Bot, subs, predictor, data);
-
-    if (
-      event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
-      event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
-      event_name === NDB2WebhookEvent.JUDGED_PREDICTION
-    ) {
-      sendPublicNotice(
-        ndb2Bot,
-        ndb2MsgSubscription,
-        predictor,
-        data,
-        event_name
-      );
-    }
-  });
+  );
 
   return router;
 }

@@ -1,5 +1,6 @@
 export enum PredictionLifeCycle {
   OPEN = "open",
+  CHECKING = "checking",
   RETIRED = "retired",
   CLOSED = "closed",
   SUCCESSFUL = "successful",
@@ -15,6 +16,14 @@ export enum ErrorCode {
 }
 
 export namespace NDB2API {
+  export enum SnoozeOptions {
+    DAY = 1,
+    WEEK = 7,
+    MONTH = 30,
+    QUARTER = 90,
+    YEAR = 365,
+  }
+
   export type GeneralResponse<T = null> = {
     success: boolean;
     errorCode?: ErrorCode;
@@ -46,6 +55,8 @@ export namespace NDB2API {
     };
   };
 
+  export type PredictionDriver = "event" | "date";
+
   export type EnhancedPrediction = {
     id: number;
     predictor: {
@@ -53,10 +64,13 @@ export namespace NDB2API {
       discord_id: string;
     };
     text: string;
+    driver: PredictionDriver;
     season_id: number;
     season_applicable: boolean;
     created_date: string;
     due_date: string | null;
+    check_date: string | null;
+    last_check_date: string | null;
     closed_date: string | null;
     triggered_date: string | null;
     triggerer: {
@@ -68,6 +82,7 @@ export namespace NDB2API {
     status: PredictionLifeCycle;
     bets: EnhancedPredictionBet[];
     votes: EnhancedPredictionVote[];
+    checks: Omit<EnhancedSnoozeCheck, "prediction_id">[];
     payouts: {
       endorse: number;
       undorse: number;
@@ -157,6 +172,10 @@ export namespace NDB2API {
 
   export type AddVote = GeneralResponse<EnhancedPrediction>;
 
+  export type AddSnoozeVote = GeneralResponse<EnhancedPrediction>;
+
+  export type SnoozePrediction = GeneralResponse<EnhancedPrediction>;
+
   export type LeaderboardType = "points" | "predictions" | "bets";
 
   type GetLeaderboard<T> = GeneralResponse<{
@@ -210,4 +229,24 @@ export namespace NDB2API {
   };
 
   export type GetSeasons = GeneralResponse<Season[]>;
+
+  export type SnoozeCheckResults = {
+    day: number;
+    week: number;
+    month: number;
+    quarter: number;
+    year: number;
+  };
+
+  export type EnhancedSnoozeCheck = SnoozeCheck & {
+    values: SnoozeCheckResults;
+  };
+
+  export type SnoozeCheck = {
+    id: number;
+    prediction_id: number;
+    check_date: string;
+    closed: boolean;
+    closed_at: string | null;
+  };
 }

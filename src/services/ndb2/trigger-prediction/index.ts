@@ -40,7 +40,7 @@ export default function TriggerPrediction({
       "NDB2 Trigger Prediction Request"
     );
 
-    const predictionId = options.getInteger("id");
+    const predictionId = options.getInteger("id", true);
 
     let prediction: NDB2API.EnhancedPrediction;
 
@@ -51,14 +51,31 @@ export default function TriggerPrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch ([userError, logError]) {
+    } catch (err) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          ephemeral: true,
+        });
+
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, logError] = err;
+
       logger.addLog(
         LogStatus.WARNING,
         `There was an error fetching this prediction. ${logError}`
       );
       logger.sendLog(interaction.client);
 
-      interaction.reply({
+      return interaction.reply({
         content: `There was an error fetching this prediction. ${userError}`,
         ephemeral: true,
       });
@@ -125,8 +142,11 @@ export default function TriggerPrediction({
 
     let id = `Trigger ${predictionId}`;
 
+    let closeMessage: string = `You have not specified a close date for this prediction, so it will default to right now. If you know that this prediction could have been adjudicated at an earlier date, hit "Dismiss message" and issue a new \`/predict trigger\` command with the appropriate date.`;
     if (closed) {
       id += ` ${closed}`;
+      const closeDate = time(new Date(closed), TimestampStyles.ShortDate);
+      closeMessage = `You have specified a close date of ${closeDate}, which means you think this prediction could have been adjudicated on ${closeDate} but was not triggered. If this date is incorrect, hit "Dismiss message" and issue a new \`/predict trigger\` command without a close date specified.`;
     }
 
     const components = [
@@ -138,21 +158,17 @@ export default function TriggerPrediction({
       ),
     ];
 
-    const closeDate = time(new Date(closed), TimestampStyles.ShortDate);
-
     const baseMessage = `You are about to trigger predicition #${
       prediction.id
     }. This will close the prediction, and no more bets (endorsements or undorsements) can be made. ${bold(
       "Proceed with caution!"
     )}`;
-    const noCloseDateMessage = `You have not specified a close date for this prediction, so it will default to right now. If you know that this prediction could have been adjudicated at an earlier date, hit "Dismiss message" and issue a new \`/predict trigger\` command with the appropriate date.`;
-    const hasCloseDateMessage = `You have specified a close date of ${closeDate}, which means you think this prediction could have been adjudicated on ${closeDate} but was not triggered. If this date is incorrect, hit "Dismiss message" and issue a new \`/predict trigger\` command without a close date specified.`;
     const predictionMessage = `Here is the text for the prediction you are about to trigger:`;
     const confirmMessage = `If you are satisfied, click "Trigger Vote" to confirm.`;
 
     const content = [
       baseMessage,
-      !!closed ? hasCloseDateMessage : noCloseDateMessage,
+      closeMessage,
       predictionMessage,
       `\`${prediction.text}\``,
       confirmMessage,
@@ -188,13 +204,12 @@ export default function TriggerPrediction({
     if (!interaction.isButton()) {
       return;
     }
-    const [command, predictionId, ...args] = interaction.customId.split(" ");
+    const [command, predictionId, closed_date] =
+      interaction.customId.split(" ");
 
     if (command !== "Trigger") {
       return;
     }
-
-    const closed_date = args[0];
 
     const logger = new Logger(
       "NDB2 Interaction",
@@ -211,14 +226,31 @@ export default function TriggerPrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch ([userError, LogError]) {
+    } catch (err) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          ephemeral: true,
+        });
+
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, logError] = err;
+
       interaction.reply({
         content: `There was an error fetching the prediction for this retirement. ${userError}`,
         ephemeral: true,
       });
       logger.addLog(
         LogStatus.WARNING,
-        `There was an error fetching the prediction for this trigger. ${LogError}`
+        `There was an error fetching the prediction for this trigger. ${logError}`
       );
       return;
     }
@@ -235,14 +267,34 @@ export default function TriggerPrediction({
 
     // Trigger the prediction
     try {
+      const closeDate = closed_date
+        ? add(new Date(closed_date), { hours: 23, minutes: 59, seconds: 59 })
+        : undefined;
+
       await ndb2Client.triggerPrediction(
         prediction.id,
         interaction.user.id,
-        closed_date &&
-          add(new Date(closed_date), { hours: 23, minutes: 59, seconds: 59 })
+        closeDate
       );
       logger.addLog(LogStatus.SUCCESS, `Prediction triggered successfully.`);
-    } catch ([userError, LogError]) {
+    } catch (err) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          ephemeral: true,
+        });
+
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, logError] = err;
+
       interaction.reply({
         content: `Triggering this prediction failed. ${userError}`,
         ephemeral: true,
@@ -250,7 +302,7 @@ export default function TriggerPrediction({
 
       logger.addLog(
         LogStatus.FAILURE,
-        `Error sending retirement request to API. ${LogError}`
+        `Error sending retirement request to API. ${logError}`
       );
 
       logger.sendLog(interaction.client);

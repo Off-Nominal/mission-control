@@ -7,7 +7,7 @@
     "clear": "rm -rf ./dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "NODE_ENV=dev nodemon --env-file=.env ./dist/index.js -e ts --exec \"npm run compile\"",
-    "build": "tsc && node ./dist/commands/register.js",
+    "build": "tsc && node --env-file=.env ./dist/commands/register.js",
     "build:dev": "tsc && node --env-file=.env ./dist/commands/register.js",
     "compile": "npm run clear && tsc && node --env-file=.env ./dist/index.js",
     "start": "node ./dist/index.js",
@@ -29,7 +29,7 @@
   "homepage": "https://github.com/Off-Nominal/mission-control#readme",
   "dependencies": {
     "@discordjs/rest": "^2.4.0",
-    "@octokit/auth-app": "^3.4.0",
+    "@octokit/auth-app": "^6.1.2",
     "@sanity/client": "^3.3.3",
     "@sanity/image-url": "^1.0.1",
     "@sanity/types": "^2.30.5",
@@ -39,11 +39,11 @@
     "date-fns": "^2.25.0",
     "discord-api-types": "^0.37.100",
     "discord.js": "^14.16.1",
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "feedparser": "^2.2.10",
     "filtrex": "^3.0.0",
     "fuse.js": "^6.4.6",
-    "googleapis": "^92.0.0",
+    "googleapis": "^144.0.0",
     "mars-date-utils": "^1.1.1",
     "morgan": "^1.10.0",
     "node-schedule": "^2.1.1",
@@ -65,6 +65,6 @@
     "typescript": "^5.3.2"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   }
 }

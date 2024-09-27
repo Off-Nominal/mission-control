@@ -8,7 +8,7 @@ import {
 import ndb2Client, {
   NDB2API,
   PredictionLifeCycle,
-} from "../../../../providers/ndb2-client";
+} from "../../../../../../providers/ndb2-client";
 
 const USER_LIST_LIMIT = 30;
 
@@ -235,7 +235,7 @@ const embedFields = {
     return {
       name: "Current Odds",
       value:
-        `A succesful prediction would pay current endorsers at ${payouts.endorse} times their wager (days). Undorsers woud lose ${payouts.undorse} times their wager.\n\nA failed prediction would pay out current undorsers at ${payouts.undorse} their wager (days), and endorsers would lose ${payouts.endorse} times their wager.` +
+        `A succesful prediction would pay current endorsers at ${payouts.endorse} times their wager (days). Undorsers woud lose ${payouts.undorse} times their wager.\n\nA failed prediction would pay out current undorsers at ${payouts.undorse} times their wager (days), and endorsers would lose ${payouts.endorse} times their wager.` +
         `\n \u200B`,
     };
   },
@@ -318,6 +318,42 @@ const embedFields = {
     return {
       name: "Season",
       value,
+    };
+  },
+  editedFields: (fields: { check_date?: { old: string; new: string } }) => {
+    if (!fields.check_date) {
+      return {
+        name: "Edited Fields",
+        value: "No fields were edited.",
+      };
+    }
+
+    const oldDate = new Date(fields.check_date.old);
+
+    const oldDateMessage = `🗓️ ${time(
+      oldDate,
+      TimestampStyles.LongDate
+    )} (${time(oldDate, TimestampStyles.RelativeTime)}) - Original`;
+
+    const newDate = new Date(fields.check_date.new);
+
+    const newDateMessage = `🗓️ ${time(
+      newDate,
+      TimestampStyles.LongDate
+    )} (${time(newDate, TimestampStyles.RelativeTime)}) - Edited`;
+
+    return {
+      name: "Check Date",
+      value: `${oldDateMessage}\n${newDateMessage}`,
+    };
+  },
+  standardFooter: (
+    predictionId: string | number,
+    driver: NDB2API.PredictionDriver
+  ) => {
+    const driverText = driver === "event" ? "Event-driven" : "Date-driven";
+    return {
+      text: `Prediction ID: ${predictionId} (${driverText})`,
     };
   },
 };

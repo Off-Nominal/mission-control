@@ -1,5 +1,7 @@
 import {
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   Message,
   ModalBuilder,
   TextInputBuilder,
@@ -13,16 +15,18 @@ import { Providers } from "../../../providers";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 import { add, isFuture } from "date-fns";
 import { NDB2API } from "../../../providers/ndb2-client";
-import { generatePredictionResponse } from "../actions/generatePredictionResponse";
 import { API } from "../../../providers/db/models/types";
+import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
+import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
 export default function AddPrediction({
   mcconfig,
   ndb2Bot,
   ndb2Client,
   models,
+  cache,
 }: Providers) {
-  // Handles request for new prediction modal
+  // Handles request for new prediction, asks for type
   ndb2Bot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) {
       return;
@@ -35,21 +39,73 @@ export default function AddPrediction({
       return;
     }
 
+    const baseMessage = `## What type of prediction would you like to make?`;
+    const dateDriven = `__Date-Driven:__ Date driven predictions are defined by a due date which you provide. If not already triggered, the system will automatically put this prediction up for a vote on the due date.`;
+    const dateExample = `_Example:_ *By the end of this year, Favourite Launch Company™ will launch at least 1 bajillion times.*`;
+    const eventDriven = `__Event-Driven:__ Event driven predictions are defined by an accompanying trigger event which you define. The system will never automatically put this prediction up for a vote (so keep an eye on it!). However, you will provide a "check date", which is date that the system will check in on this prediction and ask you if it should be triggered. Think of it as a helpful reminder and set it at the earliest possible date you think it might come true.`;
+    const eventExample = `_Example:_ *Favourite Launch Company™ will launch 1 bajillion times before Evil Launch Company™ does.*`;
+
+    const content = [
+      baseMessage,
+      dateDriven,
+      dateExample,
+      eventDriven,
+      eventExample,
+    ].join("\n\n");
+
+    const components = [
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId("new_prediction date")
+          .setLabel("Date-Driven")
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setCustomId("new_prediction event")
+          .setLabel("Event-Driven")
+          .setStyle(ButtonStyle.Success)
+      ),
+    ];
+
+    interaction.reply({ content, components, ephemeral: true });
+  });
+
+  // Handles request for new prediction modal
+  ndb2Bot.on("interactionCreate", async (interaction) => {
+    if (!interaction.isButton()) {
+      return;
+    }
+
+    const [command, driver] = interaction.customId.split(" ");
+
+    if (command !== "new_prediction" || !["date", "event"].includes(driver)) {
+      return;
+    }
+
+    const titleType = driver === "date" ? "Date-Driven" : "Event-Driven";
+
     const modal = new ModalBuilder()
-      .setCustomId("Prediction Modal")
-      .setTitle("New Nostradambot2 Prediction");
+      .setCustomId(`new_prediction ${driver}`)
+      .setTitle(`New ${titleType} Prediction`);
+
+    const placeholder =
+      driver === "date"
+        ? "By the end of 2050, Jake will produce a Valves T-shirt."
+        : "By the time the first person walks on Mars, Jake will produce a Valves T-shirt.";
 
     const textInput = new TextInputBuilder()
       .setCustomId("text")
       .setLabel("Prediction")
-      .setPlaceholder("The Sun will rise tomorrow")
+      .setPlaceholder(placeholder)
       .setMaxLength(2048)
       .setRequired(true)
       .setStyle(TextInputStyle.Paragraph);
 
+    const id = driver === "date" ? "due_date" : "check_date";
+    const label = driver === "date" ? "Due Date" : "Check Date";
+
     const dueInput = new TextInputBuilder()
-      .setCustomId("due")
-      .setLabel("Prediction Due Date (UTC, format YYYY-MM-DD)")
+      .setCustomId(id)
+      .setLabel(`${label} (UTC, format YYYY-MM-DD)`)
       .setPlaceholder("YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD")
       .setMaxLength(10)
       .setMinLength(10)
@@ -68,7 +124,14 @@ export default function AddPrediction({
 
   // Handles actual prediction submission
   ndb2Bot.on("interactionCreate", async (interaction) => {
-    if (!interaction.isModalSubmit()) {
+    if (
+      !interaction.isModalSubmit() ||
+      !interaction.guild ||
+      !interaction.member ||
+      !interaction.channel ||
+      !interaction.channelId ||
+      interaction.channel.isDMBased()
+    ) {
       return;
     }
 
@@ -78,24 +141,32 @@ export default function AddPrediction({
       "NDB2 New Prediction"
     );
 
-    const text = interaction.fields.getTextInputValue("text");
-    const due = interaction.fields.getTextInputValue("due");
-    const dueDate = new Date(due);
-    const discordId = interaction.member.user.id;
-    const messageId = interaction.channel.lastMessageId;
-    const channelId = interaction.channelId;
+    const [command, driver] = interaction.customId.split(" ");
 
-    logger.addLog(
-      LogStatus.INFO,
-      `New prediction made by ${userMention(discordId)} due ${time(
-        dueDate,
-        TimestampStyles.RelativeTime
-      )}: ${text}`
+    if (command !== "new_prediction") {
+      return;
+    }
+
+    if (driver !== "date" && driver !== "event") {
+      return;
+    }
+
+    const text = interaction.fields.getTextInputValue("text");
+    const driverDateString = interaction.fields.getTextInputValue(
+      driver === "date" ? "due_date" : "check_date"
     );
 
+    if (!text || !driverDateString) {
+      interaction.reply({
+        content: `You must provide both a prediction and a due date.`,
+        ephemeral: true,
+      });
+      return;
+    }
+
     // Validate date format
-    const isDueDateValid = validateUserDateInput(due);
-    if (!isDueDateValid) {
+    const isDriverDateValid = validateUserDateInput(driverDateString);
+    if (!isDriverDateValid) {
       logger.addLog(
         LogStatus.WARNING,
         `User entered invalid timestamp, prediction rejected`
@@ -108,12 +179,26 @@ export default function AddPrediction({
       return;
     }
 
+    const driverDate = new Date(driverDateString);
+
+    const discordId = interaction.member.user.id;
+    const messageId = interaction.channel?.lastMessageId;
+    const channelId = interaction.channelId;
+
+    logger.addLog(
+      LogStatus.INFO,
+      `New ${driver}-driven prediction made by ${userMention(
+        discordId
+      )} due ${time(driverDate, TimestampStyles.RelativeTime)}: ${text}`
+    );
+
     logger.addLog(LogStatus.SUCCESS, `Due date is properly formed!`);
 
-    const due_date = add(dueDate, { days: 1 });
+    // The date is adjusted to the next day to ensure the prediction is not triggered until the day is over
+    const adjustedDriverDate = add(driverDate, { days: 1 });
 
     // Validate date is in the future
-    if (!isFuture(due_date)) {
+    if (!isFuture(adjustedDriverDate)) {
       logger.addLog(
         LogStatus.WARNING,
         `User entered timestamp in the past, prediction rejected`
@@ -130,25 +215,46 @@ export default function AddPrediction({
 
     let prediction: NDB2API.EnhancedPrediction;
 
+    const driverBody =
+      driver === "date"
+        ? { due_date: driverDate.toISOString() }
+        : { check_date: driverDate.toISOString() };
+
     try {
       const response = await ndb2Client.addPrediction(
         discordId,
         text,
-        due_date.toISOString()
+        driverBody
       );
       prediction = response.data;
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully submitted to NDB2`
       );
-    } catch ([userError, LogError]) {
+    } catch (err) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          ephemeral: true,
+        });
+
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, logError] = err;
       interaction.reply({
         ephemeral: true,
         content: `There was an error submitting the prediction to NDB2. ${userError}`,
       });
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error submitting the prediction. ${LogError}`
+        `There was an error submitting the prediction. ${logError}`
       );
       logger.sendLog(interaction.client);
       return;
@@ -159,8 +265,20 @@ export default function AddPrediction({
         prediction.predictor.discord_id
       );
 
-      const reply = generatePredictionResponse(predictor, prediction);
-      interaction.reply(reply);
+      const [embeds, components] = generateInteractionReplyFromTemplate(
+        NDB2EmbedTemplate.View.STANDARD,
+        {
+          prediction,
+          displayName: predictor?.displayName,
+          avatarUrl: predictor?.displayAvatarURL(),
+        }
+      );
+
+      interaction.reply({
+        embeds,
+        components,
+      });
+
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction embed was sent to the channel.`
@@ -193,7 +311,7 @@ export default function AddPrediction({
       console.error(err);
     }
 
-    let reply: Message<boolean>;
+    let reply: Message<boolean> | undefined = undefined;
 
     // Add subscription for embed
     try {
@@ -221,7 +339,7 @@ export default function AddPrediction({
       const botsChannel = await interaction.guild.channels.cache.find(
         (c) => c.id === mcconfig.discord.channels.bots
       );
-      if (botsChannel.isTextBased()) {
+      if (botsChannel?.isTextBased() && reply) {
         botsChannel.send({
           content: `NDB2->TC ${channelId} ${reply.id} ${prediction.text}`,
         });

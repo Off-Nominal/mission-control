@@ -1,9 +1,9 @@
 export type Unit = "C" | "F" | "K";
 
 export class Temperature {
-  public celsius: number;
-  public fahrenheit: number;
-  public kelvin: number;
+  public celsius: number = 0;
+  public fahrenheit: number = 0;
+  public kelvin: number = 0;
 
   constructor(value: number, unit: Unit) {
     if (unit === "C") {
@@ -28,23 +28,23 @@ export class Temperature {
     }
   }
 
-  private round(value) {
+  private round(value: number) {
     return Math.round(value * 10) / 10;
   }
 
-  private CtoF(val) {
-    return val * 1.8 + 32;
+  private CtoF(value: number) {
+    return value * 1.8 + 32;
   }
 
-  private CtoK(val) {
-    return val + 273.15;
+  private CtoK(value: number) {
+    return value + 273.15;
   }
 
-  private FtoC(val) {
-    return (val - 32) / 1.8;
+  private FtoC(value: number) {
+    return (value - 32) / 1.8;
   }
 
-  private KtoC(val) {
-    return val - 273.15;
+  private KtoC(value: number) {
+    return value - 273.15;
   }
 }

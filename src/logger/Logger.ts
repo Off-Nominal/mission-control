@@ -70,6 +70,9 @@ export class Logger {
       const channel = await client.channels.fetch(
         mcconfig.discord.channels.bots
       );
+      if (!channel) {
+        throw new Error("Channel not found");
+      }
       if (channel.type === ChannelType.GuildText) {
         return channel.send({ embeds: [embed] });
       } else {
