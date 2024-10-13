@@ -42,21 +42,21 @@ export const getDetailsButton = (
 export const getWebButton = (predictionId: string | number) => {
   return new ButtonBuilder()
     .setLabel("View on Web")
-    .setURL("https://ndb.offnom.com/predictions/" + predictionId)
+    .setURL("https://nostradambot.com/predictions/" + predictionId)
     .setStyle(ButtonStyle.Link);
 };
 
 export const getLeaderboardsButton = () => {
   return new ButtonBuilder()
     .setLabel("View Leaderboards on Web")
-    .setURL("https://ndb.offnom.com/")
+    .setURL("https://nostradambot.com/")
     .setStyle(ButtonStyle.Link);
 };
 
 export const getAdvancedSearchButton = () => {
   return new ButtonBuilder()
     .setLabel("Advanced Search on Web")
-    .setURL("https://ndb.offnom.com/predictions")
+    .setURL("https://nostradambot.com/predictions")
     .setStyle(ButtonStyle.Link);
 };
 
