@@ -201,6 +201,9 @@ export class SiteListener extends EventEmitter {
     }
 
     const shouldTriggerUpdate = html !== this.html;
+    if (shouldTriggerUpdate) {
+      this.html = html;
+    }
 
     // add to log file
     try {
