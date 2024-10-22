@@ -35,7 +35,7 @@ export class SiteListener extends EventEmitter {
   //params
   private url: string;
   private cooldown: number = 0;
-  private interval: number = 5000;
+  private interval: number = 30000;
 
   //clients
   private gitHubAgent: GitHubAgent;
@@ -191,7 +191,6 @@ export class SiteListener extends EventEmitter {
     }
 
     const shouldTriggerUpdate = html !== this.html;
-    console.log(shouldTriggerUpdate);
 
     // add to log file
     try {
