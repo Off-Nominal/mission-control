@@ -7,7 +7,7 @@ import api from "./api";
 import ndb2Client from "./ndb2-client";
 import { sanityClient, sanityImageUrlBuilder } from "../providers/sanity";
 import cache from "./cache";
-import githubAgent from "./github-client";
+import githubAgent from "./github-client/index.js";
 import rssProviders from "./rss-providers";
 import youtube from "./youtube";
 import { rllClient, rllWatcher } from "./rllc";

@@ -1,9 +1,8 @@
-import EventEmitter = require("events");
+import EventEmitter from "node:events";
 import axios, { AxiosResponse, isAxiosError } from "axios";
-import { set, sub } from "date-fns";
-import { GitHubAgent } from "../../providers/github-client";
+import { sub } from "date-fns";
+import { GitHubAgent } from "../../providers/github-client/index.js";
 import mcconfig from "../../mcconfig";
-import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 export enum SiteListenerEvents {
   UPDATE = "siteUpdate",
@@ -32,6 +31,12 @@ export type GithubUpdateEmbedData = {
   diffUrl: string;
 };
 
+interface GitHubContents {
+  sha: string;
+  name: string;
+  download_url: string;
+}
+
 export class SiteListener extends EventEmitter {
   //params
   private url: string;
@@ -44,9 +49,10 @@ export class SiteListener extends EventEmitter {
   //data
   private metadata: { [key: string]: VersionData } = {};
   private logs: ChangeLog[] = [];
+  private html: string = "";
 
   //cooldown
-  private lastMessage: Date;
+  private lastMessage: Date | null = null;
   private rateLimited = false;
 
   constructor(
@@ -118,8 +124,14 @@ export class SiteListener extends EventEmitter {
 
     // Saves change information to Github
     let diffUrl: string;
+    let shouldTriggerUpdate: boolean;
     try {
-      diffUrl = await this.saveChange(newEtag);
+      const res = await this.saveChange(response);
+      if (typeof res[0] !== "string" || typeof res[1] !== "boolean") {
+        throw new Error("Invalid response from saveChange");
+      }
+      diffUrl = res[0];
+      shouldTriggerUpdate = res[1];
     } catch (err) {
       return console.error(err);
     }
@@ -129,6 +141,10 @@ export class SiteListener extends EventEmitter {
       console.log(`SiteListener is in Cooldown mode.`);
     } else {
       try {
+        if (!shouldTriggerUpdate) {
+          console.log("no difference in HTML, shorting");
+          return;
+        }
         const updateData: GithubUpdateEmbedData = {
           url: this.url,
           diffUrl,
@@ -143,6 +159,10 @@ export class SiteListener extends EventEmitter {
   }
 
   private isCoolingDown() {
+    if (!this.lastMessage) {
+      return false;
+    }
+
     const now = new Date();
     const durationSinceLastUpdate = Math.abs(
       now.getTime() - this.lastMessage.getTime()
@@ -158,25 +178,11 @@ export class SiteListener extends EventEmitter {
     return index === -1;
   }
 
-  private async saveChange(etag: string) {
+  private async saveChange(response: AxiosResponse<never>) {
     // Fetch the HTML in the new update
-    let html = "";
-    let etagCheck = "";
-    let lastUpdate: string;
-
-    try {
-      const response = await axios.get(this.url);
-      html = response.data;
-      etagCheck = response.headers.etag.replace(/"/gi, "");
-      lastUpdate = response.headers["last-modified"];
-    } catch (err) {
-      console.error(err);
-    }
-
-    // Check that the GET request's Etag is consistent to the HEAD request we made
-    if (etagCheck !== etag) {
-      throw "Etag Mismatch, the GET request and HEAD request are different. Ignoring this change for now.";
-    }
+    const html = response.data;
+    const etag = response.headers.etag.replace(/"/gi, "");
+    const lastUpdate = response.headers["last-modified"];
 
     // upload html to contents
     let diffUrl = "";
@@ -194,6 +200,8 @@ export class SiteListener extends EventEmitter {
       throw err;
     }
 
+    const shouldTriggerUpdate = html !== this.html;
+
     // add to log file
     try {
       const newLogs = [...this.logs];
@@ -203,7 +211,7 @@ export class SiteListener extends EventEmitter {
       });
 
       const filename = "log.json";
-      const response = await this.gitHubAgent.updateFile(
+      await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
         JSON.stringify(newLogs, null, 2),
@@ -221,7 +229,7 @@ export class SiteListener extends EventEmitter {
         lastUpdate,
       };
       const filename = "version.json";
-      const response = await this.gitHubAgent.updateFile(
+      await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
         JSON.stringify(newVersion, null, 2),
@@ -234,23 +242,38 @@ export class SiteListener extends EventEmitter {
     const contents = await this.gitHubAgent.getContents(
       mcconfig.siteTracker.starship.owner
     );
+    if (!Array.isArray(contents)) {
+      throw new Error("Invalid response from getContents");
+    }
     this.updateMetadata(contents);
 
-    return diffUrl;
+    return [diffUrl, shouldTriggerUpdate];
   }
 
-  private extractMetadata(response, filename: string) {
+  private extractMetadata(response: GitHubContents[], filename: string) {
     const file = response.find((content) => content.name === filename);
+    if (!file) {
+      throw new Error(`File ${filename} not found in response.`);
+    }
     this.metadata[filename] = {
       sha: file.sha,
       rawUrl: file.download_url,
     };
   }
 
-  private async updateMetadata(contents) {
+  private async updateMetadata(contents: GitHubContents[]) {
     this.extractMetadata(contents, "version.json");
     this.extractMetadata(contents, "contents.html");
     this.extractMetadata(contents, "log.json");
+  }
+
+  private async setCurrentHTML(contents: GitHubContents[]) {
+    const file = contents.find((content) => content.name === "contents.html");
+    if (!file) {
+      throw new Error("File contents.html not found in response.");
+    }
+    const html = await axios.get(file.download_url).then((res) => res.data);
+    this.html = html;
   }
 
   public async initialize() {
@@ -259,7 +282,11 @@ export class SiteListener extends EventEmitter {
       const contents = await this.gitHubAgent.getContents(
         mcconfig.siteTracker.starship.owner
       );
+      if (!Array.isArray(contents)) {
+        throw new Error("Invalid response from getContents");
+      }
       this.updateMetadata(contents);
+      this.setCurrentHTML(contents);
 
       const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
       this.logs = logsResponse.data;

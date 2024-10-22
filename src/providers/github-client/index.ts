@@ -1,8 +1,9 @@
-const { createAppAuth } = require("@octokit/auth-app");
 import axios, { AxiosRequestConfig } from "axios";
 import mcconfig from "../../mcconfig";
 import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
+import { createAppAuth } from "@octokit/auth-app";
+import { Endpoints } from "@octokit/types";
 
 const BASEURL = mcconfig.providers.github.baseUrl;
 
@@ -16,13 +17,20 @@ const config: AxiosRequestConfig = {
   },
 };
 
+type getContentsResponse =
+  Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["response"];
+
 export class GitHubAgent {
-  private token: string;
-  private authConfig: AxiosRequestConfig;
+  private token: string = "";
+  private authConfig: AxiosRequestConfig = {};
 
   constructor() {}
 
   private async authenticate() {
+    if (!mcconfig.providers.github.appId) {
+      throw new Error("GitHub App Id not found");
+    }
+
     const auth = createAppAuth({
       appId: mcconfig.providers.github.appId,
       privateKey: mcconfig.providers.github.privateKey,
@@ -56,10 +64,10 @@ export class GitHubAgent {
     }
   }
 
-  public async getContents(owner: string) {
+  public async getContents(owner: string): Promise<getContentsResponse> {
     const url = `${BASEURL}/repos/${owner}/${REPO}/contents/?ref=${BRANCH}`;
     try {
-      const { data } = await axios.get(url, config);
+      const { data } = await axios.get<getContentsResponse>(url, config);
       return data;
     } catch (err) {
       throw err;
