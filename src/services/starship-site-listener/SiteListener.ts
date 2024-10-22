@@ -1,7 +1,7 @@
-import EventEmitter = require("events");
+import EventEmitter from "node:events";
 import axios, { AxiosResponse, isAxiosError } from "axios";
 import { sub } from "date-fns";
-import { GitHubAgent } from "../../providers/github-client";
+import { GitHubAgent } from "../../providers/github-client/index.js";
 import mcconfig from "../../mcconfig";
 
 export enum SiteListenerEvents {
@@ -31,6 +31,12 @@ export type GithubUpdateEmbedData = {
   diffUrl: string;
 };
 
+interface GitHubContents {
+  sha: string;
+  name: string;
+  download_url: string;
+}
+
 export class SiteListener extends EventEmitter {
   //params
   private url: string;
@@ -46,7 +52,7 @@ export class SiteListener extends EventEmitter {
   private html: string = "";
 
   //cooldown
-  private lastMessage: Date;
+  private lastMessage: Date | null = null;
   private rateLimited = false;
 
   constructor(
@@ -153,6 +159,10 @@ export class SiteListener extends EventEmitter {
   }
 
   private isCoolingDown() {
+    if (!this.lastMessage) {
+      return false;
+    }
+
     const now = new Date();
     const durationSinceLastUpdate = Math.abs(
       now.getTime() - this.lastMessage.getTime()
@@ -232,27 +242,36 @@ export class SiteListener extends EventEmitter {
     const contents = await this.gitHubAgent.getContents(
       mcconfig.siteTracker.starship.owner
     );
+    if (!Array.isArray(contents)) {
+      throw new Error("Invalid response from getContents");
+    }
     this.updateMetadata(contents);
 
     return [diffUrl, shouldTriggerUpdate];
   }
 
-  private extractMetadata(response, filename: string) {
+  private extractMetadata(response: GitHubContents[], filename: string) {
     const file = response.find((content) => content.name === filename);
+    if (!file) {
+      throw new Error(`File ${filename} not found in response.`);
+    }
     this.metadata[filename] = {
       sha: file.sha,
       rawUrl: file.download_url,
     };
   }
 
-  private async updateMetadata(contents) {
+  private async updateMetadata(contents: GitHubContents[]) {
     this.extractMetadata(contents, "version.json");
     this.extractMetadata(contents, "contents.html");
     this.extractMetadata(contents, "log.json");
   }
 
-  private async setCurrentHTML(contents) {
+  private async setCurrentHTML(contents: GitHubContents[]) {
     const file = contents.find((content) => content.name === "contents.html");
+    if (!file) {
+      throw new Error("File contents.html not found in response.");
+    }
     const html = await axios.get(file.download_url).then((res) => res.data);
     this.html = html;
   }
@@ -263,6 +282,9 @@ export class SiteListener extends EventEmitter {
       const contents = await this.gitHubAgent.getContents(
         mcconfig.siteTracker.starship.owner
       );
+      if (!Array.isArray(contents)) {
+        throw new Error("Invalid response from getContents");
+      }
       this.updateMetadata(contents);
       this.setCurrentHTML(contents);
 
