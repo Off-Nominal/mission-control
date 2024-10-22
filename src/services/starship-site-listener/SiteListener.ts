@@ -1,9 +1,8 @@
 import EventEmitter = require("events");
 import axios, { AxiosResponse, isAxiosError } from "axios";
-import { set, sub } from "date-fns";
+import { sub } from "date-fns";
 import { GitHubAgent } from "../../providers/github-client";
 import mcconfig from "../../mcconfig";
-import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 
 export enum SiteListenerEvents {
   UPDATE = "siteUpdate",
@@ -36,7 +35,7 @@ export class SiteListener extends EventEmitter {
   //params
   private url: string;
   private cooldown: number = 0;
-  private interval: number = 30000;
+  private interval: number = 5000;
 
   //clients
   private gitHubAgent: GitHubAgent;
@@ -44,6 +43,7 @@ export class SiteListener extends EventEmitter {
   //data
   private metadata: { [key: string]: VersionData } = {};
   private logs: ChangeLog[] = [];
+  private html: string = "";
 
   //cooldown
   private lastMessage: Date;
@@ -118,8 +118,14 @@ export class SiteListener extends EventEmitter {
 
     // Saves change information to Github
     let diffUrl: string;
+    let shouldTriggerUpdate: boolean;
     try {
-      diffUrl = await this.saveChange(newEtag);
+      const res = await this.saveChange(response);
+      if (typeof res[0] !== "string" || typeof res[1] !== "boolean") {
+        throw new Error("Invalid response from saveChange");
+      }
+      diffUrl = res[0];
+      shouldTriggerUpdate = res[1];
     } catch (err) {
       return console.error(err);
     }
@@ -129,6 +135,10 @@ export class SiteListener extends EventEmitter {
       console.log(`SiteListener is in Cooldown mode.`);
     } else {
       try {
+        if (!shouldTriggerUpdate) {
+          console.log("no difference in HTML, shorting");
+          return;
+        }
         const updateData: GithubUpdateEmbedData = {
           url: this.url,
           diffUrl,
@@ -158,25 +168,11 @@ export class SiteListener extends EventEmitter {
     return index === -1;
   }
 
-  private async saveChange(etag: string) {
+  private async saveChange(response: AxiosResponse<never>) {
     // Fetch the HTML in the new update
-    let html = "";
-    let etagCheck = "";
-    let lastUpdate: string;
-
-    try {
-      const response = await axios.get(this.url);
-      html = response.data;
-      etagCheck = response.headers.etag.replace(/"/gi, "");
-      lastUpdate = response.headers["last-modified"];
-    } catch (err) {
-      console.error(err);
-    }
-
-    // Check that the GET request's Etag is consistent to the HEAD request we made
-    if (etagCheck !== etag) {
-      throw "Etag Mismatch, the GET request and HEAD request are different. Ignoring this change for now.";
-    }
+    const html = response.data;
+    const etag = response.headers.etag.replace(/"/gi, "");
+    const lastUpdate = response.headers["last-modified"];
 
     // upload html to contents
     let diffUrl = "";
@@ -194,6 +190,9 @@ export class SiteListener extends EventEmitter {
       throw err;
     }
 
+    const shouldTriggerUpdate = html !== this.html;
+    console.log(shouldTriggerUpdate);
+
     // add to log file
     try {
       const newLogs = [...this.logs];
@@ -203,7 +202,7 @@ export class SiteListener extends EventEmitter {
       });
 
       const filename = "log.json";
-      const response = await this.gitHubAgent.updateFile(
+      await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
         JSON.stringify(newLogs, null, 2),
@@ -221,7 +220,7 @@ export class SiteListener extends EventEmitter {
         lastUpdate,
       };
       const filename = "version.json";
-      const response = await this.gitHubAgent.updateFile(
+      await this.gitHubAgent.updateFile(
         filename,
         this.metadata[filename].sha,
         JSON.stringify(newVersion, null, 2),
@@ -236,7 +235,7 @@ export class SiteListener extends EventEmitter {
     );
     this.updateMetadata(contents);
 
-    return diffUrl;
+    return [diffUrl, shouldTriggerUpdate];
   }
 
   private extractMetadata(response, filename: string) {
@@ -253,6 +252,12 @@ export class SiteListener extends EventEmitter {
     this.extractMetadata(contents, "log.json");
   }
 
+  private async setCurrentHTML(contents) {
+    const file = contents.find((content) => content.name === "contents.html");
+    const html = await axios.get(file.download_url).then((res) => res.data);
+    this.html = html;
+  }
+
   public async initialize() {
     try {
       //Fetches metadata for all the files we need to work with
@@ -260,6 +265,7 @@ export class SiteListener extends EventEmitter {
         mcconfig.siteTracker.starship.owner
       );
       this.updateMetadata(contents);
+      this.setCurrentHTML(contents);
 
       const logsResponse = await axios.get(this.metadata["log.json"].rawUrl);
       this.logs = logsResponse.data;
