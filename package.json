@@ -38,7 +38,7 @@
     "cloudinary": "^1.27.0",
     "date-fns": "^2.25.0",
     "discord-api-types": "^0.37.100",
-    "discord.js": "^14.16.1",
+    "discord.js": "^14.19.3",
     "express": "^4.21.0",
     "feedparser": "^2.2.10",
     "filtrex": "^3.0.0",
