@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { NDB2API, PredictionLifeCycle } from "./types";
 import mcconfig from "../../mcconfig";
 export * from "./types";
+import * as API from "@offnominal/ndb2-api-types";
 
 const isNdb2ApiResponse = (
   response: any
@@ -129,7 +130,7 @@ const handleError = (err: any): [string, string] => {
 export class Ndb2Client {
   private baseURL = mcconfig.ndb2.baseUrl || "";
   private client: AxiosInstance;
-  private seasons: NDB2API.Season[] = [];
+  private seasons: API.Entities.Seasons.Season[] = [];
 
   constructor(key: string | undefined) {
     this.client = axios.create({
@@ -142,36 +143,40 @@ export class Ndb2Client {
   public initialize() {
     return this.getSeasons()
       .then((seasons) => {
-        this.seasons = seasons.data;
+        this.seasons = seasons;
       })
       .catch((err) => {
         console.error(err);
       });
   }
 
-  public getSeasons(): Promise<NDB2API.GetSeasons> {
+  public getSeasons(): Promise<API.Entities.Seasons.Season[]> {
     const url = new URL(this.baseURL);
-    url.pathname = "api/seasons";
+    url.pathname = "api/v2/seasons";
 
     return this.client
-      .get<NDB2API.GetSeasons>(url.toString())
-      .then((res) => res.data)
+      .get<API.Endpoints.Seasons.GET.Response>(url.toString())
+      .then((res) => res.data.data)
       .catch((err) => {
         throw handleError(err);
       });
   }
 
-  public getSeason(id: string | number): NDB2API.Season | undefined {
+  public getSeason(
+    id: string | number
+  ): API.Entities.Seasons.Season | undefined {
     return this.seasons.find((season) => season.id === id);
   }
 
-  public getPrediction(id: string | number): Promise<NDB2API.GetPrediction> {
+  public getPrediction(
+    id: string | number
+  ): Promise<API.Entities.Predictions.Prediction> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${id}`;
+    url.pathname = `api/v2/predictions/${id}`;
 
     return this.client
-      .get<NDB2API.GetPrediction>(url.toString())
-      .then((res) => res.data)
+      .get<API.Endpoints.Predictions.GET_ById.Response>(url.toString())
+      .then((res) => res.data.data)
       .catch((err) => {
         throw handleError(err);
       });

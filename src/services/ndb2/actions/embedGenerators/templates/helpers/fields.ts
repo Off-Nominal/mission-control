@@ -115,7 +115,7 @@ const embedFields = {
     return voteFields;
   },
   payoutsText: (
-    status: PredictionLifeCycle.SUCCESSFUL | PredictionLifeCycle.FAILED,
+    status: "successful" | "failed",
     payouts: { endorse: number; undorse: number },
     season: boolean
   ) => {
@@ -135,7 +135,7 @@ const embedFields = {
     };
   },
   longPayouts: (
-    status: PredictionLifeCycle.SUCCESSFUL | PredictionLifeCycle.FAILED,
+    status: "successful" | "failed",
     type: "endorsements" | "undorsements" | "invalid",
     bets: NDB2API.EnhancedPredictionBet[],
     season: boolean

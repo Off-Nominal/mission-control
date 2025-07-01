@@ -8,7 +8,7 @@ import {
   TimestampStyles,
 } from "discord.js";
 import {
-  NDB2API,
+  NDB2API as NDB2API_V1,
   PredictionLifeCycle,
 } from "../../../../../providers/ndb2-client";
 import {
@@ -19,6 +19,7 @@ import {
 import { NDB2EmbedTemplate } from "./helpers/types";
 import embedFields from "./helpers/fields";
 import { getAuthor, getThumbnail } from "./helpers/helpers";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
 const titles = {
   [PredictionLifeCycle.CHECKING]: "Just checking in...",
@@ -31,7 +32,7 @@ const getDescription = (
     | PredictionLifeCycle.CHECKING
     | PredictionLifeCycle.CLOSED
     | PredictionLifeCycle.OPEN,
-  prediction: NDB2API.EnhancedPrediction
+  prediction: NDB2API_V1.EnhancedPrediction
 ): string => {
   const newCheckDate = new Date(prediction.check_date || 0);
   const snoozeCount = prediction.checks.filter((sc) => sc.closed).length;
@@ -111,7 +112,7 @@ export const generateSnoozeCheckEmbed = (
 };
 
 export const generateSnoozeCheckComponents = (
-  prediction: NDB2API.EnhancedPrediction
+  prediction: NDB2API.Entities.Predictions.Prediction
 ): BaseMessageOptions["components"] => {
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
   const actionRow2 = new ActionRowBuilder<ButtonBuilder>();
@@ -122,23 +123,23 @@ export const generateSnoozeCheckComponents = (
       throw new Error("No open snooze check found");
     }
     actionRow.addComponents(
-      getSnoozeButton(prediction.id, check.id, 1, check.values.day, "1 Day"),
-      getSnoozeButton(prediction.id, check.id, 7, check.values.week, "1 Week"),
+      getSnoozeButton(prediction.id, check.id, 1, check.votes.day, "1 Day"),
+      getSnoozeButton(prediction.id, check.id, 7, check.votes.week, "1 Week"),
       getSnoozeButton(
         prediction.id,
         check.id,
         30,
-        check.values.month,
+        check.votes.month,
         "1 Month"
       ),
       getSnoozeButton(
         prediction.id,
         check.id,
         90,
-        check.values.quarter,
+        check.votes.quarter,
         "1 Quarter"
       ),
-      getSnoozeButton(prediction.id, check.id, 365, check.values.year, "1 Year")
+      getSnoozeButton(prediction.id, check.id, 365, check.votes.year, "1 Year")
     );
 
     actionRow2.addComponents(getWebButton(prediction.id));

@@ -32,7 +32,7 @@ export namespace NDB2API {
   };
 
   export type EnhancedPredictionBet = {
-    id: string;
+    id: number;
     endorsed: boolean;
     date: string;
     wager: number;
@@ -46,7 +46,7 @@ export namespace NDB2API {
   };
 
   export type EnhancedPredictionVote = {
-    id: string;
+    id: number;
     vote: boolean;
     voted_date: string;
     voter: {
@@ -239,7 +239,7 @@ export namespace NDB2API {
   };
 
   export type EnhancedSnoozeCheck = SnoozeCheck & {
-    values: SnoozeCheckResults;
+    votes: SnoozeCheckResults;
   };
 
   export type SnoozeCheck = {
