@@ -313,20 +313,28 @@ export default function TriggerPrediction({
     let contextChannelId: string;
 
     try {
-      const [contextSub] = await models.ndb2MsgSubscription.fetchSubByType(
+      const contextSubs = await models.ndb2MsgSubscription.fetchSubByType(
         prediction.id,
         API.Ndb2MsgSubscriptionType.CONTEXT
       );
-      logger.addLog(
-        LogStatus.SUCCESS,
-        `Fetched prediction context successfully.`
-      );
-
-      contextChannelId = contextSub.channel_id;
+      
+      if (contextSubs[0]) {
+        contextChannelId = contextSubs[0].channel_id;
+        logger.addLog(
+          LogStatus.SUCCESS,
+          `Fetched prediction context successfully.`
+        );
+      } else {
+        logger.addLog(
+          LogStatus.INFO,
+          `No prediction context found. Fallback to current channel will be used.`
+        );
+        contextChannelId = interaction.channelId;
+      }
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `Prediction creation context could not be retrieved. Fallback to current channel will be used.`
+        `Error retrieving prediction creation context. Fallback to current channel will be used.`
       );
       contextChannelId = interaction.channelId;
     }
