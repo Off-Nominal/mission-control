@@ -310,6 +310,13 @@ export default function createWebooksRouter(
                       )
                       .then(() => {
                         delete cache.ndb2.triggerResponses[prediction.id];
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                        logger.addLog(
+                          LogStatus.FAILURE,
+                          "Failed to update trigger interaction reply."
+                        );
                       });
                   }
                 }
