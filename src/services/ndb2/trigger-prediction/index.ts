@@ -1,7 +1,6 @@
 import { add, isBefore, isFuture } from "date-fns";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { NDB2API } from "../../../providers/ndb2-client";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 import {
   ActionRowBuilder,
@@ -14,6 +13,7 @@ import {
   userMention,
 } from "discord.js";
 import { API } from "../../../providers/db/models/types";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
 export default function TriggerPrediction({
   ndb2Client,
@@ -42,11 +42,10 @@ export default function TriggerPrediction({
 
     const predictionId = options.getInteger("id", true);
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
-      const response = await ndb2Client.getPrediction(predictionId);
-      prediction = response.data;
+      prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
@@ -217,11 +216,10 @@ export default function TriggerPrediction({
       "Trigger Prediction"
     );
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
-      const response = await ndb2Client.getPrediction(predictionId);
-      prediction = response.data;
+      prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`

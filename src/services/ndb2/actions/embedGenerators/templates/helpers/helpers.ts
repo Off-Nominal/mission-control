@@ -1,35 +1,33 @@
 import { APIEmbedAuthor, Client, GuildMember } from "discord.js";
 import { PredictionLifeCycle } from "../../../../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
-export const getPredictedPrefix = (status: PredictionLifeCycle): string => {
-  if (status === PredictionLifeCycle.RETIRED) {
+export const getPredictedPrefix = (
+  status: NDB2API.Entities.Predictions.PredictionLifeCycle
+): string => {
+  if (status === "retired") {
     return `had predicted that...`;
   }
 
-  if (status === PredictionLifeCycle.CLOSED) {
+  if (status === "closed") {
     return `predicted that...`;
   }
 
-  if (status === PredictionLifeCycle.SUCCESSFUL) {
+  if (status === "successful") {
     return `successfully predicted that...`;
   }
 
-  if (status === PredictionLifeCycle.FAILED) {
+  if (status === "failed") {
     return `unsuccessfully predicted that...`;
   }
 
   return `predicts that...`;
 };
 
-type ThumbnailLifeCycle =
-  | PredictionLifeCycle.OPEN
-  | PredictionLifeCycle.RETIRED
-  | PredictionLifeCycle.CLOSED
-  | PredictionLifeCycle.SUCCESSFUL
-  | PredictionLifeCycle.FAILED
-  | PredictionLifeCycle.CHECKING;
-
-const thumbnails: Record<ThumbnailLifeCycle, string> = {
+const thumbnails: Record<
+  NDB2API.Entities.Predictions.PredictionLifeCycle,
+  string
+> = {
   [PredictionLifeCycle.OPEN]:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134394/Discord%20Assets/4236484_aggyej.png",
   [PredictionLifeCycle.CHECKING]:
@@ -44,7 +42,9 @@ const thumbnails: Record<ThumbnailLifeCycle, string> = {
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134579/Discord%20Assets/4789514_czvljj.png",
 };
 
-export const getThumbnail = (status: PredictionLifeCycle) => {
+export const getThumbnail = (
+  status: NDB2API.Entities.Predictions.PredictionLifeCycle
+) => {
   return thumbnails[status];
 };
 

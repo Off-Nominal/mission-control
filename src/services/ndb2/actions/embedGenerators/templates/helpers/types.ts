@@ -1,5 +1,6 @@
 import { Client, GuildMember } from "discord.js";
-import { NDB2API } from "../../../../../../providers/ndb2-client";
+import { NDB2API as NDB2API_V1 } from "../../../../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
 export namespace NDB2EmbedTemplate {
   export enum View {
@@ -24,20 +25,20 @@ export namespace NDB2EmbedTemplate {
 
   export namespace Args {
     export type Standard = {
-      prediction: NDB2API.EnhancedPrediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       displayName?: string;
       avatarUrl?: string;
       context?: Context;
     };
 
     export type Retirement = {
-      prediction: NDB2API.EnhancedPrediction;
+      prediction: NDB2API_V1.EnhancedPrediction;
       predictor: GuildMember;
       context?: Context;
     };
 
     export type Trigger = {
-      prediction: NDB2API.EnhancedPrediction;
+      prediction: NDB2API_V1.EnhancedPrediction;
       predictor: GuildMember;
       client: Client;
       triggerer?: GuildMember;
@@ -45,30 +46,30 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type SnoozeCheck = {
-      prediction: NDB2API.EnhancedPrediction;
+      prediction: NDB2API_V1.EnhancedPrediction;
       client: Client;
       context?: Context;
     };
 
     export type Judgement = {
-      prediction: NDB2API.EnhancedPrediction;
+      prediction: NDB2API_V1.EnhancedPrediction;
       client: Client;
       context?: Context;
     };
 
     export type SeasonStart = {
-      season: NDB2API.Season;
+      season: NDB2API_V1.Season;
     };
 
     export type SeasonEnd = {
-      results: NDB2API.SeasonResults;
-      predictionsLeaderboard: NDB2API.PredictionsLeader[];
-      betsLeaderboard: NDB2API.BetsLeader[];
-      pointsLeaderboard: NDB2API.PointsLeader[];
+      results: NDB2API_V1.SeasonResults;
+      predictionsLeaderboard: NDB2API_V1.PredictionsLeader[];
+      betsLeaderboard: NDB2API_V1.BetsLeader[];
+      pointsLeaderboard: NDB2API_V1.PointsLeader[];
     };
 
     export type PredictionEdit = {
-      prediction: NDB2API.EnhancedPrediction;
+      prediction: NDB2API_V1.EnhancedPrediction;
       predictor: GuildMember;
       edited_fields: {
         check_date: {
@@ -81,15 +82,15 @@ export namespace NDB2EmbedTemplate {
     export type Leaderboard = (
       | {
           type: "points";
-          leaders: NDB2API.PointsLeader[];
+          leaders: NDB2API_V1.PointsLeader[];
         }
       | {
           type: "predictions";
-          leaders: NDB2API.PredictionsLeader[];
+          leaders: NDB2API_V1.PredictionsLeader[];
         }
       | {
           type: "bets";
-          leaders: NDB2API.BetsLeader[];
+          leaders: NDB2API_V1.BetsLeader[];
         }
     ) & { seasonIdentifier?: "current" | "last" };
 
@@ -100,19 +101,19 @@ export namespace NDB2EmbedTemplate {
         | "upcoming-mine"
         | "upcoming-no-bet"
         | "search";
-      predictions: NDB2API.ShortEnhancedPrediction[];
+      predictions: NDB2API_V1.ShortEnhancedPrediction[];
       options?: {
         keyword?: string;
       };
     };
 
     export type Details = {
-      prediction: NDB2API.EnhancedPrediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       season: boolean;
     };
 
     export type Scores = {
-      scores: NDB2API.Scores;
+      scores: NDB2API_V1.Scores;
       member: GuildMember;
       seasonIdentifier?: "current" | "last";
     };

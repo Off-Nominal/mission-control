@@ -4,12 +4,11 @@ import {
   ActionRowBuilder,
   BaseMessageOptions,
   ButtonBuilder,
-  ButtonStyle,
 } from "discord.js";
 import embedFields from "./helpers/fields";
 import { getPredictedPrefix, getThumbnail } from "./helpers/helpers";
 import {
-  NDB2API,
+  NDB2API as NDB2API_V1,
   PredictionLifeCycle,
 } from "../../../../../providers/ndb2-client";
 import { NDB2EmbedTemplate } from "./helpers/types";
@@ -21,6 +20,7 @@ import {
   getUndorseButton,
   getWebButton,
 } from "./helpers/buttons";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
 export const generateStandardViewEmbed = (
   props: NDB2EmbedTemplate.Args.Standard
@@ -175,7 +175,7 @@ export const generateStandardViewEmbed = (
 };
 
 export const generateStandardViewComponents = (
-  prediction: NDB2API.EnhancedPrediction
+  prediction: NDB2API.Entities.Predictions.Prediction
 ): BaseMessageOptions["components"] => {
   const actionRow1 = new ActionRowBuilder<ButtonBuilder>();
 

@@ -1,11 +1,12 @@
 import axios, { AxiosInstance } from "axios";
-import { NDB2API, PredictionLifeCycle } from "./types";
+import { NDB2API as NDB2API_V1, PredictionLifeCycle } from "./types";
 import mcconfig from "../../mcconfig";
 export * from "./types";
+import * as API from "@offnominal/ndb2-api-types";
 
-const isNdb2ApiResponse = (
+const isNdb2ApiResponse_v1 = (
   response: any
-): response is NDB2API.GeneralResponse => {
+): response is NDB2API_V1.GeneralResponse => {
   if (typeof response !== "object") {
     return false;
   }
@@ -27,6 +28,36 @@ const isNdb2ApiResponse = (
     (typeof message !== "string" && message !== null)
   ) {
     return false;
+  }
+
+  return true;
+};
+
+const isNdb2ApiErrorResponse = (
+  response: any
+): response is API.Utils.ErrorResponse => {
+  if (typeof response !== "object") {
+    return false;
+  }
+
+  if (
+    !("success" in response) ||
+    !("errors" in response) ||
+    !("data" in response)
+  ) {
+    return false;
+  }
+
+  const { success, errors } = response;
+
+  if (typeof success !== "boolean" || !Array.isArray(errors)) {
+    return false;
+  }
+
+  for (const error of errors) {
+    if (typeof error.code !== "number" || typeof error.message !== "string") {
+      return false;
+    }
   }
 
   return true;
@@ -58,14 +89,14 @@ export enum SortByOption {
   JUDGED_DESC = "judged_date-desc",
 }
 
-const handleError = (err: any): [string, string] => {
+const handleError_v1 = (err: any): [string, string] => {
   // returns user friendly message and full message in array
   if (axios.isAxiosError(err)) {
     if (err.response) {
       const statusCode = err.response.status;
 
       const ndb2ApiResponse = err.response.data;
-      if (isNdb2ApiResponse(ndb2ApiResponse)) {
+      if (isNdb2ApiResponse_v1(ndb2ApiResponse)) {
         const errorCode = ndb2ApiResponse.errorCode;
         const message =
           ndb2ApiResponse.message || "No error message indicated.";
@@ -126,10 +157,78 @@ const handleError = (err: any): [string, string] => {
   return [defaultUserMessage, "Unknown error."];
 };
 
+const handleError = (err: any): [string, string] => {
+  // returns user friendly message and full message in array
+  if (axios.isAxiosError(err)) {
+    if (err.response) {
+      const statusCode = err.response.status;
+
+      const ndb2ApiResponse = err.response.data;
+
+      if (isNdb2ApiErrorResponse(ndb2ApiResponse)) {
+        const firstError = ndb2ApiResponse.errors[0];
+        const errorCode = firstError.code;
+        const message = firstError.message || "No error message indicated.";
+        return [
+          message,
+          `HTTP Status: ${statusCode}. Error response: ${errorCode}. ${message}`,
+        ];
+      }
+
+      return [
+        "We received a response from NDB2 but it doesn't look right.",
+        `HTTP Status ${statusCode} from NDB2 API but response failed type predicate.`,
+      ];
+    }
+
+    return [
+      "We didn't receive a response from the NDB2 server.",
+      "Axios reports no response.",
+    ];
+  }
+
+  const defaultUserMessage = "We received some kind of unknown error.";
+
+  if (err instanceof TypeError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof RangeError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof EvalError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof ReferenceError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof SyntaxError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof URIError) {
+    return [defaultUserMessage, err.message];
+  }
+
+  if (err instanceof Error) {
+    return [defaultUserMessage, err.message];
+  }
+
+  // Error passthrough for strings
+  if (typeof err === "string") {
+    return [defaultUserMessage, err];
+  }
+
+  // Final fallback
+  return [defaultUserMessage, "Unknown error."];
+};
 export class Ndb2Client {
   private baseURL = mcconfig.ndb2.baseUrl || "";
   private client: AxiosInstance;
-  private seasons: NDB2API.Season[] = [];
+  private seasons: API.Entities.Seasons.Season[] = [];
 
   constructor(key: string | undefined) {
     this.client = axios.create({
@@ -142,36 +241,40 @@ export class Ndb2Client {
   public initialize() {
     return this.getSeasons()
       .then((seasons) => {
-        this.seasons = seasons.data;
+        this.seasons = seasons;
       })
       .catch((err) => {
         console.error(err);
       });
   }
 
-  public getSeasons(): Promise<NDB2API.GetSeasons> {
+  public getSeasons(): Promise<API.Entities.Seasons.Season[]> {
     const url = new URL(this.baseURL);
-    url.pathname = "api/seasons";
+    url.pathname = "api/v2/seasons";
 
     return this.client
-      .get<NDB2API.GetSeasons>(url.toString())
-      .then((res) => res.data)
+      .get<API.Endpoints.Seasons.GET.Response>(url.toString())
+      .then((res) => res.data.data)
       .catch((err) => {
         throw handleError(err);
       });
   }
 
-  public getSeason(id: string | number): NDB2API.Season | undefined {
+  public getSeason(
+    id: string | number
+  ): API.Entities.Seasons.Season | undefined {
     return this.seasons.find((season) => season.id === id);
   }
 
-  public getPrediction(id: string | number): Promise<NDB2API.GetPrediction> {
+  public getPrediction(
+    id: string | number
+  ): Promise<API.Entities.Predictions.Prediction> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${id}`;
+    url.pathname = `api/v2/predictions/${id}`;
 
     return this.client
-      .get<NDB2API.GetPrediction>(url.toString())
-      .then((res) => res.data)
+      .get<API.Endpoints.Predictions.GET_ById.Response>(url.toString())
+      .then((res) => res.data.data)
       .catch((err) => {
         throw handleError(err);
       });
@@ -181,16 +284,16 @@ export class Ndb2Client {
     discord_id: string,
     text: string,
     driver: { due_date: string | Date } | { check_date: string | Date }
-  ): Promise<NDB2API.AddPrediction> {
+  ): Promise<NDB2API_V1.AddPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = "api/predictions";
 
     const body = Object.assign({ discord_id, text }, driver);
     return this.client
-      .post<NDB2API.AddPrediction>(url.toString(), body)
+      .post<NDB2API_V1.AddPrediction>(url.toString(), body)
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
@@ -198,17 +301,17 @@ export class Ndb2Client {
     prediction_id: string | number,
     discord_id: string | number,
     endorsed: boolean
-  ): Promise<NDB2API.AddBet> {
+  ): Promise<NDB2API_V1.AddBet> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${prediction_id}/bets`;
     return this.client
-      .post<NDB2API.AddBet>(url.toString(), {
+      .post<NDB2API_V1.AddBet>(url.toString(), {
         discord_id,
         endorsed,
       })
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
@@ -216,17 +319,17 @@ export class Ndb2Client {
     predictionId: string | number,
     discord_id: string | number,
     vote: boolean
-  ): Promise<NDB2API.AddVote> {
+  ): Promise<NDB2API_V1.AddVote> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${predictionId}/votes`;
     return this.client
-      .post<NDB2API.AddVote>(url.toString(), {
+      .post<NDB2API_V1.AddVote>(url.toString(), {
         discord_id,
         vote,
       })
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
@@ -234,18 +337,18 @@ export class Ndb2Client {
     predictionId: string | number,
     snoozeCheckId: string | number,
     discord_id: string | number,
-    value: NDB2API.SnoozeOptions
-  ): Promise<NDB2API.AddSnoozeVote> {
+    value: NDB2API_V1.SnoozeOptions
+  ): Promise<NDB2API_V1.AddSnoozeVote> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${predictionId}/snooze_checks/${snoozeCheckId}`;
     return this.client
-      .post<NDB2API.AddSnoozeVote>(url.toString(), {
+      .post<NDB2API_V1.AddSnoozeVote>(url.toString(), {
         discord_id,
         value,
       })
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
@@ -253,54 +356,54 @@ export class Ndb2Client {
     id: string | number,
     discord_id: string | null = null,
     closed_date?: Date
-  ): Promise<NDB2API.TriggerPrediction> {
+  ): Promise<NDB2API_V1.TriggerPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${id}/trigger`;
     return this.client
-      .post<NDB2API.TriggerPrediction>(url.toString(), {
+      .post<NDB2API_V1.TriggerPrediction>(url.toString(), {
         discord_id,
         closed_date,
       })
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
   public retirePrediction(
     id: string | number,
     discord_id: string
-  ): Promise<NDB2API.RetirePrediction> {
+  ): Promise<NDB2API_V1.RetirePrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${id}/retire`;
     return this.client
-      .patch<NDB2API.RetirePrediction>(url.toString(), { discord_id })
+      .patch<NDB2API_V1.RetirePrediction>(url.toString(), { discord_id })
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
   public getScores(
     discord_id: string,
     seasonIdentifier?: number | "current" | "last"
-  ): Promise<NDB2API.GetScores> {
+  ): Promise<NDB2API_V1.GetScores> {
     const url = new URL(this.baseURL);
     url.pathname = `api/users/discord_id/${discord_id}/scores`;
     if (seasonIdentifier) {
       url.pathname += `/seasons/${seasonIdentifier}`;
     }
     return this.client
-      .get<NDB2API.GetScores>(url.toString())
+      .get<NDB2API_V1.GetScores>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
   public searchPredictions(
     options: SearchOptions = {}
-  ): Promise<NDB2API.SearchPredictions> {
+  ): Promise<NDB2API_V1.SearchPredictions> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/search`;
     const params = new URLSearchParams();
@@ -332,16 +435,16 @@ export class Ndb2Client {
     url.search = params.toString();
 
     return this.client
-      .get<NDB2API.SearchPredictions>(url.toString())
+      .get<NDB2API_V1.SearchPredictions>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
   public getPointsLeaderboard(
     seasonId?: number | "current" | "last"
-  ): Promise<NDB2API.GetPointsLeaderboard> {
+  ): Promise<NDB2API_V1.GetPointsLeaderboard> {
     const url = new URL(this.baseURL);
     url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
     const params = new URLSearchParams();
@@ -349,16 +452,16 @@ export class Ndb2Client {
     url.search = params.toString();
 
     return this.client
-      .get<NDB2API.GetPointsLeaderboard>(url.toString())
+      .get<NDB2API_V1.GetPointsLeaderboard>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
   public getPredictionsLeaderboard(
     seasonId?: number | "current" | "last"
-  ): Promise<NDB2API.GetPredictionsLeaderboard> {
+  ): Promise<NDB2API_V1.GetPredictionsLeaderboard> {
     const url = new URL(this.baseURL);
     url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
     const params = new URLSearchParams();
@@ -366,16 +469,16 @@ export class Ndb2Client {
     url.search = params.toString();
 
     return this.client
-      .get<NDB2API.GetPredictionsLeaderboard>(url.toString())
+      .get<NDB2API_V1.GetPredictionsLeaderboard>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
   public getBetsLeaderboard(
     seasonId?: number | "current" | "last"
-  ): Promise<NDB2API.GetBetsLeaderboard> {
+  ): Promise<NDB2API_V1.GetBetsLeaderboard> {
     const url = new URL(this.baseURL);
     url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
     const params = new URLSearchParams();
@@ -383,10 +486,10 @@ export class Ndb2Client {
     url.search = params.toString();
 
     return this.client
-      .get<NDB2API.GetBetsLeaderboard>(url.toString())
+      .get<NDB2API_V1.GetBetsLeaderboard>(url.toString())
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 
@@ -394,18 +497,18 @@ export class Ndb2Client {
     discord_id: string,
     predictionId: string | number,
     check_date: string | Date
-  ): Promise<NDB2API.SnoozePrediction> {
+  ): Promise<NDB2API_V1.SnoozePrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${predictionId}/snooze`;
 
     return this.client
-      .patch<NDB2API.SnoozePrediction>(url.toString(), {
+      .patch<NDB2API_V1.SnoozePrediction>(url.toString(), {
         discord_id,
         check_date,
       })
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError(err);
+        throw handleError_v1(err);
       });
   }
 }

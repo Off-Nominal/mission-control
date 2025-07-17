@@ -1,8 +1,8 @@
 import { isAfter, isPast } from "date-fns";
 import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { NDB2API, PredictionLifeCycle } from "../../../providers/ndb2-client";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
 export default function SnoozePrediction({
   ndb2Client,
@@ -34,11 +34,10 @@ export default function SnoozePrediction({
       `Received a Snooze Prediction request for prediction ID: ${predictionId}`
     );
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
-      const response = await ndb2Client.getPrediction(predictionId);
-      prediction = response.data;
+      prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
@@ -92,11 +91,7 @@ export default function SnoozePrediction({
     }
 
     // Prediction must be open or checking
-    if (
-      ![PredictionLifeCycle.CHECKING, PredictionLifeCycle.OPEN].includes(
-        prediction.status
-      )
-    ) {
+    if (!["checking", "open"].includes(prediction.status)) {
       logger.addLog(
         LogStatus.WARNING,
         `Prediction is not in a snoozable status. Rejecting.`

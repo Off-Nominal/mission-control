@@ -1,9 +1,9 @@
-import { add, isBefore, sub } from "date-fns";
+import { add, isBefore } from "date-fns";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { API } from "../../../providers/db/models/types";
-import { NDB2API } from "../../../providers/ndb2-client";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
 export default function RetirePrediction({
   cache,
@@ -40,11 +40,10 @@ export default function RetirePrediction({
 
     const predictionId = options.getInteger("id");
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
-      const response = await ndb2Client.getPrediction(predictionId);
-      prediction = response.data;
+      prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
@@ -146,11 +145,10 @@ export default function RetirePrediction({
       "Retire Prediction"
     );
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
-      const response = await ndb2Client.getPrediction(predictionId);
-      prediction = response.data;
+      prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`

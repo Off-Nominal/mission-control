@@ -1,11 +1,11 @@
 import { GuildMember } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { NDB2API } from "../../../providers/ndb2-client";
 import { API } from "../../../providers/db/models/types";
 import { add } from "date-fns";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
+import * as NDB2API from "@offnominal/ndb2-api-types";
 
 export default function ViewPrediction({
   ndb2Client,
@@ -37,11 +37,10 @@ export default function ViewPrediction({
       `Received a View Prediction request for prediction ID: ${predictionId}`
     );
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
-      const response = await ndb2Client.getPrediction(predictionId);
-      prediction = response.data;
+      prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
