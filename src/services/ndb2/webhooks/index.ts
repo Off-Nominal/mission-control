@@ -299,13 +299,18 @@ export default function createWebooksRouter(
                   const reply = cache.ndb2.triggerResponses[prediction.id];
 
                   if (reply) {
-                    reply.fetchReply().then((r) => {
-                      r.edit({
-                        content:
-                          "A voting notice has been posted here: " +
-                          messageLink(contextChannelId, message.id),
+                    reply
+                      .fetchReply()
+                      .then((r) =>
+                        r.edit({
+                          content:
+                            "A voting notice has been posted here: " +
+                            messageLink(contextChannelId, message.id),
+                        })
+                      )
+                      .then(() => {
+                        delete cache.ndb2.triggerResponses[prediction.id];
                       });
-                    });
                   }
                 }
               );
