@@ -19,7 +19,12 @@ export default function NDB2(providers: Providers) {
   const { api, ndb2Bot, ndb2Client, models } = providers;
   api.use(
     "/webhooks",
-    createWebooksRouter(ndb2Bot, ndb2Client, models.ndb2MsgSubscription)
+    createWebooksRouter(
+      ndb2Bot,
+      ndb2Client,
+      models.ndb2MsgSubscription,
+      providers.cache
+    )
   );
 
   // handles incorrect slash commands
