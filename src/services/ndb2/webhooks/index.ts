@@ -2,7 +2,7 @@ import mcconfig from "../../../mcconfig";
 
 // Modules
 import express, { Request, Router } from "express";
-import { Client, GuildMember, userMention } from "discord.js";
+import { Client, GuildMember, messageLink, userMention } from "discord.js";
 import { add } from "date-fns";
 
 // Providers
@@ -31,14 +31,15 @@ import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/
 import { handleSeasonStart } from "./handlers/season_start";
 import { handleSeasonEnd } from "./handlers/season_end";
 import { getGuildFromContext, getLoggerFromContext } from "./contexts";
-import NDB2 from "..";
+import { Providers } from "../../../providers";
 
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 
 export default function createWebooksRouter(
   ndb2Bot: Client,
   ndb2Client: Ndb2Client,
-  ndb2MsgSubscription: Ndb2MsgSubscription
+  ndb2MsgSubscription: Ndb2MsgSubscription,
+  cache: Providers["cache"]
 ): Router {
   const router = express.Router();
 
@@ -293,6 +294,19 @@ export default function createWebooksRouter(
                     message.id,
                     add(new Date(), { hours: 36 })
                   );
+
+                  // Update any trigger interaction replies
+                  const reply = cache.ndb2.triggerResponses[prediction.id];
+
+                  if (reply) {
+                    reply.fetchReply().then((r) => {
+                      r.edit({
+                        content:
+                          "A voting notice has been posted here: " +
+                          messageLink(contextChannelId, message.id),
+                      });
+                    });
+                  }
                 }
               );
 
