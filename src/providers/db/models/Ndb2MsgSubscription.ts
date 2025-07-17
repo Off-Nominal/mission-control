@@ -30,7 +30,7 @@ export class Ndb2MsgSubscription {
   ): Promise<API.Ndb2MsgSubscription[]> => {
     return this.db
       .query<API.Ndb2MsgSubscription>(
-        "SELECT id, type, prediction_id, channel_id, message_id, expiry FROM ndb2_msg_subscriptions WHERE prediction_id = $1 AND expiry > NOW() ORDER BY id DESC",
+        "SELECT id, type, prediction_id, channel_id, message_id, expiry FROM ndb2_msg_subscriptions WHERE prediction_id = $1 AND (expiry > NOW() OR expiry IS NULL) ORDER BY id DESC",
         [prediction_id]
       )
       .then((response) => response.rows);
