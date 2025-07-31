@@ -18,7 +18,6 @@ import NDB2 from "./services/ndb2";
 import DeployWeMartiansSite from "./services/deploy-wemartians-site";
 import ThreadDigest from "./services/thread-digest";
 import ContentSearch from "./services/content-search";
-import StarshipSiteListener from "./services/starship-site-listener";
 import ContentPost from "./services/content-post";
 import AnnounceStream from "./services/announce-stream";
 import TranslateTemperature from "./services/translate-temperature";
@@ -54,7 +53,6 @@ const services = [
   SendHelp,
   SetDiscordClientPresence,
   Shunt,
-  StarshipSiteListener,
   StreamHost,
   ThreadDigest,
   TranslateTemperature,
