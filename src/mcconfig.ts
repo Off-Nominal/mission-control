@@ -93,17 +93,6 @@ const mcconfig = {
       dataset: process.env.PROV_SANITY_CMS_DATASET,
       cdn: false,
     },
-    github: {
-      baseUrl: "https://api.github.com",
-      botInstallId: process.env.PROV_GITHUB_BOT_INSTALL_ID,
-      appId: process.env.PROV_GITHUB_APP_ID,
-      privateKey: Buffer.from(
-        process.env.PROV_GITHUB_PRIVATE_KEY_BASE64 || "",
-        "base64"
-      ).toString("ascii"),
-      clientId: process.env.PROV_GITHUB_CLIENT_ID,
-      clientSecret: process.env.PROV_GITHUB_CLIENT_SECRET,
-    },
   },
   content: {
     rss: {
@@ -134,13 +123,6 @@ const mcconfig = {
           ],
         },
       },
-    },
-  },
-  siteTracker: {
-    starship: {
-      branch: process.env.ST_STARSHIP_BRANCH,
-      owner: "Off-Nominal",
-      repo: "starship-site-tracking",
     },
   },
   ndb2: {
