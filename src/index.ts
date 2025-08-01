@@ -21,6 +21,7 @@ import ContentSearch from "./services/content-search";
 import ContentPost from "./services/content-post";
 import AnnounceStream from "./services/announce-stream";
 import TranslateTemperature from "./services/translate-temperature";
+import TranslateLength from "./services/translate-length";
 import WarnDeprecatedCommands from "./services/warn-deprecated-commands";
 import DBTest from "./services/db-test";
 import Shunt from "./services/shunt";
@@ -56,6 +57,7 @@ const services = [
   StreamHost,
   ThreadDigest,
   TranslateTemperature,
+  TranslateLength,
   WarnDeprecatedCommands,
   CreateEventForumPost,
   CreateEventFromThread,
