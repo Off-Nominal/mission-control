@@ -3,7 +3,7 @@ import { Providers } from "../../providers";
 import { Length, Unit } from "./Length";
 
 const regex = new RegExp(
-  /(?<=^|[\s(=])(?<sign>[-+]?)(?<length1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<length2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?(?<unit>mm|cm|m|km|in|ft|mi|millimeters?|centimeters?|meters?|kilometers?|inches?|feet?|miles?)\b/gi
+  /(?<=^|[\s(=])(?<sign>[-+]?)(?<length1>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)-?(?<length2>(?:0|[1-9](?:\d*|\d{0,2}(?:,\d{3})*))?(?:\.\d*\d)?)?(?<=\d)\s?(?<unit>mm|cm|m|km|in|ft|mi|millimeters?|centimeters?|metres?|meters?|kilometres?|kilometers?|inches?|feet?|miles?)\b/gi
 );
 
 const numConvert = (str: string) => Number(str.replace(/,/g, ""));
@@ -12,8 +12,9 @@ const normalizeUnit = (unit: string): Unit => {
   const lowerUnit = unit.toLowerCase();
   if (lowerUnit.startsWith("mm") || lowerUnit === "millimeters" || lowerUnit === "millimeter") return "mm";
   if (lowerUnit.startsWith("cm") || lowerUnit === "centimeters" || lowerUnit === "centimeter") return "cm";
+  if (lowerUnit === "metres" || lowerUnit === "metre" || lowerUnit === "meters" || lowerUnit === "meter") return "m";
   if (lowerUnit.startsWith("m") && !lowerUnit.startsWith("mm") && !lowerUnit.startsWith("mi") && lowerUnit !== "millimeters" && lowerUnit !== "miles") return "m";
-  if (lowerUnit.startsWith("km") || lowerUnit === "kilometers" || lowerUnit === "kilometer") return "km";
+  if (lowerUnit.startsWith("km") || lowerUnit === "kilometers" || lowerUnit === "kilometer" || lowerUnit === "kilometres" || lowerUnit === "kilometre") return "km";
   if (lowerUnit.startsWith("in") || lowerUnit === "inches" || lowerUnit === "inch") return "in";
   if (lowerUnit.startsWith("ft") || lowerUnit === "feet" || lowerUnit === "foot") return "ft";
   if (lowerUnit.startsWith("mi") || lowerUnit === "miles" || lowerUnit === "mile") return "mi";
