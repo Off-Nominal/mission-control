@@ -239,7 +239,7 @@ export namespace NDB2API {
   };
 
   export type EnhancedSnoozeCheck = SnoozeCheck & {
-    votes: SnoozeCheckResults;
+    values: SnoozeCheckResults;
   };
 
   export type SnoozeCheck = {

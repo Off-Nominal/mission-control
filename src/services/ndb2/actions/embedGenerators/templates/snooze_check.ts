@@ -123,23 +123,23 @@ export const generateSnoozeCheckComponents = (
       throw new Error("No open snooze check found");
     }
     actionRow.addComponents(
-      getSnoozeButton(prediction.id, check.id, 1, check.votes.day, "1 Day"),
-      getSnoozeButton(prediction.id, check.id, 7, check.votes.week, "1 Week"),
+      getSnoozeButton(prediction.id, check.id, 1, check.values.day, "1 Day"),
+      getSnoozeButton(prediction.id, check.id, 7, check.values.week, "1 Week"),
       getSnoozeButton(
         prediction.id,
         check.id,
         30,
-        check.votes.month,
+        check.values.month,
         "1 Month"
       ),
       getSnoozeButton(
         prediction.id,
         check.id,
         90,
-        check.votes.quarter,
+        check.values.quarter,
         "1 Quarter"
       ),
-      getSnoozeButton(prediction.id, check.id, 365, check.votes.year, "1 Year")
+      getSnoozeButton(prediction.id, check.id, 365, check.values.year, "1 Year")
     );
 
     actionRow2.addComponents(getWebButton(prediction.id));
