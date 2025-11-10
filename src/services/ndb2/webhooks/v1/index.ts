@@ -20,6 +20,8 @@ import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpe
 import { add } from "date-fns";
 import { Providers } from "../../../../providers";
 
+// Don't any new handlers here, add them to v2 instead
+
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 
 export const handleV1Webhook = (
