@@ -1,0 +1,29 @@
+services:
+  mission-control-database:
+    image: postgres:16-alpine
+    container_name: mission-control-db
+    environment:
+      POSTGRES_DB: mission-control
+      POSTGRES_USER: mission-control-owner
+      POSTGRES_PASSWORD: mission-control-password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5435:5432"
+    volumes:
+      - mission-control-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U mission-control-owner -d mission-control"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - mission-control-network
+
+volumes:
+  mission-control-db-data:
+
+networks:
+  mission-control-network:
+    driver: bridge
