@@ -2,7 +2,12 @@ import { add, isBefore } from "date-fns";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { API } from "../../../providers/db/models/types";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+} from "discord.js";
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export default function RetirePrediction({
@@ -57,7 +62,7 @@ export default function RetirePrediction({
 
       interaction.reply({
         content: `There was an error fetching this prediction. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -69,7 +74,7 @@ export default function RetirePrediction({
       logger.sendLog(interaction.client);
       interaction.reply({
         content: "You cannot retire other people's predictions.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -86,7 +91,7 @@ export default function RetirePrediction({
       logger.sendLog(interaction.client);
       interaction.reply({
         content: "Predictions can only be deleted within 12 hours of creation.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -125,7 +130,7 @@ export default function RetirePrediction({
         });
     }, 600000);
 
-    interaction.reply({ content, components, ephemeral: true });
+    interaction.reply({ content, components, flags: MessageFlags.Ephemeral });
   });
 
   // Handles actual retirement
@@ -156,7 +161,7 @@ export default function RetirePrediction({
     } catch ([userError, LogError]) {
       interaction.reply({
         content: `There was an error fetching the prediction for this retirement. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.WARNING,
@@ -206,7 +211,7 @@ export default function RetirePrediction({
     } catch ([userError, LogError]) {
       interaction.reply({
         content: `Retiring this prediction failed. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       // Remove subscription since retirement failed
@@ -229,7 +234,7 @@ export default function RetirePrediction({
         : `There was an error capturing the current channel, so the cancellation notice may be posted in a different channel.`;
       await interaction.reply({
         content: `Prediction #${prediction.id} has been cancelled and all bets on it will not count. ${noticeMessage}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.SUCCESS,
