@@ -2,7 +2,7 @@ import mcconfig from "../../../mcconfig";
 import { AsyncLocalStorage } from "async_hooks";
 
 import { NextFunction, Request, Response } from "express";
-import { isNdb2WebhookEvent, NDB2WebhookEvent } from "./types";
+import { isNdb2WebhookEvent, NDB2WebhookEvent } from "./v1/types";
 import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { getLoggerFromContext, guildContext, loggerContext } from "./contexts";
 import { Client } from "discord.js";

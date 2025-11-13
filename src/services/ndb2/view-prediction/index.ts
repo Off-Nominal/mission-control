@@ -5,7 +5,7 @@ import { API } from "../../../providers/db/models/types";
 import { add } from "date-fns";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
-import * as NDB2API from "@offnominal/ndb2-api-types";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export default function ViewPrediction({
   ndb2Client,

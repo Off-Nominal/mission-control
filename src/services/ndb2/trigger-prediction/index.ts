@@ -13,7 +13,7 @@ import {
   userMention,
 } from "discord.js";
 import { API } from "../../../providers/db/models/types";
-import * as NDB2API from "@offnominal/ndb2-api-types";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export default function TriggerPrediction({
   ndb2Client,
@@ -315,7 +315,7 @@ export default function TriggerPrediction({
         prediction.id,
         API.Ndb2MsgSubscriptionType.CONTEXT
       );
-      
+
       if (contextSubs[0]) {
         contextChannelId = contextSubs[0].channel_id;
         logger.addLog(

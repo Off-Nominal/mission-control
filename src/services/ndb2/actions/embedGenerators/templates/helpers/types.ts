@@ -1,6 +1,6 @@
 import { Client, GuildMember } from "discord.js";
 import { NDB2API as NDB2API_V1 } from "../../../../../../providers/ndb2-client";
-import * as NDB2API from "@offnominal/ndb2-api-types";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export namespace NDB2EmbedTemplate {
   export enum View {

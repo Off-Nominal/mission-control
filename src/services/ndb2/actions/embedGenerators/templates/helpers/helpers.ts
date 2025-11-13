@@ -1,6 +1,6 @@
 import { APIEmbedAuthor, Client, GuildMember } from "discord.js";
 import { PredictionLifeCycle } from "../../../../../../providers/ndb2-client";
-import * as NDB2API from "@offnominal/ndb2-api-types";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export const getPredictedPrefix = (
   status: NDB2API.Entities.Predictions.PredictionLifeCycle

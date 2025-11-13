@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { NDB2API as NDB2API_V1, PredictionLifeCycle } from "./types";
 import mcconfig from "../../mcconfig";
 export * from "./types";
-import * as API from "@offnominal/ndb2-api-types";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 const isNdb2ApiResponse_v1 = (
   response: any
