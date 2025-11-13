@@ -3,7 +3,7 @@ import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { API } from "../../../providers/db/models/types";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
-import * as NDB2API from "@offnominal/ndb2-api-types";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export default function RetirePrediction({
   cache,

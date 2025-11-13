@@ -1,4 +1,4 @@
-import * as API_v2 from "@offnominal/ndb2-api-types";
+import * as API_v2 from "@offnominal/ndb2-api-types/v2";
 import {
   fetchMessagesFromSubs,
   generateBulkMessageUpdater,

@@ -20,7 +20,7 @@ import {
   getUndorseButton,
   getWebButton,
 } from "./helpers/buttons";
-import * as NDB2API from "@offnominal/ndb2-api-types";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export const generateStandardViewEmbed = (
   props: NDB2EmbedTemplate.Args.Standard

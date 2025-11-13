@@ -19,7 +19,7 @@ import {
 import { NDB2EmbedTemplate } from "./helpers/types";
 import embedFields from "./helpers/fields";
 import { getAuthor, getThumbnail } from "./helpers/helpers";
-import * as NDB2API from "@offnominal/ndb2-api-types";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 const titles = {
   [PredictionLifeCycle.CHECKING]: "Just checking in...",
