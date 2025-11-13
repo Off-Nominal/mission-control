@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { NDB2API as NDB2API_V1, PredictionLifeCycle } from "./types";
 import mcconfig from "../../mcconfig";
 export * from "./types";
-import * as API from "@offnominal/ndb2-api-types/v2";
+import * as API_V2 from "@offnominal/ndb2-api-types/v2";
 
 const isNdb2ApiResponse_v1 = (
   response: any
@@ -35,7 +35,7 @@ const isNdb2ApiResponse_v1 = (
 
 const isNdb2ApiErrorResponse = (
   response: any
-): response is API.Utils.ErrorResponse => {
+): response is API_V2.Utils.ErrorResponse => {
   if (typeof response !== "object") {
     return false;
   }
@@ -228,7 +228,7 @@ const handleError = (err: any): [string, string] => {
 export class Ndb2Client {
   private baseURL = mcconfig.ndb2.baseUrl || "";
   private client: AxiosInstance;
-  private seasons: API.Entities.Seasons.Season[] = [];
+  private seasons: API_V2.Entities.Seasons.Season[] = [];
 
   constructor(key: string | undefined) {
     this.client = axios.create({
@@ -248,12 +248,12 @@ export class Ndb2Client {
       });
   }
 
-  public getSeasons(): Promise<API.Entities.Seasons.Season[]> {
+  public getSeasons(): Promise<API_V2.Entities.Seasons.Season[]> {
     const url = new URL(this.baseURL);
     url.pathname = "api/v2/seasons";
 
     return this.client
-      .get<API.Endpoints.Seasons.GET.Response>(url.toString())
+      .get<API_V2.Endpoints.Seasons.GET.Response>(url.toString())
       .then((res) => res.data.data)
       .catch((err) => {
         throw handleError(err);
@@ -262,18 +262,18 @@ export class Ndb2Client {
 
   public getSeason(
     id: string | number
-  ): API.Entities.Seasons.Season | undefined {
+  ): API_V2.Entities.Seasons.Season | undefined {
     return this.seasons.find((season) => season.id === id);
   }
 
   public getPrediction(
     id: string | number
-  ): Promise<API.Entities.Predictions.Prediction> {
+  ): Promise<API_V2.Entities.Predictions.Prediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/v2/predictions/${id}`;
 
     return this.client
-      .get<API.Endpoints.Predictions.GET_ById.Response>(url.toString())
+      .get<API_V2.Endpoints.Predictions.GET_ById.Response>(url.toString())
       .then((res) => res.data.data)
       .catch((err) => {
         throw handleError(err);
@@ -373,14 +373,17 @@ export class Ndb2Client {
   public retirePrediction(
     id: string | number,
     discord_id: string
-  ): Promise<NDB2API_V1.RetirePrediction> {
+  ): Promise<API_V2.Endpoints.Predictions.PATCH_ById_retire.Data> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${id}/retire`;
+    url.pathname = `api/v2/predictions/${id}/retire`;
     return this.client
-      .patch<NDB2API_V1.RetirePrediction>(url.toString(), { discord_id })
-      .then((res) => res.data)
+      .patch<API_V2.Endpoints.Predictions.PATCH_ById_retire.Response>(
+        url.toString(),
+        { discord_id }
+      )
+      .then((res) => res.data.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 
