@@ -113,6 +113,12 @@ export const handleV2Webhook = (
           return ndb2MsgSubscription.expireSubById(sub.id);
         });
       }
+      case "retired_prediction": {
+        // update VIEW subs
+        updateStandardViews(payload.data.prediction);
+
+        break;
+      }
     }
   });
 };

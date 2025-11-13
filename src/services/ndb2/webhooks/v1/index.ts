@@ -204,12 +204,6 @@ export const handleV1Webhook = (
           sendMessage(contextChannelId, embeds, components);
           break;
         }
-        case NDB2WebhookEvent.RETIRED_PREDICTION: {
-          // update VIEW subs
-          updateStandardViews(prediction);
-
-          break;
-        }
         case NDB2WebhookEvent.TRIGGERED_PREDICTION: {
           // update VIEW subs
           updateStandardViews(prediction);
