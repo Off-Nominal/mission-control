@@ -195,7 +195,7 @@ export default function AddPrediction({
     logger.addLog(LogStatus.SUCCESS, `Due date is properly formed!`);
 
     // The date is adjusted to the next day to ensure the prediction is not triggered until the day is over
-    const adjustedDriverDate = add(driverDate, { days: 1 });
+    const adjustedDriverDate = add(driverDate, { days: 1, seconds: -1 });
 
     // Validate date is in the future
     if (!isFuture(adjustedDriverDate)) {
@@ -217,8 +217,8 @@ export default function AddPrediction({
 
     const driverBody =
       driver === "date"
-        ? { due_date: driverDate.toISOString() }
-        : { check_date: driverDate.toISOString() };
+        ? { due_date: adjustedDriverDate.toISOString() }
+        : { check_date: adjustedDriverDate.toISOString() };
 
     try {
       const response = await ndb2Client.addPrediction(
