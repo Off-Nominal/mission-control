@@ -195,7 +195,7 @@ export default function AddPrediction({
     logger.addLog(LogStatus.SUCCESS, `Due date is properly formed!`);
 
     // The date is adjusted to the next day to ensure the prediction is not triggered until the day is over
-    const adjustedDriverDate = add(driverDate, { days: 1, seconds: -1 });
+    const adjustedDriverDate = add(driverDate, { days: 1 });
 
     // Validate date is in the future
     if (!isFuture(adjustedDriverDate)) {
