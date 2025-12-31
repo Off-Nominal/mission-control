@@ -53,7 +53,17 @@ export default function RetirePrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch ([userError, logError]) {
+    } catch (err: unknown) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, logError] = err;
       logger.addLog(
         LogStatus.WARNING,
         `There was an error fetching this prediction. ${logError}`
@@ -159,7 +169,17 @@ export default function RetirePrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch ([userError, LogError]) {
+    } catch (err: unknown) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, LogError] = err;
       interaction.reply({
         content: `There was an error fetching the prediction for this retirement. ${userError}`,
         flags: MessageFlags.Ephemeral,
@@ -183,7 +203,7 @@ export default function RetirePrediction({
 
     const deleterId = interaction.user.id;
 
-    let subId: number;
+    let subId: number | undefined = undefined;
     let subSuccess = false;
 
     // Add and await retirement subscription so that webhook has something to operate on
@@ -209,16 +229,27 @@ export default function RetirePrediction({
     try {
       await ndb2Client.retirePrediction(prediction.id, deleterId);
       logger.addLog(LogStatus.SUCCESS, `Prediction retired successfully.`);
-    } catch ([userError, LogError]) {
+    } catch (err: unknown) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+        logger.sendLog(interaction.client);
+        return;
+      }
+
+      const [userError, LogError] = err;
       interaction.reply({
         content: `Retiring this prediction failed. ${userError}`,
         flags: MessageFlags.Ephemeral,
       });
 
       // Remove subscription since retirement failed
-      models.ndb2MsgSubscription
-        .deleteSubById(subId)
-        .catch((err) => console.error(err));
+      subId &&
+        models.ndb2MsgSubscription
+          .deleteSubById(subId)
+          .catch((err) => console.error(err));
 
       logger.addLog(
         LogStatus.FAILURE,
