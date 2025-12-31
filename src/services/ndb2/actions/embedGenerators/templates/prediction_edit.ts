@@ -13,10 +13,15 @@ import { NDB2EmbedTemplate } from "./helpers/types";
 export const generatePredictionEditEmbed = (
   props: NDB2EmbedTemplate.Args.PredictionEdit
 ): BaseMessageOptions["embeds"] => {
+  const predictor = props.predictor ?? {
+    displayName: "A former discord member",
+    displayAvatarURL: () => undefined,
+  };
+
   const embed = new EmbedBuilder({
     author: {
-      name: props.predictor.displayName,
-      icon_url: props.predictor.displayAvatarURL(),
+      name: predictor.displayName,
+      icon_url: predictor.displayAvatarURL(),
     },
     thumbnail: {
       url: "https://res.cloudinary.com/dj5enq03a/image/upload/v1727366355/Discord%20Assets/dwdqxgufmjugkxpj5x8p.png",
