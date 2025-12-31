@@ -8,7 +8,7 @@ const contentBot = new Client({
 });
 
 contentBot.on("error", console.error);
-contentBot.once("ready", () => {
+contentBot.once("clientReady", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Content Bot ready");
   bootLogger.logItemSuccess("contentBot");
 });

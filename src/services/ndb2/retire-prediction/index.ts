@@ -60,6 +60,10 @@ export default function RetirePrediction({
           `There was an error fetching this prediction. Could not parse error.`
         );
         logger.sendLog(interaction.client);
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          flags: MessageFlags.Ephemeral,
+        });
         return;
       }
 
@@ -176,6 +180,10 @@ export default function RetirePrediction({
           `There was an error fetching this prediction. Could not parse error.`
         );
         logger.sendLog(interaction.client);
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          flags: MessageFlags.Ephemeral,
+        });
         return;
       }
 
@@ -236,6 +244,10 @@ export default function RetirePrediction({
           `There was an error fetching this prediction. Could not parse error.`
         );
         logger.sendLog(interaction.client);
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          flags: MessageFlags.Ephemeral,
+        });
         return;
       }
 

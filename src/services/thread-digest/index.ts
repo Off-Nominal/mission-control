@@ -6,7 +6,7 @@ import schedule from "node-schedule";
 export default function ThreadDigest({ helperBot, mcconfig }: Providers) {
   const digestSchedule = "0 12 * * * ";
 
-  helperBot.on("ready", (client) => {
+  helperBot.on("clientReady", (client) => {
     schedule.scheduleJob(digestSchedule, () => {
       sendThreadDigest(client);
     });

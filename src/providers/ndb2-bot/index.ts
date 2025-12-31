@@ -23,7 +23,7 @@ const ndb2Bot = new Client({
 
 // Handlers
 ndb2Bot.on("error", console.error);
-ndb2Bot.once("ready", () => {
+ndb2Bot.once("clientReady", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "NDB2 Bot ready");
   bootLogger.logItemSuccess("ndb2Bot");
 });

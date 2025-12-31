@@ -53,7 +53,7 @@ export default function CreateEventForumPost({
   mcconfig,
   rssProviders,
 }: Providers) {
-  eventsBot.once("ready", async () => {
+  eventsBot.once("clientReady", async () => {
     // fill cache with active threads and a subset of archived threads
     const channel = await getLivechatForumChannel(
       eventsBot,
