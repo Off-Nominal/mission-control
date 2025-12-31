@@ -8,7 +8,6 @@ import {
 import { getDetailsButton, getWebButton } from "./helpers/buttons";
 import embedFields from "./helpers/fields";
 import { getThumbnail } from "./helpers/helpers";
-import { NDB2API } from "../../../../../providers/ndb2-client";
 import { NDB2EmbedTemplate } from "./helpers/types";
 
 export const generateRetireNoticeEmbed = (
@@ -18,10 +17,15 @@ export const generateRetireNoticeEmbed = (
   const due = new Date(props.prediction.due_date || 0);
   const retired = new Date(props.prediction.retired_date || 0);
 
+  const predictor = props.predictor ?? {
+    displayName: "A former discord member",
+    displayAvatarURL: () => undefined,
+  };
+
   const embed = new EmbedBuilder({
     author: {
-      name: props.predictor.displayName,
-      icon_url: props.predictor.displayAvatarURL(),
+      name: predictor.displayName,
+      icon_url: predictor.displayAvatarURL(),
     },
     thumbnail: {
       url: getThumbnail(props.prediction.status),

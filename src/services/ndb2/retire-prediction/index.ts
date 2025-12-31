@@ -8,7 +8,7 @@ import {
   ButtonStyle,
   MessageFlags,
 } from "discord.js";
-import * as NDB2API from "@offnominal/ndb2-api-types/v2";
+import * as API_v2 from "@offnominal/ndb2-api-types/v2";
 
 export default function RetirePrediction({
   cache,
@@ -43,9 +43,9 @@ export default function RetirePrediction({
 
     const deleterId = interaction.user.id;
 
-    const predictionId = options.getInteger("id");
+    const predictionId = options.getInteger("id", true);
 
-    let prediction: NDB2API.Entities.Predictions.Prediction;
+    let prediction: API_v2.Entities.Predictions.Prediction;
 
     try {
       prediction = await ndb2Client.getPrediction(predictionId);
@@ -53,7 +53,21 @@ export default function RetirePrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch ([userError, logError]) {
+    } catch (err: unknown) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+        logger.sendLog(interaction.client);
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      const [userError, logError] = err;
       logger.addLog(
         LogStatus.WARNING,
         `There was an error fetching this prediction. ${logError}`
@@ -64,6 +78,7 @@ export default function RetirePrediction({
         content: `There was an error fetching this prediction. ${userError}`,
         flags: MessageFlags.Ephemeral,
       });
+      return;
     }
 
     if (deleterId !== prediction.predictor.discord_id) {
@@ -150,7 +165,7 @@ export default function RetirePrediction({
       "Retire Prediction"
     );
 
-    let prediction: NDB2API.Entities.Predictions.Prediction;
+    let prediction: API_v2.Entities.Predictions.Prediction;
 
     try {
       prediction = await ndb2Client.getPrediction(predictionId);
@@ -158,7 +173,21 @@ export default function RetirePrediction({
         LogStatus.SUCCESS,
         `Prediction was successfully retrieved from NDB2.`
       );
-    } catch ([userError, LogError]) {
+    } catch (err: unknown) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+        logger.sendLog(interaction.client);
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      const [userError, LogError] = err;
       interaction.reply({
         content: `There was an error fetching the prediction for this retirement. ${userError}`,
         flags: MessageFlags.Ephemeral,
@@ -182,7 +211,7 @@ export default function RetirePrediction({
 
     const deleterId = interaction.user.id;
 
-    let subId: number;
+    let subId: number | undefined = undefined;
     let subSuccess = false;
 
     // Add and await retirement subscription so that webhook has something to operate on
@@ -208,16 +237,31 @@ export default function RetirePrediction({
     try {
       await ndb2Client.retirePrediction(prediction.id, deleterId);
       logger.addLog(LogStatus.SUCCESS, `Prediction retired successfully.`);
-    } catch ([userError, LogError]) {
+    } catch (err: unknown) {
+      if (!Array.isArray(err)) {
+        logger.addLog(
+          LogStatus.WARNING,
+          `There was an error fetching this prediction. Could not parse error.`
+        );
+        logger.sendLog(interaction.client);
+        interaction.reply({
+          content: `There was an error fetching this prediction. Could not parse error.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      const [userError, LogError] = err;
       interaction.reply({
         content: `Retiring this prediction failed. ${userError}`,
         flags: MessageFlags.Ephemeral,
       });
 
       // Remove subscription since retirement failed
-      models.ndb2MsgSubscription
-        .deleteSubById(subId)
-        .catch((err) => console.error(err));
+      subId &&
+        models.ndb2MsgSubscription
+          .deleteSubById(subId)
+          .catch((err) => console.error(err));
 
       logger.addLog(
         LogStatus.FAILURE,

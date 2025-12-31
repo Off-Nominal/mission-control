@@ -115,13 +115,14 @@ export const handleV1Webhook = (
       return predictor;
     })
     .catch((err) => {
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `Failed to fetch predictor User ${userMention(
           prediction.predictor.discord_id
         )} for this event, will fallback to defauls.`
       );
-      throw err;
+      return undefined;
     });
 
   // Fetch Triggerer User from Discord

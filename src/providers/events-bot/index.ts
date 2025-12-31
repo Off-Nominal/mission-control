@@ -9,7 +9,7 @@ const eventsBot = new Client({
 
 // Handlers
 eventsBot.on("error", console.error);
-eventsBot.once("ready", () => {
+eventsBot.once("clientReady", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Event Bot ready");
   bootLogger.logItemSuccess("eventsBot");
 });

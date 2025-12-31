@@ -33,8 +33,8 @@ export function populateGuildMembers(client: Client) {
 }
 
 helperBot.on("error", console.error);
-helperBot.once("ready", populateGuildMembers);
-helperBot.once("ready", () => {
+helperBot.once("clientReady", populateGuildMembers);
+helperBot.once("clientReady", () => {
   bootLogger.addLog(LogStatus.SUCCESS, "Helper Bot ready");
   bootLogger.logItemSuccess("helperBot");
 });

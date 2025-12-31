@@ -33,13 +33,13 @@ export namespace NDB2EmbedTemplate {
 
     export type Retirement = {
       prediction: NDB2API_V1.EnhancedPrediction;
-      predictor: GuildMember;
+      predictor?: GuildMember;
       context?: Context;
     };
 
     export type Trigger = {
       prediction: NDB2API_V1.EnhancedPrediction;
-      predictor: GuildMember;
+      predictor?: GuildMember;
       client: Client;
       triggerer?: GuildMember;
       context?: Context;
@@ -70,7 +70,7 @@ export namespace NDB2EmbedTemplate {
 
     export type PredictionEdit = {
       prediction: NDB2API_V1.EnhancedPrediction;
-      predictor: GuildMember;
+      predictor?: GuildMember;
       edited_fields: {
         check_date: {
           old: string;
