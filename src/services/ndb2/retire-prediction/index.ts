@@ -8,7 +8,7 @@ import {
   ButtonStyle,
   MessageFlags,
 } from "discord.js";
-import * as NDB2API from "@offnominal/ndb2-api-types/v2";
+import * as API_v2 from "@offnominal/ndb2-api-types/v2";
 
 export default function RetirePrediction({
   cache,
@@ -43,9 +43,9 @@ export default function RetirePrediction({
 
     const deleterId = interaction.user.id;
 
-    const predictionId = options.getInteger("id");
+    const predictionId = options.getInteger("id", true);
 
-    let prediction: NDB2API.Entities.Predictions.Prediction;
+    let prediction: API_v2.Entities.Predictions.Prediction;
 
     try {
       prediction = await ndb2Client.getPrediction(predictionId);
@@ -64,6 +64,7 @@ export default function RetirePrediction({
         content: `There was an error fetching this prediction. ${userError}`,
         flags: MessageFlags.Ephemeral,
       });
+      return;
     }
 
     if (deleterId !== prediction.predictor.discord_id) {
@@ -150,7 +151,7 @@ export default function RetirePrediction({
       "Retire Prediction"
     );
 
-    let prediction: NDB2API.Entities.Predictions.Prediction;
+    let prediction: API_v2.Entities.Predictions.Prediction;
 
     try {
       prediction = await ndb2Client.getPrediction(predictionId);

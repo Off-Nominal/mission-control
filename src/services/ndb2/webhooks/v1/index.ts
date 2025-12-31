@@ -121,7 +121,7 @@ export const handleV1Webhook = (
           prediction.predictor.discord_id
         )} for this event, will fallback to defauls.`
       );
-      throw err;
+      return undefined;
     });
 
   // Fetch Triggerer User from Discord
