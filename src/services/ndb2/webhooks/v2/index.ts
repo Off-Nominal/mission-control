@@ -48,13 +48,14 @@ export const handleV2Webhook = (
       return predictor;
     })
     .catch((err) => {
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `Failed to fetch predictor User ${userMention(
           payload.data.prediction.predictor.discord_id
         )} for this event, will fallback to defauls.`
       );
-      throw err;
+      return undefined;
     });
 
   Promise.all([subsPromise, predictorPromise]).then(([subs, predictor]) => {

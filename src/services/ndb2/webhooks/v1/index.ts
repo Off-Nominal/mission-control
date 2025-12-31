@@ -115,6 +115,7 @@ export const handleV1Webhook = (
       return predictor;
     })
     .catch((err) => {
+      console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
         `Failed to fetch predictor User ${userMention(
