@@ -7,7 +7,6 @@ import {
 } from "discord.js";
 import { getDetailsButton, getWebButton } from "./helpers/buttons";
 import embedFields from "./helpers/fields";
-import { getThumbnail } from "./helpers/helpers";
 import { NDB2EmbedTemplate } from "./helpers/types";
 
 export const generatePredictionEditEmbed = (
