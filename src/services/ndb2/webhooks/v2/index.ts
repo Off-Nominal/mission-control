@@ -87,32 +87,43 @@ export const handleV2Webhook = (
       });
     };
 
+    const clearNoticeSubs = (types: API.Ndb2MsgSubscriptionType[]) => {
+      const messages = fetchMessagesFromSubs(subs, types, guild);
+
+      messages.map((mp) => {
+        return mp.then((m) => {
+          return m.delete();
+        });
+      });
+
+      const noticeSubs = subs.filter((s) => types.includes(s.type));
+
+      noticeSubs.map((sub) => {
+        return ndb2MsgSubscription.expireSubById(sub.id);
+      });
+    };
+
     switch (payload.event_name) {
       case "untriggered_prediction": {
         // update VIEW subs
         updateStandardViews(payload.data.prediction);
 
         // Delete any trigger notices
-        const messages = fetchMessagesFromSubs(
-          subs,
-          [API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE],
-          guild
-        );
+        clearNoticeSubs([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE]);
 
-        messages.map((mp) => {
-          return mp.then((m) => {
-            return m.delete();
-          });
-        });
+        break;
+      }
+      case "unjudged_prediction": {
+        // update VIEW subs
+        updateStandardViews(payload.data.prediction);
 
-        // Expire any subs for trigger notices
-        const triggerSubs = subs.filter(
-          (s) => s.type === API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE
-        );
+        // Delete any trigger or judgement notices
+        clearNoticeSubs([
+          API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+          API.Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
+        ]);
 
-        triggerSubs.map((sub) => {
-          return ndb2MsgSubscription.expireSubById(sub.id);
-        });
+        break;
       }
       case "retired_prediction": {
         // update VIEW subs
