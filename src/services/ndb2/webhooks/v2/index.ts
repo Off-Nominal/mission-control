@@ -110,6 +110,8 @@ export const handleV2Webhook = (
 
         // Delete any trigger notices
         clearNoticeSubs([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE]);
+
+        break;
       }
       case "unjudged_prediction": {
         // update VIEW subs
