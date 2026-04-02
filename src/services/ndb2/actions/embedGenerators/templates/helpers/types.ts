@@ -101,7 +101,7 @@ export namespace NDB2EmbedTemplate {
         | "upcoming-mine"
         | "upcoming-no-bet"
         | "search";
-      predictions: NDB2API_V1.ShortEnhancedPrediction[];
+      predictions: NDB2API.Endpoints.Predictions.GET_Search.Data;
       options?: {
         keyword?: string;
       };
@@ -134,5 +134,5 @@ export type EmbedTemplateArgs =
   | [NDB2EmbedTemplate.View.SCORES, NDB2EmbedTemplate.Args.Scores]
   | [
       NDB2EmbedTemplate.View.PREDICTION_EDIT,
-      NDB2EmbedTemplate.Args.PredictionEdit
+      NDB2EmbedTemplate.Args.PredictionEdit,
     ];
