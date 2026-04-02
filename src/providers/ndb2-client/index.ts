@@ -281,19 +281,19 @@ export class Ndb2Client {
   }
 
   public addPrediction(
-    discord_id: string,
-    text: string,
-    driver: { due_date: string | Date } | { check_date: string | Date }
-  ): Promise<NDB2API_V1.AddPrediction> {
+    body: API_V2.Endpoints.Predictions.POST_Predictions.Body
+  ): Promise<API_V2.Entities.Predictions.Prediction> {
     const url = new URL(this.baseURL);
-    url.pathname = "api/predictions";
+    url.pathname = "api/v2/predictions";
 
-    const body = Object.assign({ discord_id, text }, driver);
     return this.client
-      .post<NDB2API_V1.AddPrediction>(url.toString(), body)
-      .then((res) => res.data)
+      .post<API_V2.Endpoints.Predictions.POST_Predictions.Response>(
+        url.toString(),
+        body
+      )
+      .then((res) => res.data.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 
