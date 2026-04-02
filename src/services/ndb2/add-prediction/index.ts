@@ -14,7 +14,7 @@ import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 import { add, isFuture } from "date-fns";
-import { NDB2API } from "../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 import { API } from "../../../providers/db/models/types";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
@@ -213,20 +213,17 @@ export default function AddPrediction({
 
     logger.addLog(LogStatus.INFO, `Due date is correctly in the future!`);
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
-    const driverBody =
-      driver === "date"
-        ? { due_date: adjustedDriverDate.toISOString() }
-        : { check_date: adjustedDriverDate.toISOString() };
+    const body: NDB2API.Endpoints.Predictions.POST_Predictions.Body = {
+      discord_id: discordId,
+      text,
+      date: adjustedDriverDate.toISOString(),
+      driver,
+    };
 
     try {
-      const response = await ndb2Client.addPrediction(
-        discordId,
-        text,
-        driverBody
-      );
-      prediction = response.data;
+      prediction = await ndb2Client.addPrediction(body);
       logger.addLog(
         LogStatus.SUCCESS,
         `Prediction was successfully submitted to NDB2`
