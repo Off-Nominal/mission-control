@@ -17,7 +17,7 @@ type RobustWatcherOptions = {
 export class FeedWatcher extends EventEmitter {
   private feedurl: string;
   private interval: number;
-  private timer: null | NodeJS.Timer;
+  private timer: ReturnType<typeof setInterval> | null;
   private loadAttempts: number = 0;
   private options: RobustWatcherOptions;
   private lastEntry: {
@@ -74,7 +74,10 @@ export class FeedWatcher extends EventEmitter {
   }
 
   public stop() {
-    clearInterval(this.timer);
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
     this.emit(FeedWatcherEvents.STOP);
   }
 
