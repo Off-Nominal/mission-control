@@ -32,7 +32,7 @@ const getDescription = (
     | PredictionLifeCycle.CHECKING
     | PredictionLifeCycle.CLOSED
     | PredictionLifeCycle.OPEN,
-  prediction: NDB2API_V1.EnhancedPrediction
+  prediction: NDB2API_V1.EnhancedPrediction,
 ): string => {
   const newCheckDate = new Date(prediction.check_date || 0);
   const snoozeCount = prediction.checks.filter((sc) => sc.closed).length;
@@ -44,10 +44,10 @@ const getDescription = (
       prediction.id
     } until later. I'll check in again on ${time(
       newCheckDate,
-      TimestampStyles.LongDate
+      TimestampStyles.LongDate,
     )} (${time(
       newCheckDate,
-      TimestampStyles.RelativeTime
+      TimestampStyles.RelativeTime,
     )}). This prediction has now been snoozed ${snoozeCount} times.`,
   };
 
@@ -55,7 +55,7 @@ const getDescription = (
 };
 
 export const generateSnoozeCheckEmbed = (
-  props: NDB2EmbedTemplate.Args.SnoozeCheck
+  props: NDB2EmbedTemplate.Args.SnoozeCheck,
 ): BaseMessageOptions["embeds"] => {
   if (
     props.prediction.status !== PredictionLifeCycle.CHECKING &&
@@ -80,7 +80,7 @@ export const generateSnoozeCheckEmbed = (
     description,
     footer: embedFields.standardFooter(
       props.prediction.id,
-      props.prediction.driver
+      props.prediction.driver,
     ),
   });
 
@@ -111,44 +111,44 @@ export const generateSnoozeCheckEmbed = (
   return [embed];
 };
 
+interface SnoozeCheckComponentsProps {
+  id: number;
+  status: PredictionLifeCycle;
+  checks: NDB2API.Entities.Predictions.Prediction["checks"];
+}
+
 export const generateSnoozeCheckComponents = (
-  prediction: NDB2API.Entities.Predictions.Prediction
+  props: SnoozeCheckComponentsProps,
 ): BaseMessageOptions["components"] => {
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
   const actionRow2 = new ActionRowBuilder<ButtonBuilder>();
 
-  if (prediction.status === PredictionLifeCycle.CHECKING) {
-    const check = prediction.checks.find((sc) => sc.closed == false);
+  if (props.status === PredictionLifeCycle.CHECKING) {
+    const check = props.checks.find((sc) => sc.closed == false);
     if (!check) {
       throw new Error("No open snooze check found");
     }
     actionRow.addComponents(
-      getSnoozeButton(prediction.id, check.id, 1, check.values.day, "1 Day"),
-      getSnoozeButton(prediction.id, check.id, 7, check.values.week, "1 Week"),
+      getSnoozeButton(props.id, check.id, 1, check.values.day, "1 Day"),
+      getSnoozeButton(props.id, check.id, 7, check.values.week, "1 Week"),
+      getSnoozeButton(props.id, check.id, 30, check.values.month, "1 Month"),
       getSnoozeButton(
-        prediction.id,
-        check.id,
-        30,
-        check.values.month,
-        "1 Month"
-      ),
-      getSnoozeButton(
-        prediction.id,
+        props.id,
         check.id,
         90,
         check.values.quarter,
-        "1 Quarter"
+        "1 Quarter",
       ),
-      getSnoozeButton(prediction.id, check.id, 365, check.values.year, "1 Year")
+      getSnoozeButton(props.id, check.id, 365, check.values.year, "1 Year"),
     );
 
-    actionRow2.addComponents(getWebButton(prediction.id));
+    actionRow2.addComponents(getWebButton(props.id));
 
     return [actionRow, actionRow2];
   } else {
     actionRow.addComponents(
-      getDetailsButton(prediction.id, "Season", "Details"),
-      getWebButton(prediction.id)
+      getDetailsButton(props.id, "Season", "Details"),
+      getWebButton(props.id),
     );
     return [actionRow];
   }

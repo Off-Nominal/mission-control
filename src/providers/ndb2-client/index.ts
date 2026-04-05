@@ -276,17 +276,20 @@ export class Ndb2Client {
     prediction_id: string | number,
     discord_id: string | number,
     endorsed: boolean,
-  ): Promise<NDB2API_V1.AddBet> {
+  ): Promise<API_V2.Endpoints.Predictions.POST_ById_bets.Response> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${prediction_id}/bets`;
+    url.pathname = `api/v2/predictions/${prediction_id}/bets`;
     return this.client
-      .post<NDB2API_V1.AddBet>(url.toString(), {
-        discord_id,
-        endorsed,
-      })
+      .post<API_V2.Endpoints.Predictions.POST_ById_bets.Response>(
+        url.toString(),
+        {
+          discord_id,
+          endorsed,
+        },
+      )
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 
@@ -294,17 +297,20 @@ export class Ndb2Client {
     predictionId: string | number,
     discord_id: string | number,
     vote: boolean,
-  ): Promise<NDB2API_V1.AddVote> {
+  ): Promise<API_V2.Endpoints.Predictions.POST_ById_votes.Response> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${predictionId}/votes`;
+    url.pathname = `api/v2/predictions/${predictionId}/votes`;
     return this.client
-      .post<NDB2API_V1.AddVote>(url.toString(), {
-        discord_id,
-        vote,
-      })
+      .post<API_V2.Endpoints.Predictions.POST_ById_votes.Response>(
+        url.toString(),
+        {
+          discord_id,
+          vote,
+        },
+      )
       .then((res) => res.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 

@@ -26,7 +26,7 @@ export default function createWebooksRouter(
   ndb2Bot: Client,
   ndb2Client: Ndb2Client,
   ndb2MsgSubscription: Ndb2MsgSubscription,
-  cache: Providers["cache"]
+  cache: Providers["cache"],
 ): Router {
   const router = express.Router();
 
@@ -46,11 +46,13 @@ export default function createWebooksRouter(
         req.body.event_name === NDB2WebhookEvent.NEW_PREDICTION ||
         req.body.event_name === NDB2WebhookEvent.UNTRIGGERED_PREDICTION ||
         req.body.event_name === NDB2WebhookEvent.UNJUDGED_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.RETIRED_PREDICTION
+        req.body.event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
+        req.body.event_name === NDB2WebhookEvent.NEW_BET ||
+        req.body.event_name === NDB2WebhookEvent.NEW_VOTE
       ) {
         logger.addLog(
           LogStatus.INFO,
-          `Event was ${req.body.event_name}, which is currently ignored.`
+          `Event was ${req.body.event_name}, which is currently ignored.`,
         );
         return logger.sendLog(ndb2Bot);
       }
@@ -60,9 +62,9 @@ export default function createWebooksRouter(
         ndb2Bot,
         ndb2Client,
         ndb2MsgSubscription,
-        cache
+        cache,
       );
-    }
+    },
   );
 
   router.post(
@@ -81,8 +83,8 @@ export default function createWebooksRouter(
         return "womp";
       }
 
-      return handleV2Webhook(payload, ndb2MsgSubscription);
-    }
+      return handleV2Webhook(payload, ndb2Bot, ndb2MsgSubscription);
+    },
   );
 
   return router;

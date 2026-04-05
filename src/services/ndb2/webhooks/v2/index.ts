@@ -10,11 +10,12 @@ import { getGuildFromContext, getLoggerFromContext } from "../contexts";
 import { LogStatus } from "../../../../logger/Logger";
 import { generateInteractionReplyFromTemplate } from "../../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpers/types";
-import { userMention } from "discord.js";
+import { Client, GuildMember, userMention } from "discord.js";
 
 export const handleV2Webhook = (
   payload: API_v2.Webhooks.Payload,
-  ndb2MsgSubscription: Ndb2MsgSubscription
+  ndb2Bot: Client,
+  ndb2MsgSubscription: Ndb2MsgSubscription,
 ) => {
   const logger = getLoggerFromContext();
   const guild = getGuildFromContext();
@@ -25,14 +26,14 @@ export const handleV2Webhook = (
     .then((subs) => {
       logger.addLog(
         LogStatus.SUCCESS,
-        `Successfully fetched ${subs.length} subscriptions to process for this event.`
+        `Successfully fetched ${subs.length} subscriptions to process for this event.`,
       );
       return subs;
     })
     .catch((err) => {
       logger.addLog(
         LogStatus.FAILURE,
-        `Failed to fetch message subscriptions for this event, cannot process any further.`
+        `Failed to fetch message subscriptions for this event, cannot process any further.`,
       );
       throw err;
     });
@@ -43,7 +44,7 @@ export const handleV2Webhook = (
     .then((predictor) => {
       logger.addLog(
         LogStatus.SUCCESS,
-        `Successfully fetched predictor User ${userMention(predictor.id)}.`
+        `Successfully fetched predictor User ${userMention(predictor.id)}.`,
       );
       return predictor;
     })
@@ -52,85 +53,136 @@ export const handleV2Webhook = (
       logger.addLog(
         LogStatus.FAILURE,
         `Failed to fetch predictor User ${userMention(
-          payload.data.prediction.predictor.discord_id
-        )} for this event, will fallback to defauls.`
+          payload.data.prediction.predictor.discord_id,
+        )} for this event, will fallback to defauls.`,
       );
       return undefined;
     });
 
-  Promise.all([subsPromise, predictorPromise]).then(([subs, predictor]) => {
-    logger.addLog(LogStatus.INFO, `Passing log to update functions.`);
+  // Fetch Triggerer User from Discord
+  const triggererPromise: Promise<GuildMember | undefined> = payload.data
+    .prediction.triggerer
+    ? guild.members
+        .fetch(payload.data.prediction.triggerer.discord_id)
+        .then((triggerer) => {
+          logger.addLog(
+            LogStatus.SUCCESS,
+            "Triggerer Discord profile successfully fetched",
+          );
+          return triggerer;
+        })
+        .catch((err) => {
+          console.error(err);
+          logger.addLog(
+            LogStatus.FAILURE,
+            `Failed to fetch triggerer from Discord, cannot post notice.`,
+          );
+          throw err;
+        })
+    : Promise.resolve(undefined);
 
-    const contextMessage = getSubByType(
-      subs,
-      API.Ndb2MsgSubscriptionType.CONTEXT
-    );
+  Promise.all([subsPromise, predictorPromise, triggererPromise]).then(
+    ([subs, predictor, triggerer]) => {
+      logger.addLog(LogStatus.INFO, `Passing log to update functions.`);
 
-    const updateBulkMessages = generateBulkMessageUpdater(subs, guild);
-
-    const updateStandardViews = (
-      prediction: API_v2.Entities.Predictions.Prediction
-    ) => {
-      const standardViewOptions = generateInteractionReplyFromTemplate(
-        NDB2EmbedTemplate.View.STANDARD,
-        {
-          prediction,
-          displayName: predictor?.displayName,
-          avatarUrl: predictor?.displayAvatarURL(),
-          context: contextMessage,
-        }
+      const contextMessage = getSubByType(
+        subs,
+        API.Ndb2MsgSubscriptionType.CONTEXT,
       );
 
-      updateBulkMessages([API.Ndb2MsgSubscriptionType.VIEW], {
-        embeds: standardViewOptions[0],
-        components: standardViewOptions[1],
-      });
-    };
+      const updateBulkMessages = generateBulkMessageUpdater(subs, guild);
 
-    const clearNoticeSubs = (types: API.Ndb2MsgSubscriptionType[]) => {
-      const messages = fetchMessagesFromSubs(subs, types, guild);
+      const updateStandardViews = (
+        prediction: API_v2.Entities.Predictions.Prediction,
+      ) => {
+        const standardViewOptions = generateInteractionReplyFromTemplate(
+          NDB2EmbedTemplate.View.STANDARD,
+          {
+            prediction,
+            displayName: predictor?.displayName,
+            avatarUrl: predictor?.displayAvatarURL(),
+            context: contextMessage,
+          },
+        );
 
-      messages.map((mp) => {
-        return mp.then((m) => {
-          return m.delete();
+        updateBulkMessages([API.Ndb2MsgSubscriptionType.VIEW], {
+          embeds: standardViewOptions[0],
+          components: standardViewOptions[1],
         });
-      });
+      };
 
-      const noticeSubs = subs.filter((s) => types.includes(s.type));
+      const clearNoticeSubs = (types: API.Ndb2MsgSubscriptionType[]) => {
+        const messages = fetchMessagesFromSubs(subs, types, guild);
 
-      noticeSubs.map((sub) => {
-        return ndb2MsgSubscription.expireSubById(sub.id);
-      });
-    };
+        messages.map((mp) => {
+          return mp.then((m) => {
+            return m.delete();
+          });
+        });
 
-    switch (payload.event_name) {
-      case "untriggered_prediction": {
-        // update VIEW subs
-        updateStandardViews(payload.data.prediction);
+        const noticeSubs = subs.filter((s) => types.includes(s.type));
 
-        // Delete any trigger notices
-        clearNoticeSubs([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE]);
+        noticeSubs.map((sub) => {
+          return ndb2MsgSubscription.expireSubById(sub.id);
+        });
+      };
 
-        break;
+      switch (payload.event_name) {
+        case "untriggered_prediction": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Delete any trigger notices
+          clearNoticeSubs([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE]);
+
+          break;
+        }
+        case "unjudged_prediction": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Delete any trigger or judgement notices
+          clearNoticeSubs([
+            API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+            API.Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
+          ]);
+
+          break;
+        }
+        case "retired_prediction": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          break;
+        }
+        case "new_bet": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+          break;
+        }
+        case "new_vote": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Update Trigger Notice
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.TRIGGER,
+            {
+              prediction: payload.data.prediction,
+              predictor,
+              client: ndb2Bot,
+              triggerer,
+              context: contextMessage,
+            },
+          );
+
+          updateBulkMessages([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE], {
+            embeds,
+            components,
+          });
+          break;
+        }
       }
-      case "unjudged_prediction": {
-        // update VIEW subs
-        updateStandardViews(payload.data.prediction);
-
-        // Delete any trigger or judgement notices
-        clearNoticeSubs([
-          API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
-          API.Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
-        ]);
-
-        break;
-      }
-      case "retired_prediction": {
-        // update VIEW subs
-        updateStandardViews(payload.data.prediction);
-
-        break;
-      }
-    }
-  });
+    },
+  );
 };
