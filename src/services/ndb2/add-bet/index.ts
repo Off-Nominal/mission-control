@@ -31,12 +31,7 @@ export default function AddBet({ ndb2Bot, ndb2Client }: Providers) {
 
     // Add Bet
     try {
-      const response = await ndb2Client.addBet(
-        predictionId,
-        discordId,
-        endorsed,
-      );
-      prediction = response.data;
+      prediction = await ndb2Client.addBet(predictionId, discordId, endorsed);
       logger.addLog(
         LogStatus.SUCCESS,
         `Bet was successfully submitted to NDB2`,

@@ -36,12 +36,7 @@ export default function AddVote({ ndb2Bot, ndb2Client }: Providers) {
 
     // Add Vote
     try {
-      const response = await ndb2Client.addVote(predictionId, discordId, vote);
-      prediction = response.data;
-      if (!response.success) {
-        throw ["Unknown error", "Unknown error"];
-      }
-      message = response.message;
+      prediction = await ndb2Client.addVote(predictionId, discordId, vote);
       logger.addLog(
         LogStatus.SUCCESS,
         `Vote was successfully submitted to NDB2`,

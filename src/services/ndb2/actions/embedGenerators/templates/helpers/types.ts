@@ -34,7 +34,7 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type Retirement = {
-      prediction: NDB2API_V1.EnhancedPrediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       predictor?: GuildMember;
       context?: Context;
     };
@@ -50,7 +50,7 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type SnoozeCheck = {
-      prediction: NDB2API_V1.EnhancedPrediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       client: Client;
       context?: Context;
     };
@@ -73,11 +73,11 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type PredictionEdit = {
-      prediction: NDB2API_V1.EnhancedPrediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       predictor?: GuildMember;
       edited_fields: {
-        check_date: {
-          old: string;
+        check_date?: {
+          old: string | null;
           new: string;
         };
       };

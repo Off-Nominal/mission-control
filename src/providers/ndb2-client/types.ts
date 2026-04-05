@@ -16,14 +16,6 @@ export enum ErrorCode {
 }
 
 export namespace NDB2API {
-  export enum SnoozeOptions {
-    DAY = 1,
-    WEEK = 7,
-    MONTH = 30,
-    QUARTER = 90,
-    YEAR = 365,
-  }
-
   export type GeneralResponse<T = null> = {
     success: boolean;
     errorCode?: ErrorCode;
@@ -89,11 +81,6 @@ export namespace NDB2API {
     };
   };
 
-  export type ShortEnhancedPrediction = Omit<
-    EnhancedPrediction,
-    "bets" | "votes"
-  >;
-
   export type Scores = {
     score: {
       points: number;
@@ -156,25 +143,9 @@ export namespace NDB2API {
     closed: boolean;
   };
 
-  export type AddPrediction = GeneralResponse<EnhancedPrediction>;
-
-  export type AddBet = GeneralResponse<EnhancedPrediction>;
-
-  export type GetPrediction = GeneralResponse<EnhancedPrediction>;
-
   export type TriggerPrediction = GeneralResponse<EnhancedPrediction>;
 
-  export type RetirePrediction = GeneralResponse<EnhancedPrediction>;
-
   export type GetScores = GeneralResponse<Scores>;
-
-  export type SearchPredictions = GeneralResponse<ShortEnhancedPrediction[]>;
-
-  export type AddVote = GeneralResponse<EnhancedPrediction>;
-
-  export type AddSnoozeVote = GeneralResponse<EnhancedPrediction>;
-
-  export type SnoozePrediction = GeneralResponse<EnhancedPrediction>;
 
   export type LeaderboardType = "points" | "predictions" | "bets";
 
@@ -228,8 +199,6 @@ export namespace NDB2API {
     };
   };
 
-  export type GetSeasons = GeneralResponse<Season[]>;
-
   export type SnoozeCheckResults = {
     day: number;
     week: number;
@@ -238,15 +207,15 @@ export namespace NDB2API {
     year: number;
   };
 
-  export type EnhancedSnoozeCheck = SnoozeCheck & {
-    values: SnoozeCheckResults;
-  };
-
   export type SnoozeCheck = {
     id: number;
     prediction_id: number;
     check_date: string;
     closed: boolean;
     closed_at: string | null;
+  };
+
+  export type EnhancedSnoozeCheck = SnoozeCheck & {
+    values: SnoozeCheckResults;
   };
 }

@@ -2,6 +2,7 @@ import * as API_v2 from "@offnominal/ndb2-api-types/v2";
 import {
   fetchMessagesFromSubs,
   generateBulkMessageUpdater,
+  generateSender,
   getSubByType,
 } from "../helpers";
 import { API } from "../../../../providers/db/models/types";
@@ -11,6 +12,10 @@ import { LogStatus } from "../../../../logger/Logger";
 import { generateInteractionReplyFromTemplate } from "../../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpers/types";
 import { Client, GuildMember, userMention } from "discord.js";
+import mcconfig from "../../../../mcconfig";
+import { add } from "date-fns";
+
+const fallbackContextChannelId = mcconfig.discord.channels.general;
 
 export const handleV2Webhook = (
   payload: API_v2.Webhooks.Payload,
@@ -19,6 +24,8 @@ export const handleV2Webhook = (
 ) => {
   const logger = getLoggerFromContext();
   const guild = getGuildFromContext();
+
+  const sendMessage = generateSender(guild);
 
   // Fetch subscriptions to prediction in Discord
   const subsPromise = ndb2MsgSubscription
@@ -89,6 +96,8 @@ export const handleV2Webhook = (
         subs,
         API.Ndb2MsgSubscriptionType.CONTEXT,
       );
+      const contextChannelId =
+        contextMessage?.channelId ?? fallbackContextChannelId;
 
       const updateBulkMessages = generateBulkMessageUpdater(subs, guild);
 
@@ -179,6 +188,154 @@ export const handleV2Webhook = (
           updateBulkMessages([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE], {
             embeds,
             components,
+          });
+          break;
+        }
+        case "prediction_edit": {
+          const edited_fields = payload.data.edited_fields;
+
+          if (!edited_fields) {
+            logger.addLog(
+              LogStatus.FAILURE,
+              "Edited fields were not present in the event, cannot process any further.",
+            );
+            return logger.sendLog(ndb2Bot);
+          }
+
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Send notice of Edit
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.PREDICTION_EDIT,
+            {
+              prediction: payload.data.prediction,
+              predictor,
+              edited_fields,
+            },
+          );
+
+          sendMessage(contextChannelId, embeds, components);
+          break;
+        }
+        case "triggered_snooze_check": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Shut down Snooze Notice
+          const messages = fetchMessagesFromSubs(
+            subs,
+            [API.Ndb2MsgSubscriptionType.SNOOZE_CHECK],
+            guild,
+          );
+
+          const snoozeCheckMessage = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.SNOOZE_CHECK,
+            {
+              prediction: payload.data.prediction,
+              client: ndb2Bot,
+              context: contextMessage,
+            },
+          );
+
+          messages.map((mp) => {
+            return mp.then((m) => {
+              return m.edit({
+                embeds: snoozeCheckMessage[0],
+                components: snoozeCheckMessage[1],
+              });
+            });
+          });
+
+          // Send Trigger Notice
+          const triggerNoticeMessage = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.TRIGGER,
+            {
+              prediction: payload.data.prediction,
+              predictor,
+              client: ndb2Bot,
+              triggerer,
+              context: contextMessage,
+            },
+          );
+
+          sendMessage(contextChannelId, ...triggerNoticeMessage).then(
+            (message) => {
+              // Log the trigger notice subscription
+              ndb2MsgSubscription.addSubscription(
+                API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+                payload.data.prediction.id,
+                message.channel.id,
+                message.id,
+                add(new Date(), { hours: 36 }),
+              );
+            },
+          );
+          break;
+        }
+        case "new_snooze_vote": {
+          // update SNOOZE subs
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.SNOOZE_CHECK,
+            {
+              prediction: payload.data.prediction,
+              client: ndb2Bot,
+              context: contextMessage,
+            },
+          );
+
+          updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
+            embeds,
+            components,
+          });
+          break;
+        }
+        case "snoozed_prediction": {
+          // update SNOOZE subs
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.SNOOZE_CHECK,
+            {
+              prediction: payload.data.prediction,
+              client: ndb2Bot,
+              context: contextMessage,
+            },
+          );
+
+          updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
+            embeds,
+            components,
+          });
+
+          // Expire any subs for snooze notices
+          const triggerSubs = subs.filter(
+            (s) => s.type === API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
+          );
+
+          triggerSubs.map((sub) => {
+            return ndb2MsgSubscription.expireSubById(sub.id);
+          });
+          break;
+        }
+        case "new_snooze_check": {
+          // Send Snooze Check
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.SNOOZE_CHECK,
+            {
+              prediction: payload.data.prediction,
+              client: ndb2Bot,
+              context: contextMessage,
+            },
+          );
+
+          sendMessage(contextChannelId, embeds, components).then((message) => {
+            // Log the trigger notice subscription
+            ndb2MsgSubscription.addSubscription(
+              API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
+              payload.data.prediction.id,
+              message.channel.id,
+              message.id,
+              add(new Date(), { hours: 24 }),
+            );
           });
           break;
         }

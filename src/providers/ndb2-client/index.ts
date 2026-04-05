@@ -223,13 +223,18 @@ export class Ndb2Client {
       });
   }
 
-  public getSeasons(): Promise<API_V2.Entities.Seasons.Season[]> {
+  public getSeasons(): Promise<API_V2.Endpoints.Seasons.GET.Data> {
     const url = new URL(this.baseURL);
     url.pathname = "api/v2/seasons";
 
     return this.client
       .get<API_V2.Endpoints.Seasons.GET.Response>(url.toString())
-      .then((res) => res.data.data)
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to get seasons");
+        }
+        return res.data.data;
+      })
       .catch((err) => {
         throw handleError(err);
       });
@@ -243,13 +248,18 @@ export class Ndb2Client {
 
   public getPrediction(
     id: string | number,
-  ): Promise<API_V2.Entities.Predictions.Prediction> {
+  ): Promise<API_V2.Endpoints.Predictions.GET_ById.Data> {
     const url = new URL(this.baseURL);
     url.pathname = `api/v2/predictions/${id}`;
 
     return this.client
       .get<API_V2.Endpoints.Predictions.GET_ById.Response>(url.toString())
-      .then((res) => res.data.data)
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to get prediction");
+        }
+        return res.data.data;
+      })
       .catch((err) => {
         throw handleError(err);
       });
@@ -257,7 +267,7 @@ export class Ndb2Client {
 
   public addPrediction(
     body: API_V2.Endpoints.Predictions.POST_Predictions.Body,
-  ): Promise<API_V2.Entities.Predictions.Prediction> {
+  ): Promise<API_V2.Endpoints.Predictions.POST_Predictions.Data> {
     const url = new URL(this.baseURL);
     url.pathname = "api/v2/predictions";
 
@@ -266,7 +276,12 @@ export class Ndb2Client {
         url.toString(),
         body,
       )
-      .then((res) => res.data.data)
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to add prediction");
+        }
+        return res.data.data;
+      })
       .catch((err) => {
         throw handleError(err);
       });
@@ -276,7 +291,7 @@ export class Ndb2Client {
     prediction_id: string | number,
     discord_id: string | number,
     endorsed: boolean,
-  ): Promise<API_V2.Endpoints.Predictions.POST_ById_bets.Response> {
+  ): Promise<API_V2.Endpoints.Predictions.POST_ById_bets.Data> {
     const url = new URL(this.baseURL);
     url.pathname = `api/v2/predictions/${prediction_id}/bets`;
     return this.client
@@ -287,7 +302,12 @@ export class Ndb2Client {
           endorsed,
         },
       )
-      .then((res) => res.data)
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to add bet");
+        }
+        return res.data.data;
+      })
       .catch((err) => {
         throw handleError(err);
       });
@@ -297,7 +317,7 @@ export class Ndb2Client {
     predictionId: string | number,
     discord_id: string | number,
     vote: boolean,
-  ): Promise<API_V2.Endpoints.Predictions.POST_ById_votes.Response> {
+  ): Promise<API_V2.Endpoints.Predictions.POST_ById_votes.Data> {
     const url = new URL(this.baseURL);
     url.pathname = `api/v2/predictions/${predictionId}/votes`;
     return this.client
@@ -308,7 +328,12 @@ export class Ndb2Client {
           vote,
         },
       )
-      .then((res) => res.data)
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to add vote");
+        }
+        return res.data.data;
+      })
       .catch((err) => {
         throw handleError(err);
       });
@@ -318,18 +343,26 @@ export class Ndb2Client {
     predictionId: string | number,
     snoozeCheckId: string | number,
     discord_id: string | number,
-    value: NDB2API_V1.SnoozeOptions,
-  ): Promise<NDB2API_V1.AddSnoozeVote> {
+    value: API_V2.Endpoints.Predictions.POST_ById_snooze_checks.Body["value"],
+  ): Promise<API_V2.Endpoints.Predictions.POST_ById_snooze_checks.Data> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${predictionId}/snooze_checks/${snoozeCheckId}`;
+    url.pathname = `api/v2/predictions/${predictionId}/snooze_checks/${snoozeCheckId}`;
     return this.client
-      .post<NDB2API_V1.AddSnoozeVote>(url.toString(), {
-        discord_id,
-        value,
+      .post<API_V2.Endpoints.Predictions.POST_ById_snooze_checks.Response>(
+        url.toString(),
+        {
+          discord_id,
+          value,
+        },
+      )
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to add snooze vote");
+        }
+        return res.data.data;
       })
-      .then((res) => res.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 
@@ -362,7 +395,12 @@ export class Ndb2Client {
         url.toString(),
         { discord_id },
       )
-      .then((res) => res.data.data)
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to retire prediction");
+        }
+        return res.data.data;
+      })
       .catch((err) => {
         throw handleError(err);
       });
@@ -397,7 +435,12 @@ export class Ndb2Client {
 
     return this.client
       .get<API_V2.Endpoints.Predictions.GET_Search.Response>(url.toString())
-      .then((res) => res.data.data)
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to search predictions");
+        }
+        return res.data.data;
+      })
       .catch((err) => {
         throw handleError(err);
       });
@@ -458,18 +501,26 @@ export class Ndb2Client {
     discord_id: string,
     predictionId: string | number,
     check_date: string | Date,
-  ): Promise<NDB2API_V1.SnoozePrediction> {
+  ): Promise<API_V2.Endpoints.Predictions.PATCH_ById_snooze.Data> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${predictionId}/snooze`;
+    url.pathname = `api/v2/predictions/${predictionId}/snooze`;
 
     return this.client
-      .patch<NDB2API_V1.SnoozePrediction>(url.toString(), {
-        discord_id,
-        check_date,
+      .patch<API_V2.Endpoints.Predictions.PATCH_ById_snooze.Response>(
+        url.toString(),
+        {
+          discord_id,
+          check_date,
+        },
+      )
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to snooze prediction");
+        }
+        return res.data.data;
       })
-      .then((res) => res.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 }
