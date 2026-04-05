@@ -218,61 +218,6 @@ export const handleV2Webhook = (
           sendMessage(contextChannelId, embeds, components);
           break;
         }
-        case "triggered_snooze_check": {
-          // update VIEW subs
-          updateStandardViews(payload.data.prediction);
-
-          // Shut down Snooze Notice
-          const messages = fetchMessagesFromSubs(
-            subs,
-            [API.Ndb2MsgSubscriptionType.SNOOZE_CHECK],
-            guild,
-          );
-
-          const snoozeCheckMessage = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.SNOOZE_CHECK,
-            {
-              prediction: payload.data.prediction,
-              client: ndb2Bot,
-              context: contextMessage,
-            },
-          );
-
-          messages.map((mp) => {
-            return mp.then((m) => {
-              return m.edit({
-                embeds: snoozeCheckMessage[0],
-                components: snoozeCheckMessage[1],
-              });
-            });
-          });
-
-          // Send Trigger Notice
-          const triggerNoticeMessage = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.TRIGGER,
-            {
-              prediction: payload.data.prediction,
-              predictor,
-              client: ndb2Bot,
-              triggerer,
-              context: contextMessage,
-            },
-          );
-
-          sendMessage(contextChannelId, ...triggerNoticeMessage).then(
-            (message) => {
-              // Log the trigger notice subscription
-              ndb2MsgSubscription.addSubscription(
-                API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
-                payload.data.prediction.id,
-                message.channel.id,
-                message.id,
-                add(new Date(), { hours: 36 }),
-              );
-            },
-          );
-          break;
-        }
         case "new_snooze_vote": {
           // update SNOOZE subs
           const [embeds, components] = generateInteractionReplyFromTemplate(
@@ -313,29 +258,6 @@ export const handleV2Webhook = (
 
           triggerSubs.map((sub) => {
             return ndb2MsgSubscription.expireSubById(sub.id);
-          });
-          break;
-        }
-        case "new_snooze_check": {
-          // Send Snooze Check
-          const [embeds, components] = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.SNOOZE_CHECK,
-            {
-              prediction: payload.data.prediction,
-              client: ndb2Bot,
-              context: contextMessage,
-            },
-          );
-
-          sendMessage(contextChannelId, embeds, components).then((message) => {
-            // Log the trigger notice subscription
-            ndb2MsgSubscription.addSubscription(
-              API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
-              payload.data.prediction.id,
-              message.channel.id,
-              message.id,
-              add(new Date(), { hours: 24 }),
-            );
           });
           break;
         }
