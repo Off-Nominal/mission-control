@@ -8,10 +8,6 @@ import {
   TimestampStyles,
 } from "discord.js";
 import {
-  NDB2API as NDB2API_V1,
-  PredictionLifeCycle,
-} from "../../../../../providers/ndb2-client";
-import {
   getDetailsButton,
   getSnoozeButton,
   getWebButton,
@@ -22,25 +18,32 @@ import { getAuthor, getThumbnail } from "./helpers/helpers";
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 const titles = {
-  [PredictionLifeCycle.CHECKING]: "Just checking in...",
-  [PredictionLifeCycle.CLOSED]: "Thanks for letting me know",
-  [PredictionLifeCycle.OPEN]: "Thanks for letting me know",
+  checking: "Just checking in...",
+  closed: "Thanks for letting me know",
+  open: "Thanks for letting me know",
 };
 
+interface GetDescriptionChecksProps {
+  closed: boolean;
+}
+
+interface GetDescriptionPredictionProps {
+  id: number;
+  check_date: string;
+  checks: GetDescriptionChecksProps[];
+}
+
 const getDescription = (
-  status:
-    | PredictionLifeCycle.CHECKING
-    | PredictionLifeCycle.CLOSED
-    | PredictionLifeCycle.OPEN,
-  prediction: NDB2API_V1.EnhancedPrediction,
+  status: "checking" | "closed" | "open",
+  prediction: GetDescriptionPredictionProps,
 ): string => {
   const newCheckDate = new Date(prediction.check_date || 0);
   const snoozeCount = prediction.checks.filter((sc) => sc.closed).length;
 
   const descriptions = {
-    [PredictionLifeCycle.CHECKING]: `Prediction #${prediction.id} has reached a check-in date. Please let me know what we should do with it!`,
-    [PredictionLifeCycle.CLOSED]: `Prediction #${prediction.id} has been triggered!`,
-    [PredictionLifeCycle.OPEN]: `I've snoozed prediction #${
+    ["checking"]: `Prediction #${prediction.id} has reached a check-in date. Please let me know what we should do with it!`,
+    ["closed"]: `Prediction #${prediction.id} has been triggered!`,
+    ["open"]: `I've snoozed prediction #${
       prediction.id
     } until later. I'll check in again on ${time(
       newCheckDate,
@@ -58,10 +61,14 @@ export const generateSnoozeCheckEmbed = (
   props: NDB2EmbedTemplate.Args.SnoozeCheck,
 ): BaseMessageOptions["embeds"] => {
   if (
-    props.prediction.status !== PredictionLifeCycle.CHECKING &&
-    props.prediction.status !== PredictionLifeCycle.CLOSED &&
-    props.prediction.status !== PredictionLifeCycle.OPEN
+    props.prediction.status !== "checking" &&
+    props.prediction.status !== "closed" &&
+    props.prediction.status !== "open"
   ) {
+    return [];
+  }
+
+  if (props.prediction.driver !== "event") {
     return [];
   }
 
@@ -93,7 +100,7 @@ export const generateSnoozeCheckEmbed = (
     embedFields.date(created, "Created", { context: props.context }),
   ];
 
-  if (props.prediction.status === PredictionLifeCycle.CHECKING) {
+  if (props.prediction.status === "checking") {
     fields.push({
       name: "Is this prediction ready to be triggered?",
       value:
@@ -113,7 +120,7 @@ export const generateSnoozeCheckEmbed = (
 
 interface SnoozeCheckComponentsProps {
   id: number;
-  status: PredictionLifeCycle;
+  status: NDB2API.Entities.Predictions.PredictionLifeCycle;
   checks: NDB2API.Entities.Predictions.Prediction["checks"];
 }
 
@@ -123,7 +130,7 @@ export const generateSnoozeCheckComponents = (
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
   const actionRow2 = new ActionRowBuilder<ButtonBuilder>();
 
-  if (props.status === PredictionLifeCycle.CHECKING) {
+  if (props.status === "checking") {
     const check = props.checks.find((sc) => sc.closed == false);
     if (!check) {
       throw new Error("No open snooze check found");

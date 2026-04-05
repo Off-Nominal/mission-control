@@ -178,33 +178,6 @@ export const handleV1Webhook = (
       };
 
       switch (event_name) {
-        case NDB2WebhookEvent.PREDICTION_EDIT: {
-          const edited_fields = data.edited_fields;
-
-          if (!edited_fields) {
-            logger.addLog(
-              LogStatus.FAILURE,
-              "Edited fields were not present in the event, cannot process any further.",
-            );
-            return logger.sendLog(ndb2Bot);
-          }
-
-          // update VIEW subs
-          updateStandardViews(prediction);
-
-          // Send notice of Edit
-          const [embeds, components] = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.PREDICTION_EDIT,
-            {
-              prediction,
-              predictor,
-              edited_fields,
-            },
-          );
-
-          sendMessage(contextChannelId, embeds, components);
-          break;
-        }
         case NDB2WebhookEvent.TRIGGERED_PREDICTION: {
           // update VIEW subs
           updateStandardViews(prediction);
@@ -259,61 +232,7 @@ export const handleV1Webhook = (
 
           break;
         }
-        case NDB2WebhookEvent.TRIGGERED_SNOOZE: {
-          // update VIEW subs
-          updateStandardViews(prediction);
 
-          // Shut down Snooze Notice
-          const messages = fetchMessagesFromSubs(
-            subs,
-            [API.Ndb2MsgSubscriptionType.SNOOZE_CHECK],
-            guild,
-          );
-
-          const snoozeCheckMessage = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.SNOOZE_CHECK,
-            {
-              prediction,
-              client: ndb2Bot,
-              context: contextMessage,
-            },
-          );
-
-          messages.map((mp) => {
-            return mp.then((m) => {
-              return m.edit({
-                embeds: snoozeCheckMessage[0],
-                components: snoozeCheckMessage[1],
-              });
-            });
-          });
-
-          // Send Trigger Notice
-          const triggerNoticeMessage = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.TRIGGER,
-            {
-              prediction,
-              predictor,
-              client: ndb2Bot,
-              triggerer,
-              context: contextMessage,
-            },
-          );
-
-          sendMessage(contextChannelId, ...triggerNoticeMessage).then(
-            (message) => {
-              // Log the trigger notice subscription
-              ndb2MsgSubscription.addSubscription(
-                API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
-                prediction.id,
-                message.channel.id,
-                message.id,
-                add(new Date(), { hours: 36 }),
-              );
-            },
-          );
-          break;
-        }
         case NDB2WebhookEvent.JUDGED_PREDICTION: {
           // update VIEW subs
           updateStandardViews(prediction);
@@ -336,72 +255,6 @@ export const handleV1Webhook = (
               message.channel.id,
               message.id,
               add(new Date(), { hours: 36 }),
-            );
-          });
-          break;
-        }
-        case NDB2WebhookEvent.NEW_SNOOZE_VOTE: {
-          // update SNOOZE subs
-          const [embeds, components] = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.SNOOZE_CHECK,
-            {
-              prediction,
-              client: ndb2Bot,
-              context: contextMessage,
-            },
-          );
-
-          updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
-            embeds,
-            components,
-          });
-          break;
-        }
-        case NDB2WebhookEvent.SNOOZED_PREDICTION: {
-          // update SNOOZE subs
-          const [embeds, components] = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.SNOOZE_CHECK,
-            {
-              prediction,
-              client: ndb2Bot,
-              context: contextMessage,
-            },
-          );
-
-          updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
-            embeds,
-            components,
-          });
-
-          // Expire any subs for snooze notices
-          const triggerSubs = subs.filter(
-            (s) => s.type === API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
-          );
-
-          triggerSubs.map((sub) => {
-            return ndb2MsgSubscription.expireSubById(sub.id);
-          });
-          break;
-        }
-        case NDB2WebhookEvent.NEW_SNOOZE_CHECK: {
-          // Send Snooze Check
-          const [embeds, components] = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.SNOOZE_CHECK,
-            {
-              prediction,
-              client: ndb2Bot,
-              context: contextMessage,
-            },
-          );
-
-          sendMessage(contextChannelId, embeds, components).then((message) => {
-            // Log the trigger notice subscription
-            ndb2MsgSubscription.addSubscription(
-              API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
-              prediction.id,
-              message.channel.id,
-              message.id,
-              add(new Date(), { hours: 24 }),
             );
           });
           break;

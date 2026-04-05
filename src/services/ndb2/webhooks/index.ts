@@ -48,7 +48,12 @@ export default function createWebooksRouter(
         req.body.event_name === NDB2WebhookEvent.UNJUDGED_PREDICTION ||
         req.body.event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
         req.body.event_name === NDB2WebhookEvent.NEW_BET ||
-        req.body.event_name === NDB2WebhookEvent.NEW_VOTE
+        req.body.event_name === NDB2WebhookEvent.NEW_VOTE ||
+        req.body.event_name === NDB2WebhookEvent.NEW_SNOOZE_CHECK ||
+        req.body.event_name === NDB2WebhookEvent.NEW_SNOOZE_VOTE ||
+        req.body.event_name === NDB2WebhookEvent.SNOOZED_PREDICTION ||
+        req.body.event_name === NDB2WebhookEvent.TRIGGERED_SNOOZE ||
+        req.body.event_name === NDB2WebhookEvent.PREDICTION_EDIT
       ) {
         logger.addLog(
           LogStatus.INFO,

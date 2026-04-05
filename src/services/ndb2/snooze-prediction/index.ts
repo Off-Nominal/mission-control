@@ -4,11 +4,7 @@ import { Providers } from "../../../providers";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
-export default function SnoozePrediction({
-  ndb2Client,
-  ndb2Bot,
-  models,
-}: Providers) {
+export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
   ndb2Bot.on("interactionCreate", async (interaction) => {
     if (!interaction.isChatInputCommand()) {
       return;
@@ -24,14 +20,14 @@ export default function SnoozePrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 Slash Command Snooze Prediction"
+      "NDB2 Slash Command Snooze Prediction",
     );
 
     const predictionId = options.getInteger("id", true);
 
     logger.addLog(
       LogStatus.INFO,
-      `Received a Snooze Prediction request for prediction ID: ${predictionId}`
+      `Received a Snooze Prediction request for prediction ID: ${predictionId}`,
     );
 
     let prediction: NDB2API.Entities.Predictions.Prediction;
@@ -40,13 +36,13 @@ export default function SnoozePrediction({
       prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
-        `Prediction was successfully retrieved from NDB2.`
+        `Prediction was successfully retrieved from NDB2.`,
       );
     } catch (err) {
       if (!Array.isArray(err)) {
         logger.addLog(
           LogStatus.WARNING,
-          `There was an error fetching this prediction. Could not parse error.`
+          `There was an error fetching this prediction. Could not parse error.`,
         );
 
         interaction.reply({
@@ -62,7 +58,7 @@ export default function SnoozePrediction({
 
       logger.addLog(
         LogStatus.WARNING,
-        `There was an error fetching this prediction. ${logError}`
+        `There was an error fetching this prediction. ${logError}`,
       );
       logger.sendLog(interaction.client);
 
@@ -73,13 +69,13 @@ export default function SnoozePrediction({
       return;
     }
 
-    const discordId = interaction.member.user.id;
+    const discordId = interaction.member?.user.id;
 
     // Only predictor can snooze a prediction proactively
     if (prediction.predictor.discord_id !== discordId) {
       logger.addLog(
         LogStatus.WARNING,
-        `Someone other than the predictor is trying to snooze this prediction. Rejecting.`
+        `Someone other than the predictor is trying to snooze this prediction. Rejecting.`,
       );
 
       interaction.reply({
@@ -94,7 +90,7 @@ export default function SnoozePrediction({
     if (!["checking", "open"].includes(prediction.status)) {
       logger.addLog(
         LogStatus.WARNING,
-        `Prediction is not in a snoozable status. Rejecting.`
+        `Prediction is not in a snoozable status. Rejecting.`,
       );
 
       interaction.reply({
@@ -116,7 +112,7 @@ export default function SnoozePrediction({
       });
       logger.addLog(
         LogStatus.WARNING,
-        `User entered invalid timestamp, trigger rejected`
+        `User entered invalid timestamp, trigger rejected`,
       );
       logger.sendLog(interaction.client);
       return;
@@ -133,7 +129,7 @@ export default function SnoozePrediction({
       });
       logger.addLog(
         LogStatus.WARNING,
-        `User entered check date in the past, snooze rejected`
+        `User entered check date in the past, snooze rejected`,
       );
       logger.sendLog(interaction.client);
       return;
@@ -148,7 +144,7 @@ export default function SnoozePrediction({
       });
       logger.addLog(
         LogStatus.WARNING,
-        `User entered check date that was before prediction created date, snooze rejected`
+        `User entered check date that was before prediction created date, snooze rejected`,
       );
       logger.sendLog(interaction.client);
       return;
@@ -161,7 +157,7 @@ export default function SnoozePrediction({
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error snoozing the prediction.`
+        `There was an error snoozing the prediction.`,
       );
       console.error(err);
       logger.sendLog(interaction.client);
@@ -183,7 +179,7 @@ export default function SnoozePrediction({
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error sending the reply to the discord.`
+        `There was an error sending the reply to the discord.`,
       );
       console.error(err);
       logger.sendLog(interaction.client);
