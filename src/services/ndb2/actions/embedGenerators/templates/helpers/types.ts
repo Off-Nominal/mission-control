@@ -50,7 +50,9 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type SnoozeCheck = {
-      prediction: NDB2API.Entities.Predictions.Prediction;
+      prediction:
+        | NDB2API_V1.EnhancedPrediction
+        | NDB2API.Entities.Predictions.Prediction;
       client: Client;
       context?: Context;
     };
