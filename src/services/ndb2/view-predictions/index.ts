@@ -1,10 +1,7 @@
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import {
-  PredictionLifeCycle,
-  SearchOptions,
-  SortByOption,
-} from "../../../providers/ndb2-client";
+import type { Endpoints } from "@offnominal/ndb2-api-types/v2";
+import { PredictionLifeCycle } from "../../../providers/ndb2-client";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
@@ -46,10 +43,10 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
       return;
     }
 
-    const searchOptions: SearchOptions = {};
+    const searchOptions: Endpoints.Predictions.GET_Search.Query = {};
 
     if (listType === "recent") {
-      searchOptions.sort_by = [SortByOption.CREATED_DESC];
+      searchOptions.sort_by = "created_date-desc";
       searchOptions.status = [
         PredictionLifeCycle.OPEN,
         PredictionLifeCycle.CHECKING,
@@ -57,7 +54,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
     }
 
     if (listType === "upcoming") {
-      searchOptions.sort_by = [SortByOption.CHECK_ASC, SortByOption.DUE_ASC];
+      searchOptions.sort_by = "check_date-asc";
       searchOptions.status = [
         PredictionLifeCycle.OPEN,
         PredictionLifeCycle.CHECKING,
@@ -65,7 +62,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
     }
 
     if (listType === "upcoming-mine") {
-      searchOptions.sort_by = [SortByOption.CHECK_ASC, SortByOption.DUE_ASC];
+      searchOptions.sort_by = "check_date-asc";
       searchOptions.status = [
         PredictionLifeCycle.OPEN,
         PredictionLifeCycle.CHECKING,
@@ -74,7 +71,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
     }
 
     if (listType === "upcoming-no-bet") {
-      searchOptions.sort_by = [SortByOption.CHECK_ASC, SortByOption.DUE_ASC];
+      searchOptions.sort_by = "check_date-asc";
       searchOptions.status = [
         PredictionLifeCycle.OPEN,
         PredictionLifeCycle.CHECKING,
@@ -89,7 +86,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
         "Successfully fetched predictions from API."
       );
 
-      const predictions = response.data;
+      const predictions = response;
 
       const [embeds, components] = generateInteractionReplyFromTemplate(
         NDB2EmbedTemplate.View.LIST,

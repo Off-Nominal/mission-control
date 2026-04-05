@@ -1,6 +1,6 @@
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { SearchOptions } from "../../../providers/ndb2-client";
+import type { Endpoints } from "@offnominal/ndb2-api-types/v2";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
@@ -25,7 +25,7 @@ export default function SearchPredictions({ ndb2Client, ndb2Bot }: Providers) {
       `Search Predictions: Keyword - ${keyword}`
     );
 
-    const searchOptions: SearchOptions = {
+    const searchOptions: Endpoints.Predictions.GET_Search.Query = {
       keyword,
     };
 
@@ -36,7 +36,7 @@ export default function SearchPredictions({ ndb2Client, ndb2Bot }: Providers) {
         "Successfully fetched predictions from API."
       );
 
-      const predictions = response.data;
+      const predictions = response;
 
       const [embeds, components] = generateInteractionReplyFromTemplate(
         NDB2EmbedTemplate.View.LIST,

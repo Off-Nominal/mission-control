@@ -1,11 +1,11 @@
 import axios, { AxiosInstance } from "axios";
-import { NDB2API as NDB2API_V1, PredictionLifeCycle } from "./types";
+import { NDB2API as NDB2API_V1 } from "./types";
 import mcconfig from "../../mcconfig";
 export * from "./types";
 import * as API_V2 from "@offnominal/ndb2-api-types/v2";
 
 const isNdb2ApiResponse_v1 = (
-  response: any
+  response: any,
 ): response is NDB2API_V1.GeneralResponse => {
   if (typeof response !== "object") {
     return false;
@@ -34,7 +34,7 @@ const isNdb2ApiResponse_v1 = (
 };
 
 const isNdb2ApiErrorResponse = (
-  response: any
+  response: any,
 ): response is API_V2.Utils.ErrorResponse => {
   if (typeof response !== "object") {
     return false;
@@ -62,32 +62,6 @@ const isNdb2ApiErrorResponse = (
 
   return true;
 };
-
-export type SearchOptions = {
-  status?: PredictionLifeCycle[];
-  keyword?: string;
-  sort_by?: SortByOption[];
-  page?: number;
-  creator?: string;
-  unbetter?: string;
-};
-
-export enum SortByOption {
-  CREATED_ASC = "created_date-asc",
-  CREATED_DESC = "created_date-desc",
-  DUE_ASC = "due_date-asc",
-  DUE_DESC = "due_date-desc",
-  CHECK_ASC = "check_date-asc",
-  CHECK_DESC = "check_date-desc",
-  RETIRED_ASC = "retired_date-asc",
-  RETIRED_DESC = "retired_date-desc",
-  TRIGGERED_ASC = "triggered_date-asc",
-  TRIGGERED_DESC = "triggered_date-desc",
-  CLOSED_ASC = "closed_date-asc",
-  CLOSED_DESC = "closed_date-desc",
-  JUDGED_ASC = "judged_date-asc",
-  JUDGED_DESC = "judged_date-desc",
-}
 
 const handleError_v1 = (err: any): [string, string] => {
   // returns user friendly message and full message in array
@@ -225,6 +199,7 @@ const handleError = (err: any): [string, string] => {
   // Final fallback
   return [defaultUserMessage, "Unknown error."];
 };
+
 export class Ndb2Client {
   private baseURL = mcconfig.ndb2.baseUrl || "";
   private client: AxiosInstance;
@@ -261,13 +236,13 @@ export class Ndb2Client {
   }
 
   public getSeason(
-    id: string | number
+    id: string | number,
   ): API_V2.Entities.Seasons.Season | undefined {
     return this.seasons.find((season) => season.id === id);
   }
 
   public getPrediction(
-    id: string | number
+    id: string | number,
   ): Promise<API_V2.Entities.Predictions.Prediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/v2/predictions/${id}`;
@@ -281,7 +256,7 @@ export class Ndb2Client {
   }
 
   public addPrediction(
-    body: API_V2.Endpoints.Predictions.POST_Predictions.Body
+    body: API_V2.Endpoints.Predictions.POST_Predictions.Body,
   ): Promise<API_V2.Entities.Predictions.Prediction> {
     const url = new URL(this.baseURL);
     url.pathname = "api/v2/predictions";
@@ -289,7 +264,7 @@ export class Ndb2Client {
     return this.client
       .post<API_V2.Endpoints.Predictions.POST_Predictions.Response>(
         url.toString(),
-        body
+        body,
       )
       .then((res) => res.data.data)
       .catch((err) => {
@@ -300,7 +275,7 @@ export class Ndb2Client {
   public addBet(
     prediction_id: string | number,
     discord_id: string | number,
-    endorsed: boolean
+    endorsed: boolean,
   ): Promise<NDB2API_V1.AddBet> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${prediction_id}/bets`;
@@ -318,7 +293,7 @@ export class Ndb2Client {
   public addVote(
     predictionId: string | number,
     discord_id: string | number,
-    vote: boolean
+    vote: boolean,
   ): Promise<NDB2API_V1.AddVote> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${predictionId}/votes`;
@@ -337,7 +312,7 @@ export class Ndb2Client {
     predictionId: string | number,
     snoozeCheckId: string | number,
     discord_id: string | number,
-    value: NDB2API_V1.SnoozeOptions
+    value: NDB2API_V1.SnoozeOptions,
   ): Promise<NDB2API_V1.AddSnoozeVote> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${predictionId}/snooze_checks/${snoozeCheckId}`;
@@ -355,7 +330,7 @@ export class Ndb2Client {
   public triggerPrediction(
     id: string | number,
     discord_id: string | null = null,
-    closed_date?: Date
+    closed_date?: Date,
   ): Promise<NDB2API_V1.TriggerPrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${id}/trigger`;
@@ -372,14 +347,14 @@ export class Ndb2Client {
 
   public retirePrediction(
     id: string | number,
-    discord_id: string
+    discord_id: string,
   ): Promise<API_V2.Endpoints.Predictions.PATCH_ById_retire.Data> {
     const url = new URL(this.baseURL);
     url.pathname = `api/v2/predictions/${id}/retire`;
     return this.client
       .patch<API_V2.Endpoints.Predictions.PATCH_ById_retire.Response>(
         url.toString(),
-        { discord_id }
+        { discord_id },
       )
       .then((res) => res.data.data)
       .catch((err) => {
@@ -389,7 +364,7 @@ export class Ndb2Client {
 
   public getScores(
     discord_id: string,
-    seasonIdentifier?: number | "current" | "last"
+    seasonIdentifier?: number | "current" | "last",
   ): Promise<NDB2API_V1.GetScores> {
     const url = new URL(this.baseURL);
     url.pathname = `api/users/discord_id/${discord_id}/scores`;
@@ -405,48 +380,25 @@ export class Ndb2Client {
   }
 
   public searchPredictions(
-    options: SearchOptions = {}
-  ): Promise<NDB2API_V1.SearchPredictions> {
+    options: API_V2.Endpoints.Predictions.GET_Search.Query = {},
+  ): Promise<API_V2.Endpoints.Predictions.GET_Search.Data> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/search`;
-    const params = new URLSearchParams();
-
-    if (options.status) {
-      options.status.forEach((option) => {
-        params.append("status", option);
-      });
-    }
-
-    if (options.keyword) {
-      params.set("keyword", options.keyword);
-    }
-
-    if (options.sort_by) {
-      options.sort_by.forEach((option) => {
-        params.append("sort_by", option);
-      });
-    }
-
-    if (options.creator) {
-      params.set("creator", options.creator);
-    }
-
-    if (options.unbetter) {
-      params.set("unbetter", options.unbetter);
-    }
-
-    url.search = params.toString();
+    url.pathname = `api/v2/predictions/search`;
+    url.search =
+      API_V2.Endpoints.Predictions.GET_Search.toURLSearchParams(
+        options,
+      ).toString();
 
     return this.client
-      .get<NDB2API_V1.SearchPredictions>(url.toString())
-      .then((res) => res.data)
+      .get<API_V2.Endpoints.Predictions.GET_Search.Response>(url.toString())
+      .then((res) => res.data.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 
   public getPointsLeaderboard(
-    seasonId?: number | "current" | "last"
+    seasonId?: number | "current" | "last",
   ): Promise<NDB2API_V1.GetPointsLeaderboard> {
     const url = new URL(this.baseURL);
     url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
@@ -463,7 +415,7 @@ export class Ndb2Client {
   }
 
   public getPredictionsLeaderboard(
-    seasonId?: number | "current" | "last"
+    seasonId?: number | "current" | "last",
   ): Promise<NDB2API_V1.GetPredictionsLeaderboard> {
     const url = new URL(this.baseURL);
     url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
@@ -480,7 +432,7 @@ export class Ndb2Client {
   }
 
   public getBetsLeaderboard(
-    seasonId?: number | "current" | "last"
+    seasonId?: number | "current" | "last",
   ): Promise<NDB2API_V1.GetBetsLeaderboard> {
     const url = new URL(this.baseURL);
     url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
@@ -499,7 +451,7 @@ export class Ndb2Client {
   public snoozePrediction(
     discord_id: string,
     predictionId: string | number,
-    check_date: string | Date
+    check_date: string | Date,
   ): Promise<NDB2API_V1.SnoozePrediction> {
     const url = new URL(this.baseURL);
     url.pathname = `api/predictions/${predictionId}/snooze`;
