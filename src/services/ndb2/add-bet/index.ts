@@ -1,7 +1,7 @@
 import { userMention } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { NDB2API } from "../../../providers/ndb2-client";
+import * as API_V2 from "@offnominal/ndb2-api-types/v2";
 
 export default function AddBet({ ndb2Bot, ndb2Client }: Providers) {
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -23,28 +23,28 @@ export default function AddBet({ ndb2Bot, ndb2Client }: Providers) {
     logger.addLog(
       LogStatus.INFO,
       `New ${command} made by ${userMention(
-        discordId
-      )} on prediction #${predictionId}`
+        discordId,
+      )} on prediction #${predictionId}`,
     );
 
-    let prediction: NDB2API.EnhancedPrediction;
+    let prediction: API_V2.Entities.Predictions.Prediction;
 
     // Add Bet
     try {
       const response = await ndb2Client.addBet(
         predictionId,
         discordId,
-        endorsed
+        endorsed,
       );
       prediction = response.data;
       logger.addLog(
         LogStatus.SUCCESS,
-        `Bet was successfully submitted to NDB2`
+        `Bet was successfully submitted to NDB2`,
       );
     } catch ([userError, LogError]) {
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error submitting the bet. ${LogError}`
+        `There was an error submitting the bet. ${LogError}`,
       );
 
       interaction.reply({
@@ -63,13 +63,13 @@ export default function AddBet({ ndb2Bot, ndb2Client }: Providers) {
       });
       logger.addLog(
         LogStatus.SUCCESS,
-        `Successfully notified user of bet success.`
+        `Successfully notified user of bet success.`,
       );
     } catch (err) {
       console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
-        `There was an error responding to the prediction in the channel, but the prediction was submitted. ${err.response.data.message}`
+        `There was an error responding to the prediction in the channel, but the prediction was submitted. ${err.response.data.message}`,
       );
     }
 

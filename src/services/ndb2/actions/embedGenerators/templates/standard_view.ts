@@ -7,10 +7,6 @@ import {
 } from "discord.js";
 import embedFields from "./helpers/fields";
 import { getPredictedPrefix, getThumbnail } from "./helpers/helpers";
-import {
-  NDB2API as NDB2API_V1,
-  PredictionLifeCycle,
-} from "../../../../../providers/ndb2-client";
 import { NDB2EmbedTemplate } from "./helpers/types";
 import {
   getAffirmButton,
@@ -23,7 +19,7 @@ import {
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export const generateStandardViewEmbed = (
-  props: NDB2EmbedTemplate.Args.Standard
+  props: NDB2EmbedTemplate.Args.Standard,
 ): BaseMessageOptions["embeds"] => {
   const created = new Date(props.prediction.created_date);
   const closed = new Date(props.prediction.closed_date || 0);
@@ -33,10 +29,10 @@ export const generateStandardViewEmbed = (
   const triggered = new Date(props.prediction.triggered_date || 0);
 
   const endorsements = props.prediction.bets.filter(
-    (bet) => bet.endorsed && bet.valid
+    (bet) => bet.endorsed && bet.valid,
   );
   const undorsements = props.prediction.bets.filter(
-    (bet) => !bet.endorsed && bet.valid
+    (bet) => !bet.endorsed && bet.valid,
   );
 
   const yesVotes = props.prediction.votes.filter((vote) => vote.vote);
@@ -55,7 +51,7 @@ export const generateStandardViewEmbed = (
     },
     footer: embedFields.standardFooter(
       props.prediction.id,
-      props.prediction.driver
+      props.prediction.driver,
     ),
   });
 
@@ -64,7 +60,7 @@ export const generateStandardViewEmbed = (
     embedFields.date(created, "Created", { context: props.context }),
   ];
 
-  if (props.prediction.status === PredictionLifeCycle.CLOSED) {
+  if (props.prediction.status === "closed") {
     if (props.prediction.driver === "date") {
       fields.push(embedFields.date(due, "Original Due Date"));
     }
@@ -73,66 +69,66 @@ export const generateStandardViewEmbed = (
         embedFields.triggeredDate(
           triggered,
           `Vote Triggered`,
-          props.prediction.triggerer.discord_id
-        )
+          props.prediction.triggerer.discord_id,
+        ),
       );
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
-        props.prediction.season_applicable
-      )
+        props.prediction.season_id ?? 0,
+        props.prediction.season_applicable,
+      ),
     );
     fields.push(
       embedFields.shortBets(
         endorsements.length,
         undorsements.length,
-        props.prediction.payouts
-      )
+        props.prediction.payouts,
+      ),
     );
     fields.push(embedFields.votingNotice());
     fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
   }
 
-  if (props.prediction.status === PredictionLifeCycle.SUCCESSFUL) {
+  if (props.prediction.status === "successful") {
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
-        props.prediction.season_applicable
-      )
+        props.prediction.season_id ?? 0,
+        props.prediction.season_applicable,
+      ),
     );
     fields.push(
       embedFields.shortBets(
         endorsements.length,
         undorsements.length,
-        props.prediction.payouts
-      )
+        props.prediction.payouts,
+      ),
     );
     fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
   }
 
-  if (props.prediction.status === PredictionLifeCycle.FAILED) {
+  if (props.prediction.status === "failed") {
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
-        props.prediction.season_applicable
-      )
+        props.prediction.season_id ?? 0,
+        props.prediction.season_applicable,
+      ),
     );
     fields.push(
       embedFields.shortBets(
         endorsements.length,
         undorsements.length,
-        props.prediction.payouts
-      )
+        props.prediction.payouts,
+      ),
     );
     fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
   }
 
   if (
-    props.prediction.status === PredictionLifeCycle.OPEN ||
-    props.prediction.status === PredictionLifeCycle.CHECKING
+    props.prediction.status === "open" ||
+    props.prediction.status === "checking"
   ) {
     if (props.prediction.driver === "date") {
       fields.push(embedFields.date(due, "Due Date"));
@@ -141,20 +137,20 @@ export const generateStandardViewEmbed = (
     }
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
-        props.prediction.season_applicable
-      )
+        props.prediction.season_id ?? 0,
+        props.prediction.season_applicable,
+      ),
     );
     fields.push(
       embedFields.shortBets(
         endorsements.length,
         undorsements.length,
-        props.prediction.payouts
-      )
+        props.prediction.payouts,
+      ),
     );
   }
 
-  if (props.prediction.status === PredictionLifeCycle.RETIRED) {
+  if (props.prediction.status === "retired") {
     fields.push(embedFields.date(retired, "Retired"));
     if (props.prediction.driver === "date") {
       fields.push(embedFields.date(due, "Original Due Date"));
@@ -163,9 +159,9 @@ export const generateStandardViewEmbed = (
     }
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
-        props.prediction.season_applicable
-      )
+        props.prediction.season_id ?? 0,
+        props.prediction.season_applicable,
+      ),
     );
   }
 
@@ -174,43 +170,40 @@ export const generateStandardViewEmbed = (
   return [embed];
 };
 
+interface StandardViewComponentsProps {
+  id: number;
+  status: NDB2API.Entities.Predictions.PredictionLifeCycle;
+}
+
 export const generateStandardViewComponents = (
-  prediction: NDB2API.Entities.Predictions.Prediction
+  props: StandardViewComponentsProps,
 ): BaseMessageOptions["components"] => {
   const actionRow1 = new ActionRowBuilder<ButtonBuilder>();
 
-  if (
-    prediction.status === PredictionLifeCycle.OPEN ||
-    prediction.status === PredictionLifeCycle.CHECKING
-  ) {
+  if (props.status === "open" || props.status === "checking") {
     actionRow1.addComponents(
-      getEndorseButton(prediction.id),
-      getUndorseButton(prediction.id)
+      getEndorseButton(props.id),
+      getUndorseButton(props.id),
     );
   }
 
-  if (prediction.status === PredictionLifeCycle.CLOSED) {
+  if (props.status === "closed") {
     actionRow1.addComponents(
-      getAffirmButton(prediction.id),
-      getNegateButton(prediction.id)
+      getAffirmButton(props.id),
+      getNegateButton(props.id),
     );
   }
 
-  if (
-    prediction.status === PredictionLifeCycle.SUCCESSFUL ||
-    prediction.status === PredictionLifeCycle.FAILED
-  ) {
+  if (props.status === "successful" || props.status === "failed") {
     actionRow1.addComponents(
-      getDetailsButton(prediction.id, "Season", "Results - Season"),
-      getDetailsButton(prediction.id, "Alltime", "Results - All-time")
+      getDetailsButton(props.id, "Season", "Results - Season"),
+      getDetailsButton(props.id, "Alltime", "Results - All-time"),
     );
   } else {
-    actionRow1.addComponents(
-      getDetailsButton(prediction.id, "Season", "Details")
-    );
+    actionRow1.addComponents(getDetailsButton(props.id, "Season", "Details"));
   }
 
-  actionRow1.addComponents(getWebButton(prediction.id));
+  actionRow1.addComponents(getWebButton(props.id));
 
   return [actionRow1];
 };

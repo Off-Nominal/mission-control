@@ -100,7 +100,7 @@ export const generateInteractionReplyFromTemplate = (
     case NDB2EmbedTemplate.View.DETAILS: {
       const embeds = generatePredictionDetailsEmbed(args);
       const components = generatePredictionDetailsComponents(
-        args.prediction.id
+        args.prediction.id,
       );
       return [embeds, components];
     }

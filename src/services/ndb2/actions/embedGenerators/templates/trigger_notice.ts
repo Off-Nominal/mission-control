@@ -17,7 +17,7 @@ import {
 } from "./helpers/buttons";
 
 export const generateTriggerNoticeEmbed = (
-  props: NDB2EmbedTemplate.Args.Trigger
+  props: NDB2EmbedTemplate.Args.Trigger,
 ): BaseMessageOptions["embeds"] => {
   const created = new Date(props.prediction.created_date);
   const due = new Date(props.prediction.due_date || 0);
@@ -25,10 +25,10 @@ export const generateTriggerNoticeEmbed = (
   const closed = new Date(props.prediction.closed_date || 0);
 
   const endorsements = props.prediction.bets.filter(
-    (bet) => bet.endorsed && bet.valid
+    (bet) => bet.endorsed && bet.valid,
   );
   const undorsements = props.prediction.bets.filter(
-    (bet) => !bet.endorsed && bet.valid
+    (bet) => !bet.endorsed && bet.valid,
   );
 
   const yesVotes = props.prediction.votes.filter((vote) => vote.vote);
@@ -42,7 +42,7 @@ export const generateTriggerNoticeEmbed = (
     title: "Trigger Notice",
     description:
       `Prediction #${props.prediction.id} by ${userMention(
-        props.prediction.predictor.discord_id
+        props.prediction.predictor.discord_id,
       )} has been triggered ${
         props.triggerer?.id ? "manually" : "automatically"
       } by ${
@@ -50,7 +50,7 @@ export const generateTriggerNoticeEmbed = (
       }.` + `\n \u200B`,
     footer: embedFields.standardFooter(
       props.prediction.id,
-      props.prediction.driver
+      props.prediction.driver,
     ),
   });
 
@@ -71,8 +71,8 @@ export const generateTriggerNoticeEmbed = (
     embedFields.shortBets(
       endorsements.length,
       undorsements.length,
-      props.prediction.payouts
-    )
+      props.prediction.payouts,
+    ),
   );
   fields.push(embedFields.votingNotice());
   fields.push(embedFields.shortVotes(yesVotes.length, noVotes.length));
@@ -83,7 +83,7 @@ export const generateTriggerNoticeEmbed = (
 };
 
 export const generateTriggerNoticeComponents = (
-  predictionId: number | string
+  predictionId: number | string,
 ): BaseMessageOptions["components"] => {
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
 
@@ -91,7 +91,7 @@ export const generateTriggerNoticeComponents = (
     getAffirmButton(predictionId),
     getNegateButton(predictionId),
     getDetailsButton(predictionId, "Season", "Details"),
-    getWebButton(predictionId)
+    getWebButton(predictionId),
   );
 
   return [actionRow];

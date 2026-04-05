@@ -29,7 +29,7 @@ export const handleV1Webhook = (
   ndb2Bot: Client,
   ndb2Client: Ndb2Client,
   ndb2MsgSubscription: Ndb2MsgSubscription,
-  cache: Providers["cache"]
+  cache: Providers["cache"],
 ) => {
   const logger = getLoggerFromContext();
   const guild = getGuildFromContext();
@@ -44,7 +44,7 @@ export const handleV1Webhook = (
     if (!season) {
       logger.addLog(
         LogStatus.FAILURE,
-        "Season data was not present in the event, cannot process any further."
+        "Season data was not present in the event, cannot process any further.",
       );
       return logger.sendLog(ndb2Bot);
     }
@@ -62,7 +62,7 @@ export const handleV1Webhook = (
     if (!results) {
       logger.addLog(
         LogStatus.FAILURE,
-        "Season data was not present in the event, cannot process any further."
+        "Season data was not present in the event, cannot process any further.",
       );
       return logger.sendLog(ndb2Bot);
     }
@@ -81,7 +81,7 @@ export const handleV1Webhook = (
   if (!prediction) {
     logger.addLog(
       LogStatus.FAILURE,
-      "Prediction data was not present in the event, cannot process any further."
+      "Prediction data was not present in the event, cannot process any further.",
     );
     return logger.sendLog(ndb2Bot);
   }
@@ -92,14 +92,14 @@ export const handleV1Webhook = (
     .then((subs) => {
       logger.addLog(
         LogStatus.SUCCESS,
-        `Successfully fetched ${subs.length} subscriptions to process for this event.`
+        `Successfully fetched ${subs.length} subscriptions to process for this event.`,
       );
       return subs;
     })
     .catch((err) => {
       logger.addLog(
         LogStatus.FAILURE,
-        `Failed to fetch message subscriptions for this event, cannot process any further.`
+        `Failed to fetch message subscriptions for this event, cannot process any further.`,
       );
       throw err;
     });
@@ -110,7 +110,7 @@ export const handleV1Webhook = (
     .then((predictor) => {
       logger.addLog(
         LogStatus.SUCCESS,
-        `Successfully fetched predictor User ${userMention(predictor.id)}.`
+        `Successfully fetched predictor User ${userMention(predictor.id)}.`,
       );
       return predictor;
     })
@@ -119,8 +119,8 @@ export const handleV1Webhook = (
       logger.addLog(
         LogStatus.FAILURE,
         `Failed to fetch predictor User ${userMention(
-          prediction.predictor.discord_id
-        )} for this event, will fallback to defauls.`
+          prediction.predictor.discord_id,
+        )} for this event, will fallback to defauls.`,
       );
       return undefined;
     });
@@ -133,7 +133,7 @@ export const handleV1Webhook = (
           .then((triggerer) => {
             logger.addLog(
               LogStatus.SUCCESS,
-              "Triggerer Discord profile successfully fetched"
+              "Triggerer Discord profile successfully fetched",
             );
             return triggerer;
           })
@@ -141,7 +141,7 @@ export const handleV1Webhook = (
             console.error(err);
             logger.addLog(
               LogStatus.FAILURE,
-              `Failed to fetch triggerer from Discord, cannot post notice.`
+              `Failed to fetch triggerer from Discord, cannot post notice.`,
             );
             throw err;
           })
@@ -153,7 +153,7 @@ export const handleV1Webhook = (
 
       const contextMessage = getSubByType(
         subs,
-        API.Ndb2MsgSubscriptionType.CONTEXT
+        API.Ndb2MsgSubscriptionType.CONTEXT,
       );
       const contextChannelId =
         contextMessage?.channelId ?? fallbackContextChannelId;
@@ -168,7 +168,7 @@ export const handleV1Webhook = (
             displayName: predictor?.displayName,
             avatarUrl: predictor?.displayAvatarURL(),
             context: contextMessage,
-          }
+          },
         );
 
         updateBulkMessages([API.Ndb2MsgSubscriptionType.VIEW], {
@@ -184,7 +184,7 @@ export const handleV1Webhook = (
           if (!edited_fields) {
             logger.addLog(
               LogStatus.FAILURE,
-              "Edited fields were not present in the event, cannot process any further."
+              "Edited fields were not present in the event, cannot process any further.",
             );
             return logger.sendLog(ndb2Bot);
           }
@@ -199,7 +199,7 @@ export const handleV1Webhook = (
               prediction,
               predictor,
               edited_fields,
-            }
+            },
           );
 
           sendMessage(contextChannelId, embeds, components);
@@ -218,7 +218,7 @@ export const handleV1Webhook = (
               client: ndb2Bot,
               triggerer,
               context: contextMessage,
-            }
+            },
           );
 
           sendMessage(contextChannelId, embeds, components).then((message) => {
@@ -228,7 +228,7 @@ export const handleV1Webhook = (
               prediction.id,
               message.channel.id,
               message.id,
-              add(new Date(), { hours: 36 })
+              add(new Date(), { hours: 36 }),
             );
 
             // Update any trigger interaction replies
@@ -242,7 +242,7 @@ export const handleV1Webhook = (
                     content:
                       "A voting notice has been posted here: " +
                       messageLink(contextChannelId, message.id),
-                  })
+                  }),
                 )
                 .then(() => {
                   delete cache.ndb2.triggerResponses[prediction.id];
@@ -251,7 +251,7 @@ export const handleV1Webhook = (
                   console.error(err);
                   logger.addLog(
                     LogStatus.FAILURE,
-                    "Failed to update trigger interaction reply."
+                    "Failed to update trigger interaction reply.",
                   );
                 });
             }
@@ -267,7 +267,7 @@ export const handleV1Webhook = (
           const messages = fetchMessagesFromSubs(
             subs,
             [API.Ndb2MsgSubscriptionType.SNOOZE_CHECK],
-            guild
+            guild,
           );
 
           const snoozeCheckMessage = generateInteractionReplyFromTemplate(
@@ -276,7 +276,7 @@ export const handleV1Webhook = (
               prediction,
               client: ndb2Bot,
               context: contextMessage,
-            }
+            },
           );
 
           messages.map((mp) => {
@@ -297,7 +297,7 @@ export const handleV1Webhook = (
               client: ndb2Bot,
               triggerer,
               context: contextMessage,
-            }
+            },
           );
 
           sendMessage(contextChannelId, ...triggerNoticeMessage).then(
@@ -308,9 +308,9 @@ export const handleV1Webhook = (
                 prediction.id,
                 message.channel.id,
                 message.id,
-                add(new Date(), { hours: 36 })
+                add(new Date(), { hours: 36 }),
               );
-            }
+            },
           );
           break;
         }
@@ -325,7 +325,7 @@ export const handleV1Webhook = (
               prediction,
               client: ndb2Bot,
               context: contextMessage,
-            }
+            },
           );
 
           sendMessage(contextChannelId, embeds, components).then((message) => {
@@ -335,35 +335,8 @@ export const handleV1Webhook = (
               prediction.id,
               message.channel.id,
               message.id,
-              add(new Date(), { hours: 36 })
+              add(new Date(), { hours: 36 }),
             );
-          });
-          break;
-        }
-        case NDB2WebhookEvent.NEW_BET: {
-          // update VIEW subs
-          updateStandardViews(prediction);
-          break;
-        }
-        case NDB2WebhookEvent.NEW_VOTE: {
-          // update VIEW subs
-          updateStandardViews(prediction);
-
-          // Update Trigger Notice
-          const [embeds, components] = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.TRIGGER,
-            {
-              prediction,
-              predictor,
-              client: ndb2Bot,
-              triggerer,
-              context: contextMessage,
-            }
-          );
-
-          updateBulkMessages([API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE], {
-            embeds,
-            components,
           });
           break;
         }
@@ -375,7 +348,7 @@ export const handleV1Webhook = (
               prediction,
               client: ndb2Bot,
               context: contextMessage,
-            }
+            },
           );
 
           updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
@@ -392,7 +365,7 @@ export const handleV1Webhook = (
               prediction,
               client: ndb2Bot,
               context: contextMessage,
-            }
+            },
           );
 
           updateBulkMessages([API.Ndb2MsgSubscriptionType.SNOOZE_CHECK], {
@@ -402,7 +375,7 @@ export const handleV1Webhook = (
 
           // Expire any subs for snooze notices
           const triggerSubs = subs.filter(
-            (s) => s.type === API.Ndb2MsgSubscriptionType.SNOOZE_CHECK
+            (s) => s.type === API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
           );
 
           triggerSubs.map((sub) => {
@@ -418,7 +391,7 @@ export const handleV1Webhook = (
               prediction,
               client: ndb2Bot,
               context: contextMessage,
-            }
+            },
           );
 
           sendMessage(contextChannelId, embeds, components).then((message) => {
@@ -428,7 +401,7 @@ export const handleV1Webhook = (
               prediction.id,
               message.channel.id,
               message.id,
-              add(new Date(), { hours: 24 })
+              add(new Date(), { hours: 24 }),
             );
           });
           break;
