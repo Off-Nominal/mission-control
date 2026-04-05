@@ -75,7 +75,7 @@ export const generateStandardViewEmbed = (
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
+        props.prediction.season_id ?? 0,
         props.prediction.season_applicable,
       ),
     );
@@ -94,7 +94,7 @@ export const generateStandardViewEmbed = (
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
+        props.prediction.season_id ?? 0,
         props.prediction.season_applicable,
       ),
     );
@@ -112,7 +112,7 @@ export const generateStandardViewEmbed = (
     fields.push(embedFields.date(closed, "Effective Close Date"));
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
+        props.prediction.season_id ?? 0,
         props.prediction.season_applicable,
       ),
     );
@@ -137,7 +137,7 @@ export const generateStandardViewEmbed = (
     }
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
+        props.prediction.season_id ?? 0,
         props.prediction.season_applicable,
       ),
     );
@@ -159,7 +159,7 @@ export const generateStandardViewEmbed = (
     }
     fields.push(
       embedFields.season(
-        props.prediction.season_id,
+        props.prediction.season_id ?? 0,
         props.prediction.season_applicable,
       ),
     );
