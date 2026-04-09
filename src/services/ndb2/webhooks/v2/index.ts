@@ -4,6 +4,7 @@ import {
   generateBulkMessageUpdater,
   generateSender,
   getSubByType,
+  isDiscordNotFound,
 } from "../helpers";
 import { API } from "../../../../providers/db/models/types";
 import { Ndb2MsgSubscription } from "../../../../providers/db/models/Ndb2MsgSubscription";
@@ -123,11 +124,18 @@ export const handleV2Webhook = (
       const clearNoticeSubs = (types: API.Ndb2MsgSubscriptionType[]) => {
         const messages = fetchMessagesFromSubs(subs, types, guild);
 
-        messages.map((mp) => {
-          return mp.then((m) => {
-            return m.delete();
-          });
-        });
+        for (const mp of messages) {
+          mp
+            .then((m) => {
+              if (!m) return;
+              return m.delete();
+            })
+            .catch((err: unknown) => {
+              if (!isDiscordNotFound(err)) {
+                console.error(err);
+              }
+            });
+        }
 
         const noticeSubs = subs.filter((s) => types.includes(s.type));
 

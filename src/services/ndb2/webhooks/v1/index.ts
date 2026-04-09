@@ -9,6 +9,7 @@ import {
   generateBulkMessageUpdater,
   generateSender,
   getSubByType,
+  isDiscordNotFound,
 } from "../helpers";
 import { handleSeasonStart } from "../handlers/season_start";
 import { handleSeasonEnd } from "../handlers/season_end";
@@ -252,14 +253,21 @@ export const handleV1Webhook = (
             },
           );
 
-          messages.map((mp) => {
-            return mp.then((m) => {
-              return m.edit({
-                embeds: snoozeCheckMessage[0],
-                components: snoozeCheckMessage[1],
+          for (const mp of messages) {
+            mp
+              .then((m) => {
+                if (!m) return;
+                return m.edit({
+                  embeds: snoozeCheckMessage[0],
+                  components: snoozeCheckMessage[1],
+                });
+              })
+              .catch((err: unknown) => {
+                if (!isDiscordNotFound(err)) {
+                  console.error(err);
+                }
               });
-            });
-          });
+          }
 
           // Send Trigger Notice
           const triggerNoticeMessage = generateInteractionReplyFromTemplate(
