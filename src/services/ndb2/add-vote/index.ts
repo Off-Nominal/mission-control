@@ -1,7 +1,6 @@
 import { userMention } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import * as API_V2 from "@offnominal/ndb2-api-types/v2";
 
 export default function AddVote({ ndb2Bot, ndb2Client }: Providers) {
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -31,12 +30,9 @@ export default function AddVote({ ndb2Bot, ndb2Client }: Providers) {
       )} on prediction #${predictionId}`,
     );
 
-    let prediction: API_V2.Entities.Predictions.Prediction;
-    let message: string;
-
     // Add Vote
     try {
-      prediction = await ndb2Client.addVote(predictionId, discordId, vote);
+      await ndb2Client.addVote(predictionId, discordId, vote);
       logger.addLog(
         LogStatus.SUCCESS,
         `Vote was successfully submitted to NDB2`,
@@ -57,8 +53,9 @@ export default function AddVote({ ndb2Bot, ndb2Client }: Providers) {
 
     // Reply to Discord
     try {
+      const pastTense = command === "Affirm" ? "affirmed" : "negated";
       interaction.reply({
-        content: message,
+        content: `Prediction #${predictionId} successfully ${pastTense}!`,
         ephemeral: true,
       });
       logger.addLog(
