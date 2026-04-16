@@ -1,8 +1,7 @@
 import mcconfig from "../../../mcconfig";
-import { AsyncLocalStorage } from "async_hooks";
+import * as API from "@offnominal/ndb2-api-types/v2";
 
 import { NextFunction, Request, Response } from "express";
-import { isNdb2WebhookEvent, NDB2WebhookEvent } from "./v1/types";
 import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { getLoggerFromContext, guildContext, loggerContext } from "./contexts";
 import { Client } from "discord.js";
@@ -11,7 +10,7 @@ import fetchGuild from "../../../helpers/fetchGuild";
 export const validateWebhookAuthorization = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // verify source of webhook
   if (req.headers.authorization !== `Bearer ${mcconfig.ndb2.clientId}`) {
@@ -26,13 +25,11 @@ export const validateWebhookAuthorization = (
 export const validateWebhookEvent = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const { event_name } = req.body;
-
-  if (!isNdb2WebhookEvent(event_name)) {
+  if (!API.Webhooks.isWebhookPayloadV2(req.body)) {
     return res.status(400).json({
-      error: `Invalid Webhook Event Name. Event name was '${event_name}'.`,
+      error: `Invalid v2 webhook payload. Event name was '${req.body?.event_name}'.`,
     });
   }
 
@@ -43,7 +40,7 @@ export const logRequest = (req: Request, res: Response, next: NextFunction) => {
   const logger = new Logger(
     "Webhook Receipt",
     LogInitiator.NDB2,
-    "A webhook was recieved from NDB2"
+    "A webhook was recieved from NDB2",
   );
   loggerContext.run(logger, () => {
     next();
@@ -53,14 +50,14 @@ export const logRequest = (req: Request, res: Response, next: NextFunction) => {
 export const webhookResponser = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // tell the API to go away
   // we don't need to give the webhook anything, just a 200
   res.json("thank u");
 
   // currently ignored
-  if (req.body.event_name === NDB2WebhookEvent.NEW_PREDICTION) {
+  if (req.body.event_name === "new_prediction") {
     return;
   }
 
