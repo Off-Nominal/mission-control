@@ -370,17 +370,25 @@ export class Ndb2Client {
     id: string | number,
     discord_id: string | null = null,
     closed_date?: Date,
-  ): Promise<NDB2API_V1.TriggerPrediction> {
+  ): Promise<API_V2.Endpoints.Predictions.POST_ById_trigger.Data> {
     const url = new URL(this.baseURL);
-    url.pathname = `api/predictions/${id}/trigger`;
+    url.pathname = `api/v2/predictions/${id}/trigger`;
     return this.client
-      .post<NDB2API_V1.TriggerPrediction>(url.toString(), {
-        discord_id,
-        closed_date,
+      .post<API_V2.Endpoints.Predictions.POST_ById_trigger.Response>(
+        url.toString(),
+        {
+          discord_id,
+          closed_date,
+        },
+      )
+      .then((res) => {
+        if (!res.data.success) {
+          throw new Error("Failed to trigger prediction");
+        }
+        return res.data.data;
       })
-      .then((res) => res.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 
