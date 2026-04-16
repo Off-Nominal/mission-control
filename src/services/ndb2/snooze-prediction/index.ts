@@ -1,4 +1,5 @@
 import { isAfter, isPast } from "date-fns";
+import { MessageFlags } from "discord.js";
 import { Logger, LogInitiator, LogStatus } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { validateUserDateInput } from "../helpers/validateUserDateInput";
@@ -47,7 +48,7 @@ export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
 
         interaction.reply({
           content: `There was an error fetching this prediction. Could not parse error.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         logger.sendLog(interaction.client);
@@ -64,7 +65,7 @@ export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
 
       interaction.reply({
         content: `There was an error fetching this prediction. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -80,7 +81,7 @@ export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
 
       interaction.reply({
         content: `Only the predictor can snooze a prediction proactively.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       return logger.sendLog(ndb2Bot);
@@ -95,7 +96,7 @@ export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
 
       interaction.reply({
         content: `Only open predictions can be snoozed.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       return logger.sendLog(ndb2Bot);
@@ -108,7 +109,7 @@ export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
     if (!isCheckDateValid) {
       interaction.reply({
         content: `Your check date format was invalid. Ensure it is entered as YYYY-MM-DD.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.WARNING,
@@ -125,7 +126,7 @@ export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
       interaction.reply({
         content:
           "Your Check date is in the past. Please try again with a date in the future.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.WARNING,
@@ -140,7 +141,7 @@ export default function SnoozePrediction({ ndb2Client, ndb2Bot }: Providers) {
       interaction.reply({
         content:
           "Your Check date is before the prediction was created. Please try again with a later date. If you are trying to trigger this prediction, use the appropriate trigger commands.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.WARNING,

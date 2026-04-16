@@ -1,4 +1,4 @@
-import { userMention } from "discord.js";
+import { MessageFlags, userMention } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
@@ -84,7 +84,7 @@ export default function AddSnoozeVote({ ndb2Bot, ndb2Client }: Providers) {
       );
 
       interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: `There was an error submitting the Snooze Vote to NDB2. ${userError}`,
       });
       logger.sendLog(interaction.client);
@@ -95,7 +95,7 @@ export default function AddSnoozeVote({ ndb2Bot, ndb2Client }: Providers) {
     try {
       interaction.reply({
         content: `Prediction #${predictionId} Snooze Vote successfully updated!`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.SUCCESS,

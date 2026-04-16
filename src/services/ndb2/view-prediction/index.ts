@@ -1,4 +1,4 @@
-import { GuildMember } from "discord.js";
+import { GuildMember, MessageFlags } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { API } from "../../../providers/db/models/types";
@@ -54,7 +54,7 @@ export default function ViewPrediction({
 
         interaction.reply({
           content: `There was an error fetching this prediction. Could not parse error.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         logger.sendLog(interaction.client);
@@ -71,7 +71,7 @@ export default function ViewPrediction({
 
       interaction.reply({
         content: `There was an error fetching this prediction. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }

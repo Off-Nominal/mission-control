@@ -1,5 +1,5 @@
 import { SanityClient } from "@sanity/client";
-import { EmbedBuilder, Interaction } from "discord.js";
+import { EmbedBuilder, Interaction, MessageFlags } from "discord.js";
 import { NewsCategoryDocument } from "../../providers/sanity";
 import mcconfig from "../../mcconfig";
 
@@ -31,7 +31,7 @@ export function listRSSFeeds(interaction: Interaction, client: SanityClient) {
         fields: feedsFields,
       });
 
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     })
     .catch((err) => console.error(err));
 }

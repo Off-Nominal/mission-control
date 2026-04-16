@@ -1,4 +1,9 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+} from "discord.js";
 import fetchGuild from "../../../helpers/fetchGuild";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
@@ -39,7 +44,9 @@ export default function ViewScore({ ndb2Client, ndb2Bot }: Providers) {
 
     // Score calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
     try {
-      await interaction.deferReply({ ephemeral: !brag });
+      await interaction.deferReply(
+        brag ? {} : { flags: MessageFlags.Ephemeral }
+      );
       logger.addLog(LogStatus.SUCCESS, "Successfully deferred reply.");
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, "Failed to defer reply, aborting.");
