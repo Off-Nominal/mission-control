@@ -146,7 +146,9 @@ export const handleV2Webhook = (
         });
       };
 
-      switch (payload.event_name) {
+      const event_name = payload.event_name as string;
+
+      switch (event_name) {
         case "triggered_prediction": {
           // update VIEW subs
           updateStandardViews(payload.data.prediction);
@@ -199,6 +201,118 @@ export const handleV2Webhook = (
             }
           });
 
+          break;
+        }
+        case "triggered_snooze_check": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Shut down Snooze Notice
+          const messages = fetchMessagesFromSubs(
+            subs,
+            [API.Ndb2MsgSubscriptionType.SNOOZE_CHECK],
+            guild,
+          );
+
+          const snoozeCheckMessage = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.SNOOZE_CHECK,
+            {
+              prediction: payload.data.prediction,
+              client: ndb2Bot,
+              context: contextMessage,
+            },
+          );
+
+          for (const mp of messages) {
+            mp
+              .then((m) => {
+                if (!m) return;
+                return m.edit({
+                  embeds: snoozeCheckMessage[0],
+                  components: snoozeCheckMessage[1],
+                });
+              })
+              .catch((err: unknown) => {
+                if (!isDiscordNotFound(err)) {
+                  console.error(err);
+                }
+              });
+          }
+
+          // Send Trigger Notice
+          const triggerNoticeMessage = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.TRIGGER,
+            {
+              prediction: payload.data.prediction,
+              predictor,
+              client: ndb2Bot,
+              triggerer,
+              context: contextMessage,
+            },
+          );
+
+          sendMessage(contextChannelId, ...triggerNoticeMessage).then(
+            (message) => {
+              // Log the trigger notice subscription
+              ndb2MsgSubscription.addSubscription(
+                API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+                payload.data.prediction.id,
+                message.channel.id,
+                message.id,
+                add(new Date(), { hours: 36 }),
+              );
+            },
+          );
+
+          break;
+        }
+        case "new_snooze_check": {
+          // Send Snooze Check
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.SNOOZE_CHECK,
+            {
+              prediction: payload.data.prediction,
+              client: ndb2Bot,
+              context: contextMessage,
+            },
+          );
+
+          sendMessage(contextChannelId, embeds, components).then((message) => {
+            // Log the trigger notice subscription
+            ndb2MsgSubscription.addSubscription(
+              API.Ndb2MsgSubscriptionType.SNOOZE_CHECK,
+              payload.data.prediction.id,
+              message.channel.id,
+              message.id,
+              add(new Date(), { hours: 24 }),
+            );
+          });
+          break;
+        }
+        case "judged_prediction": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Send Judgement Notice
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.JUDGEMENT,
+            {
+              prediction: payload.data.prediction,
+              client: ndb2Bot,
+              context: contextMessage,
+            },
+          );
+
+          sendMessage(contextChannelId, embeds, components).then((message) => {
+            // Log the trigger notice subscription
+            ndb2MsgSubscription.addSubscription(
+              API.Ndb2MsgSubscriptionType.JUDGEMENT_NOTICE,
+              payload.data.prediction.id,
+              message.channel.id,
+              message.id,
+              add(new Date(), { hours: 36 }),
+            );
+          });
           break;
         }
         case "untriggered_prediction": {
@@ -256,7 +370,10 @@ export const handleV2Webhook = (
           break;
         }
         case "prediction_edit": {
-          const edited_fields = payload.data.edited_fields;
+          const edited_fields =
+            "edited_fields" in payload.data
+              ? (payload.data as { edited_fields?: unknown }).edited_fields
+              : undefined;
 
           if (!edited_fields) {
             logger.addLog(
