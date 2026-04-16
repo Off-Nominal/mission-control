@@ -1,6 +1,5 @@
 import {
   ActionRowBuilder,
-  APIEmbedField,
   BaseMessageOptions,
   bold,
   ButtonBuilder,
@@ -10,10 +9,7 @@ import {
 import { getDetailsButton, getWebButton } from "./helpers/buttons";
 import embedFields from "./helpers/fields";
 import { getAuthor, getThumbnail } from "./helpers/helpers";
-import {
-  NDB2API,
-  PredictionLifeCycle,
-} from "../../../../../providers/ndb2-client";
+import * as API_v2 from "@offnominal/ndb2-api-types/v2";
 import { NDB2EmbedTemplate } from "./helpers/types";
 
 export const generateJudgementNoticeEmbed = (
@@ -32,9 +28,11 @@ export const generateJudgementNoticeEmbed = (
       `Prediction ${props.prediction.id} by ${userMention(
         props.prediction.predictor.discord_id
       )} has been judged ${bold(props.prediction.status)} by the community. ${
-        props.prediction.status === PredictionLifeCycle.SUCCESSFUL
+        props.prediction.status === "successful"
           ? "Nice work"
-          : "Better luck next time"
+          : props.prediction.status === "failed"
+            ? "Better luck next time"
+            : ""
       }!` + `\n \u200B`,
     footer: embedFields.standardFooter(
       props.prediction.id,
@@ -54,7 +52,9 @@ export const generateJudgementNoticeEmbed = (
 };
 
 export const generateJudgementNoticeComponents = (
-  prediction: NDB2API.EnhancedPrediction
+  prediction:
+    | API_v2.Entities.Predictions.Prediction
+    | { id: string | number }
 ): BaseMessageOptions["components"] => {
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
 
