@@ -15,12 +15,7 @@ import {
   webhookResponser,
 } from "./middleware";
 import { Providers } from "../../../providers";
-import { handleV1Webhook } from "./v1";
 import { handleV2Webhook } from "./v2";
-import * as API from "@offnominal/ndb2-api-types/v2";
-import { NDB2WebhookEvent } from "./v1/types";
-import { getLoggerFromContext } from "./contexts";
-import { LogStatus } from "../../../logger/Logger";
 
 export default function createWebooksRouter(
   ndb2Bot: Client,
@@ -29,48 +24,6 @@ export default function createWebooksRouter(
   cache: Providers["cache"],
 ): Router {
   const router = express.Router();
-
-  router.post(
-    "/ndb2",
-    [
-      validateWebhookAuthorization,
-      validateWebhookEvent,
-      webhookResponser,
-      logRequest,
-      guildProvider(ndb2Bot),
-    ],
-    async (req: Request, res: Response) => {
-      const logger = getLoggerFromContext();
-
-      if (
-        req.body.event_name === NDB2WebhookEvent.NEW_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.JUDGED_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.UNTRIGGERED_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.UNJUDGED_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.NEW_BET ||
-        req.body.event_name === NDB2WebhookEvent.NEW_VOTE ||
-        req.body.event_name === NDB2WebhookEvent.NEW_SNOOZE_CHECK ||
-        req.body.event_name === NDB2WebhookEvent.NEW_SNOOZE_VOTE ||
-        req.body.event_name === NDB2WebhookEvent.SNOOZED_PREDICTION ||
-        req.body.event_name === NDB2WebhookEvent.TRIGGERED_SNOOZE ||
-        req.body.event_name === NDB2WebhookEvent.PREDICTION_EDIT
-      ) {
-        logger.addLog(
-          LogStatus.INFO,
-          `Event was ${req.body.event_name}, which is currently ignored.`,
-        );
-        return logger.sendLog(ndb2Bot);
-      }
-
-      return handleV1Webhook(
-        req,
-        ndb2Bot,
-        ndb2Client,
-      );
-    },
-  );
 
   router.post(
     "/ndb2/v2",
@@ -82,13 +35,13 @@ export default function createWebooksRouter(
       guildProvider(ndb2Bot),
     ],
     async (req: Request, res: Response) => {
-      const payload = req.body;
-
-      if (!API.Webhooks.isWebhookPayloadV2(payload)) {
-        return "womp";
-      }
-
-      return handleV2Webhook(payload, ndb2Bot, ndb2MsgSubscription, cache);
+      return handleV2Webhook(
+        req.body,
+        ndb2Bot,
+        ndb2Client,
+        ndb2MsgSubscription,
+        cache,
+      );
     },
   );
 

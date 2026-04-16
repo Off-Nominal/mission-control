@@ -16,17 +16,47 @@ import { Client, GuildMember, messageLink, userMention } from "discord.js";
 import mcconfig from "../../../../mcconfig";
 import { add } from "date-fns";
 import { Providers } from "../../../../providers";
+import { handleSeasonEnd } from "../handlers/season_end";
+import { handleSeasonStart } from "../handlers/season_start";
+import { Ndb2Client } from "../../../../providers/ndb2-client";
 
 const fallbackContextChannelId = mcconfig.discord.channels.general;
+
+const isPredictionPayload = (
+  payload: API_v2.Webhooks.Payload,
+): payload is Exclude<
+  API_v2.Webhooks.Payload,
+  API_v2.Webhooks.Events.SeasonStart | API_v2.Webhooks.Events.SeasonEnd
+> => "prediction" in payload.data;
 
 export const handleV2Webhook = (
   payload: API_v2.Webhooks.Payload,
   ndb2Bot: Client,
+  ndb2Client: Ndb2Client,
   ndb2MsgSubscription: Ndb2MsgSubscription,
   cache: Providers["cache"],
 ) => {
   const logger = getLoggerFromContext();
   const guild = getGuildFromContext();
+
+  if (!isPredictionPayload(payload)) {
+    if (payload.event_name === "season_start") {
+      return handleSeasonStart({
+        guild,
+        client: ndb2Bot,
+        season: payload.data.season,
+      });
+    }
+
+    if (payload.event_name === "season_end") {
+      return handleSeasonEnd({
+        ndb2Client,
+        guild,
+        client: ndb2Bot,
+        results: payload.data.results,
+      });
+    }
+  }
 
   const sendMessage = generateSender(guild);
 
