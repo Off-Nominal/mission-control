@@ -12,9 +12,10 @@ import { getGuildFromContext, getLoggerFromContext } from "../contexts";
 import { LogStatus } from "../../../../logger/Logger";
 import { generateInteractionReplyFromTemplate } from "../../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpers/types";
-import { Client, GuildMember, userMention } from "discord.js";
+import { Client, GuildMember, messageLink, userMention } from "discord.js";
 import mcconfig from "../../../../mcconfig";
 import { add } from "date-fns";
+import { Providers } from "../../../../providers";
 
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 
@@ -22,6 +23,7 @@ export const handleV2Webhook = (
   payload: API_v2.Webhooks.Payload,
   ndb2Bot: Client,
   ndb2MsgSubscription: Ndb2MsgSubscription,
+  cache: Providers["cache"],
 ) => {
   const logger = getLoggerFromContext();
   const guild = getGuildFromContext();
@@ -145,6 +147,60 @@ export const handleV2Webhook = (
       };
 
       switch (payload.event_name) {
+        case "triggered_prediction": {
+          // update VIEW subs
+          updateStandardViews(payload.data.prediction);
+
+          // Send Trigger Notice
+          const [embeds, components] = generateInteractionReplyFromTemplate(
+            NDB2EmbedTemplate.View.TRIGGER,
+            {
+              prediction: payload.data.prediction,
+              predictor,
+              client: ndb2Bot,
+              triggerer,
+              context: contextMessage,
+            },
+          );
+
+          sendMessage(contextChannelId, embeds, components).then((message) => {
+            // Log the trigger notice subscription
+            ndb2MsgSubscription.addSubscription(
+              API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
+              payload.data.prediction.id,
+              message.channel.id,
+              message.id,
+              add(new Date(), { hours: 36 }),
+            );
+
+            // Update any trigger interaction replies
+            const reply = cache.ndb2.triggerResponses[payload.data.prediction.id];
+
+            if (reply) {
+              reply
+                .fetchReply()
+                .then((r) =>
+                  r.edit({
+                    content:
+                      "A voting notice has been posted here: " +
+                      messageLink(contextChannelId, message.id),
+                  }),
+                )
+                .then(() => {
+                  delete cache.ndb2.triggerResponses[payload.data.prediction.id];
+                })
+                .catch((err) => {
+                  console.error(err);
+                  logger.addLog(
+                    LogStatus.FAILURE,
+                    "Failed to update trigger interaction reply.",
+                  );
+                });
+            }
+          });
+
+          break;
+        }
         case "untriggered_prediction": {
           // update VIEW subs
           updateStandardViews(payload.data.prediction);

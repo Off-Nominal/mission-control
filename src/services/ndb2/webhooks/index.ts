@@ -44,6 +44,7 @@ export default function createWebooksRouter(
 
       if (
         req.body.event_name === NDB2WebhookEvent.NEW_PREDICTION ||
+        req.body.event_name === NDB2WebhookEvent.TRIGGERED_PREDICTION ||
         req.body.event_name === NDB2WebhookEvent.UNTRIGGERED_PREDICTION ||
         req.body.event_name === NDB2WebhookEvent.UNJUDGED_PREDICTION ||
         req.body.event_name === NDB2WebhookEvent.RETIRED_PREDICTION ||
@@ -67,7 +68,6 @@ export default function createWebooksRouter(
         ndb2Bot,
         ndb2Client,
         ndb2MsgSubscription,
-        cache,
       );
     },
   );
@@ -88,7 +88,7 @@ export default function createWebooksRouter(
         return "womp";
       }
 
-      return handleV2Webhook(payload, ndb2Bot, ndb2MsgSubscription);
+      return handleV2Webhook(payload, ndb2Bot, ndb2MsgSubscription, cache);
     },
   );
 

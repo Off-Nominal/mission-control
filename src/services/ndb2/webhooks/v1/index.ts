@@ -3,7 +3,7 @@ import { LogStatus } from "../../../../logger/Logger";
 import { getGuildFromContext, getLoggerFromContext } from "../contexts";
 import { NDB2WebhookEvent } from "./types";
 import { NDB2API, Ndb2Client } from "../../../../providers/ndb2-client";
-import { Client, GuildMember, messageLink, userMention } from "discord.js";
+import { Client, GuildMember, userMention } from "discord.js";
 import {
   fetchMessagesFromSubs,
   generateBulkMessageUpdater,
@@ -19,7 +19,6 @@ import mcconfig from "../../../../mcconfig";
 import { generateInteractionReplyFromTemplate } from "../../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpers/types";
 import { add } from "date-fns";
-import { Providers } from "../../../../providers";
 
 // Don't any new handlers here, add them to v2 instead
 
@@ -30,7 +29,6 @@ export const handleV1Webhook = (
   ndb2Bot: Client,
   ndb2Client: Ndb2Client,
   ndb2MsgSubscription: Ndb2MsgSubscription,
-  cache: Providers["cache"],
 ) => {
   const logger = getLoggerFromContext();
   const guild = getGuildFromContext();
@@ -179,60 +177,6 @@ export const handleV1Webhook = (
       };
 
       switch (event_name) {
-        case NDB2WebhookEvent.TRIGGERED_PREDICTION: {
-          // update VIEW subs
-          updateStandardViews(prediction);
-
-          // Send Trigger Notice
-          const [embeds, components] = generateInteractionReplyFromTemplate(
-            NDB2EmbedTemplate.View.TRIGGER,
-            {
-              prediction,
-              predictor,
-              client: ndb2Bot,
-              triggerer,
-              context: contextMessage,
-            },
-          );
-
-          sendMessage(contextChannelId, embeds, components).then((message) => {
-            // Log the trigger notice subscription
-            ndb2MsgSubscription.addSubscription(
-              API.Ndb2MsgSubscriptionType.TRIGGER_NOTICE,
-              prediction.id,
-              message.channel.id,
-              message.id,
-              add(new Date(), { hours: 36 }),
-            );
-
-            // Update any trigger interaction replies
-            const reply = cache.ndb2.triggerResponses[prediction.id];
-
-            if (reply) {
-              reply
-                .fetchReply()
-                .then((r) =>
-                  r.edit({
-                    content:
-                      "A voting notice has been posted here: " +
-                      messageLink(contextChannelId, message.id),
-                  }),
-                )
-                .then(() => {
-                  delete cache.ndb2.triggerResponses[prediction.id];
-                })
-                .catch((err) => {
-                  console.error(err);
-                  logger.addLog(
-                    LogStatus.FAILURE,
-                    "Failed to update trigger interaction reply.",
-                  );
-                });
-            }
-          });
-
-          break;
-        }
         case NDB2WebhookEvent.TRIGGERED_SNOOZE: {
           // update VIEW subs
           updateStandardViews(prediction);
