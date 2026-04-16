@@ -1,3 +1,4 @@
+import { MessageFlags } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { NDB2API } from "../../../providers/ndb2-client";
@@ -38,7 +39,9 @@ export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
 
     // Leaderboard calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
     try {
-      await interaction.deferReply({ ephemeral: !brag });
+      await interaction.deferReply(
+        brag ? {} : { flags: MessageFlags.Ephemeral }
+      );
       logger.addLog(LogStatus.SUCCESS, "Successfully deferred reply.");
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, "Failed to defer reply, aborting.");

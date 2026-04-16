@@ -6,6 +6,7 @@ import {
   User,
   ChatInputCommandInteraction,
   GuildTextBasedChannel,
+  MessageFlags,
 } from "discord.js";
 import {
   getDiscussion,
@@ -74,7 +75,7 @@ export class ReportGenerator {
       return await interaction.reply({
         content:
           "In order to maintain order, please limit summary reports to last 24 hours",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 

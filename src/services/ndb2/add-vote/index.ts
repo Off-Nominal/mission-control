@@ -1,4 +1,4 @@
-import { userMention } from "discord.js";
+import { MessageFlags, userMention } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 
@@ -44,7 +44,7 @@ export default function AddVote({ ndb2Bot, ndb2Client }: Providers) {
       );
 
       interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: `There was an error submitting the vote to NDB2. ${userError}`,
       });
       logger.sendLog(interaction.client);
@@ -56,7 +56,7 @@ export default function AddVote({ ndb2Bot, ndb2Client }: Providers) {
       const pastTense = command === "Affirm" ? "affirmed" : "negated";
       interaction.reply({
         content: `Prediction #${predictionId} successfully ${pastTense}!`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.SUCCESS,

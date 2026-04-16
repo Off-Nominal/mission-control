@@ -1,3 +1,4 @@
+import { MessageFlags } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { Providers } from "../../providers";
 import createWebooksRouter from "./webhooks";
@@ -51,7 +52,7 @@ export default function NDB2(providers: Providers) {
 
       interaction.reply({
         content: "Invalid Command. Try `/predict help` to see how I work.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   });

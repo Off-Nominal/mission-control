@@ -1,4 +1,4 @@
-import { BaseInteraction, EmbedBuilder } from "discord.js";
+import { BaseInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import { User } from "../../providers/db/models/User";
 
 export async function setSubscriptions(
@@ -35,7 +35,7 @@ export async function setSubscriptions(
       return await interaction.reply({
         content:
           "No parameters set, so no changes to your notificatin subscription settings.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -68,14 +68,14 @@ export async function setSubscriptions(
 
       return await interaction.reply({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (err) {
       console.error(err);
       return await interaction.reply({
         content:
           "Something went wrong setting your subscriptions. Please let Jake know!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   }

@@ -5,6 +5,7 @@ import {
   GuildScheduledEvent,
   GuildScheduledEventStatus,
   MessageCreateOptions,
+  MessageFlags,
   MessagePayload,
   ThreadChannel,
 } from "discord.js";
@@ -137,7 +138,7 @@ export class ManagedStream extends EventEmitter {
       try {
         await interaction.reply({
           content: `This command only works during a live Off-Nominal episode stream.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } catch (err) {
         console.error(err);
@@ -177,7 +178,7 @@ export class ManagedStream extends EventEmitter {
       try {
         await interaction.reply({
           content: `This command only works during a live Off-Nominal episode stream.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } catch (err) {
         console.error(err);
@@ -196,7 +197,7 @@ export class ManagedStream extends EventEmitter {
             )
           ),
         ],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (err) {
       console.error(err);

@@ -6,6 +6,7 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
   TimestampStyles,
   bold,
   channelMention,
@@ -59,7 +60,7 @@ export default function TriggerPrediction({
 
         interaction.reply({
           content: `There was an error fetching this prediction. Could not parse error.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         logger.sendLog(interaction.client);
@@ -76,7 +77,7 @@ export default function TriggerPrediction({
 
       return interaction.reply({
         content: `There was an error fetching this prediction. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -93,7 +94,7 @@ export default function TriggerPrediction({
       if (!isDueDateValid) {
         interaction.reply({
           content: `Your close date format was invalid. Ensure it is entered as YYYY-MM-DD.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         logger.addLog(
           LogStatus.WARNING,
@@ -110,7 +111,7 @@ export default function TriggerPrediction({
         interaction.reply({
           content:
             "Your close date is in the future. Either leave it blank to trigger effective now, or put in a past date.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         logger.addLog(
           LogStatus.WARNING,
@@ -126,7 +127,7 @@ export default function TriggerPrediction({
           content: `Your close date is before the prediction's creation date, which can't happen. Either leave it blank to trigger effective now, or put in a date after ${time(
             new Date(prediction.created_date)
           )}.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         logger.addLog(
           LogStatus.WARNING,
@@ -193,7 +194,7 @@ export default function TriggerPrediction({
         });
     }, 600000);
 
-    interaction.reply({ content, components, ephemeral: true });
+    interaction.reply({ content, components, flags: MessageFlags.Ephemeral });
 
     logger.sendLog(interaction.client);
   });
@@ -233,7 +234,7 @@ export default function TriggerPrediction({
 
         interaction.reply({
           content: `There was an error fetching this prediction. Could not parse error.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         logger.sendLog(interaction.client);
@@ -244,7 +245,7 @@ export default function TriggerPrediction({
 
       interaction.reply({
         content: `There was an error fetching the prediction for this retirement. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.WARNING,
@@ -284,7 +285,7 @@ export default function TriggerPrediction({
 
         interaction.reply({
           content: `There was an error fetching this prediction. Could not parse error.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         logger.sendLog(interaction.client);
@@ -295,7 +296,7 @@ export default function TriggerPrediction({
 
       interaction.reply({
         content: `Triggering this prediction failed. ${userError}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       logger.addLog(

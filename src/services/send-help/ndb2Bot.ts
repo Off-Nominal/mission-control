@@ -1,4 +1,4 @@
-import { EmbedBuilder, Interaction } from "discord.js";
+import { EmbedBuilder, Interaction, MessageFlags } from "discord.js";
 
 export function sendNdb2Help(interaction: Interaction) {
   if (!interaction.isChatInputCommand()) return;
@@ -58,5 +58,5 @@ export function sendNdb2Help(interaction: Interaction) {
     ],
   });
 
-  interaction.reply({ embeds: [embed], ephemeral: true });
+  interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }

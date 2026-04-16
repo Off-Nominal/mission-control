@@ -1,3 +1,4 @@
+import { MessageFlags } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import type { Endpoints } from "@offnominal/ndb2-api-types/v2";
@@ -99,7 +100,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
       await interaction.reply({
         embeds,
         components,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.SUCCESS,

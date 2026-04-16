@@ -1,3 +1,4 @@
+import { MessageFlags } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
@@ -30,7 +31,7 @@ export default function ViewDetails({ ndb2Client, ndb2Bot }: Providers) {
       logger.addLog(LogStatus.SUCCESS, "Prediction successfully fetched");
     } catch ([userError, logError]) {
       interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: `There was an error fetching this subscription detail. ${userError}`,
       });
       logger.addLog(
@@ -55,7 +56,7 @@ export default function ViewDetails({ ndb2Client, ndb2Bot }: Providers) {
       interaction.reply({
         embeds,
         components,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       logger.addLog(
         LogStatus.SUCCESS,

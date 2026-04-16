@@ -3,6 +3,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   Message,
+  MessageFlags,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -66,7 +67,7 @@ export default function AddPrediction({
       ),
     ];
 
-    interaction.reply({ content, components, ephemeral: true });
+    interaction.reply({ content, components, flags: MessageFlags.Ephemeral });
   });
 
   // Handles request for new prediction modal
@@ -159,7 +160,7 @@ export default function AddPrediction({
     if (!text || !driverDateString) {
       interaction.reply({
         content: `You must provide both a prediction and a due date.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -174,7 +175,7 @@ export default function AddPrediction({
       logger.sendLog(interaction.client);
       interaction.reply({
         content: `Your due date format was invalid. Ensure it is entered as YYYY-MM-DD. If you need to re-enter your prediction, you can copy and paste it from here:\n\n${text}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -206,7 +207,7 @@ export default function AddPrediction({
       logger.sendLog(interaction.client);
       interaction.reply({
         content: `Your due date is in the past. Please adjust your date and try again. If you need to reneter your prediction, you can copy and paste it from here:\n\n${text}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -237,7 +238,7 @@ export default function AddPrediction({
 
         interaction.reply({
           content: `There was an error fetching this prediction. Could not parse error.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         logger.sendLog(interaction.client);
@@ -246,7 +247,7 @@ export default function AddPrediction({
 
       const [userError, logError] = err;
       interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: `There was an error submitting the prediction to NDB2. ${userError}`,
       });
       logger.addLog(
