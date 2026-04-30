@@ -1,7 +1,7 @@
 import { MessageFlags, userMention } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import * as API_V2 from "@offnominal/ndb2-api-types/v2";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export default function AddBet({ ndb2Bot, ndb2Client }: Providers) {
   ndb2Bot.on("interactionCreate", async (interaction) => {
@@ -27,7 +27,7 @@ export default function AddBet({ ndb2Bot, ndb2Client }: Providers) {
       )} on prediction #${predictionId}`,
     );
 
-    let prediction: API_V2.Entities.Predictions.Prediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     // Add Bet
     try {

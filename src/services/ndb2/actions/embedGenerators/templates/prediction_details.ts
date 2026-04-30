@@ -9,11 +9,11 @@ import {
 } from "discord.js";
 import embedFields from "./helpers/fields";
 import { getPredictedPrefix } from "./helpers/helpers";
-import { NDB2API } from "../../../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 import { getWebButton } from "./helpers/buttons";
 import { NDB2EmbedTemplate } from "./helpers/types";
 
-const driver = (driver: NDB2API.PredictionDriver) => {
+const driver = (driver: NDB2API.Entities.Predictions.PredictionDriver) => {
   return driver === "date" ? "(Date-driven)" : "(Event-driven)";
 };
 

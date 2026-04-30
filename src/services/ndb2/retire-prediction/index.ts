@@ -8,7 +8,7 @@ import {
   ButtonStyle,
   MessageFlags,
 } from "discord.js";
-import * as API_v2 from "@offnominal/ndb2-api-types/v2";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export default function RetirePrediction({
   cache,
@@ -33,31 +33,31 @@ export default function RetirePrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 Slash Command Retire Prediction Request"
+      "NDB2 Slash Command Retire Prediction Request",
     );
 
     logger.addLog(
       LogStatus.INFO,
-      `Received a RETIRE Prediction request, validating data and initiating confirmation message.`
+      `Received a RETIRE Prediction request, validating data and initiating confirmation message.`,
     );
 
     const deleterId = interaction.user.id;
 
     const predictionId = options.getInteger("id", true);
 
-    let prediction: API_v2.Entities.Predictions.Prediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
       prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
-        `Prediction was successfully retrieved from NDB2.`
+        `Prediction was successfully retrieved from NDB2.`,
       );
     } catch (err: unknown) {
       if (!Array.isArray(err)) {
         logger.addLog(
           LogStatus.WARNING,
-          `There was an error fetching this prediction. Could not parse error.`
+          `There was an error fetching this prediction. Could not parse error.`,
         );
         logger.sendLog(interaction.client);
         interaction.reply({
@@ -70,7 +70,7 @@ export default function RetirePrediction({
       const [userError, logError] = err;
       logger.addLog(
         LogStatus.WARNING,
-        `There was an error fetching this prediction. ${logError}`
+        `There was an error fetching this prediction. ${logError}`,
       );
       logger.sendLog(interaction.client);
 
@@ -84,7 +84,7 @@ export default function RetirePrediction({
     if (deleterId !== prediction.predictor.discord_id) {
       logger.addLog(
         LogStatus.WARNING,
-        `User tried to retire another user's predition.`
+        `User tried to retire another user's predition.`,
       );
       logger.sendLog(interaction.client);
       interaction.reply({
@@ -101,7 +101,7 @@ export default function RetirePrediction({
     if (isBefore(editWindow, now)) {
       logger.addLog(
         LogStatus.WARNING,
-        `User tried to retire prediction after edit window.`
+        `User tried to retire prediction after edit window.`,
       );
       logger.sendLog(interaction.client);
       interaction.reply({
@@ -118,7 +118,7 @@ export default function RetirePrediction({
         new ButtonBuilder()
           .setCustomId(`Retire ${predictionId}`)
           .setLabel("Retire")
-          .setStyle(ButtonStyle.Danger)
+          .setStyle(ButtonStyle.Danger),
       ),
     ];
 
@@ -162,22 +162,22 @@ export default function RetirePrediction({
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "Retire Prediction"
+      "Retire Prediction",
     );
 
-    let prediction: API_v2.Entities.Predictions.Prediction;
+    let prediction: NDB2API.Entities.Predictions.Prediction;
 
     try {
       prediction = await ndb2Client.getPrediction(predictionId);
       logger.addLog(
         LogStatus.SUCCESS,
-        `Prediction was successfully retrieved from NDB2.`
+        `Prediction was successfully retrieved from NDB2.`,
       );
     } catch (err: unknown) {
       if (!Array.isArray(err)) {
         logger.addLog(
           LogStatus.WARNING,
-          `There was an error fetching this prediction. Could not parse error.`
+          `There was an error fetching this prediction. Could not parse error.`,
         );
         logger.sendLog(interaction.client);
         interaction.reply({
@@ -194,7 +194,7 @@ export default function RetirePrediction({
       });
       logger.addLog(
         LogStatus.WARNING,
-        `There was an error fetching the prediction for this retirement. ${LogError}`
+        `There was an error fetching the prediction for this retirement. ${LogError}`,
       );
       return;
     }
@@ -220,17 +220,17 @@ export default function RetirePrediction({
       subId = await models.ndb2MsgSubscription.addSubscription(
         API.Ndb2MsgSubscriptionType.RETIREMENT,
         prediction.id,
-        interaction.channelId
+        interaction.channelId,
       );
       subSuccess = true;
       logger.addLog(
         LogStatus.SUCCESS,
-        `Prediction retirement context logged successfully.`
+        `Prediction retirement context logged successfully.`,
       );
     } catch (err) {
       logger.addLog(
         LogStatus.FAILURE,
-        `Prediction retirement context could not be logged. Fallback will be used for location of retirement notice.`
+        `Prediction retirement context could not be logged. Fallback will be used for location of retirement notice.`,
       );
     }
 
@@ -241,7 +241,7 @@ export default function RetirePrediction({
       if (!Array.isArray(err)) {
         logger.addLog(
           LogStatus.WARNING,
-          `There was an error fetching this prediction. Could not parse error.`
+          `There was an error fetching this prediction. Could not parse error.`,
         );
         logger.sendLog(interaction.client);
         interaction.reply({
@@ -265,7 +265,7 @@ export default function RetirePrediction({
 
       logger.addLog(
         LogStatus.FAILURE,
-        `Error sending retirement request to API. ${LogError}`
+        `Error sending retirement request to API. ${LogError}`,
       );
 
       logger.sendLog(interaction.client);
@@ -282,13 +282,13 @@ export default function RetirePrediction({
       });
       logger.addLog(
         LogStatus.SUCCESS,
-        `User successfully notified of prediction retirement.`
+        `User successfully notified of prediction retirement.`,
       );
     } catch (err) {
       console.error(err);
       logger.addLog(
         LogStatus.FAILURE,
-        `Error sending interaction response to user.`
+        `Error sending interaction response to user.`,
       );
       logger.sendLog(interaction.client);
       return;

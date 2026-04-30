@@ -1,5 +1,4 @@
 import { Client, GuildMember } from "discord.js";
-import { NDB2API as NDB2API_V1 } from "../../../../../../providers/ndb2-client";
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export namespace NDB2EmbedTemplate {
@@ -58,11 +57,11 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type SeasonStart = {
-      season: NDB2API_V1.Season;
+      season: NDB2API.Webhooks.Events.SeasonStart["data"]["season"];
     };
 
     export type SeasonEnd = {
-      results: NDB2API_V1.SeasonResults;
+      results: NDB2API.Webhooks.Events.SeasonEnd["data"]["results"];
       predictionsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
       betsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
       pointsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];

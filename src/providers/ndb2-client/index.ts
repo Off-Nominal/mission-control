@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from "axios";
 import mcconfig from "../../mcconfig";
-export * from "./types";
 import * as API_V2 from "@offnominal/ndb2-api-types/v2";
 
 const isNdb2ApiErrorResponse = (

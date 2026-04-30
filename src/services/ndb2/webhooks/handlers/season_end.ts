@@ -1,7 +1,7 @@
 import { channelMention, Client, Guild } from "discord.js";
 import { LogStatus } from "../../../../logger/Logger";
-import { NDB2API, Ndb2Client } from "../../../../providers/ndb2-client";
-import * as API_V2 from "@offnominal/ndb2-api-types/v2";
+import { Ndb2Client } from "../../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 import { generateInteractionReplyFromTemplate } from "../../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpers/types";
 import mcconfig from "../../../../mcconfig";
@@ -12,7 +12,7 @@ export const handleSeasonEnd = async (options: {
   ndb2Client: Ndb2Client;
   client: Client;
   guild: Guild;
-  results: NDB2API.SeasonResults;
+  results: NDB2API.Webhooks.Events.SeasonEnd["data"]["results"];
 }) => {
   const logger = loggerContext.getStore();
 
@@ -21,18 +21,18 @@ export const handleSeasonEnd = async (options: {
     "Event was SEASON END, generating embed notice.",
   );
 
-  let predictionsLeaderboard: API_V2.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
+  let predictionsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
     [];
-  let betsLeaderboard: API_V2.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
+  let betsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
     [];
-  let pointsLeaderboard: API_V2.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
+  let pointsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
     [];
 
   try {
     const promises: [
-      Promise<API_V2.Endpoints.Results.GET_seasons_BySeasonId.Data>,
-      Promise<API_V2.Endpoints.Results.GET_seasons_BySeasonId.Data>,
-      Promise<API_V2.Endpoints.Results.GET_seasons_BySeasonId.Data>,
+      Promise<NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data>,
+      Promise<NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data>,
+      Promise<NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data>,
     ] = [
       options.ndb2Client.getResultsBySeasonId(options.results.season.id, {
         sort_by: "predictions_successful-desc",

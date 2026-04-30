@@ -1,6 +1,6 @@
 import { channelMention, Client, Guild } from "discord.js";
 import { LogStatus } from "../../../../logger/Logger";
-import { NDB2API } from "../../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 import { generateInteractionReplyFromTemplate } from "../../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpers/types";
 import mcconfig from "../../../../mcconfig";
@@ -10,7 +10,7 @@ import { loggerContext } from "../contexts";
 export const handleSeasonStart = (options: {
   guild: Guild;
   client: Client;
-  season: NDB2API.Season;
+  season: NDB2API.Webhooks.Events.SeasonStart["data"]["season"];
 }) => {
   const logger = loggerContext.getStore();
 

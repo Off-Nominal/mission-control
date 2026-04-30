@@ -5,10 +5,29 @@ import {
   TimestampStyles,
   userMention,
 } from "discord.js";
-import ndb2Client, { NDB2API } from "../../../../../../providers/ndb2-client";
-import * as API_V2 from "@offnominal/ndb2-api-types/v2";
+import ndb2Client from "../../../../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 const USER_LIST_LIMIT = 30;
+
+/** Used by `longVotes` — reads `voter.discord_id` only. */
+interface LongVotesVoteRow {
+  voter: { discord_id: string };
+}
+
+/** Used by `longPayouts`. */
+interface LongPayoutsBetRow {
+  payout?: number | null;
+  season_payout?: number | null;
+  better: { discord_id: string };
+}
+
+/** Used by `longBets`. */
+interface LongBetsBetRow {
+  date: string;
+  wager: number;
+  better: { discord_id: string };
+}
 
 const embedFields = {
   date: (
@@ -87,7 +106,7 @@ const embedFields = {
       value: `👍 ${yesCount} \u200B \u200B \u200B \u200B 👎 ${noCount}`,
     };
   },
-  longVotes: (votes: NDB2API.EnhancedPredictionVote[], type: "yes" | "no") => {
+  longVotes: (votes: LongVotesVoteRow[], type: "yes" | "no") => {
     const values = votes.map((e) => userMention(e.voter.discord_id));
 
     const fieldCount = Math.ceil(values.length / USER_LIST_LIMIT);
@@ -134,7 +153,7 @@ const embedFields = {
   longPayouts: (
     status: "successful" | "failed",
     type: "endorsements" | "undorsements" | "invalid",
-    bets: NDB2API.EnhancedPredictionBet[],
+    bets: LongPayoutsBetRow[],
     season: boolean,
   ) => {
     let payouts: string[];
@@ -197,7 +216,7 @@ const embedFields = {
 
     return payoutFields;
   },
-  shortStatus: (status: API_V2.Entities.Predictions.PredictionLifeCycle) => {
+  shortStatus: (status: NDB2API.Entities.Predictions.PredictionLifeCycle) => {
     let pStatus: string;
 
     if (status === "closed") {
@@ -237,7 +256,7 @@ const embedFields = {
     };
   },
   longBets: (
-    bets: NDB2API.EnhancedPredictionBet[],
+    bets: LongBetsBetRow[],
     type: "undorsements" | "endorsements" | "invalid",
   ) => {
     const betUserListLimit = USER_LIST_LIMIT / 3;
@@ -346,7 +365,7 @@ const embedFields = {
   },
   standardFooter: (
     predictionId: string | number,
-    driver: NDB2API.PredictionDriver,
+    driver: NDB2API.Entities.Predictions.PredictionDriver,
   ) => {
     const driverText = driver === "event" ? "Event-driven" : "Date-driven";
     return {
