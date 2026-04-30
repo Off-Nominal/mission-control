@@ -71,9 +71,9 @@ export namespace NDB2EmbedTemplate {
 
     export type SeasonEnd = {
       results: NDB2API_V1.SeasonResults;
-      predictionsLeaderboard: NDB2API_V1.PredictionsLeader[];
-      betsLeaderboard: NDB2API_V1.BetsLeader[];
-      pointsLeaderboard: NDB2API_V1.PointsLeader[];
+      predictionsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
+      betsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
+      pointsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
     };
 
     export type PredictionEdit = {
@@ -88,19 +88,12 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type Leaderboard = (
-      | {
-          type: "points";
-          leaders: NDB2API_V1.PointsLeader[];
-        }
-      | {
-          type: "predictions";
-          leaders: NDB2API_V1.PredictionsLeader[];
-        }
-      | {
-          type: "bets";
-          leaders: NDB2API_V1.BetsLeader[];
-        }
-    ) & { seasonIdentifier?: "current" | "last" };
+      | NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data
+      | NDB2API.Endpoints.Results.GET_all_time.Data
+    ) & {
+      seasonIdentifier?: "current" | "last";
+      leaderboardType: "points" | "predictions" | "bets";
+    };
 
     export type List = {
       type:

@@ -81,33 +81,6 @@ export namespace NDB2API {
     };
   };
 
-  export type Scores = {
-    score: {
-      points: number;
-      rank: number;
-    };
-    predictions: {
-      successful: number;
-      failed: number;
-      pending: number;
-      retired: number;
-      rank: number;
-    };
-    bets: {
-      successful: number;
-      failed: number;
-      pending: number;
-      retired: number;
-      invalid: number;
-      rank: number;
-    };
-    votes: {
-      sycophantic: number;
-      contrarian: number;
-      pending: number;
-    };
-  };
-
   export interface Leader {
     id: string;
     discord_id: string;
@@ -144,8 +117,6 @@ export namespace NDB2API {
   };
 
   export type TriggerPrediction = GeneralResponse<EnhancedPrediction>;
-
-  export type GetScores = GeneralResponse<Scores>;
 
   export type LeaderboardType = "points" | "predictions" | "bets";
 

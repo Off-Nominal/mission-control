@@ -1,37 +1,7 @@
 import axios, { AxiosInstance } from "axios";
-import { NDB2API as NDB2API_V1 } from "./types";
 import mcconfig from "../../mcconfig";
 export * from "./types";
 import * as API_V2 from "@offnominal/ndb2-api-types/v2";
-
-const isNdb2ApiResponse_v1 = (
-  response: any,
-): response is NDB2API_V1.GeneralResponse => {
-  if (typeof response !== "object") {
-    return false;
-  }
-
-  if (
-    !("success" in response) ||
-    !("errorCode" in response) ||
-    !("message" in response) ||
-    !("data" in response)
-  ) {
-    return false;
-  }
-
-  const { success, errorCode, message } = response;
-
-  if (
-    typeof success !== "boolean" ||
-    typeof errorCode !== "number" ||
-    (typeof message !== "string" && message !== null)
-  ) {
-    return false;
-  }
-
-  return true;
-};
 
 const isNdb2ApiErrorResponse = (
   response: any,
@@ -61,74 +31,6 @@ const isNdb2ApiErrorResponse = (
   }
 
   return true;
-};
-
-const handleError_v1 = (err: any): [string, string] => {
-  // returns user friendly message and full message in array
-  if (axios.isAxiosError(err)) {
-    if (err.response) {
-      const statusCode = err.response.status;
-
-      const ndb2ApiResponse = err.response.data;
-      if (isNdb2ApiResponse_v1(ndb2ApiResponse)) {
-        const errorCode = ndb2ApiResponse.errorCode;
-        const message =
-          ndb2ApiResponse.message || "No error message indicated.";
-        return [
-          message,
-          `HTTP Status: ${statusCode}. Error response: ${errorCode}. ${message}`,
-        ];
-      }
-
-      return [
-        "We received a response from NDB2 but it doesn't look right.",
-        `HTTP Status ${statusCode} from NDB2 API but response failed type predicate.`,
-      ];
-    }
-
-    return [
-      "We didn't receive a response from the NDB2 server.",
-      "Axios reports no response.",
-    ];
-  }
-
-  const defaultUserMessage = "We received some kind of unknown error.";
-
-  if (err instanceof TypeError) {
-    return [defaultUserMessage, err.message];
-  }
-
-  if (err instanceof RangeError) {
-    return [defaultUserMessage, err.message];
-  }
-
-  if (err instanceof EvalError) {
-    return [defaultUserMessage, err.message];
-  }
-
-  if (err instanceof ReferenceError) {
-    return [defaultUserMessage, err.message];
-  }
-
-  if (err instanceof SyntaxError) {
-    return [defaultUserMessage, err.message];
-  }
-
-  if (err instanceof URIError) {
-    return [defaultUserMessage, err.message];
-  }
-
-  if (err instanceof Error) {
-    return [defaultUserMessage, err.message];
-  }
-
-  // Error passthrough for strings
-  if (typeof err === "string") {
-    return [defaultUserMessage, err];
-  }
-
-  // Final fallback
-  return [defaultUserMessage, "Unknown error."];
 };
 
 const handleError = (err: any): [string, string] => {
@@ -414,15 +316,15 @@ export class Ndb2Client {
       });
   }
 
-  public getSeasonResultBySeasonIdAndDiscordId(
+  public getResultsBySeasonIdAndDiscordId(
     discord_id: string,
     seasonIdentifier?: number | "current" | "last",
   ) {
     const url = new URL(this.baseURL);
-    url.pathname = `api/v2/seasons/${seasonIdentifier}/users/discord_id/${discord_id}/result`;
+    url.pathname = `api/v2/results/seasons/${seasonIdentifier}/users/discord_id/${discord_id}`;
 
     return this.client
-      .get<API_V2.Endpoints.Seasons.GET_ById_users_ByDiscordId_result.Response>(
+      .get<API_V2.Endpoints.Results.GET_seasons_BySeasonId_users_ByDiscordId.Response>(
         url.toString(),
       )
       .then((res) => res.data.data)
@@ -433,10 +335,10 @@ export class Ndb2Client {
 
   public getAlltimeResultsByDiscordId(discord_id: string) {
     const url = new URL(this.baseURL);
-    url.pathname = `api/v2/users/discord_id/${discord_id}/results/all-time`;
+    url.pathname = `api/v2/results/users/discord_id/${discord_id}/all-time`;
 
     return this.client
-      .get<API_V2.Endpoints.Users.GET_ByDiscordId_results_all_time.Response>(
+      .get<API_V2.Endpoints.Results.GET_users_ByDiscordId_all_time.Response>(
         url.toString(),
       )
       .then((res) => res.data.data)
@@ -468,54 +370,69 @@ export class Ndb2Client {
       });
   }
 
-  public getPointsLeaderboard(
-    seasonId?: number | "current" | "last",
-  ): Promise<NDB2API_V1.GetPointsLeaderboard> {
+  public getAlltimeResults(
+    options: API_V2.Endpoints.Results.GET_seasons_BySeasonId.Query = {
+      sort_by: "points_net-desc",
+      page: 1,
+      per_page: 10,
+    },
+  ) {
     const url = new URL(this.baseURL);
-    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
+    url.pathname = `api/v2/results/all-time`;
     const params = new URLSearchParams();
-    params.set("view", "points");
+
+    if (options) {
+      if (options.sort_by) {
+        params.set("sort_by", options.sort_by);
+      }
+      if (options.page) {
+        params.set("page", options.page.toString());
+      }
+      if (options.per_page) {
+        params.set("per_page", options.per_page.toString());
+      }
+    }
+
     url.search = params.toString();
 
     return this.client
-      .get<NDB2API_V1.GetPointsLeaderboard>(url.toString())
-      .then((res) => res.data)
+      .get<API_V2.Endpoints.Results.GET_all_time.Response>(url.toString())
+      .then((res) => res.data.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 
-  public getPredictionsLeaderboard(
+  public getResultsBySeasonId(
     seasonId?: number | "current" | "last",
-  ): Promise<NDB2API_V1.GetPredictionsLeaderboard> {
+    options: API_V2.Endpoints.Results.GET_seasons_BySeasonId.Query = {
+      sort_by: "points_net-desc",
+      page: 1,
+      per_page: 10,
+    },
+  ) {
     const url = new URL(this.baseURL);
-    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
+    url.pathname = `api/v2/results/seasons/${seasonId}`;
     const params = new URLSearchParams();
-    params.set("view", "predictions");
+    if (options) {
+      if (options.sort_by) {
+        params.set("sort_by", options.sort_by);
+      }
+      if (options.page) {
+        params.set("page", options.page.toString());
+      }
+      if (options.per_page) {
+        params.set("per_page", options.per_page.toString());
+      }
+    }
     url.search = params.toString();
-
     return this.client
-      .get<NDB2API_V1.GetPredictionsLeaderboard>(url.toString())
-      .then((res) => res.data)
+      .get<API_V2.Endpoints.Results.GET_seasons_BySeasonId.Response>(
+        url.toString(),
+      )
+      .then((res) => res.data.data)
       .catch((err) => {
-        throw handleError_v1(err);
-      });
-  }
-
-  public getBetsLeaderboard(
-    seasonId?: number | "current" | "last",
-  ): Promise<NDB2API_V1.GetBetsLeaderboard> {
-    const url = new URL(this.baseURL);
-    url.pathname = `api/scores${seasonId ? "/seasons/" + seasonId : ""}`;
-    const params = new URLSearchParams();
-    params.set("view", "bets");
-    url.search = params.toString();
-
-    return this.client
-      .get<NDB2API_V1.GetBetsLeaderboard>(url.toString())
-      .then((res) => res.data)
-      .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
       });
   }
 

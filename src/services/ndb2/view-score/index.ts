@@ -59,7 +59,7 @@ export default function ViewScore({ ndb2Client, ndb2Bot }: Providers) {
     try {
       const results =
         seasonIdentifier !== undefined
-          ? await ndb2Client.getSeasonResultBySeasonIdAndDiscordId(
+          ? await ndb2Client.getResultsBySeasonIdAndDiscordId(
               discord_id,
               seasonIdentifier,
             )
