@@ -7,7 +7,7 @@ import {
 import fetchGuild from "../../../helpers/fetchGuild";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { generateScoresEmbed } from "../actions/embedGenerators/templates/scores";
+import { generateScoresEmbed } from "../actions/embedGenerators/templates/results";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
@@ -27,7 +27,7 @@ export default function ViewScore({ ndb2Client, ndb2Bot }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      "NDB2 Slash Command View Scores"
+      "NDB2 Slash Command View Scores",
     );
 
     const brag = options.getBoolean("brag");
@@ -45,7 +45,7 @@ export default function ViewScore({ ndb2Client, ndb2Bot }: Providers) {
     // Score calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
     try {
       await interaction.deferReply(
-        brag ? {} : { flags: MessageFlags.Ephemeral }
+        brag ? {} : { flags: MessageFlags.Ephemeral },
       );
       logger.addLog(LogStatus.SUCCESS, "Successfully deferred reply.");
     } catch (err) {
@@ -57,10 +57,17 @@ export default function ViewScore({ ndb2Client, ndb2Bot }: Providers) {
     const discord_id = interaction.user.id;
 
     try {
-      const response = await ndb2Client.getScores(discord_id, seasonIdentifier);
-      logger.addLog(LogStatus.SUCCESS, "Successfully fetched scores from API.");
-
-      const scores = response.data;
+      const results =
+        seasonIdentifier !== undefined
+          ? await ndb2Client.getResultsBySeasonIdAndDiscordId(
+              discord_id,
+              seasonIdentifier,
+            )
+          : await ndb2Client.getAlltimeResultsByDiscordId(discord_id);
+      logger.addLog(
+        LogStatus.SUCCESS,
+        "Successfully fetched results from API.",
+      );
       const guild = fetchGuild(interaction.client);
 
       if (!guild) {
@@ -71,18 +78,22 @@ export default function ViewScore({ ndb2Client, ndb2Bot }: Providers) {
       logger.addLog(LogStatus.SUCCESS, "Successfully fetched Guild Member");
 
       const [embeds, components] = generateInteractionReplyFromTemplate(
-        NDB2EmbedTemplate.View.SCORES,
+        NDB2EmbedTemplate.View.RESULTS,
         {
-          scores,
+          results,
           member,
           seasonIdentifier,
-        }
+        },
+      );
+      logger.addLog(
+        LogStatus.SUCCESS,
+        "Successfully generated embeds and components",
       );
 
       await interaction.editReply({ embeds, components });
       logger.addLog(
         LogStatus.SUCCESS,
-        "Successfully posted scores embed to Discord"
+        "Successfully posted scores embed to Discord",
       );
     } catch (err) {
       await interaction.editReply({

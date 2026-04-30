@@ -1,7 +1,6 @@
 import { MessageFlags } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
-import { NDB2API } from "../../../providers/ndb2-client";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
@@ -34,13 +33,13 @@ export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      `View Leaderboards: ${leaderboardType}`
+      `View Leaderboards: ${leaderboardType}`,
     );
 
     // Leaderboard calculcations can sometimes take time, this deferred reply let's discord know we're working on it!
     try {
       await interaction.deferReply(
-        brag ? {} : { flags: MessageFlags.Ephemeral }
+        brag ? {} : { flags: MessageFlags.Ephemeral },
       );
       logger.addLog(LogStatus.SUCCESS, "Successfully deferred reply.");
     } catch (err) {
@@ -56,7 +55,7 @@ export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
     ) {
       logger.addLog(
         LogStatus.FAILURE,
-        `Invalid interaction option: Type: ${leaderboardType}`
+        `Invalid interaction option: Type: ${leaderboardType}`,
       );
       interaction.editReply({
         content:
@@ -66,52 +65,47 @@ export default function ViewLeaderboards({ ndb2Bot, ndb2Client }: Providers) {
     }
 
     try {
-      let response:
-        | NDB2API.GetPredictionsLeaderboard
-        | NDB2API.GetBetsLeaderboard
-        | NDB2API.GetPointsLeaderboard;
+      const listQuery = {
+        page: 1,
+        per_page: 10,
+      } as const;
 
-      let options: NDB2EmbedTemplate.Args.Leaderboard;
+      const sort_by =
+        leaderboardType === "predictions"
+          ? ("predictions_successful-desc" as const)
+          : leaderboardType === "bets"
+            ? ("bets_successful-desc" as const)
+            : ("points_net-desc" as const);
 
-      if (leaderboardType === "predictions") {
-        response = await ndb2Client.getPredictionsLeaderboard(seasonIdentifier);
-        options = {
-          type: leaderboardType,
-          leaders: response.data.leaders,
-          seasonIdentifier,
-        };
-      } else if (leaderboardType === "bets") {
-        response = await ndb2Client.getBetsLeaderboard(seasonIdentifier);
-        options = {
-          type: leaderboardType,
-          leaders: response.data.leaders,
-          seasonIdentifier,
-        };
-      } else if (leaderboardType === "points") {
-        response = await ndb2Client.getPointsLeaderboard(seasonIdentifier);
-        options = {
-          type: leaderboardType,
-          leaders: response.data.leaders,
-          seasonIdentifier,
-        };
-      }
+      const response =
+        seasonIdentifier !== undefined
+          ? await ndb2Client.getResultsBySeasonId(seasonIdentifier, {
+              sort_by,
+              ...listQuery,
+            })
+          : await ndb2Client.getAlltimeResults({
+              sort_by,
+              ...listQuery,
+            });
 
       logger.addLog(
         LogStatus.SUCCESS,
-        "Successfully fetched leaderboard from API."
+        "Successfully fetched leaderboard from API.",
       );
-
-      const leaders = response.data.leaders;
 
       const [embeds, components] = generateInteractionReplyFromTemplate(
         NDB2EmbedTemplate.View.LEADERBOARD,
-        options
+        {
+          ...response,
+          seasonIdentifier,
+          leaderboardType,
+        },
       );
 
       await interaction.editReply({ embeds, components });
       logger.addLog(
         LogStatus.SUCCESS,
-        "Successfully posted leaderboard embed to Discord"
+        "Successfully posted leaderboard embed to Discord",
       );
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, "Failed to fetch leaderboard from API");

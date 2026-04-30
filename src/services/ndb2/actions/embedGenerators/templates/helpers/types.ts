@@ -1,5 +1,4 @@
 import { Client, GuildMember } from "discord.js";
-import { NDB2API as NDB2API_V1 } from "../../../../../../providers/ndb2-client";
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export namespace NDB2EmbedTemplate {
@@ -14,7 +13,7 @@ export namespace NDB2EmbedTemplate {
     LEADERBOARD = "LEADERBOARD",
     LIST = "LIST",
     DETAILS = "DETAILS",
-    SCORES = "SCORES",
+    RESULTS = "RESULTS",
     PREDICTION_EDIT = "PREDICTION_EDIT",
   }
 
@@ -25,9 +24,7 @@ export namespace NDB2EmbedTemplate {
 
   export namespace Args {
     export type Standard = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       displayName?: string;
       avatarUrl?: string;
       context?: Context;
@@ -40,9 +37,7 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type Trigger = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       predictor?: GuildMember;
       client: Client;
       triggerer?: GuildMember;
@@ -50,30 +45,26 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type SnoozeCheck = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       client: Client;
       context?: Context;
     };
 
     export type Judgement = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       client: Client;
       context?: Context;
     };
 
     export type SeasonStart = {
-      season: NDB2API_V1.Season;
+      season: NDB2API.Webhooks.Events.SeasonStart["data"]["season"];
     };
 
     export type SeasonEnd = {
-      results: NDB2API_V1.SeasonResults;
-      predictionsLeaderboard: NDB2API_V1.PredictionsLeader[];
-      betsLeaderboard: NDB2API_V1.BetsLeader[];
-      pointsLeaderboard: NDB2API_V1.PointsLeader[];
+      results: NDB2API.Webhooks.Events.SeasonEnd["data"]["results"];
+      predictionsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
+      betsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
+      pointsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"];
     };
 
     export type PredictionEdit = {
@@ -88,19 +79,12 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type Leaderboard = (
-      | {
-          type: "points";
-          leaders: NDB2API_V1.PointsLeader[];
-        }
-      | {
-          type: "predictions";
-          leaders: NDB2API_V1.PredictionsLeader[];
-        }
-      | {
-          type: "bets";
-          leaders: NDB2API_V1.BetsLeader[];
-        }
-    ) & { seasonIdentifier?: "current" | "last" };
+      | NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data
+      | NDB2API.Endpoints.Results.GET_all_time.Data
+    ) & {
+      seasonIdentifier?: "current" | "last";
+      leaderboardType: "points" | "predictions" | "bets";
+    };
 
     export type List = {
       type:
@@ -120,8 +104,8 @@ export namespace NDB2EmbedTemplate {
       season: boolean;
     };
 
-    export type Scores = {
-      scores: NDB2API_V1.Scores;
+    export type Results = {
+      results: NDB2API.Entities.Results.UserSeasonResult;
       member: GuildMember;
       seasonIdentifier?: "current" | "last";
     };
@@ -139,7 +123,7 @@ export type EmbedTemplateArgs =
   | [NDB2EmbedTemplate.View.LEADERBOARD, NDB2EmbedTemplate.Args.Leaderboard]
   | [NDB2EmbedTemplate.View.LIST, NDB2EmbedTemplate.Args.List]
   | [NDB2EmbedTemplate.View.DETAILS, NDB2EmbedTemplate.Args.Details]
-  | [NDB2EmbedTemplate.View.SCORES, NDB2EmbedTemplate.Args.Scores]
+  | [NDB2EmbedTemplate.View.RESULTS, NDB2EmbedTemplate.Args.Results]
   | [
       NDB2EmbedTemplate.View.PREDICTION_EDIT,
       NDB2EmbedTemplate.Args.PredictionEdit,

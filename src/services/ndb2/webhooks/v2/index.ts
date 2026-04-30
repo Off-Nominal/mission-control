@@ -1,4 +1,4 @@
-import * as API_v2 from "@offnominal/ndb2-api-types/v2";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 import {
   fetchMessagesFromSubs,
   generateBulkMessageUpdater,
@@ -23,14 +23,14 @@ import { Ndb2Client } from "../../../../providers/ndb2-client";
 const fallbackContextChannelId = mcconfig.discord.channels.general;
 
 const isPredictionPayload = (
-  payload: API_v2.Webhooks.Payload,
+  payload: NDB2API.Webhooks.Payload,
 ): payload is Exclude<
-  API_v2.Webhooks.Payload,
-  API_v2.Webhooks.Events.SeasonStart | API_v2.Webhooks.Events.SeasonEnd
+  NDB2API.Webhooks.Payload,
+  NDB2API.Webhooks.Events.SeasonStart | NDB2API.Webhooks.Events.SeasonEnd
 > => "prediction" in payload.data;
 
 export const handleV2Webhook = (
-  payload: API_v2.Webhooks.Payload,
+  payload: NDB2API.Webhooks.Payload,
   ndb2Bot: Client,
   ndb2Client: Ndb2Client,
   ndb2MsgSubscription: Ndb2MsgSubscription,
@@ -135,7 +135,7 @@ export const handleV2Webhook = (
       const updateBulkMessages = generateBulkMessageUpdater(subs, guild);
 
       const updateStandardViews = (
-        prediction: API_v2.Entities.Predictions.Prediction,
+        prediction: NDB2API.Entities.Predictions.Prediction,
       ) => {
         const standardViewOptions = generateInteractionReplyFromTemplate(
           NDB2EmbedTemplate.View.STANDARD,
@@ -157,16 +157,14 @@ export const handleV2Webhook = (
         const messages = fetchMessagesFromSubs(subs, types, guild);
 
         for (const mp of messages) {
-          mp
-            .then((m) => {
-              if (!m) return;
-              return m.delete();
-            })
-            .catch((err: unknown) => {
-              if (!isDiscordNotFound(err)) {
-                console.error(err);
-              }
-            });
+          mp.then((m) => {
+            if (!m) return;
+            return m.delete();
+          }).catch((err: unknown) => {
+            if (!isDiscordNotFound(err)) {
+              console.error(err);
+            }
+          });
         }
 
         const noticeSubs = subs.filter((s) => types.includes(s.type));
@@ -206,7 +204,8 @@ export const handleV2Webhook = (
             );
 
             // Update any trigger interaction replies
-            const reply = cache.ndb2.triggerResponses[payload.data.prediction.id];
+            const reply =
+              cache.ndb2.triggerResponses[payload.data.prediction.id];
 
             if (reply) {
               reply
@@ -219,7 +218,9 @@ export const handleV2Webhook = (
                   }),
                 )
                 .then(() => {
-                  delete cache.ndb2.triggerResponses[payload.data.prediction.id];
+                  delete cache.ndb2.triggerResponses[
+                    payload.data.prediction.id
+                  ];
                 })
                 .catch((err) => {
                   console.error(err);
@@ -254,19 +255,17 @@ export const handleV2Webhook = (
           );
 
           for (const mp of messages) {
-            mp
-              .then((m) => {
-                if (!m) return;
-                return m.edit({
-                  embeds: snoozeCheckMessage[0],
-                  components: snoozeCheckMessage[1],
-                });
-              })
-              .catch((err: unknown) => {
-                if (!isDiscordNotFound(err)) {
-                  console.error(err);
-                }
+            mp.then((m) => {
+              if (!m) return;
+              return m.edit({
+                embeds: snoozeCheckMessage[0],
+                components: snoozeCheckMessage[1],
               });
+            }).catch((err: unknown) => {
+              if (!isDiscordNotFound(err)) {
+                console.error(err);
+              }
+            });
           }
 
           // Send Trigger Notice

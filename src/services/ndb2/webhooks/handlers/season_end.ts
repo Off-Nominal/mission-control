@@ -1,6 +1,7 @@
 import { channelMention, Client, Guild } from "discord.js";
 import { LogStatus } from "../../../../logger/Logger";
-import { NDB2API, Ndb2Client } from "../../../../providers/ndb2-client";
+import { Ndb2Client } from "../../../../providers/ndb2-client";
+import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 import { generateInteractionReplyFromTemplate } from "../../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../../actions/embedGenerators/templates/helpers/types";
 import mcconfig from "../../../../mcconfig";
@@ -11,33 +12,48 @@ export const handleSeasonEnd = async (options: {
   ndb2Client: Ndb2Client;
   client: Client;
   guild: Guild;
-  results: NDB2API.SeasonResults;
+  results: NDB2API.Webhooks.Events.SeasonEnd["data"]["results"];
 }) => {
   const logger = loggerContext.getStore();
 
   logger.addLog(
     LogStatus.INFO,
-    "Event was SEASON END, generating embed notice."
+    "Event was SEASON END, generating embed notice.",
   );
 
-  let predictionsLeaderboard: NDB2API.PredictionsLeader[] = [];
-  let betsLeaderboard: NDB2API.BetsLeader[] = [];
-  let pointsLeaderboard: NDB2API.PointsLeader[] = [];
+  let predictionsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
+    [];
+  let betsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
+    [];
+  let pointsLeaderboard: NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data["results"] =
+    [];
 
   try {
     const promises: [
-      Promise<NDB2API.GetPredictionsLeaderboard>,
-      Promise<NDB2API.GetBetsLeaderboard>,
-      Promise<NDB2API.GetPointsLeaderboard>
+      Promise<NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data>,
+      Promise<NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data>,
+      Promise<NDB2API.Endpoints.Results.GET_seasons_BySeasonId.Data>,
     ] = [
-      options.ndb2Client.getPredictionsLeaderboard(options.results.season.id),
-      options.ndb2Client.getBetsLeaderboard(options.results.season.id),
-      options.ndb2Client.getPointsLeaderboard(options.results.season.id),
+      options.ndb2Client.getResultsBySeasonId(options.results.season.id, {
+        sort_by: "predictions_successful-desc",
+        page: 1,
+        per_page: 10,
+      }),
+      options.ndb2Client.getResultsBySeasonId(options.results.season.id, {
+        sort_by: "bets_successful-desc",
+        page: 1,
+        per_page: 10,
+      }),
+      options.ndb2Client.getResultsBySeasonId(options.results.season.id, {
+        sort_by: "points_net-desc",
+        page: 1,
+        per_page: 10,
+      }),
     ];
     await Promise.all(promises).then((leaderboards) => {
-      predictionsLeaderboard = leaderboards[0].data.leaders;
-      betsLeaderboard = leaderboards[1].data.leaders;
-      pointsLeaderboard = leaderboards[2].data.leaders;
+      predictionsLeaderboard = leaderboards[0].results;
+      betsLeaderboard = leaderboards[1].results;
+      pointsLeaderboard = leaderboards[2].results;
     });
   } catch (err) {
     logger.addLog(LogStatus.FAILURE, "Leaderboard fetch failed");
@@ -52,11 +68,11 @@ export const handleSeasonEnd = async (options: {
       predictionsLeaderboard,
       betsLeaderboard,
       pointsLeaderboard,
-    }
+    },
   );
 
   const generalChannel = options.guild.channels.cache.get(
-    mcconfig.discord.channels.general
+    mcconfig.discord.channels.general,
   );
 
   if (!generalChannel) {
@@ -71,8 +87,8 @@ export const handleSeasonEnd = async (options: {
       logger.addLog(
         LogStatus.SUCCESS,
         `Season End Notice sent successfully to ${channelMention(
-          generalChannel.id
-        )}`
+          generalChannel.id,
+        )}`,
       );
       logger.sendLog(options.client);
     })
