@@ -14,7 +14,7 @@ export namespace NDB2EmbedTemplate {
     LEADERBOARD = "LEADERBOARD",
     LIST = "LIST",
     DETAILS = "DETAILS",
-    SCORES = "SCORES",
+    RESULTS = "RESULTS",
     PREDICTION_EDIT = "PREDICTION_EDIT",
   }
 
@@ -120,8 +120,8 @@ export namespace NDB2EmbedTemplate {
       season: boolean;
     };
 
-    export type Scores = {
-      scores: NDB2API_V1.Scores;
+    export type Results = {
+      results: NDB2API.Entities.Results.UserSeasonResult;
       member: GuildMember;
       seasonIdentifier?: "current" | "last";
     };
@@ -139,7 +139,7 @@ export type EmbedTemplateArgs =
   | [NDB2EmbedTemplate.View.LEADERBOARD, NDB2EmbedTemplate.Args.Leaderboard]
   | [NDB2EmbedTemplate.View.LIST, NDB2EmbedTemplate.Args.List]
   | [NDB2EmbedTemplate.View.DETAILS, NDB2EmbedTemplate.Args.Details]
-  | [NDB2EmbedTemplate.View.SCORES, NDB2EmbedTemplate.Args.Scores]
+  | [NDB2EmbedTemplate.View.RESULTS, NDB2EmbedTemplate.Args.Results]
   | [
       NDB2EmbedTemplate.View.PREDICTION_EDIT,
       NDB2EmbedTemplate.Args.PredictionEdit,

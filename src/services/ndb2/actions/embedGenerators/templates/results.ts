@@ -1,6 +1,5 @@
 import {
   ActionRowBuilder,
-  Base,
   BaseMessageOptions,
   ButtonBuilder,
   EmbedBuilder,
@@ -9,7 +8,7 @@ import { NDB2EmbedTemplate } from "./helpers/types";
 import { getLeaderboardsButton } from "./helpers/buttons";
 
 export const generateScoresEmbed = (
-  props: NDB2EmbedTemplate.Args.Scores
+  props: NDB2EmbedTemplate.Args.Results,
 ): BaseMessageOptions["embeds"] => {
   let timeWindowDescription: string = "the all time";
 
@@ -25,19 +24,19 @@ export const generateScoresEmbed = (
     fields: [
       {
         name: "🏆 Score",
-        value: `Points: ${props.scores.score.points}\nRank: ${props.scores.score.rank}`,
+        value: `Points: ${props.results.points.net}\nRank: ${props.results.points.rank} of ${props.results.total_participants}`,
       },
       {
         name: "💭 Predictions",
-        value: `Successful: ${props.scores.predictions.successful}\nFailed: ${props.scores.predictions.failed}\nPending: ${props.scores.predictions.pending}\nRetired: ${props.scores.predictions.retired}\nRank: ${props.scores.predictions.rank}`,
+        value: `Successful: ${props.results.predictions.successful}\nFailed: ${props.results.predictions.failed}\nPending: ${props.results.predictions.open + props.results.predictions.checking + props.results.predictions.closed}\nRetired: ${props.results.predictions.retired}\nRank: ${props.results.predictions.rank} of ${props.results.total_participants}`,
       },
       {
         name: "💵 Bets",
-        value: `Successful: ${props.scores.bets.successful}\nFailed: ${props.scores.bets.failed}\nPending: ${props.scores.bets.pending}\nRetired: ${props.scores.bets.retired}\nInvalid: ${props.scores.bets.invalid}\nRank: ${props.scores.bets.rank}`,
+        value: `Successful: ${props.results.bets.successful}\nFailed: ${props.results.bets.failed}\nPending: ${props.results.bets.pending}\nRetired: ${props.results.bets.retired}\nInvalid: ${props.results.bets.invalid}\nRank: ${props.results.bets.rank} of ${props.results.total_participants}`,
       },
       {
         name: "📝 Votes",
-        value: `Sycophantic: ${props.scores.votes.sycophantic}\nContrarian: ${props.scores.votes.contrarian}\nPending: ${props.scores.votes.pending}`,
+        value: `Yes: ${props.results.votes.yes}\nNo: ${props.results.votes.no}\nAffirmative: ${props.results.votes.affirmative}\nNegative: ${props.results.votes.negative}\nPending: ${props.results.votes.pending}`,
       },
     ],
   });

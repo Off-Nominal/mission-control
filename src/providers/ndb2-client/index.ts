@@ -414,20 +414,34 @@ export class Ndb2Client {
       });
   }
 
-  public getScores(
+  public getSeasonResultBySeasonIdAndDiscordId(
     discord_id: string,
     seasonIdentifier?: number | "current" | "last",
-  ): Promise<NDB2API_V1.GetScores> {
+  ) {
     const url = new URL(this.baseURL);
-    url.pathname = `api/users/discord_id/${discord_id}/scores`;
-    if (seasonIdentifier) {
-      url.pathname += `/seasons/${seasonIdentifier}`;
-    }
+    url.pathname = `api/v2/seasons/${seasonIdentifier}/users/discord_id/${discord_id}/result`;
+
     return this.client
-      .get<NDB2API_V1.GetScores>(url.toString())
-      .then((res) => res.data)
+      .get<API_V2.Endpoints.Seasons.GET_ById_users_ByDiscordId_result.Response>(
+        url.toString(),
+      )
+      .then((res) => res.data.data)
       .catch((err) => {
-        throw handleError_v1(err);
+        throw handleError(err);
+      });
+  }
+
+  public getAlltimeResultsByDiscordId(discord_id: string) {
+    const url = new URL(this.baseURL);
+    url.pathname = `api/v2/users/discord_id/${discord_id}/results/all-time`;
+
+    return this.client
+      .get<API_V2.Endpoints.Users.GET_ByDiscordId_results_all_time.Response>(
+        url.toString(),
+      )
+      .then((res) => res.data.data)
+      .catch((err) => {
+        throw handleError(err);
       });
   }
 
