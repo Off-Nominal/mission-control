@@ -1,9 +1,8 @@
 import { APIEmbedAuthor, Client, GuildMember } from "discord.js";
-import { PredictionLifeCycle } from "../../../../../../providers/ndb2-client";
 import * as NDB2API from "@offnominal/ndb2-api-types/v2";
 
 export const getPredictedPrefix = (
-  status: NDB2API.Entities.Predictions.PredictionLifeCycle
+  status: NDB2API.Entities.Predictions.PredictionLifeCycle,
 ): string => {
   if (status === "retired") {
     return `had predicted that...`;
@@ -28,29 +27,28 @@ const thumbnails: Record<
   NDB2API.Entities.Predictions.PredictionLifeCycle,
   string
 > = {
-  [PredictionLifeCycle.OPEN]:
-    "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134394/Discord%20Assets/4236484_aggyej.png",
-  [PredictionLifeCycle.CHECKING]:
+  open: "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134394/Discord%20Assets/4236484_aggyej.png",
+  checking:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1726341718/Discord%20Assets/kijdba830md4le7gs77b.png",
-  [PredictionLifeCycle.RETIRED]:
+  retired:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679241808/Discord%20Assets/5267928_bsb9z6.png",
-  [PredictionLifeCycle.CLOSED]:
+  closed:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679692889/Discord%20Assets/3468568_cqtnle.png",
-  [PredictionLifeCycle.SUCCESSFUL]:
+  successful:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134400/Discord%20Assets/4789514_yqcukf.png",
-  [PredictionLifeCycle.FAILED]:
+  failed:
     "https://res.cloudinary.com/dj5enq03a/image/upload/v1679134579/Discord%20Assets/4789514_czvljj.png",
 };
 
 export const getThumbnail = (
-  status: NDB2API.Entities.Predictions.PredictionLifeCycle
+  status: NDB2API.Entities.Predictions.PredictionLifeCycle,
 ) => {
   return thumbnails[status];
 };
 
 export const getAuthor = (
   client: Client,
-  triggerer?: GuildMember
+  triggerer?: GuildMember,
 ): APIEmbedAuthor | undefined => {
   if (triggerer) {
     return {

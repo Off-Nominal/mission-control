@@ -16,18 +16,18 @@ export const handleSeasonStart = (options: {
 
   logger.addLog(
     LogStatus.INFO,
-    "Event was SEASON START, generating embed notice."
+    "Event was SEASON START, generating embed notice.",
   );
 
   const [embeds, components] = generateInteractionReplyFromTemplate(
     NDB2EmbedTemplate.View.SEASON_START,
     {
       season: options.season,
-    }
+    },
   );
 
   const generalChannel = options.guild.channels.cache.get(
-    mcconfig.discord.channels.general
+    mcconfig.discord.channels.general,
   );
   if (!generalChannel) {
     logger.addLog(LogStatus.FAILURE, "General Channel Not found");
@@ -41,8 +41,8 @@ export const handleSeasonStart = (options: {
       logger.addLog(
         LogStatus.SUCCESS,
         `Season Start Notice sent successfully to ${channelMention(
-          generalChannel.id
-        )}`
+          generalChannel.id,
+        )}`,
       );
       logger.sendLog(options.client);
     })

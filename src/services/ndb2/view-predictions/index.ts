@@ -2,7 +2,6 @@ import { MessageFlags } from "discord.js";
 import { LogInitiator, LogStatus, Logger } from "../../../logger/Logger";
 import { Providers } from "../../../providers";
 import type { Endpoints } from "@offnominal/ndb2-api-types/v2";
-import { PredictionLifeCycle } from "../../../providers/ndb2-client";
 import { generateInteractionReplyFromTemplate } from "../actions/embedGenerators/templates";
 import { NDB2EmbedTemplate } from "../actions/embedGenerators/templates/helpers/types";
 
@@ -24,7 +23,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
     const logger = new Logger(
       "NDB2 Interaction",
       LogInitiator.NDB2,
-      `List Predictions: ${listType}`
+      `List Predictions: ${listType}`,
     );
 
     if (
@@ -35,7 +34,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
     ) {
       logger.addLog(
         LogStatus.FAILURE,
-        `Invalid interaction option: Type: ${listType}`
+        `Invalid interaction option: Type: ${listType}`,
       );
       interaction.reply({
         content:
@@ -48,35 +47,23 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
 
     if (listType === "recent") {
       searchOptions.sort_by = "created_date-desc";
-      searchOptions.status = [
-        PredictionLifeCycle.OPEN,
-        PredictionLifeCycle.CHECKING,
-      ];
+      searchOptions.status = ["open", "checking"];
     }
 
     if (listType === "upcoming") {
       searchOptions.sort_by = "check_date-asc";
-      searchOptions.status = [
-        PredictionLifeCycle.OPEN,
-        PredictionLifeCycle.CHECKING,
-      ];
+      searchOptions.status = ["open", "checking"];
     }
 
     if (listType === "upcoming-mine") {
       searchOptions.sort_by = "check_date-asc";
-      searchOptions.status = [
-        PredictionLifeCycle.OPEN,
-        PredictionLifeCycle.CHECKING,
-      ];
+      searchOptions.status = ["open", "checking"];
       searchOptions.creator = interaction.user.id;
     }
 
     if (listType === "upcoming-no-bet") {
       searchOptions.sort_by = "check_date-asc";
-      searchOptions.status = [
-        PredictionLifeCycle.OPEN,
-        PredictionLifeCycle.CHECKING,
-      ];
+      searchOptions.status = ["open", "checking"];
       searchOptions.unbetter = interaction.user.id;
     }
 
@@ -84,7 +71,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
       const response = await ndb2Client.searchPredictions(searchOptions);
       logger.addLog(
         LogStatus.SUCCESS,
-        "Successfully fetched predictions from API."
+        "Successfully fetched predictions from API.",
       );
 
       const predictions = response;
@@ -94,7 +81,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
         {
           type: listType,
           predictions,
-        }
+        },
       );
 
       await interaction.reply({
@@ -104,7 +91,7 @@ export default function ViewPredictions({ ndb2Client, ndb2Bot }: Providers) {
       });
       logger.addLog(
         LogStatus.SUCCESS,
-        "Successfully posted prediction list embed to Discord"
+        "Successfully posted prediction list embed to Discord",
       );
     } catch (err) {
       logger.addLog(LogStatus.FAILURE, "Failed to fetch predictions from API");

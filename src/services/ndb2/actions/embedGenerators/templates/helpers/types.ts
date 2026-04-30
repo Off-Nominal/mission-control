@@ -25,9 +25,7 @@ export namespace NDB2EmbedTemplate {
 
   export namespace Args {
     export type Standard = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       displayName?: string;
       avatarUrl?: string;
       context?: Context;
@@ -40,9 +38,7 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type Trigger = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       predictor?: GuildMember;
       client: Client;
       triggerer?: GuildMember;
@@ -50,17 +46,13 @@ export namespace NDB2EmbedTemplate {
     };
 
     export type SnoozeCheck = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       client: Client;
       context?: Context;
     };
 
     export type Judgement = {
-      prediction:
-        | NDB2API_V1.EnhancedPrediction
-        | NDB2API.Entities.Predictions.Prediction;
+      prediction: NDB2API.Entities.Predictions.Prediction;
       client: Client;
       context?: Context;
     };

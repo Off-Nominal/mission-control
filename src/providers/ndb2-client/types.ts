@@ -1,28 +1,4 @@
-export enum PredictionLifeCycle {
-  OPEN = "open",
-  CHECKING = "checking",
-  RETIRED = "retired",
-  CLOSED = "closed",
-  SUCCESSFUL = "successful",
-  FAILED = "failed",
-}
-
-export enum ErrorCode {
-  SERVER_ERROR = 0,
-  AUTHENTICATION_ERROR = 1,
-  BAD_REQUEST = 2,
-  MALFORMED_BODY_DATA = 3,
-  MALFORMED_QUERY_PARAMS = 4,
-}
-
 export namespace NDB2API {
-  export type GeneralResponse<T = null> = {
-    success: boolean;
-    errorCode?: ErrorCode;
-    message: string | null;
-    data: T;
-  };
-
   export type EnhancedPredictionBet = {
     id: number;
     endorsed: boolean;
@@ -49,64 +25,6 @@ export namespace NDB2API {
 
   export type PredictionDriver = "event" | "date";
 
-  export type EnhancedPrediction = {
-    id: number;
-    predictor: {
-      id: string;
-      discord_id: string;
-    };
-    text: string;
-    driver: PredictionDriver;
-    season_id: number;
-    season_applicable: boolean;
-    created_date: string;
-    due_date: string | null;
-    check_date: string | null;
-    last_check_date: string | null;
-    closed_date: string | null;
-    triggered_date: string | null;
-    triggerer: {
-      id: string;
-      discord_id: string;
-    } | null;
-    judged_date: string | null;
-    retired_date: string | null;
-    status: PredictionLifeCycle;
-    bets: EnhancedPredictionBet[];
-    votes: EnhancedPredictionVote[];
-    checks: Omit<EnhancedSnoozeCheck, "prediction_id">[];
-    payouts: {
-      endorse: number;
-      undorse: number;
-    };
-  };
-
-  export interface Leader {
-    id: string;
-    discord_id: string;
-    rank: number;
-  }
-
-  export interface PointsLeader extends Leader {
-    points: number;
-  }
-
-  export interface BetsLeader extends Leader {
-    bets: {
-      successful: number;
-      unsuccessful: number;
-      total: number;
-    };
-  }
-
-  export interface PredictionsLeader extends Leader {
-    predictions: {
-      successful: number;
-      unsuccessful: number;
-      total: number;
-    };
-  }
-
   export type Season = {
     id: number;
     name: string;
@@ -115,20 +33,6 @@ export namespace NDB2API {
     wager_cap: number;
     closed: boolean;
   };
-
-  export type TriggerPrediction = GeneralResponse<EnhancedPrediction>;
-
-  export type LeaderboardType = "points" | "predictions" | "bets";
-
-  type GetLeaderboard<T> = GeneralResponse<{
-    type: LeaderboardType;
-    season?: Season;
-    leaders: T[];
-  }>;
-
-  export type GetPointsLeaderboard = GetLeaderboard<PointsLeader>;
-  export type GetBetsLeaderboard = GetLeaderboard<BetsLeader>;
-  export type GetPredictionsLeaderboard = GetLeaderboard<PredictionsLeader>;
 
   export type SeasonResults = {
     season: {
@@ -168,25 +72,5 @@ export namespace NDB2API {
         discord_id: string;
       };
     };
-  };
-
-  export type SnoozeCheckResults = {
-    day: number;
-    week: number;
-    month: number;
-    quarter: number;
-    year: number;
-  };
-
-  export type SnoozeCheck = {
-    id: number;
-    prediction_id: number;
-    check_date: string;
-    closed: boolean;
-    closed_at: string | null;
-  };
-
-  export type EnhancedSnoozeCheck = SnoozeCheck & {
-    values: SnoozeCheckResults;
   };
 }

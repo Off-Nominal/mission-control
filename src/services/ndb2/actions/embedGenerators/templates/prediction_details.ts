@@ -9,10 +9,7 @@ import {
 } from "discord.js";
 import embedFields from "./helpers/fields";
 import { getPredictedPrefix } from "./helpers/helpers";
-import {
-  NDB2API,
-  PredictionLifeCycle,
-} from "../../../../../providers/ndb2-client";
+import { NDB2API } from "../../../../../providers/ndb2-client";
 import { getWebButton } from "./helpers/buttons";
 import { NDB2EmbedTemplate } from "./helpers/types";
 
@@ -21,13 +18,13 @@ const driver = (driver: NDB2API.PredictionDriver) => {
 };
 
 export const generatePredictionDetailsEmbed = (
-  props: NDB2EmbedTemplate.Args.Details
+  props: NDB2EmbedTemplate.Args.Details,
 ): BaseMessageOptions["embeds"] => {
   const endorsements = props.prediction.bets.filter(
-    (bet) => bet.endorsed && bet.valid
+    (bet) => bet.endorsed && bet.valid,
   );
   const undorsements = props.prediction.bets.filter(
-    (bet) => !bet.endorsed && bet.valid
+    (bet) => !bet.endorsed && bet.valid,
   );
   const invalidBets = props.prediction.bets.filter((bet) => !bet.valid);
 
@@ -51,14 +48,14 @@ export const generatePredictionDetailsEmbed = (
   const fields: APIEmbedField[] = [];
 
   if (
-    props.prediction.status === PredictionLifeCycle.OPEN ||
-    props.prediction.status === PredictionLifeCycle.CHECKING
+    props.prediction.status === "open" ||
+    props.prediction.status === "checking"
   ) {
     fields.push(
       embedFields.riskAssessment(
         props.prediction.bets.length,
-        props.prediction.payouts.endorse
-      )
+        props.prediction.payouts.endorse,
+      ),
     );
     fields.push(embedFields.longOdds(props.prediction.payouts));
     embedFields
@@ -70,7 +67,7 @@ export const generatePredictionDetailsEmbed = (
     fields.push(embedFields.accuracyDisclaimer());
   }
 
-  if (props.prediction.status === PredictionLifeCycle.CLOSED) {
+  if (props.prediction.status === "closed") {
     embedFields
       .longBets(endorsements, "endorsements")
       .forEach((bf) => fields.push(bf));
@@ -86,7 +83,7 @@ export const generatePredictionDetailsEmbed = (
     fields.push(embedFields.accuracyDisclaimer());
   }
 
-  if (props.prediction.status === PredictionLifeCycle.RETIRED) {
+  if (props.prediction.status === "retired") {
     embedFields
       .longBets(endorsements, "endorsements")
       .forEach((bf) => fields.push(bf));
@@ -96,29 +93,29 @@ export const generatePredictionDetailsEmbed = (
   }
 
   if (
-    props.prediction.status === PredictionLifeCycle.SUCCESSFUL ||
-    props.prediction.status === PredictionLifeCycle.FAILED
+    props.prediction.status === "successful" ||
+    props.prediction.status === "failed"
   ) {
     fields.push(
       embedFields.season(
         props.prediction.season_id,
-        props.prediction.season_applicable
-      )
+        props.prediction.season_applicable,
+      ),
     );
 
     fields.push(
       embedFields.payoutsText(
         props.prediction.status,
         props.prediction.payouts,
-        props.season
-      )
+        props.season,
+      ),
     );
     embedFields
       .longPayouts(
         props.prediction.status,
         "endorsements",
         endorsements,
-        props.season
+        props.season,
       )
       .forEach((ef) => fields.push(ef));
     embedFields
@@ -126,7 +123,7 @@ export const generatePredictionDetailsEmbed = (
         props.prediction.status,
         "undorsements",
         undorsements,
-        props.season
+        props.season,
       )
       .forEach((ef) => fields.push(ef));
     embedFields
@@ -134,7 +131,7 @@ export const generatePredictionDetailsEmbed = (
         props.prediction.status,
         "invalid",
         invalidBets,
-        props.season
+        props.season,
       )
       .forEach((ef) => fields.push(ef));
 
@@ -148,7 +145,7 @@ export const generatePredictionDetailsEmbed = (
 };
 
 export const generatePredictionDetailsComponents = (
-  predictionId: string | number
+  predictionId: string | number,
 ) => {
   const actionRow = new ActionRowBuilder<ButtonBuilder>();
   actionRow.addComponents(getWebButton(predictionId));

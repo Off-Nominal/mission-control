@@ -5,10 +5,8 @@ import {
   TimestampStyles,
   userMention,
 } from "discord.js";
-import ndb2Client, {
-  NDB2API,
-  PredictionLifeCycle,
-} from "../../../../../../providers/ndb2-client";
+import ndb2Client, { NDB2API } from "../../../../../../providers/ndb2-client";
+import * as API_V2 from "@offnominal/ndb2-api-types/v2";
 
 const USER_LIST_LIMIT = 30;
 
@@ -19,13 +17,13 @@ const embedFields = {
     options: {
       context?: { channelId: string; messageId: string };
       showTime?: boolean;
-    } = {}
+    } = {},
   ) => {
     const baseMessage = `🗓️ ${time(
       date,
       options.showTime
         ? TimestampStyles.ShortDateTime
-        : TimestampStyles.LongDate
+        : TimestampStyles.LongDate,
     )} (${time(date, TimestampStyles.RelativeTime)})`;
 
     let value = baseMessage;
@@ -35,7 +33,7 @@ const embedFields = {
         baseMessage +
         ` (context: ${messageLink(
           options.context.channelId,
-          options.context.messageId
+          options.context.messageId,
         )})`;
     }
 
@@ -49,7 +47,7 @@ const embedFields = {
       name: title,
       value: `🗓️ ${time(date, TimestampStyles.LongDate)} (${time(
         date,
-        TimestampStyles.RelativeTime
+        TimestampStyles.RelativeTime,
       )}) by ${userMention(triggerer_id)}`,
     };
   },
@@ -57,22 +55,22 @@ const embedFields = {
     return {
       name: "Wager Cap",
       value: `This season's wager cap is ${bold(
-        wagerCap.toString() + " points"
+        wagerCap.toString() + " points",
       )}. This is the most amount of points that can be wagered for purposes of season-based scoring (all-time scoring is unaffected). Wagers are then modified by their respective endorsement and undorsement multipliers.`,
     };
   },
   shortBets: (
     eCount: number,
     uCount: number,
-    payouts: { endorse: number; undorse: number }
+    payouts: { endorse: number; undorse: number },
   ) => {
     return {
       name: "Bets (Odds)",
       value: `
       ✅ ${eCount} (${payouts.endorse.toFixed(
-        2
+        2,
       )}) \u200B \u200B \u200B \u200B ❌ ${uCount} (${payouts.undorse.toFixed(
-        2
+        2,
       )})`,
     };
   },
@@ -101,7 +99,7 @@ const embedFields = {
     for (let i = 0; i < fieldCount; i++) {
       const voteSlice = values.slice(
         i * USER_LIST_LIMIT,
-        i * USER_LIST_LIMIT + USER_LIST_LIMIT
+        i * USER_LIST_LIMIT + USER_LIST_LIMIT,
       );
 
       voteFields.push({
@@ -117,11 +115,10 @@ const embedFields = {
   payoutsText: (
     status: "successful" | "failed",
     payouts: { endorse: number; undorse: number },
-    season: boolean
+    season: boolean,
   ) => {
-    const endorseVerb =
-      status === PredictionLifeCycle.SUCCESSFUL ? "earn" : "lose";
-    const undorseVerb = status === PredictionLifeCycle.FAILED ? "earn" : "lose";
+    const endorseVerb = status === "successful" ? "earn" : "lose";
+    const undorseVerb = status === "failed" ? "earn" : "lose";
 
     return {
       name: "Payouts",
@@ -138,7 +135,7 @@ const embedFields = {
     status: "successful" | "failed",
     type: "endorsements" | "undorsements" | "invalid",
     bets: NDB2API.EnhancedPredictionBet[],
-    season: boolean
+    season: boolean,
   ) => {
     let payouts: string[];
     let listType: "invalid" | "payouts" | "penalties";
@@ -151,8 +148,8 @@ const embedFields = {
       listType = "invalid";
       title = "🚫 Invalid Bets";
     } else if (
-      (type === "endorsements" && status === PredictionLifeCycle.SUCCESSFUL) ||
-      (type === "undorsements" && status === PredictionLifeCycle.FAILED)
+      (type === "endorsements" && status === "successful") ||
+      (type === "undorsements" && status === "failed")
     ) {
       listType = "payouts";
       sign = "+";
@@ -171,7 +168,7 @@ const embedFields = {
       }
 
       return `(${sign}${payout.toString()}) `.concat(
-        userMention(b.better.discord_id)
+        userMention(b.better.discord_id),
       );
     });
 
@@ -182,7 +179,7 @@ const embedFields = {
     for (let i = 0; i < fieldCount; i++) {
       const payoutsSlice = payouts.slice(
         i * USER_LIST_LIMIT,
-        i * USER_LIST_LIMIT + USER_LIST_LIMIT
+        i * USER_LIST_LIMIT + USER_LIST_LIMIT,
       );
 
       const note =
@@ -200,10 +197,10 @@ const embedFields = {
 
     return payoutFields;
   },
-  shortStatus: (status: PredictionLifeCycle) => {
+  shortStatus: (status: API_V2.Entities.Predictions.PredictionLifeCycle) => {
     let pStatus: string;
 
-    if (status === PredictionLifeCycle.CLOSED) {
+    if (status === "closed") {
       pStatus = "VOTING";
     } else {
       pStatus = status.toUpperCase();
@@ -241,7 +238,7 @@ const embedFields = {
   },
   longBets: (
     bets: NDB2API.EnhancedPredictionBet[],
-    type: "undorsements" | "endorsements" | "invalid"
+    type: "undorsements" | "endorsements" | "invalid",
   ) => {
     const betUserListLimit = USER_LIST_LIMIT / 3;
 
@@ -250,7 +247,7 @@ const embedFields = {
         type === "invalid" ? "" : ` (${e.wager} points wagered)`;
       return `${userMention(e.better.discord_id)} ${time(
         new Date(e.date),
-        TimestampStyles.LongDate
+        TimestampStyles.LongDate,
       )}${wagerNote}`;
     });
 
@@ -271,7 +268,7 @@ const embedFields = {
     for (let i = 0; i < fieldCount; i++) {
       const betSlice = values.slice(
         i * betUserListLimit,
-        i * betUserListLimit + betUserListLimit
+        i * betUserListLimit + betUserListLimit,
       );
 
       const note =
@@ -308,7 +305,7 @@ const embedFields = {
 
     let value = `${season.name} (${time(
       new Date(season.start),
-      TimestampStyles.ShortDate
+      TimestampStyles.ShortDate,
     )} - ${time(new Date(season.end), TimestampStyles.ShortDate)})`;
 
     if (!applicable) {
@@ -332,14 +329,14 @@ const embedFields = {
 
     const oldDateMessage = `🗓️ ${time(
       oldDate,
-      TimestampStyles.LongDate
+      TimestampStyles.LongDate,
     )} (${time(oldDate, TimestampStyles.RelativeTime)}) - Original`;
 
     const newDate = new Date(fields.check_date.new);
 
     const newDateMessage = `🗓️ ${time(
       newDate,
-      TimestampStyles.LongDate
+      TimestampStyles.LongDate,
     )} (${time(newDate, TimestampStyles.RelativeTime)}) - Edited`;
 
     return {
@@ -349,7 +346,7 @@ const embedFields = {
   },
   standardFooter: (
     predictionId: string | number,
-    driver: NDB2API.PredictionDriver
+    driver: NDB2API.PredictionDriver,
   ) => {
     const driverText = driver === "event" ? "Event-driven" : "Date-driven";
     return {
