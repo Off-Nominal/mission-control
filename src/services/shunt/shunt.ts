@@ -176,8 +176,8 @@ export default async function shunt(
       embeds: [
         generateEmbed({
           url: destinationMessage.url,
-          sourceChannelName: targetChannel.name,
-          targetChannelName: sourceChannel.name,
+          sourceChannelName: sourceChannel.name,
+          targetChannelName: targetChannel.name,
           shunterName,
           topic,
           direction: "outbound",
