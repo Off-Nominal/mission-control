@@ -21,6 +21,7 @@ export const generateTriggerNoticeEmbed = (
 ): BaseMessageOptions["embeds"] => {
   const created = new Date(props.prediction.created_date);
   const due = new Date(props.prediction.due_date || 0);
+  const check = new Date(props.prediction.check_date || 0);
   const triggered = new Date(props.prediction.triggered_date || 0);
   const closed = new Date(props.prediction.closed_date || 0);
 
@@ -63,7 +64,13 @@ export const generateTriggerNoticeEmbed = (
     embedFields.date(created, "Created", { context: props.context }),
   ];
 
-  props.triggerer && fields.push(embedFields.date(due, "Original Due Date"));
+  if (props.triggerer) {
+    if (props.prediction.driver === "date") {
+      fields.push(embedFields.date(due, "Original Due Date"));
+    } else {
+      fields.push(embedFields.date(check, "Original Check Date"));
+    }
+  }
 
   fields.push(embedFields.date(triggered, "Triggered Date"));
   fields.push(embedFields.date(closed, "Effective Close Date"));
