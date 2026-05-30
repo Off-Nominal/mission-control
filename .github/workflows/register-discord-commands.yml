@@ -1,0 +1,50 @@
+name: Register Discord Commands
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/commands/content/**"
+      - "src/commands/events/**"
+      - "src/commands/main/**"
+      - "src/commands/ndb2/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: register-discord-commands
+  cancel-in-progress: false
+
+jobs:
+  register:
+    name: Register Discord commands
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Register commands
+        run: npm run commands:register
+        env:
+          DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID }}
+          DISCORD_CLIENT_APP_ID_HELPER_BOT: ${{ secrets.DISCORD_CLIENT_APP_ID_HELPER_BOT }}
+          DISCORD_CLIENT_TOKEN_ID_HELPER_BOT: ${{ secrets.DISCORD_CLIENT_TOKEN_ID_HELPER_BOT }}
+          DISCORD_CLIENT_APP_ID_CONTENT_BOT: ${{ secrets.DISCORD_CLIENT_APP_ID_CONTENT_BOT }}
+          DISCORD_CLIENT_TOKEN_ID_CONTENT_BOT: ${{ secrets.DISCORD_CLIENT_TOKEN_ID_CONTENT_BOT }}
+          DISCORD_CLIENT_APP_ID_EVENT_BOT: ${{ secrets.DISCORD_CLIENT_APP_ID_EVENT_BOT }}
+          DISCORD_CLIENT_TOKEN_ID_EVENT_BOT: ${{ secrets.DISCORD_CLIENT_TOKEN_ID_EVENT_BOT }}
+          DISCORD_CLIENT_APP_ID_NDB2_BOT: ${{ secrets.DISCORD_CLIENT_APP_ID_NDB2_BOT }}
+          DISCORD_CLIENT_TOKEN_ID_NDB2_BOT: ${{ secrets.DISCORD_CLIENT_TOKEN_ID_NDB2_BOT }}

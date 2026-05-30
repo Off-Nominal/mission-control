@@ -45,4 +45,7 @@ Promise.all([
   .then(() => {
     console.log("Successfully registered application commands.");
   })
-  .catch(console.error);
+  .catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
