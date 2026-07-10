@@ -3,6 +3,7 @@ import mcconfig from "../../mcconfig";
 import bootLogger from "../../logger";
 import fetchGuild from "../../helpers/fetchGuild";
 import { LogStatus } from "../../logger/Logger";
+import { connectDiscordClientInBackground } from "../../helpers/discord-client-connect";
 
 export enum HelperBotEvents {
   SUMMARY_CREATE = "summaryReportCreate",
@@ -39,6 +40,6 @@ helperBot.once("clientReady", () => {
   bootLogger.logItemSuccess("helperBot");
 });
 
-helperBot.login(mcconfig.discord.clients.helper.token);
+connectDiscordClientInBackground(helperBot, mcconfig.discord.clients.helper.token, "helper");
 
 export default helperBot;

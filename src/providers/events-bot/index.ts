@@ -2,6 +2,7 @@ import { Client } from "discord.js";
 import mcconfig from "../../mcconfig";
 import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
+import { connectDiscordClientInBackground } from "../../helpers/discord-client-connect";
 
 const eventsBot = new Client({
   intents: [mcconfig.discord.clients.events.intents],
@@ -14,6 +15,6 @@ eventsBot.once("clientReady", () => {
   bootLogger.logItemSuccess("eventsBot");
 });
 
-eventsBot.login(mcconfig.discord.clients.events.token);
+connectDiscordClientInBackground(eventsBot, mcconfig.discord.clients.events.token, "events");
 
 export default eventsBot;
