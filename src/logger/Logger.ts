@@ -64,6 +64,10 @@ export class Logger {
   }
 
   public async sendLog(client: Client) {
+    if (!client.isReady()) {
+      return;
+    }
+
     const embed = this.generateEmbed();
 
     try {

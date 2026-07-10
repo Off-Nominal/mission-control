@@ -10,7 +10,17 @@ export default function LaunchEvents({
   mcconfig,
 }: Providers) {
   const sync = (eventType: "new" | "change" | "ready") => {
-    syncEvents(rllWatcher.launches, eventsBot, eventType);
+    const run = () => {
+      void syncEvents(rllWatcher.launches, eventsBot, eventType).catch((err) => {
+        console.error(`[LaunchEvents] Sync failed (${eventType}):`, err);
+      });
+    };
+
+    if (eventsBot.isReady()) {
+      run();
+    } else {
+      eventsBot.once("clientReady", run);
+    }
   };
 
   rllWatcher.on("ready", () => sync("ready"));

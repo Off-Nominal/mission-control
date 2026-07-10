@@ -80,7 +80,7 @@ export async function syncEvents(
   } catch (err) {
     logger.addLog(LogStatus.FAILURE, "Could not fetch Guild.");
     logger.sendLog(eventsBot);
-    return Promise.reject("Guild not found");
+    return;
   }
 
   const eventsManager = guild.scheduledEvents;
@@ -100,7 +100,7 @@ export async function syncEvents(
   } catch (err) {
     logger.addLog(LogStatus.FAILURE, "Could not fetch Events.");
     logger.sendLog(eventsBot);
-    return Promise.reject();
+    return;
   }
 
   const counts = {
