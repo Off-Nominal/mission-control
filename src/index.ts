@@ -15,7 +15,6 @@ import SendHelp from "./services/send-help";
 import PostNews from "./services/post-news";
 import AddModsToThread from "./services/add-mods-to-thread";
 import NDB2 from "./services/ndb2";
-import DeployWeMartiansSite from "./services/deploy-wemartians-site";
 import ThreadDigest from "./services/thread-digest";
 import ContentSearch from "./services/content-search";
 import ContentPost from "./services/content-post";
@@ -42,7 +41,6 @@ const services = [
   ContentPost,
   ContentSearch,
   DBTest,
-  DeployWeMartiansSite,
   EventNotifications,
   JoinDiscordThread,
   LaunchEvents,

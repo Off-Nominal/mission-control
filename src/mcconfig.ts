@@ -130,9 +130,6 @@ const mcconfig = {
     clientId: process.env.NDB2_CLIENT_ID,
     baseUrl: process.env.NDB2_API_BASEURL,
   },
-  wemartians: {
-    deployUrl: process.env.WM_DEPLOY_URL,
-  },
 };
 
 export default mcconfig;
