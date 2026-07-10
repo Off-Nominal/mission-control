@@ -1,16 +1,29 @@
 import { Status, type Client } from "discord.js";
 import {
+  type DiscordBotLabel,
+  getDiscordBootStatus,
+  registerDiscordBootClient,
+  setDiscordBotStatus,
+} from "./discord-boot-status";
+import {
   discordSessionRateLimitDelayMs,
   isDiscordSessionRateLimitError,
 } from "./discord-session-rate-limit";
+
+export { getDiscordBootStatus } from "./discord-boot-status";
+export type {
+  DiscordBotLabel,
+  DiscordBotStatus,
+} from "./discord-boot-status";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 const stopConnect = new WeakMap<Client, boolean>();
-const connectLoopRunning = new WeakMap<Client, boolean>();
-const hasConnected = new WeakMap<Client, boolean>();
+
+const SESSION_RESET_AT_RE =
+  /resets at (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/i;
 
 function isDiscordClientConnecting(client: Client): boolean {
   const status = client.ws.status;
@@ -47,70 +60,112 @@ function waitForClientReady(
   });
 }
 
-export function connectDiscordClientInBackground(
+export type DiscordBotConnectConfig = {
+  client: Client;
+  token: string;
+  label: DiscordBotLabel;
+};
+
+export async function connectDiscordClient(
   client: Client,
   token: string,
-  label: string,
-): void {
-  if (client.isReady() || connectLoopRunning.get(client) || hasConnected.get(client)) {
+  label: DiscordBotLabel,
+): Promise<void> {
+  registerDiscordBootClient(label, client);
+  stopConnect.set(client, false);
+
+  if (client.isReady()) {
+    setDiscordBotStatus(label, { status: "connected" });
+    console.log(`[Discord/${label}] Gateway already connected`);
     return;
   }
 
-  connectLoopRunning.set(client, true);
-  stopConnect.set(client, false);
+  let attempt = 0;
 
-  void (async () => {
-    let attempt = 0;
+  while (!client.isReady() && !stopConnect.get(client)) {
+    attempt += 1;
 
     try {
-      while (!client.isReady() && !stopConnect.get(client)) {
-        if (hasConnected.get(client)) {
-          return;
-        }
-
-        attempt += 1;
-
-        try {
-          if (attempt === 1) {
-            console.log(`[Discord/${label}] Connecting in background…`);
-          } else {
-            console.log(
-              `[Discord/${label}] Retrying gateway connection (attempt ${attempt})…`,
-            );
-          }
-
-          if (isDiscordClientConnecting(client)) {
-            await waitForClientReady(client);
-            continue;
-          }
-
-          await client.login(token);
-          await waitForClientReady(client);
-          hasConnected.set(client, true);
-          console.log(`[Discord/${label}] Gateway connected`);
-          return;
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          const rateLimitDelayMs = discordSessionRateLimitDelayMs(err);
-          const delayMs =
-            rateLimitDelayMs ??
-            Math.min(1_000 * 2 ** Math.min(attempt, 5), 30_000);
-
-          if (isDiscordSessionRateLimitError(err)) {
-            console.error(
-              `[Discord/${label}] Session rate limited; retrying in ${Math.ceil(delayMs / 1000)}s: ${message}`,
-            );
-          } else {
-            console.error(`[Discord/${label}] Login failed: ${message}`);
-          }
-
-          await sleep(delayMs);
-        }
+      if (attempt === 1) {
+        console.log(`[Discord/${label}] Connecting…`);
+      } else {
+        console.log(
+          `[Discord/${label}] Retrying gateway connection (attempt ${attempt})…`,
+        );
       }
-    } finally {
-      connectLoopRunning.set(client, false);
+
+      setDiscordBotStatus(label, { status: "connecting" });
+
+      if (isDiscordClientConnecting(client)) {
+        await waitForClientReady(client);
+        continue;
+      }
+
+      await client.login(token);
+      await waitForClientReady(client);
+      setDiscordBotStatus(label, { status: "connected" });
+      console.log(`[Discord/${label}] Gateway connected`);
+      return;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const rateLimitDelayMs = discordSessionRateLimitDelayMs(err);
+      const delayMs =
+        rateLimitDelayMs ??
+        Math.min(1_000 * 2 ** Math.min(attempt, 5), 30_000);
+
+      if (isDiscordSessionRateLimitError(err)) {
+        const retryAt =
+          err instanceof Error
+            ? err.message.match(SESSION_RESET_AT_RE)?.[1]
+            : undefined;
+
+        setDiscordBotStatus(label, {
+          status: "rate_limited",
+          message,
+          retryAt,
+          retryInSec: Math.ceil(delayMs / 1_000),
+        });
+
+        console.error(
+          `[Discord/${label}] SESSION RATE LIMITED — /health returns 503 (Coolify can alert)`,
+        );
+        console.error(
+          `[Discord/${label}] Retrying in ${Math.ceil(delayMs / 1_000)}s: ${message}`,
+        );
+      } else {
+        setDiscordBotStatus(label, {
+          status: "failed",
+          message,
+          retryInSec: Math.ceil(delayMs / 1_000),
+        });
+        console.error(
+          `[Discord/${label}] Login failed; retrying in ${Math.ceil(delayMs / 1_000)}s: ${message}`,
+        );
+      }
+
+      await sleep(delayMs);
     }
-  })();
+  }
+
+  if (stopConnect.get(client)) {
+    throw new Error(`[Discord/${label}] Gateway connect stopped`);
+  }
+}
+
+export async function connectAllDiscordBots(
+  configs: DiscordBotConnectConfig[],
+): Promise<void> {
+  console.log(
+    "[Boot] Waiting for all Discord gateway clients (required dependency)…",
+  );
+
+  await Promise.all(
+    configs.map(({ client, token, label }) =>
+      connectDiscordClient(client, token, label),
+    ),
+  );
+
+  console.log("[Boot] All Discord gateway clients connected");
 }
 
 export function stopDiscordClientConnect(client: Client): void {
