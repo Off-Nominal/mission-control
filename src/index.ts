@@ -3,10 +3,13 @@ import mcconfig from "./mcconfig";
 // Boot Logger
 import bootLogger from "./logger";
 import { LogStatus } from "./logger/Logger";
-bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
 
 // Providers
 import { providers } from "./providers";
+
+// Discord boot
+import { connectAllDiscordBots } from "./helpers/discord-client-connect";
+import { initDiscordBootStatus } from "./helpers/discord-boot-status";
 
 // Services
 import SetDiscordClientPresence from "./services/set-discord-client-presence";
@@ -59,19 +62,58 @@ const services = [
   CreateEventFromThread,
 ];
 
-services.forEach((service) => service(providers));
+function listenApi(): Promise<void> {
+  return new Promise((resolve) => {
+    providers.api.listen(mcconfig.api.port, () => {
+      bootLogger.addLog(
+        LogStatus.SUCCESS,
+        "Express Server booted and listening.",
+      );
+      bootLogger.logItemSuccess("api");
+      console.log(
+        "[Boot] /health is live — returns 503 until all Discord bots connect",
+      );
+      resolve();
+    });
+  });
+}
 
-/***********************************
- *  API Initialization
- ************************************/
+async function main(): Promise<void> {
+  bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
+  initDiscordBootStatus();
 
-providers.api.listen(mcconfig.api.port, () => {
-  bootLogger.addLog(LogStatus.SUCCESS, "Express Server booted and listening.");
-  bootLogger.logItemSuccess("api");
+  await listenApi();
+
+  await connectAllDiscordBots([
+    {
+      client: providers.ndb2Bot,
+      token: mcconfig.discord.clients.ndb2.token,
+      label: "ndb2",
+    },
+    {
+      client: providers.helperBot,
+      token: mcconfig.discord.clients.helper.token,
+      label: "helper",
+    },
+    {
+      client: providers.contentBot,
+      token: mcconfig.discord.clients.content.token,
+      label: "content",
+    },
+    {
+      client: providers.eventsBot,
+      token: mcconfig.discord.clients.events.token,
+      label: "events",
+    },
+  ]);
+
+  console.log("[Boot] Discord ready — starting services");
+  services.forEach((service) => service(providers));
+
+  bootLogger.checkBoot(providers.helperBot);
+}
+
+main().catch((err) => {
+  console.error("[Boot] Fatal startup error:", err);
+  process.exit(1);
 });
-
-/***********************************
- *  Boot Logger
- ************************************/
-
-bootLogger.checkBoot(providers.helperBot);
