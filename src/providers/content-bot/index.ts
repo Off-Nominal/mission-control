@@ -2,6 +2,7 @@ import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
 import mcconfig from "../../mcconfig";
 import { Client } from "discord.js";
+import { connectDiscordClientInBackground } from "../../helpers/discord-client-connect";
 
 const contentBot = new Client({
   intents: mcconfig.discord.clients.content.intents,
@@ -13,6 +14,6 @@ contentBot.once("clientReady", () => {
   bootLogger.logItemSuccess("contentBot");
 });
 
-contentBot.login(mcconfig.discord.clients.content.token);
+connectDiscordClientInBackground(contentBot, mcconfig.discord.clients.content.token, "content");
 
 export default contentBot;

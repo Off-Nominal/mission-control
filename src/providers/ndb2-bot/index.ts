@@ -2,6 +2,7 @@ import { Client } from "discord.js";
 import mcconfig from "../../mcconfig";
 import bootLogger from "../../logger";
 import { LogStatus } from "../../logger/Logger";
+import { connectDiscordClientInBackground } from "../../helpers/discord-client-connect";
 
 export enum Ndb2Events {
   NEW_PREDICTION = "new_prediction",
@@ -31,6 +32,6 @@ ndb2Bot.once("clientReady", () => {
 // Ndb2 is busy, so we need to increase the max listeners
 ndb2Bot.setMaxListeners(20);
 
-ndb2Bot.login(mcconfig.discord.clients.ndb2.token);
+connectDiscordClientInBackground(ndb2Bot, mcconfig.discord.clients.ndb2.token, "ndb2");
 
 export default ndb2Bot;
