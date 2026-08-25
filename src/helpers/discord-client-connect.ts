@@ -1,7 +1,7 @@
 import { Status, type Client } from "discord.js";
+import mcconfig from "../mcconfig";
 import {
   type DiscordBotLabel,
-  getDiscordBootStatus,
   registerDiscordBootClient,
   setDiscordBotStatus,
 } from "./discord-boot-status";
@@ -10,8 +10,10 @@ import {
   isDiscordSessionRateLimitError,
 } from "./discord-session-rate-limit";
 
-export { getDiscordBootStatus } from "./discord-boot-status";
+export { getAppHealth, getDiscordBootStatus } from "./discord-boot-status";
 export type {
+  AppHealth,
+  AppHealthPhase,
   DiscordBotLabel,
   DiscordBotStatus,
 } from "./discord-boot-status";
@@ -24,6 +26,13 @@ const stopConnect = new WeakMap<Client, boolean>();
 
 const SESSION_RESET_AT_RE =
   /resets at (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/i;
+
+export class DiscordBootFatalError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DiscordBootFatalError";
+  }
+}
 
 function isDiscordClientConnecting(client: Client): boolean {
   const status = client.ws.status;
@@ -80,7 +89,9 @@ export async function connectDiscordClient(
     return;
   }
 
+  const maxLoginAttempts = mcconfig.discord.boot.maxLoginAttempts;
   let attempt = 0;
+  let nonRateLimitFailures = 0;
 
   while (!client.isReady() && !stopConnect.get(client)) {
     attempt += 1;
@@ -127,20 +138,27 @@ export async function connectDiscordClient(
         });
 
         console.error(
-          `[Discord/${label}] SESSION RATE LIMITED — /health returns 503 (Coolify can alert)`,
+          `[Discord/${label}] SESSION RATE LIMITED — staying alive; /health reports alert (no container restart)`,
         );
         console.error(
           `[Discord/${label}] Retrying in ${Math.ceil(delayMs / 1_000)}s: ${message}`,
         );
       } else {
+        nonRateLimitFailures += 1;
         setDiscordBotStatus(label, {
           status: "failed",
           message,
           retryInSec: Math.ceil(delayMs / 1_000),
         });
         console.error(
-          `[Discord/${label}] Login failed; retrying in ${Math.ceil(delayMs / 1_000)}s: ${message}`,
+          `[Discord/${label}] Login failed (${nonRateLimitFailures}/${maxLoginAttempts}); retrying in ${Math.ceil(delayMs / 1_000)}s: ${message}`,
         );
+
+        if (nonRateLimitFailures >= maxLoginAttempts) {
+          throw new DiscordBootFatalError(
+            `[Discord/${label}] Gateway login failed after ${maxLoginAttempts} attempts: ${message}`,
+          );
+        }
       }
 
       await sleep(delayMs);

@@ -1,6 +1,6 @@
 import mcconfig from "../../mcconfig";
 import express from "express";
-import { getDiscordBootStatus } from "../../helpers/discord-client-connect";
+import { getAppHealth } from "../../helpers/discord-client-connect";
 
 const api = express();
 
@@ -11,33 +11,34 @@ if (mcconfig.env !== "production") {
   api.use(morgan("dev"));
 }
 
+function healthBody() {
+  const health = getAppHealth();
+  return {
+    status: health.phase,
+    ready: health.ready,
+    alert: health.alert,
+    bootAgeSec: health.bootAgeSec,
+    reason: health.reason,
+    discord: health.discord,
+  };
+}
+
+// Liveness: always 200 while the process is up so orchestrators do not restart
+// the container during Discord boot or session rate-limit cool-off. Use the
+// `alert` field (or GET /ready) for Coolify/monitoring webhooks.
 api.get("/health", (req, res) => {
-  const discord = getDiscordBootStatus();
+  return res.status(200).json(healthBody());
+});
 
-  const discordPayload = Object.fromEntries(
-    discord.bots.map((bot) => [
-      bot.label,
-      {
-        status: bot.status,
-        ...(bot.retryInSec !== undefined && { retryInSec: bot.retryInSec }),
-        ...(bot.retryAt && { retryAt: bot.retryAt }),
-        ...(bot.message && { message: bot.message }),
-      },
-    ]),
-  );
+// Readiness: 503 until every Discord gateway client is connected.
+api.get("/ready", (req, res) => {
+  const body = healthBody();
 
-  if (discord.allReady) {
-    return res.status(200).json({
-      status: "healthy",
-      discord: discordPayload,
-    });
+  if (body.ready) {
+    return res.status(200).json(body);
   }
 
-  return res.status(503).json({
-    status: "unhealthy",
-    reason: discord.summary,
-    discord: discordPayload,
-  });
+  return res.status(503).json(body);
 });
 
 api.get("*", (req, res) => res.status(404).json("Invalid Resource."));
