@@ -71,7 +71,7 @@ function listenApi(): Promise<void> {
       );
       bootLogger.logItemSuccess("api");
       console.log(
-        "[Boot] /health is live — returns 503 until all Discord bots connect",
+        "[Boot] /health is live (liveness, always 200) — use /ready or health.alert for Discord readiness",
       );
       resolve();
     });
@@ -114,6 +114,9 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
+  if (err instanceof Error && err.name === "DiscordBootFatalError") {
+    console.error("[Boot] Discord gateway login exhausted retries — exiting");
+  }
   console.error("[Boot] Fatal startup error:", err);
   process.exit(1);
 });

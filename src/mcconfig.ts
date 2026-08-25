@@ -9,6 +9,11 @@ const mcconfig = {
     port: process.env.PORT || 8080,
   },
   discord: {
+    boot: {
+      maxLoginAttempts: Number(process.env.DISCORD_BOOT_MAX_LOGIN_ATTEMPTS) || 3,
+      startupAlertAfterSec:
+        Number(process.env.DISCORD_BOOT_STARTUP_ALERT_SEC) || 120,
+    },
     guildId: process.env.DISCORD_GUILD_ID,
     channels: {
       splashdown: process.env.DISCORD_CHANNEL_ID_SPLASHDOWN || "",
