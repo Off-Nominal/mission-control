@@ -11,21 +11,16 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable("member_club_verification", {
-    discord_user_id: {
-      type: "string",
-      primaryKey: true,
-      notNull: true,
-    },
-    last_verified_at: {
-      type: "timestamp",
-      notNull: true,
-    },
-  });
+  return db.runSql(`
+    CREATE TABLE member_club_verification (
+      discord_user_id text PRIMARY KEY NOT NULL,
+      last_verified_at timestamptz NOT NULL
+    )
+  `);
 };
 
 exports.down = function (db) {
-  return db.dropTable("member_club_verification");
+  return db.runSql("DROP TABLE member_club_verification");
 };
 
 exports._meta = {

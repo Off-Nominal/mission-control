@@ -1,58 +1,240 @@
+import {
+  ChannelType,
+  Collection,
+  EmbedBuilder,
+  MessageCreateOptions,
+  Role,
+} from "discord.js";
 import schedule from "node-schedule";
-import { LogInitiator, Logger, LogStatus } from "../../logger/Logger";
+import { LogInitiator, LogStatus, Logger } from "../../logger/Logger";
 import { Providers } from "../../providers";
-import { handleClubMemberUpdate, refreshClubVerifications } from "./refreshClubVerifications";
-import { getClubRoleIds, memberHasClubRole } from "./clubRoles";
+import { verifyClubMembers } from "./verifyClubMembers";
 
 const nightlySchedule = "0 5 * * *";
+let verificationScheduleStarted = false;
 
-export default function CelebrateMembership(providers: Providers) {
-  const { helperBot } = providers;
-  const clubRoleIdSet = () => new Set(getClubRoleIds(providers.mcconfig));
+export default function CelebrateMembership({
+  helperBot,
+  mcconfig,
+  models,
+}: Providers) {
+  const roleLabels = {
+    [mcconfig.discord.roles.anomaly]: "Discord Anomaly",
+    [mcconfig.discord.roles.nfrs]: "Discord Never Fly Ride Share",
+    [mcconfig.discord.roles.meco]: "Main Engine Cut Off Patron",
+    [mcconfig.discord.roles.wemartians]: "WeMartians Patron",
+    [mcconfig.discord.roles.youtube_anomaly]: "YouTube Anomaly",
+  };
 
   helperBot.on("guildMemberUpdate", async (oldMember, newMember) => {
-    const clubRoles = clubRoleIdSet();
-    const inClub = memberHasClubRole(newMember.roles.cache.keys(), clubRoles);
-    const wasInClub = memberHasClubRole(oldMember.roles.cache.keys(), clubRoles);
+    const logger = new Logger(
+      "New Role Add",
+      LogInitiator.DISCORD,
+      "guildMemberUpdate"
+    );
 
-    if (!inClub || wasInClub) {
+    const oldRoles = oldMember.roles.cache;
+    const newRoles = newMember.roles.cache;
+
+    const addedRoles = new Collection<string, Role>();
+
+    for (const [k, v] of newRoles) {
+      if (!oldRoles.has(k)) {
+        addedRoles.set(k, v);
+      }
+    }
+
+    if (addedRoles.size < 1) {
+      logger.addLog(LogStatus.INFO, "No new roles added - command ignored.");
+      try {
+        await logger.sendLog(newMember.client);
+      } catch (err) {
+        console.error(err);
+      }
       return;
     }
 
-    await handleClubMemberUpdate(newMember, providers);
-  });
+    logger.addLog(
+      LogStatus.INFO,
+      `${addedRoles.size} new Roles added for user ${newMember.displayName}`
+    );
 
-  helperBot.on("clientReady", (client) => {
-    refreshClubVerifications(client, providers, {
-      sendWelcomes: false,
-      logToDiscord: false,
-      eventName: "Startup Club Verification Backfill",
-      logTitle: "Club Verification Backfill",
-    }).catch((err) => {
-      console.error("Startup club verification backfill failed", err);
-    });
+    const isNewMember =
+      !oldRoles.find(
+        (_, roleId) =>
+          roleId === mcconfig.discord.roles.premium ||
+          roleId === mcconfig.discord.roles.youtube ||
+          roleId === mcconfig.discord.roles.wemartians ||
+          roleId === mcconfig.discord.roles.meco
+      ) &&
+      newRoles.find(
+        (_, roleId) =>
+          roleId === mcconfig.discord.roles.premium ||
+          roleId === mcconfig.discord.roles.youtube ||
+          roleId === mcconfig.discord.roles.wemartians ||
+          roleId === mcconfig.discord.roles.meco
+      );
 
-    schedule.scheduleJob(nightlySchedule, async () => {
-      try {
-        await refreshClubVerifications(client, providers, {
-          sendWelcomes: false,
-          logToDiscord: true,
-          eventName: "Nightly Club Verification",
-          logTitle: "Club Verification Nightly Job",
-        });
-      } catch (err) {
-        console.error("Nightly club verification failed", err);
-        const logger = new Logger(
-          "Club Verification Nightly Job",
-          LogInitiator.SERVER,
-          "Nightly Club Verification"
+    logger.addLog(
+      LogStatus.INFO,
+      `${newMember.displayName} is ${isNewMember ? "" : "not "}a new member.`
+    );
+
+    const embeds: EmbedBuilder[] = [];
+
+    if (isNewMember) {
+      const embed = new EmbedBuilder();
+
+      embed
+        .setColor("#3e7493")
+        .setTitle(
+          `Welcome to the Off-Nominal Discord, ${newMember.displayName}!`
+        )
+        .setThumbnail(newMember.user.displayAvatarURL())
+        .setDescription(
+          `Thanks for subscribing! Enjoy the flood of welcomes you are about to receive!`
+        )
+        .addFields(
+          { name: "\u200B", value: "We have two core rules:" },
+          {
+            name: "1. Don't be mean",
+            value: "Teasing is ok, discrimination isn't.",
+            inline: true,
+          },
+          {
+            name: "2. There are no dumb questions",
+            value: "This community values learning and debate.",
+            inline: true,
+          },
+          {
+            name: "\u200B",
+            value: `You can learn more about the rules as well as some of the bots available to help you by checking out our Welcome Guide in <#782993058866266132>.`,
+          }
         );
-        logger.addLog(
-          LogStatus.FAILURE,
-          "Nightly club verification threw an unexpected error."
-        );
-        await logger.sendLog(client);
+
+      embeds.push(embed);
+      logger.addLog(LogStatus.SUCCESS, "New member Embed added!");
+    } else {
+      const embed = new EmbedBuilder();
+
+      embed
+        .setThumbnail(newMember.user.displayAvatarURL())
+        .setDescription("Thanks for supporting this community ❤️");
+
+      for (const [k, v] of addedRoles) {
+        if (v.id === mcconfig.discord.roles.anomaly) {
+          embed
+            .setColor("#C0C0C0")
+            .setTitle(
+              `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
+            );
+          embeds.push(embed);
+          logger.addLog(
+            LogStatus.SUCCESS,
+            "New pledge (Discord Anomaly) Embed added!"
+          );
+        }
+        if (v.id === mcconfig.discord.roles.nfrs) {
+          embed
+            .setColor("#FFD700")
+            .setTitle(
+              `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
+            );
+          embeds.push(embed);
+          logger.addLog(
+            LogStatus.SUCCESS,
+            "New pledge (Discord #NeverFlyRideShare) Embed added!"
+          );
+        }
+        if (v.id === mcconfig.discord.roles.meco) {
+          embed
+            .setColor("#66a3c6")
+            .setTitle(
+              `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
+            );
+          embeds.push(embed);
+          logger.addLog(
+            LogStatus.SUCCESS,
+            "New pledge (MECO Patron) Embed added!"
+          );
+        }
+        if (v.id === mcconfig.discord.roles.wemartians) {
+          embed
+            .setColor("#d15d27")
+            .setTitle(
+              `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
+            );
+          embeds.push(embed);
+          logger.addLog(
+            LogStatus.SUCCESS,
+            "New pledge (WeMartians Patron) Embed added!"
+          );
+        }
+        if (v.id === mcconfig.discord.roles.youtube_anomaly) {
+          embed
+            .setColor("#FF0000")
+            .setTitle(
+              `🎉 ${newMember.displayName} has subscribed as a ${roleLabels[k]}!`
+            );
+          embeds.push(embed);
+          logger.addLog(
+            LogStatus.SUCCESS,
+            "New pledge (YouTube Anomaly) Embed added!"
+          );
+        }
       }
-    });
+    }
+
+    try {
+      const channel = await newMember.client.channels.fetch(
+        mcconfig.discord.channels.general
+      );
+      if (channel.type !== ChannelType.GuildText) return;
+
+      const message: MessageCreateOptions = {
+        embeds,
+      };
+
+      if (isNewMember) {
+        message.content = `Attention <@${newMember.user.id}>!`;
+      }
+
+      await channel.send(message);
+      logger.addLog(LogStatus.SUCCESS, "New Role Update Complete!");
+    } catch (err) {
+      console.error(err);
+    }
+    logger.sendLog(newMember.client);
   });
+
+  // Services are registered after the gateway is already ready, so clientReady
+  // has already fired and will not run this boot scan.
+  const startVerification = () => {
+    if (verificationScheduleStarted || !helperBot.isReady()) {
+      return;
+    }
+    verificationScheduleStarted = true;
+
+    verifyClubMembers(helperBot, { mcconfig, models }, {
+      logTitle: "Club Verification Boot",
+      eventName: "Boot Club Verification",
+    }).catch((err) => {
+      console.error("Boot club verification failed", err);
+    });
+
+    schedule.scheduleJob(nightlySchedule, () => {
+      verifyClubMembers(helperBot, { mcconfig, models }, {
+        logTitle: "Club Verification Nightly Job",
+        eventName: "Nightly Club Verification",
+      }).catch((err) => {
+        console.error("Nightly club verification failed", err);
+      });
+    });
+  };
+
+  if (helperBot.isReady()) {
+    startVerification();
+  } else {
+    helperBot.once("clientReady", startVerification);
+  }
 }
