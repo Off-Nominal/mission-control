@@ -135,6 +135,10 @@ const mcconfig = {
     clientId: process.env.NDB2_CLIENT_ID,
     baseUrl: process.env.NDB2_API_BASEURL,
   },
+  membership: {
+    clubCooldownDays:
+      Number(process.env.MEMBERSHIP_CLUB_COOLDOWN_DAYS) || 30,
+  },
 };
 
 export default mcconfig;
