@@ -5,6 +5,7 @@ import { LogStatus } from "../../logger/Logger";
 import { User } from "./models/User";
 import { Test } from "./models/Test";
 import { Ndb2MsgSubscription } from "./models/Ndb2MsgSubscription";
+import { MemberClubVerification } from "./models/MemberClubVerification";
 
 const db = new Client({
   connectionString: mcconfig.database.url,
@@ -24,9 +25,11 @@ db.connect()
 const test = new Test(db);
 const user = new User(db);
 const ndb2MsgSubscription = new Ndb2MsgSubscription(db);
+const memberClubVerification = new MemberClubVerification(db);
 
 export const models = {
   user,
   test,
   ndb2MsgSubscription,
+  memberClubVerification,
 };
