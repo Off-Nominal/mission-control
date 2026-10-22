@@ -1,8 +1,7 @@
-# Nixpacks' own Node only bootstraps corepack/pnpm (Nixpacks supports 18/22/24 only).
-# The app runs on the Node pinned in package.json devEngines.runtime, which pnpm downloads
-# and verifies against the checksum in pnpm-lock.yaml.
-[variables]
-NIXPACKS_NODE_VERSION = "24"
+# Nixpacks' own Node only bootstraps corepack/pnpm; the app runs on the Node pinned in
+# package.json devEngines.runtime, which pnpm downloads and verifies against pnpm-lock.yaml.
+# Don't set NIXPACKS_NODE_VERSION: in Nixpacks v1.41.0 it changes the package (e.g. nodejs_24)
+# but not the Nix snapshot it comes from, so the build fails with "undefined variable".
 
 # The official Node 26+ linux binaries dynamically link libatomic.so.1,
 # which the Nixpacks Ubuntu base image doesn't ship.
