@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "clear": "rm -rf ./dist",
-    "dev": "NODE_ENV=dev nodemon ./dist/index.js -e ts --exec \"npm run compile\"",
+    "dev": "NODE_ENV=dev nodemon ./dist/index.js -e ts --exec \"pnpm run compile\"",
     "build": "tsc",
     "build:dev": "tsc",
-    "commands:register": "npm run build && node ./dist/commands/register.js",
-    "commands:register:dev": "npm run build && node --env-file=.env ./dist/commands/register.js",
-    "compile": "npm run clear && tsc && node --env-file=.env ./dist/index.js",
+    "commands:register": "pnpm run build && node ./dist/commands/register.js",
+    "commands:register:dev": "pnpm run build && node --env-file=.env ./dist/commands/register.js",
+    "compile": "pnpm run clear && tsc && node --env-file=.env ./dist/index.js",
     "start": "node ./dist/index.js",
     "db:reset": "node --env-file=.env seeds/seed.js",
     "db:start": "docker compose -f docker-compose-db.yml up -d"
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/Off-Nominal/mission-control#readme",
   "dependencies": {
+    "@discordjs/builders": "^1.13.0",
     "@discordjs/rest": "^2.4.0",
     "@octokit/auth-app": "^6.1.2",
     "@offnominal/ndb2-api-types": "^0.20.0",
@@ -64,7 +65,12 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2"
   },
-  "engines": {
-    "node": "26.x"
+  "packageManager": "pnpm@10.34.7",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "26.12.1",
+      "onFail": "download"
+    }
   }
 }
