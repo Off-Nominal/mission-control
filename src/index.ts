@@ -1,5 +1,3 @@
-import mcconfig from "./mcconfig";
-
 // Boot Logger
 import bootLogger from "./logger";
 import { LogStatus } from "./logger/Logger";
@@ -8,8 +6,9 @@ import { LogStatus } from "./logger/Logger";
 import { providers } from "./providers";
 
 // Discord boot
-import { connectAllDiscordBots } from "./helpers/discord-client-connect";
-import { initDiscordBootStatus } from "./helpers/discord-boot-status";
+import { initDiscordBootStatus, setFoundationBootStatus } from "./helpers/discord-boot-status";
+import { BootPhaseError, runBootSequence } from "./boot/run-boot-sequence";
+import { discordPhase, foundationPhase } from "./boot/phases";
 
 // Services
 import SetDiscordClientPresence from "./services/set-discord-client-presence";
@@ -62,50 +61,37 @@ const services = [
   CreateEventFromThread,
 ];
 
-function listenApi(): Promise<void> {
-  return new Promise((resolve) => {
-    providers.api.listen(mcconfig.api.port, () => {
-      bootLogger.addLog(
-        LogStatus.SUCCESS,
-        "Express Server booted and listening.",
-      );
-      bootLogger.logItemSuccess("api");
-      console.log(
-        "[Boot] /health is live (liveness, always 200) — use /ready or health.alert for Discord readiness",
-      );
-      resolve();
-    });
-  });
-}
-
 async function main(): Promise<void> {
   bootLogger.addLog(LogStatus.INFO, "Mission Control in Startup...");
   initDiscordBootStatus();
+  setFoundationBootStatus("running");
 
-  await listenApi();
-
-  await connectAllDiscordBots([
-    {
-      client: providers.ndb2Bot,
-      token: mcconfig.discord.clients.ndb2.token,
-      label: "ndb2",
-    },
-    {
-      client: providers.helperBot,
-      token: mcconfig.discord.clients.helper.token,
-      label: "helper",
-    },
-    {
-      client: providers.contentBot,
-      token: mcconfig.discord.clients.content.token,
-      label: "content",
-    },
-    {
-      client: providers.eventsBot,
-      token: mcconfig.discord.clients.events.token,
-      label: "events",
-    },
-  ]);
+  try {
+    await runBootSequence(
+      [foundationPhase(), discordPhase()],
+      (phase) => {
+        if (phase.name === "foundation") {
+          setFoundationBootStatus("ready");
+          console.log(
+            "[Boot] Foundation complete — connecting Discord gateways",
+          );
+        }
+      },
+    );
+  } catch (error) {
+    if (error instanceof BootPhaseError && error.phase === "foundation") {
+      setFoundationBootStatus(
+        "failed",
+        error.failures.map((failure) => failure.name),
+      );
+      console.error(
+        "[Boot] Foundation failed. Discord gateways will not connect.",
+      );
+      console.error(error.message);
+      return;
+    }
+    throw error;
+  }
 
   console.log("[Boot] Discord ready — starting services");
   services.forEach((service) => service(providers));

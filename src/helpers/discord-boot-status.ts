@@ -21,12 +21,18 @@ export type DiscordBotStatus = {
 
 export type AppHealthPhase = "healthy" | "starting" | "rate_limited" | "degraded";
 
+export type FoundationBootStatus = "pending" | "running" | "ready" | "failed";
+
 export type AppHealth = {
   ready: boolean;
   phase: AppHealthPhase;
   alert: boolean;
   bootAgeSec: number;
   reason: string;
+  foundation: {
+    status: FoundationBootStatus;
+    failedTasks: string[];
+  };
   discord: Record<
     DiscordBotLabel,
     {
@@ -48,6 +54,16 @@ const DISCORD_BOT_LABELS: DiscordBotLabel[] = [
 const statuses = new Map<DiscordBotLabel, DiscordBotStatus>();
 const clients = new Map<DiscordBotLabel, Client>();
 let bootStartedAtMs = Date.now();
+let foundationStatus: FoundationBootStatus = "pending";
+let foundationFailures: string[] = [];
+
+export function setFoundationBootStatus(
+  status: FoundationBootStatus,
+  failedTasks: string[] = [],
+): void {
+  foundationStatus = status;
+  foundationFailures = failedTasks;
+}
 
 export function initDiscordBootStatus(): void {
   bootStartedAtMs = Date.now();
@@ -139,7 +155,18 @@ export function getAppHealth(nowMs: number = Date.now()): AppHealth {
   const startupAlertAfterSec = mcconfig.discord.boot.startupAlertAfterSec;
 
   let phase: AppHealthPhase;
-  if (discord.allReady) {
+  let reason = discord.summary;
+  let ready = discord.allReady;
+
+  if (foundationStatus === "failed") {
+    phase = "degraded";
+    ready = false;
+    reason = `Foundation boot failed: ${foundationFailures.join(", ")}`;
+  } else if (foundationStatus !== "ready") {
+    phase = "starting";
+    ready = false;
+    reason = "Foundation boot has not finished";
+  } else if (discord.allReady) {
     phase = "healthy";
   } else if (discord.anyRateLimited) {
     phase = "rate_limited";
@@ -152,14 +179,18 @@ export function getAppHealth(nowMs: number = Date.now()): AppHealth {
   const alert =
     phase === "rate_limited" ||
     phase === "degraded" ||
-    (!discord.allReady && bootAgeSec >= startupAlertAfterSec);
+    (!ready && bootAgeSec >= startupAlertAfterSec);
 
   return {
-    ready: discord.allReady,
+    ready,
     phase,
     alert,
     bootAgeSec,
-    reason: discord.summary,
+    reason,
+    foundation: {
+      status: foundationStatus,
+      failedTasks: foundationFailures,
+    },
     discord: discordPayload(discord.bots),
   };
 }

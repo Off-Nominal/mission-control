@@ -3,6 +3,7 @@ import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../../actions/post-to-content-channel";
 import { FeedWatcherEvents } from "../FeedWatcher/types";
 import { FeedWatcher } from "../FeedWatcher";
+import { formatFeedError } from "../FeedWatcher/errors";
 const FuseJS = require("fuse.js");
 
 const defaultProcessor = (item, showTitle: string) => item;
@@ -10,7 +11,8 @@ const defaultProcessor = (item, showTitle: string) => item;
 export enum ContentListenerEvents {
   NEW = "newContent",
   READY = "ready",
-  ERROR = "error",
+  // Not "error": emitting that name with no listener exits the process.
+  ERROR = "contentFeedError",
 }
 
 export type ContentListenerOptions = {
@@ -48,14 +50,18 @@ export class ContentListener extends FeedWatcher {
         `${this.title} feed loaded with ${this.episodes.length} items.`
       );
       this.on(FeedWatcherEvents.ERROR, (error) =>
-        console.error(`Error checking ${this.title}.`, error)
+        console.error(
+          `Error checking ${this.title}: ${formatFeedError(error)}`
+        )
       );
     } catch (err) {
+      const detail = formatFeedError(err);
       this.emit(
         ContentListenerEvents.ERROR,
-        `Attempted to initialize ${this.title} multiple times, could not fetch data.`
+        `Could not fetch content feed: ${detail}`
       );
-      console.error(err);
+      console.error(`Could not fetch content feed: ${detail}`);
+      throw err;
     }
 
     this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client

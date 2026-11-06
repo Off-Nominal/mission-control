@@ -1,5 +1,6 @@
 import EventEmitter = require("events");
 import { feedRequest } from "./feedRequest";
+import { formatFeedError, isPermanentRequestFailure } from "./errors";
 import { FeedParserEntry, FeedWatcherEvents } from "./types";
 export * from "./types";
 export * from "./mappers";
@@ -59,8 +60,17 @@ export class FeedWatcher extends EventEmitter {
             resolver(entries);
           })
           .catch((err) => {
-            if (attempts <= this.loadAttempts) {
-              console.error(`Tried loading ${this.feedurl} ${attempts} times`);
+            const gaveUp =
+              isPermanentRequestFailure(err) || attempts <= this.loadAttempts;
+
+            if (gaveUp) {
+              const attemptLabel =
+                this.loadAttempts === 1
+                  ? "1 time"
+                  : `${this.loadAttempts} times`;
+              console.error(
+                `Tried loading ${this.feedurl} ${attemptLabel}: ${formatFeedError(err)}`
+              );
               return reject(err);
             }
 
@@ -97,7 +107,7 @@ export class FeedWatcher extends EventEmitter {
             this.emit(FeedWatcherEvents.NEW, newEntries);
           }
         })
-        .catch((err) => this.emit(err));
+        .catch((err) => this.emit(FeedWatcherEvents.ERROR, err));
     };
 
     return setInterval(() => {

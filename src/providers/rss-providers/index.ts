@@ -17,8 +17,6 @@ wmFeedListener.once(ContentListenerEvents.READY, (message) => {
 wmFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-wmFeedListener.initialize();
-
 // MECO
 const mecoFeedListener = new ContentListener(mcconfig.content.rss.meco, {
   processor: simpleCastFeedMapper,
@@ -31,8 +29,6 @@ mecoFeedListener.once(ContentListenerEvents.READY, (message) => {
 mecoFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-mecoFeedListener.initialize();
-
 // Off-Nominal Podcast
 const ofnFeedListener = new ContentListener(mcconfig.content.rss.ofn, {
   processor: simpleCastFeedMapper,
@@ -45,8 +41,6 @@ ofnFeedListener.once(ContentListenerEvents.READY, (message) => {
 ofnFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-ofnFeedListener.initialize();
-
 // Red Planet Review
 const rprFeedListener = new ContentListener(mcconfig.content.rss.rpr, {
   processor: simpleCastFeedMapper,
@@ -59,8 +53,6 @@ rprFeedListener.once(ContentListenerEvents.READY, (message) => {
 rprFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-rprFeedListener.initialize();
-
 // MECO Headlines
 const hlFeedListener = new ContentListener(mcconfig.content.rss.hl, {
   processor: simpleCastFeedMapper,
@@ -73,8 +65,6 @@ hlFeedListener.once(ContentListenerEvents.READY, (message) => {
 hlFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-hlFeedListener.initialize();
-
 // Off-Nominal Happy Hour
 const hhFeedListener = new ContentListener(mcconfig.content.rss.ofn_hh, {
   processor: youtubeFeedMapper,
@@ -87,8 +77,6 @@ hhFeedListener.once(ContentListenerEvents.READY, (message) => {
 hhFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-hhFeedListener.initialize();
-
 // Off-Nominal YouTube
 const ytFeedListener = new ContentListener(mcconfig.content.rss.ofn_yt, {
   processor: youtubeFeedMapper,
@@ -101,18 +89,28 @@ ytFeedListener.once(ContentListenerEvents.READY, (message) => {
 ytFeedListener.once(ContentListenerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-ytFeedListener.initialize();
-
 // News Feed Listener
 const newsFeedListener = new NewsManager();
 newsFeedListener.once(NewsManagerEvents.READY, (message) => {
   bootLogger.addLog(LogStatus.SUCCESS, message);
   bootLogger.logItemSuccess("newsFeed");
 });
-newsFeedListener.once(NewsManagerEvents.ERROR, (message) => {
+newsFeedListener.on(NewsManagerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
-newsFeedListener.initialize();
+
+export function rssBootTasks() {
+  return [
+    { name: "wmFeedListener", run: () => wmFeedListener.initialize() },
+    { name: "mecoFeedListener", run: () => mecoFeedListener.initialize() },
+    { name: "ofnFeedListener", run: () => ofnFeedListener.initialize() },
+    { name: "rprFeedListener", run: () => rprFeedListener.initialize() },
+    { name: "hlFeedListener", run: () => hlFeedListener.initialize() },
+    { name: "hhFeedListener", run: () => hhFeedListener.initialize() },
+    { name: "ytFeedListener", run: () => ytFeedListener.initialize() },
+    { name: "newsFeed", run: () => newsFeedListener.initialize() },
+  ];
+}
 
 export default {
   yt: ytFeedListener,

@@ -69,12 +69,6 @@ function waitForClientReady(
   });
 }
 
-export type DiscordBotConnectConfig = {
-  client: Client;
-  token: string;
-  label: DiscordBotLabel;
-};
-
 export async function connectDiscordClient(
   client: Client,
   token: string,
@@ -168,22 +162,6 @@ export async function connectDiscordClient(
   if (stopConnect.get(client)) {
     throw new Error(`[Discord/${label}] Gateway connect stopped`);
   }
-}
-
-export async function connectAllDiscordBots(
-  configs: DiscordBotConnectConfig[],
-): Promise<void> {
-  console.log(
-    "[Boot] Waiting for all Discord gateway clients (required dependency)…",
-  );
-
-  await Promise.all(
-    configs.map(({ client, token, label }) =>
-      connectDiscordClient(client, token, label),
-    ),
-  );
-
-  console.log("[Boot] All Discord gateway clients connected");
 }
 
 export function stopDiscordClientConnect(client: Client): void {

@@ -10,15 +10,19 @@ const db = new Client({
   connectionString: mcconfig.database.url,
 });
 
-db.connect()
-  .then(() => {
-    bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
-    bootLogger.logItemSuccess("db");
-  })
-  .catch((err) => {
-    console.error(err);
-    bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
-  });
+export function connectDatabase(): Promise<void> {
+  return db
+    .connect()
+    .then(() => {
+      bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
+      bootLogger.logItemSuccess("db");
+    })
+    .catch((err) => {
+      console.error(err);
+      bootLogger.addLog(LogStatus.FAILURE, "Failure to connect to Database");
+      throw err;
+    });
+}
 
 // Models
 const test = new Test(db);

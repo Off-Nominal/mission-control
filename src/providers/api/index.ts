@@ -19,6 +19,7 @@ function healthBody() {
     alert: health.alert,
     bootAgeSec: health.bootAgeSec,
     reason: health.reason,
+    foundation: health.foundation,
     discord: health.discord,
   };
 }

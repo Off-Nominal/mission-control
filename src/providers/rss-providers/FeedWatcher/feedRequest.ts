@@ -1,7 +1,10 @@
 import { FeedParserEntry } from "./types";
 import axios from "axios";
+import { releaseResponseStream } from "./errors";
 
 const FeedParser = require("feedparser");
+
+const FEED_REQUEST_TIMEOUT_MS = 20_000;
 
 enum FeedParserEvents {
   ERROR = "error",
@@ -38,12 +41,16 @@ export const feedRequest = (feedUrl: string): Promise<FeedParserEntry[]> => {
     axios
       .get(feedUrl, {
         responseType: "stream",
+        timeout: FEED_REQUEST_TIMEOUT_MS,
         headers: {
           Accept:
             "application/rss+xml, application/rdf+xml;q=0.8, application/atom+xml;q=0.6, application/xml;q=0.4, text/xml;q=0.4",
         },
       })
       .then(({ data }) => data.pipe(feedParser))
-      .catch((err) => reject(err));
+      .catch((err) => {
+        releaseResponseStream(err);
+        reject(err);
+      });
   });
 };
