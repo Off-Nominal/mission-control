@@ -6,26 +6,37 @@ import { LogStatus } from "../../logger/Logger";
 export let rllClient: RLLClient;
 export let rllWatcher: RLLWatcher;
 
-try {
-  rllClient = rllc(mcconfig.providers.rll.key || "");
-  bootLogger.addLog(LogStatus.SUCCESS, "RLLC Client initialized.");
-  bootLogger.logItemSuccess("rllClient");
+export function startLaunchClient(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      rllClient = rllc(mcconfig.providers.rll.key || "");
+      bootLogger.addLog(LogStatus.SUCCESS, "RLLC Client initialized.");
+      bootLogger.logItemSuccess("rllClient");
 
-  rllWatcher = rllClient.watch();
+      rllWatcher = rllClient.watch();
 
-  rllWatcher.on("ready", () => {
-    bootLogger.addLog(LogStatus.SUCCESS, "RLLC Watcher initialized.");
-    bootLogger.logItemSuccess("rllWatcher");
+      rllWatcher.once("ready", () => {
+        bootLogger.addLog(LogStatus.SUCCESS, "RLLC Watcher initialized.");
+        bootLogger.logItemSuccess("rllWatcher");
+        resolve();
+      });
+
+      rllWatcher.once("init_error", (err) => {
+        bootLogger.addLog(LogStatus.FAILURE, "RLLC Watcher failed to initialize.");
+        console.error(err.error);
+        console.error(err.message);
+        reject(
+          err.error instanceof Error
+            ? err.error
+            : new Error(err.message || "RLLC watcher failed to initialize"),
+        );
+      });
+
+      rllWatcher.start();
+    } catch (err) {
+      bootLogger.addLog(LogStatus.FAILURE, "RLLC Client failed to initialize.");
+      console.error(err);
+      reject(err);
+    }
   });
-
-  rllWatcher.on("init_error", (err) => {
-    bootLogger.addLog(LogStatus.FAILURE, "RLLC Watcher failed to initialize.");
-    console.error(err.error);
-    console.error(err.message);
-  });
-
-  rllWatcher.start();
-} catch (err) {
-  bootLogger.addLog(LogStatus.FAILURE, "RLLC Client failed to initialize.");
-  console.error(err);
 }

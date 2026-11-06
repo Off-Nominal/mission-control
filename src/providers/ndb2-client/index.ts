@@ -114,13 +114,16 @@ export class Ndb2Client {
     });
   }
 
-  public initialize() {
+  public initialize(): Promise<void> {
     return this.getSeasons()
       .then((seasons) => {
         this.seasons = seasons;
       })
       .catch((err) => {
         console.error(err);
+        throw err instanceof Error
+          ? err
+          : new Error("NDB2 client failed to initialize");
       });
   }
 
@@ -465,6 +468,9 @@ export class Ndb2Client {
 
 const ndbKey = mcconfig.ndb2.clientId;
 const ndb2Client = new Ndb2Client(ndbKey);
-ndb2Client.initialize();
+
+export function startNdb2Client(): Promise<void> {
+  return ndb2Client.initialize();
+}
 
 export default ndb2Client;

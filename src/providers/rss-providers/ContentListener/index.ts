@@ -61,6 +61,7 @@ export class ContentListener extends FeedWatcher {
         `Could not fetch content feed: ${detail}`
       );
       console.error(`Could not fetch content feed: ${detail}`);
+      throw err;
     }
 
     this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client

@@ -171,19 +171,32 @@ export class NewsManager extends EventEmitter {
     }, results);
   }
 
-  public initialize() {
+  public initialize(): Promise<void> {
     const query =
       '*[_type == "newsFeed"]{name, filter, _id, diagnostic, thumbnail, url}';
 
     this.subscribeToCms(query);
-    this.queryCms(query)
+    return this.queryCms(query)
       .then((results) => {
         this.publishSubscriptionReport(results);
+        const successful = results.filter(
+          (result) => result.status === "fulfilled",
+        ).length;
+        if (successful === 0) {
+          throw new Error("Failure to subscribe to any News Feeds.");
+        }
       })
       .catch((error) => {
+        if (
+          error instanceof Error &&
+          error.message === "Failure to subscribe to any News Feeds."
+        ) {
+          throw error;
+        }
         const message = `Failure to subscribe to any News Feeds: ${formatFeedError(error)}`;
         console.error(message);
         this.emit(NewsManagerEvents.ERROR, message);
+        throw error;
       });
   }
 
