@@ -15,15 +15,15 @@ import {
   sanityClient,
   sanityImageUrlBuilder,
 } from "../../sanity";
-import { isFulfilled } from "../../../helpers/allSettledTypeGuard";
+import { formatFeedError } from "../FeedWatcher/errors";
+import {
+  emitSubscriptionReport,
+  NewsManagerEvents,
+} from "./reportSubscriptionResults";
+
+export { NewsManagerEvents };
 
 const FEED_INTERVAL = 60; // five minutes interval for checking news sources
-
-export enum NewsManagerEvents {
-  NEW = "newNews",
-  READY = "ready",
-  ERROR = "error",
-}
 
 export type CmsNewsFeed = {
   data: NewsFeedDocument;
@@ -59,7 +59,9 @@ export class NewsManager extends EventEmitter {
         });
       })
       .on(FeedWatcherEvents.ERROR, (error) => {
-        console.error(`Error reading news Feed: ${name}`, error);
+        console.error(
+          `Error reading news Feed: ${name}: ${formatFeedError(error)}`
+        );
       });
   };
 
@@ -89,7 +91,9 @@ export class NewsManager extends EventEmitter {
         return feed.name;
       })
       .catch((error) => {
-        console.error(error);
+        console.error(
+          `Error subscribing to ${feed.name}: ${formatFeedError(error)}`
+        );
         throw feed.name;
       });
   }
@@ -118,6 +122,25 @@ export class NewsManager extends EventEmitter {
     console.log(`Stopped monitoring ${feed.data.name}`);
   }
 
+  private trackFeed(feed: NewsFeedDocument) {
+    void Promise.resolve()
+      .then(() => {
+        if (!feed?.url) {
+          throw new Error("News feed is missing a url.");
+        }
+        return this.initiateWatcher(feed);
+      })
+      .catch((reason) => {
+        // initiateWatcher already logged the feed name and rejected with it.
+        if (typeof reason === "string") {
+          return;
+        }
+        console.error(
+          `Error subscribing to ${feed?.name ?? "news feed"}: ${formatFeedError(reason)}`
+        );
+      });
+  }
+
   public subscribeToCms(query: string) {
     sanityClient.listen<NewsFeedDocument>(query).subscribe((update) => {
       update.mutations.forEach((mutation) => {
@@ -125,10 +148,10 @@ export class NewsManager extends EventEmitter {
 
         if ("createOrReplace" in mutation) {
           this.deleteFeed(id);
-          this.initiateWatcher(update.result);
+          this.trackFeed(update.result);
         }
         if ("create" in mutation) {
-          this.initiateWatcher(update.result);
+          this.trackFeed(update.result);
         }
         if ("delete" in mutation) {
           this.deleteFeed(id);
@@ -137,36 +160,31 @@ export class NewsManager extends EventEmitter {
     });
   }
 
+  private publishSubscriptionReport(
+    results: PromiseSettledResult<string>[]
+  ) {
+    emitSubscriptionReport((event, message) => {
+      if (event === NewsManagerEvents.ERROR) {
+        console.error(message);
+      }
+      this.emit(event, message);
+    }, results);
+  }
+
   public initialize() {
     const query =
       '*[_type == "newsFeed"]{name, filter, _id, diagnostic, thumbnail, url}';
 
-    const queryResult = this.queryCms(query);
     this.subscribeToCms(query);
-    queryResult.then((promises) => {
-      for (const promise of promises) {
-        if (promise.status === "rejected") {
-          this.emit(
-            NewsManagerEvents.ERROR,
-            `Error subscribing to ${promise.reason}.`
-          );
-        }
-      }
-
-      const totalSubs = promises.length;
-      const successfulSubs = promises.filter(isFulfilled).length;
-      if (successfulSubs > 0) {
-        this.emit(
-          NewsManagerEvents.READY,
-          `Successfully subscribed to ${successfulSubs}/${totalSubs} news feeds.`
-        );
-      } else {
-        this.emit(
-          NewsManagerEvents.ERROR,
-          `Failure to subscribe to any News Feeds.`
-        );
-      }
-    });
+    this.queryCms(query)
+      .then((results) => {
+        this.publishSubscriptionReport(results);
+      })
+      .catch((error) => {
+        const message = `Failure to subscribe to any News Feeds: ${formatFeedError(error)}`;
+        console.error(message);
+        this.emit(NewsManagerEvents.ERROR, message);
+      });
   }
 
   public notifyNew(data: ContentFeedItem, text?: string) {

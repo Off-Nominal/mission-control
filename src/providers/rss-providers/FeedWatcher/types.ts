@@ -95,5 +95,7 @@ export type FeedParserEntry = {
 export enum FeedWatcherEvents {
   NEW = "new",
   STOP = "stop",
-  ERROR = "error",
+  // Not "error": EventEmitter crashes the process if that name is emitted
+  // and no listener is attached.
+  ERROR = "feedError",
 }

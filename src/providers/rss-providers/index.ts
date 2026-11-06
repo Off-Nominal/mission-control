@@ -109,7 +109,7 @@ newsFeedListener.once(NewsManagerEvents.READY, (message) => {
   bootLogger.addLog(LogStatus.SUCCESS, message);
   bootLogger.logItemSuccess("newsFeed");
 });
-newsFeedListener.once(NewsManagerEvents.ERROR, (message) => {
+newsFeedListener.on(NewsManagerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
 newsFeedListener.initialize();
