@@ -1,6 +1,7 @@
 import mcconfig from "../../mcconfig";
 import express from "express";
 import { getAppHealth } from "../../helpers/discord-client-connect";
+import { shouldSkipHealthAccessLog } from "./access-log";
 
 const api = express();
 
@@ -8,7 +9,12 @@ const api = express();
 api.use(express.json());
 if (mcconfig.env !== "production") {
   const morgan = require("morgan");
-  api.use(morgan("dev"));
+  api.use(
+    morgan("dev", {
+      skip: (req: { path?: string; url?: string }, res: { statusCode?: number }) =>
+        shouldSkipHealthAccessLog(req.path ?? req.url, res.statusCode),
+    }),
+  );
 }
 
 function healthBody() {
