@@ -14,6 +14,9 @@ importers:
       '@discordjs/rest':
         specifier: ^2.4.0
         version: 2.6.0
+      '@discordjs/ws':
+        specifier: 1.2.3
+        version: 1.2.3
       '@octokit/auth-app':
         specifier: ^6.1.2
         version: 6.1.2

@@ -1,4 +1,4 @@
-import { Status, type Client } from "discord.js";
+import type { Client } from "discord.js";
 import mcconfig from "../mcconfig";
 import {
   type DiscordBotLabel,
@@ -6,9 +6,15 @@ import {
   setDiscordBotStatus,
 } from "./discord-boot-status";
 import {
+  installDiscordSessionGuard,
+  prepareClientForLogin,
+} from "./discord-gateway-session";
+import {
   discordSessionRateLimitDelayMs,
   isDiscordSessionRateLimitError,
 } from "./discord-session-rate-limit";
+
+installDiscordSessionGuard();
 
 export { getAppHealth, getDiscordBootStatus } from "./discord-boot-status";
 export type {
@@ -34,16 +40,22 @@ export class DiscordBootFatalError extends Error {
   }
 }
 
-function isDiscordClientConnecting(client: Client): boolean {
-  const status = client.ws.status;
-  return (
-    status === Status.Connecting ||
-    status === Status.Reconnecting ||
-    status === Status.Identifying ||
-    status === Status.Resuming ||
-    status === Status.WaitingForGuilds ||
-    status === Status.Nearly
-  );
+const sessionBudgetLoggers = new WeakSet<Client>();
+
+function watchSessionBudget(client: Client, label: DiscordBotLabel): void {
+  if (sessionBudgetLoggers.has(client)) {
+    return;
+  }
+  sessionBudgetLoggers.add(client);
+  client.on("debug", (message: string) => {
+    const remaining = message.match(/Remaining: (\d+)/);
+    if (!remaining) {
+      return;
+    }
+    console.log(
+      `[Discord/${label}] Session budget remaining: ${remaining[1]}`,
+    );
+  });
 }
 
 function waitForClientReady(
@@ -101,11 +113,10 @@ export async function connectDiscordClient(
 
       setDiscordBotStatus(label, { status: "connecting" });
 
-      if (isDiscordClientConnecting(client)) {
-        await waitForClientReady(client);
-        continue;
-      }
-
+      // A failed login() leaves the client destroyed and the shard marked
+      // connecting. Clear that and log in again, which sends one Identify.
+      prepareClientForLogin(client);
+      watchSessionBudget(client, label);
       await client.login(token);
       await waitForClientReady(client);
       setDiscordBotStatus(label, { status: "connected" });
