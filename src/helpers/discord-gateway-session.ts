@@ -4,6 +4,7 @@ import {
   type WebSocketShardDestroyOptions,
 } from "@discordjs/ws";
 import type { Client } from "discord.js";
+import { gatewayLabelForToken } from "./discord-gateway-log";
 
 /**
  * @discordjs/ws passes this reason when a gateway wait exceeds readyTimeout
@@ -53,8 +54,12 @@ export function installDiscordSessionGuard(): void {
   ) {
     const next = withoutReidentify(options);
     if (next !== options) {
+      const token = (
+        this as unknown as { strategy?: { options?: { token?: string } } }
+      ).strategy?.options?.token;
+      const label = gatewayLabelForToken(token);
       console.error(
-        "[Discord] Gateway wait timed out. Closing this socket without another Identify.",
+        `[Discord/${label}] Gateway wait timed out on shard ${this.id}. Closed without another Identify. code=${options?.code ?? "none"}`,
       );
     }
     return originalDestroy.call(this, next);

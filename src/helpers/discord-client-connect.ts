@@ -6,6 +6,10 @@ import {
   setDiscordBotStatus,
 } from "./discord-boot-status";
 import {
+  attachDiscordGatewayLog,
+  formatRetryDelay,
+} from "./discord-gateway-log";
+import {
   installDiscordSessionGuard,
   prepareClientForLogin,
 } from "./discord-gateway-session";
@@ -38,24 +42,6 @@ export class DiscordBootFatalError extends Error {
     super(message);
     this.name = "DiscordBootFatalError";
   }
-}
-
-const sessionBudgetLoggers = new WeakSet<Client>();
-
-function watchSessionBudget(client: Client, label: DiscordBotLabel): void {
-  if (sessionBudgetLoggers.has(client)) {
-    return;
-  }
-  sessionBudgetLoggers.add(client);
-  client.on("debug", (message: string) => {
-    const remaining = message.match(/Remaining: (\d+)/);
-    if (!remaining) {
-      return;
-    }
-    console.log(
-      `[Discord/${label}] Session budget remaining: ${remaining[1]}`,
-    );
-  });
 }
 
 function waitForClientReady(
@@ -116,7 +102,7 @@ export async function connectDiscordClient(
       // A failed login() leaves the client destroyed and the shard marked
       // connecting. Clear that and log in again, which sends one Identify.
       prepareClientForLogin(client);
-      watchSessionBudget(client, label);
+      attachDiscordGatewayLog(client, token, label);
       await client.login(token);
       await waitForClientReady(client);
       setDiscordBotStatus(label, { status: "connected" });
@@ -146,7 +132,7 @@ export async function connectDiscordClient(
           `[Discord/${label}] SESSION RATE LIMITED — staying alive; /health reports alert (no container restart)`,
         );
         console.error(
-          `[Discord/${label}] Retrying in ${Math.ceil(delayMs / 1_000)}s: ${message}`,
+          `[Discord/${label}] Retrying in ${formatRetryDelay(delayMs)}: ${message}`,
         );
       } else {
         nonRateLimitFailures += 1;
@@ -156,8 +142,11 @@ export async function connectDiscordClient(
           retryInSec: Math.ceil(delayMs / 1_000),
         });
         console.error(
-          `[Discord/${label}] Login failed (${nonRateLimitFailures}/${maxLoginAttempts}); retrying in ${Math.ceil(delayMs / 1_000)}s: ${message}`,
+          `[Discord/${label}] Login failed (${nonRateLimitFailures}/${maxLoginAttempts}); retrying in ${formatRetryDelay(delayMs)}: ${message}`,
         );
+        if (err instanceof Error && err.stack) {
+          console.error(err.stack);
+        }
 
         if (nonRateLimitFailures >= maxLoginAttempts) {
           throw new DiscordBootFatalError(
