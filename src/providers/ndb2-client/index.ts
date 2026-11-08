@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import mcconfig from "../../mcconfig";
 import * as API_V2 from "@offnominal/ndb2-api-types/v2";
+import { beginSeasonLoad, describeNdb2Failure, NDB2_SEASON_RETRY_MS } from "./boot";
 
 const isNdb2ApiErrorResponse = (
   response: any,
@@ -115,16 +116,9 @@ export class Ndb2Client {
   }
 
   public initialize(): Promise<void> {
-    return this.getSeasons()
-      .then((seasons) => {
-        this.seasons = seasons;
-      })
-      .catch((err) => {
-        console.error(err);
-        throw err instanceof Error
-          ? err
-          : new Error("NDB2 client failed to initialize");
-      });
+    return this.getSeasons().then((seasons) => {
+      this.seasons = seasons;
+    });
   }
 
   public getSeasons(): Promise<API_V2.Endpoints.Seasons.GET.Data> {
@@ -469,8 +463,28 @@ export class Ndb2Client {
 const ndbKey = mcconfig.ndb2.clientId;
 const ndb2Client = new Ndb2Client(ndbKey);
 
+let seasonRetry: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleSeasonRetry(): void {
+  if (seasonRetry) return;
+  seasonRetry = setTimeout(() => {
+    seasonRetry = null;
+    ndb2Client.initialize().then(
+      () => {
+        console.log("[NDB2] Seasons loaded");
+      },
+      (err) => {
+        console.error(
+          `[NDB2] Season load failed; retrying in ${NDB2_SEASON_RETRY_MS / 1000}s. ${describeNdb2Failure(err)}`,
+        );
+        scheduleSeasonRetry();
+      },
+    );
+  }, NDB2_SEASON_RETRY_MS);
+}
+
 export function startNdb2Client(): Promise<void> {
-  return ndb2Client.initialize();
+  return beginSeasonLoad(() => ndb2Client.initialize(), scheduleSeasonRetry);
 }
 
 export default ndb2Client;

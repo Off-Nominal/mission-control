@@ -25,7 +25,7 @@ function failureMessage(reason: unknown): string {
   return String(reason);
 }
 
-// Tasks in a phase run together. The phase resolves only when every task does.
+// Tasks in a phase run together. The phase resolves when every required task does.
 export async function runBootPhase(phase: BootPhase): Promise<void> {
   console.log(
     `[Boot] Phase "${phase.name}" starting: ${phase.tasks
@@ -45,10 +45,18 @@ export async function runBootPhase(phase: BootPhase): Promise<void> {
     if (result.status === "fulfilled") {
       return;
     }
-    const name = phase.tasks[index].name;
+    const task = phase.tasks[index];
     const message = failureMessage(result.reason);
-    console.error(`[Boot] Phase "${phase.name}" failed: ${name}: ${message}`);
-    failures.push({ name, message });
+    if (task.required === false) {
+      console.error(
+        `[Boot] Phase "${phase.name}" optional task ${task.name} failed: ${message}`,
+      );
+      return;
+    }
+    console.error(
+      `[Boot] Phase "${phase.name}" failed: ${task.name}: ${message}`,
+    );
+    failures.push({ name: task.name, message });
   });
 
   if (failures.length > 0) {

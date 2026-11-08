@@ -1,6 +1,8 @@
 export type BootTask = {
   name: string;
   run: () => Promise<void>;
+  // A failed optional task is logged and the phase still completes.
+  required?: boolean;
 };
 
 export type BootPhase = {

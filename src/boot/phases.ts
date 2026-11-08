@@ -33,7 +33,7 @@ export function foundationPhase(): BootPhase {
     tasks: [
       { name: "api", run: listenApi },
       { name: "db", run: connectDatabase },
-      { name: "ndb2Client", run: startNdb2Client },
+      { name: "ndb2Client", required: false, run: startNdb2Client },
       ...rssBootTasks(),
     ],
   };
