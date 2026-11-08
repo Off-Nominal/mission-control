@@ -9,32 +9,22 @@ import { sanityClient, sanityImageUrlBuilder } from "../providers/sanity";
 import cache from "./cache";
 import rssProviders from "./rss-providers";
 import youtube from "./youtube";
-import { rllClient, rllWatcher } from "./rllc";
 import { models } from "./db";
-import { withLateBindings } from "./late-binding";
 
-export const providers = withLateBindings(
-  {
-    mcconfig,
-    api,
-    contentBot,
-    helperBot,
-    ndb2Bot,
-    eventsBot,
-    models,
-    sanityClient,
-    sanityImageUrlBuilder,
-    ndb2Client,
-    cache,
-    rssProviders,
-    youtube,
-    rllClient,
-    rllWatcher,
-  },
-  {
-    rllClient: () => rllClient,
-    rllWatcher: () => rllWatcher,
-  },
-);
+export const providers = {
+  mcconfig,
+  api,
+  contentBot,
+  helperBot,
+  ndb2Bot,
+  eventsBot,
+  models,
+  sanityClient,
+  sanityImageUrlBuilder,
+  ndb2Client,
+  cache,
+  rssProviders,
+  youtube,
+};
 
 export type Providers = typeof providers;

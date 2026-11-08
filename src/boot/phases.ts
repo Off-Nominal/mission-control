@@ -5,7 +5,6 @@ import mcconfig from "../mcconfig";
 import { providers } from "../providers";
 import { connectDatabase } from "../providers/db";
 import { startNdb2Client } from "../providers/ndb2-client";
-import { startLaunchClient } from "../providers/rllc";
 import { rssBootTasks } from "../providers/rss-providers";
 import { BootPhase } from "./types";
 
@@ -35,7 +34,6 @@ export function foundationPhase(): BootPhase {
       { name: "api", run: listenApi },
       { name: "db", run: connectDatabase },
       { name: "ndb2Client", run: startNdb2Client },
-      { name: "launches", run: startLaunchClient },
       ...rssBootTasks(),
     ],
   };
