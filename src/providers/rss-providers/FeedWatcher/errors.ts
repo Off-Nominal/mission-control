@@ -30,6 +30,24 @@ export function formatFeedError(error: unknown): string {
   return String(error);
 }
 
+// Three polls in a row. A single 404 can be a blip; a streak means the feed is gone.
+export const PERMANENT_FEED_FAILURES_BEFORE_STOP = 3;
+
+export function nextFeedPoll(
+  consecutivePermanent: number,
+  error: unknown,
+): { consecutivePermanent: number; stop: boolean } {
+  if (!isPermanentRequestFailure(error)) {
+    return { consecutivePermanent: 0, stop: false };
+  }
+
+  const next = consecutivePermanent + 1;
+  return {
+    consecutivePermanent: next,
+    stop: next >= PERMANENT_FEED_FAILURES_BEFORE_STOP,
+  };
+}
+
 // 4xx responses other than timeout and rate-limit will not succeed on retry.
 export function isPermanentRequestFailure(error: unknown): boolean {
   if (!axios.isAxiosError(error)) {

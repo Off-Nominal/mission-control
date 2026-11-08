@@ -7,6 +7,7 @@ import { FeedWatcherEvents } from "./FeedWatcher/types";
 import {
   formatFeedError,
   isPermanentRequestFailure,
+  nextFeedPoll,
   releaseResponseStream,
 } from "./FeedWatcher/errors";
 import {
@@ -147,6 +148,22 @@ describe("feed request errors", () => {
       formatFeedError(axiosError(404)),
       "HTTP 404 Not Found for https://www.esa.int/rssfeed/Our_Activities/Space_Science"
     );
+  });
+
+  it("stops polling after three permanent failures and resets on a blip", () => {
+    const first = nextFeedPoll(0, axiosError(404));
+    const second = nextFeedPoll(first.consecutivePermanent, axiosError(403));
+    const third = nextFeedPoll(second.consecutivePermanent, axiosError(404));
+    const recovered = nextFeedPoll(second.consecutivePermanent, axiosError(503));
+    const reset = nextFeedPoll(second.consecutivePermanent, null);
+
+    assert.equal(first.stop, false);
+    assert.equal(second.stop, false);
+    assert.equal(third.stop, true);
+    assert.equal(third.consecutivePermanent, 3);
+    assert.equal(recovered.stop, false);
+    assert.equal(recovered.consecutivePermanent, 0);
+    assert.equal(reset.consecutivePermanent, 0);
   });
 
   it("treats 404 as permanent and 429 and 503 as retryable", () => {

@@ -1,6 +1,10 @@
 import EventEmitter = require("events");
 import { feedRequest } from "./feedRequest";
-import { formatFeedError, isPermanentRequestFailure } from "./errors";
+import {
+  formatFeedError,
+  isPermanentRequestFailure,
+  nextFeedPoll,
+} from "./errors";
 import { FeedParserEntry, FeedWatcherEvents } from "./types";
 export * from "./types";
 export * from "./mappers";
@@ -20,6 +24,7 @@ export class FeedWatcher extends EventEmitter {
   private interval: number;
   private timer: ReturnType<typeof setInterval> | null;
   private loadAttempts: number = 0;
+  private consecutivePermanentFailures: number = 0;
   private options: RobustWatcherOptions;
   private lastEntry: {
     date?: Date;
@@ -95,6 +100,7 @@ export class FeedWatcher extends EventEmitter {
     const fetch = () => {
       this.fetchEntries()
         .then((entries) => {
+          this.consecutivePermanentFailures = 0;
           const newEntries = entries.filter(
             (entry) =>
               entry.pubDate > this.lastEntry.date &&
@@ -107,7 +113,20 @@ export class FeedWatcher extends EventEmitter {
             this.emit(FeedWatcherEvents.NEW, newEntries);
           }
         })
-        .catch((err) => this.emit(FeedWatcherEvents.ERROR, err));
+        .catch((err) => {
+          const decision = nextFeedPoll(
+            this.consecutivePermanentFailures,
+            err,
+          );
+          this.consecutivePermanentFailures = decision.consecutivePermanent;
+          this.emit(FeedWatcherEvents.ERROR, err);
+          if (!decision.stop) return;
+
+          console.error(
+            `Stopped checking ${this.feedurl} after ${decision.consecutivePermanent} permanent failures: ${formatFeedError(err)}`,
+          );
+          this.stop();
+        });
     };
 
     return setInterval(() => {
