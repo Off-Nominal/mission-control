@@ -5,14 +5,22 @@ import { LogStatus } from "../../logger/Logger";
 import { User } from "./models/User";
 import { Test } from "./models/Test";
 import { Ndb2MsgSubscription } from "./models/Ndb2MsgSubscription";
+import { createResilientDatabase } from "./database";
 
-const db = new Client({
-  connectionString: mcconfig.database.url,
+const db = createResilientDatabase({
+  open: () =>
+    new Client({
+      connectionString: mcconfig.database.url,
+    }),
+  connect: (client) => client.connect(),
+  onDisconnect: (err) => {
+    console.error("[db] Postgres connection lost:", err.message);
+  },
 });
 
 export function connectDatabase(): Promise<void> {
   return db
-    .connect()
+    .query("SELECT 1")
     .then(() => {
       bootLogger.addLog(LogStatus.SUCCESS, "Database connected");
       bootLogger.logItemSuccess("db");

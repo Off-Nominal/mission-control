@@ -1,9 +1,9 @@
-import { Client } from "pg";
+import { Database } from "../database";
 import { API } from "./types";
 
 export class Ndb2MsgSubscription {
-  private db: Client;
-  constructor(db: Client) {
+  private db: Database;
+  constructor(db: Database) {
     this.db = db;
   }
 
