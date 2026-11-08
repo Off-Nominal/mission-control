@@ -101,4 +101,42 @@ describe("boot sequence", () => {
 
     assert.deepEqual(calls.sort(), ["db", "feeds"]);
   });
+
+  it("continues when an optional task fails", async () => {
+    const calls: string[] = [];
+    await runBootSequence([
+      {
+        name: "foundation",
+        tasks: [
+          {
+            name: "db",
+            run: async () => {
+              calls.push("db");
+            },
+          },
+          {
+            name: "ndb2Client",
+            required: false,
+            run: async () => {
+              calls.push("ndb2Client");
+              throw new Error("HTTP Status 503");
+            },
+          },
+        ],
+      },
+      {
+        name: "discord",
+        tasks: [
+          {
+            name: "helper",
+            run: async () => {
+              calls.push("helper");
+            },
+          },
+        ],
+      },
+    ]);
+
+    assert.deepEqual(calls, ["db", "ndb2Client", "helper"]);
+  });
 });
