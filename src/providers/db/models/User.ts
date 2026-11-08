@@ -1,9 +1,9 @@
-import { Client } from "pg";
-import { API } from "./types";
 import { isBefore, sub } from "date-fns";
+import { Database } from "../database";
+import { API } from "./types";
 
 export class User {
-  private db: Client;
+  private db: Database;
   private cache: {
     fetchPreNotificationSubscribers: {
       timestamp: Date;
@@ -28,7 +28,7 @@ export class User {
     },
   };
 
-  constructor(db: Client) {
+  constructor(db: Database) {
     this.db = db;
   }
 

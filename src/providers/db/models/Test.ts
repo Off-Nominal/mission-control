@@ -1,9 +1,9 @@
-import { Client } from "pg";
+import { Database } from "../database";
 
 export class Test {
-  private db: Client;
+  private db: Database;
 
-  constructor(db: Client) {
+  constructor(db: Database) {
     this.db = db;
   }
 
