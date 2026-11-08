@@ -5,6 +5,11 @@ import { LogStatus } from "../../logger/Logger";
 
 export let rllClient: RLLClient;
 export let rllWatcher: RLLWatcher;
+let launchWatcherReady = false;
+
+export function isLaunchWatcherReady(): boolean {
+  return launchWatcherReady;
+}
 
 export function startLaunchClient(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -16,6 +21,7 @@ export function startLaunchClient(): Promise<void> {
       rllWatcher = rllClient.watch();
 
       rllWatcher.once("ready", () => {
+        launchWatcherReady = true;
         bootLogger.addLog(LogStatus.SUCCESS, "RLLC Watcher initialized.");
         bootLogger.logItemSuccess("rllWatcher");
         resolve();

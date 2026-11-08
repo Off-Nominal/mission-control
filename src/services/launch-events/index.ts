@@ -1,6 +1,8 @@
 import { RLLEntity } from "rocket-launch-live-client";
 import { parseCommands } from "../../helpers/parseCommands";
 import { Providers } from "../../providers";
+import { isLaunchWatcherReady } from "../../providers/rllc";
+import { bindLaunchWatcher } from "./bind-watcher";
 import { syncEvents } from "./syncLaunches";
 
 export default function LaunchEvents({
@@ -23,9 +25,7 @@ export default function LaunchEvents({
     }
   };
 
-  rllWatcher.on("ready", () => sync("ready"));
-  rllWatcher.on("new", () => sync("new"));
-  rllWatcher.on("change", () => sync("change"));
+  bindLaunchWatcher(rllWatcher, sync, isLaunchWatcherReady());
 
   // Dev check on cache
   helperBot.on("messageCreate", (message) => {

@@ -11,23 +11,30 @@ import rssProviders from "./rss-providers";
 import youtube from "./youtube";
 import { rllClient, rllWatcher } from "./rllc";
 import { models } from "./db";
+import { withLateBindings } from "./late-binding";
 
-export const providers = {
-  mcconfig,
-  api,
-  contentBot,
-  helperBot,
-  ndb2Bot,
-  eventsBot,
-  models,
-  sanityClient,
-  sanityImageUrlBuilder,
-  ndb2Client,
-  cache,
-  rssProviders,
-  youtube,
-  rllClient,
-  rllWatcher,
-};
+export const providers = withLateBindings(
+  {
+    mcconfig,
+    api,
+    contentBot,
+    helperBot,
+    ndb2Bot,
+    eventsBot,
+    models,
+    sanityClient,
+    sanityImageUrlBuilder,
+    ndb2Client,
+    cache,
+    rssProviders,
+    youtube,
+    rllClient,
+    rllWatcher,
+  },
+  {
+    rllClient: () => rllClient,
+    rllWatcher: () => rllWatcher,
+  },
+);
 
 export type Providers = typeof providers;

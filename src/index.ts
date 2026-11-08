@@ -94,7 +94,13 @@ async function main(): Promise<void> {
   }
 
   console.log("[Boot] Discord ready — starting services");
-  services.forEach((service) => service(providers));
+  for (const service of services) {
+    try {
+      service(providers);
+    } catch (err) {
+      console.error(`[Boot] Service ${service.name} failed to start:`, err);
+    }
+  }
 
   bootLogger.checkBoot(providers.helperBot);
 }
