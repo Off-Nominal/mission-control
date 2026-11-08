@@ -150,20 +150,28 @@ describe("feed request errors", () => {
     );
   });
 
-  it("stops polling after three permanent failures and resets on a blip", () => {
-    const first = nextFeedPoll(0, axiosError(404));
-    const second = nextFeedPoll(first.consecutivePermanent, axiosError(403));
-    const third = nextFeedPoll(second.consecutivePermanent, axiosError(404));
-    const recovered = nextFeedPoll(second.consecutivePermanent, axiosError(503));
-    const reset = nextFeedPoll(second.consecutivePermanent, null);
+  it("backs off after three permanent failures and doubles the wait", () => {
+    const idle = { consecutivePermanent: 0, backoffStep: 0 };
+    const first = nextFeedPoll(idle, axiosError(404));
+    const second = nextFeedPoll(first, axiosError(403));
+    const third = nextFeedPoll(second, axiosError(404));
+    const fourth = nextFeedPoll(third, axiosError(404));
+    const capped = nextFeedPoll(
+      { consecutivePermanent: 10, backoffStep: 8 },
+      axiosError(404),
+    );
+    const recovered = nextFeedPoll(third, axiosError(503));
 
-    assert.equal(first.stop, false);
-    assert.equal(second.stop, false);
-    assert.equal(third.stop, true);
-    assert.equal(third.consecutivePermanent, 3);
-    assert.equal(recovered.stop, false);
+    assert.equal(first.delayMs, null);
+    assert.equal(second.delayMs, null);
+    assert.equal(third.delayMs, 5 * 60 * 1000);
+    assert.equal(third.backoffStep, 1);
+    assert.equal(fourth.delayMs, 10 * 60 * 1000);
+    assert.equal(fourth.backoffStep, 2);
+    assert.equal(capped.delayMs, 60 * 60 * 1000);
+    assert.equal(recovered.delayMs, null);
     assert.equal(recovered.consecutivePermanent, 0);
-    assert.equal(reset.consecutivePermanent, 0);
+    assert.equal(recovered.backoffStep, 0);
   });
 
   it("treats 404 as permanent and 429 and 503 as retryable", () => {

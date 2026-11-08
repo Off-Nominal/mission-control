@@ -30,22 +30,47 @@ export function formatFeedError(error: unknown): string {
   return String(error);
 }
 
-// Three polls in a row. A single 404 can be a blip; a streak means the feed is gone.
-export const PERMANENT_FEED_FAILURES_BEFORE_STOP = 3;
+// Keep the normal interval through a short streak, then double the wait.
+export const FEED_FAILURES_BEFORE_BACKOFF = 3;
+export const FEED_BACKOFF_START_MS = 5 * 60 * 1000;
+export const FEED_BACKOFF_MAX_MS = 60 * 60 * 1000;
+
+export type FeedPollState = {
+  consecutivePermanent: number;
+  backoffStep: number;
+};
 
 export function nextFeedPoll(
-  consecutivePermanent: number,
+  state: FeedPollState,
   error: unknown,
-): { consecutivePermanent: number; stop: boolean } {
+): FeedPollState & { delayMs: number | null } {
   if (!isPermanentRequestFailure(error)) {
-    return { consecutivePermanent: 0, stop: false };
+    return { consecutivePermanent: 0, backoffStep: 0, delayMs: null };
   }
 
-  const next = consecutivePermanent + 1;
-  return {
-    consecutivePermanent: next,
-    stop: next >= PERMANENT_FEED_FAILURES_BEFORE_STOP,
-  };
+  const consecutivePermanent = state.consecutivePermanent + 1;
+  if (
+    state.backoffStep === 0 &&
+    consecutivePermanent < FEED_FAILURES_BEFORE_BACKOFF
+  ) {
+    return { consecutivePermanent, backoffStep: 0, delayMs: null };
+  }
+
+  const backoffStep = state.backoffStep + 1;
+  const delayMs = Math.min(
+    FEED_BACKOFF_START_MS * 2 ** (backoffStep - 1),
+    FEED_BACKOFF_MAX_MS,
+  );
+  return { consecutivePermanent, backoffStep, delayMs };
+}
+
+export function formatFeedWait(delayMs: number): string {
+  const minutes = Math.round(delayMs / 60000);
+  if (minutes < 60) {
+    return minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  }
+  const hours = Math.round(minutes / 60);
+  return hours === 1 ? "1 hour" : `${hours} hours`;
 }
 
 // 4xx responses other than timeout and rate-limit will not succeed on retry.

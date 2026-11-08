@@ -2,6 +2,7 @@ import EventEmitter = require("events");
 import { feedRequest } from "./feedRequest";
 import {
   formatFeedError,
+  formatFeedWait,
   isPermanentRequestFailure,
   nextFeedPoll,
 } from "./errors";
@@ -22,9 +23,11 @@ type RobustWatcherOptions = {
 export class FeedWatcher extends EventEmitter {
   private feedurl: string;
   private interval: number;
-  private timer: ReturnType<typeof setInterval> | null;
+  private timer: ReturnType<typeof setTimeout> | null;
+  private repeating = false;
   private loadAttempts: number = 0;
   private consecutivePermanentFailures: number = 0;
+  private backoffStep: number = 0;
   private options: RobustWatcherOptions;
   private lastEntry: {
     date?: Date;
@@ -61,7 +64,7 @@ export class FeedWatcher extends EventEmitter {
           .then((entries) => {
             this.lastEntry.date = entries[0].pubDate;
             this.lastEntry.permalink = entries[0].link;
-            this.timer = this.watch();
+            this.watch();
             resolver(entries);
           })
           .catch((err) => {
@@ -89,48 +92,73 @@ export class FeedWatcher extends EventEmitter {
   }
 
   public stop() {
-    if (this.timer !== null) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
+    this.clearTimer();
     this.emit(FeedWatcherEvents.STOP);
   }
 
+  private clearTimer() {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+  }
+
+  private arm(delayMs: number, repeating: boolean) {
+    this.clearTimer();
+    this.repeating = repeating;
+    const run = () => this.poll();
+    this.timer = repeating ? setInterval(run, delayMs) : setTimeout(run, delayMs);
+  }
+
   private watch() {
-    const fetch = () => {
-      this.fetchEntries()
-        .then((entries) => {
-          this.consecutivePermanentFailures = 0;
-          const newEntries = entries.filter(
-            (entry) =>
-              entry.pubDate > this.lastEntry.date &&
-              entry.link !== this.lastEntry.permalink
-          );
+    this.arm(this.interval * 1000, true);
+  }
 
-          if (newEntries.length > 0) {
-            this.lastEntry.date = newEntries[0].pubDate;
-            this.lastEntry.permalink = newEntries[0].link;
-            this.emit(FeedWatcherEvents.NEW, newEntries);
-          }
-        })
-        .catch((err) => {
-          const decision = nextFeedPoll(
-            this.consecutivePermanentFailures,
-            err,
-          );
-          this.consecutivePermanentFailures = decision.consecutivePermanent;
-          this.emit(FeedWatcherEvents.ERROR, err);
-          if (!decision.stop) return;
+  private poll() {
+    this.fetchEntries()
+      .then((entries) => {
+        const leftBackoff = this.backoffStep > 0;
+        this.consecutivePermanentFailures = 0;
+        this.backoffStep = 0;
+        const newEntries = entries.filter(
+          (entry) =>
+            entry.pubDate > this.lastEntry.date &&
+            entry.link !== this.lastEntry.permalink
+        );
 
+        if (newEntries.length > 0) {
+          this.lastEntry.date = newEntries[0].pubDate;
+          this.lastEntry.permalink = newEntries[0].link;
+          this.emit(FeedWatcherEvents.NEW, newEntries);
+        }
+
+        if (leftBackoff) {
+          console.log(`Resumed checking ${this.feedurl}`);
+          this.arm(this.interval * 1000, true);
+        }
+      })
+      .catch((err) => {
+        const decision = nextFeedPoll(
+          {
+            consecutivePermanent: this.consecutivePermanentFailures,
+            backoffStep: this.backoffStep,
+          },
+          err,
+        );
+        this.consecutivePermanentFailures = decision.consecutivePermanent;
+        this.backoffStep = decision.backoffStep;
+        this.emit(FeedWatcherEvents.ERROR, err);
+        if (decision.delayMs != null) {
           console.error(
-            `Stopped checking ${this.feedurl} after ${decision.consecutivePermanent} permanent failures: ${formatFeedError(err)}`,
+            `Waiting ${formatFeedWait(decision.delayMs)} before checking ${this.feedurl} again: ${formatFeedError(err)}`,
           );
-          this.stop();
-        });
-    };
-
-    return setInterval(() => {
-      fetch();
-    }, this.interval * 1000);
+          this.arm(decision.delayMs, false);
+          return;
+        }
+        if (!this.repeating) {
+          this.arm(this.interval * 1000, true);
+        }
+      });
   }
 }
