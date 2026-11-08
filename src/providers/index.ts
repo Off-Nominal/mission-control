@@ -9,7 +9,6 @@ import { sanityClient, sanityImageUrlBuilder } from "../providers/sanity";
 import cache from "./cache";
 import rssProviders from "./rss-providers";
 import youtube from "./youtube";
-import { rllClient, rllWatcher } from "./rllc";
 import { models } from "./db";
 
 export const providers = {
@@ -26,8 +25,6 @@ export const providers = {
   cache,
   rssProviders,
   youtube,
-  rllClient,
-  rllWatcher,
 };
 
 export type Providers = typeof providers;

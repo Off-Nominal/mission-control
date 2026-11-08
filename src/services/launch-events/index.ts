@@ -1,14 +1,28 @@
-import { RLLEntity } from "rocket-launch-live-client";
+import { RLLEntity, RLLWatcher, rllc } from "rocket-launch-live-client";
 import { parseCommands } from "../../helpers/parseCommands";
+import bootLogger from "../../logger";
+import { LogStatus } from "../../logger/Logger";
 import { Providers } from "../../providers";
 import { syncEvents } from "./syncLaunches";
+import { watchLaunches } from "./watch";
 
 export default function LaunchEvents({
   eventsBot,
   helperBot,
-  rllWatcher,
   mcconfig,
 }: Providers) {
+  let rllWatcher: RLLWatcher;
+  try {
+    const launchClient = rllc(mcconfig.providers.rll.key || "");
+    bootLogger.addLog(LogStatus.SUCCESS, "RLLC Client initialized.");
+    bootLogger.logItemSuccess("rllClient");
+    rllWatcher = launchClient.watch();
+  } catch (err) {
+    bootLogger.addLog(LogStatus.FAILURE, "RLLC Client failed to initialize.");
+    console.error(err);
+    return;
+  }
+
   const sync = (eventType: "new" | "change" | "ready") => {
     const run = () => {
       void syncEvents(rllWatcher.launches, eventsBot, eventType).catch((err) => {
@@ -23,9 +37,20 @@ export default function LaunchEvents({
     }
   };
 
-  rllWatcher.on("ready", () => sync("ready"));
-  rllWatcher.on("new", () => sync("new"));
-  rllWatcher.on("change", () => sync("change"));
+  watchLaunches(
+    rllWatcher,
+    (eventType) => {
+      if (eventType === "ready") {
+        bootLogger.addLog(LogStatus.SUCCESS, "RLLC Watcher initialized.");
+        bootLogger.logItemSuccess("rllWatcher");
+      }
+      sync(eventType);
+    },
+    (err) => {
+      bootLogger.addLog(LogStatus.FAILURE, "RLLC Watcher failed to initialize.");
+      console.error(err);
+    },
+  );
 
   // Dev check on cache
   helperBot.on("messageCreate", (message) => {
