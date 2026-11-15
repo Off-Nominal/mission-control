@@ -1,11 +1,6 @@
 import EventEmitter = require("events");
 import { feedRequest } from "./feedRequest";
-import {
-  formatFeedError,
-  formatFeedWait,
-  isPermanentRequestFailure,
-  nextFeedPoll,
-} from "./errors";
+import { formatFeedError, formatFeedWait, nextFeedPoll } from "./errors";
 import { FeedParserEntry, FeedWatcherEvents } from "./types";
 export * from "./types";
 export * from "./mappers";
@@ -14,20 +9,27 @@ const DEFAULT_FEED_CHECK_TIME_IN_SECONDS = 60;
 const DEFAULT_RETRY_ATTEMPTS = 3;
 const DEFAULT_RETRY_WAIT_TIME_IN_SECONDS = 5;
 
+export type FeedFetcher = () => Promise<FeedParserEntry[]>;
+
 type RobustWatcherOptions = {
   interval?: number;
   attempts?: number;
   retryTime?: number;
+  // After the startup attempts are spent, keep polling instead of stopping.
+  pollAfterFailedStart?: boolean;
+  fetch?: FeedFetcher;
 };
 
 export class FeedWatcher extends EventEmitter {
-  private feedurl: string;
+  protected feedurl: string;
   private interval: number;
   private timer: ReturnType<typeof setTimeout> | null;
   private repeating = false;
   private loadAttempts: number = 0;
   private consecutivePermanentFailures: number = 0;
   private backoffStep: number = 0;
+  private baselineSet = false;
+  protected recoveryPolling = false;
   private options: RobustWatcherOptions;
   private lastEntry: {
     date?: Date;
@@ -49,45 +51,71 @@ export class FeedWatcher extends EventEmitter {
   }
 
   private fetchEntries() {
+    if (this.options.fetch) return this.options.fetch();
     return feedRequest(this.feedurl);
+  }
+
+  private rememberLatest(entries: FeedParserEntry[]) {
+    this.lastEntry.date = entries[0].pubDate;
+    this.lastEntry.permalink = entries[0].link;
+    this.baselineSet = true;
   }
 
   public start(): Promise<FeedParserEntry[]> {
     const attempts = this.options.attempts || DEFAULT_RETRY_ATTEMPTS;
+    // 0 is a real wait. `||` would replace it with the default.
     const retryTime =
-      (this.options.retryTime || DEFAULT_RETRY_WAIT_TIME_IN_SECONDS) * 1000;
+      (this.options.retryTime ?? DEFAULT_RETRY_WAIT_TIME_IN_SECONDS) * 1000;
+
+    this.loadAttempts = 0;
+    this.clearTimer();
+    this.recoveryPolling = false;
 
     return new Promise((resolve, reject) => {
-      const fetcher = (resolver) => {
+      const fetcher = () => {
         this.loadAttempts++;
         this.fetchEntries()
           .then((entries) => {
-            this.lastEntry.date = entries[0].pubDate;
-            this.lastEntry.permalink = entries[0].link;
+            this.rememberLatest(entries);
+            this.consecutivePermanentFailures = 0;
+            this.backoffStep = 0;
             this.watch();
-            resolver(entries);
+            resolve(entries);
           })
           .catch((err) => {
-            const gaveUp =
-              isPermanentRequestFailure(err) || attempts <= this.loadAttempts;
+            const decision = nextFeedPoll(
+              {
+                consecutivePermanent: this.consecutivePermanentFailures,
+                backoffStep: this.backoffStep,
+              },
+              err,
+            );
+            this.consecutivePermanentFailures = decision.consecutivePermanent;
+            this.backoffStep = decision.backoffStep;
 
-            if (gaveUp) {
-              const attemptLabel =
-                this.loadAttempts === 1
-                  ? "1 time"
-                  : `${this.loadAttempts} times`;
-              console.error(
-                `Tried loading ${this.feedurl} ${attemptLabel}: ${formatFeedError(err)}`
-              );
-              return reject(err);
+            // HTTP 4xx used to stop on the first response. Give every error
+            // the same attempt budget, then keep checking when asked.
+            if (this.loadAttempts < attempts) {
+              setTimeout(fetcher, retryTime);
+              return;
             }
 
-            setTimeout(() => {
-              fetcher(resolver);
-            }, retryTime);
+            const attemptLabel =
+              this.loadAttempts === 1
+                ? "1 time"
+                : `${this.loadAttempts} times`;
+            console.error(
+              `Tried loading ${this.feedurl} ${attemptLabel}: ${formatFeedError(err)}`,
+            );
+
+            if (this.options.pollAfterFailedStart) {
+              this.recoveryPolling = true;
+              this.armFailurePoll(decision.delayMs, err);
+            }
+            reject(err);
           });
       };
-      fetcher(resolve);
+      fetcher();
     });
   }
 
@@ -104,7 +132,7 @@ export class FeedWatcher extends EventEmitter {
     }
   }
 
-  private arm(delayMs: number, repeating: boolean) {
+  protected arm(delayMs: number, repeating: boolean) {
     this.clearTimer();
     this.repeating = repeating;
     const run = () => this.poll();
@@ -115,12 +143,34 @@ export class FeedWatcher extends EventEmitter {
     this.arm(this.interval * 1000, true);
   }
 
-  private poll() {
-    this.fetchEntries()
+  private armFailurePoll(delayMs: number | null, err: unknown) {
+    if (delayMs != null) {
+      console.error(
+        `Waiting ${formatFeedWait(delayMs)} before checking ${this.feedurl} again: ${formatFeedError(err)}`,
+      );
+      this.arm(delayMs, false);
+      return;
+    }
+    this.arm(this.interval * 1000, true);
+  }
+
+  protected poll(): Promise<void> {
+    return this.fetchEntries()
       .then((entries) => {
         const leftBackoff = this.backoffStep > 0;
         this.consecutivePermanentFailures = 0;
         this.backoffStep = 0;
+
+        if (!this.baselineSet) {
+          this.rememberLatest(entries);
+          this.emit(FeedWatcherEvents.INITIAL, entries);
+          if (leftBackoff || !this.repeating) {
+            console.log(`Resumed checking ${this.feedurl}`);
+            this.arm(this.interval * 1000, true);
+          }
+          return;
+        }
+
         const newEntries = entries.filter(
           (entry) =>
             entry.pubDate > this.lastEntry.date &&

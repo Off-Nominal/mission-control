@@ -1,7 +1,7 @@
 import { GuildScheduledEvent, GuildScheduledEventStatus } from "discord.js";
 import Fuse from "fuse.js";
 import { ContentFeedItem } from "../../../actions/post-to-content-channel";
-import { FeedWatcherEvents } from "../FeedWatcher/types";
+import { FeedParserEntry, FeedWatcherEvents } from "../FeedWatcher/types";
 import { FeedWatcher } from "../FeedWatcher";
 import { formatFeedError } from "../FeedWatcher/errors";
 const FuseJS = require("fuse.js");
@@ -19,6 +19,9 @@ export type ContentListenerOptions = {
   processor?: (item: any, showTitle: string) => ContentFeedItem;
   rssInterval?: number;
   searchOptions?: Fuse.IFuseOptions<ContentFeedItem>;
+  attempts?: number;
+  retryTime?: number;
+  fetch?: () => Promise<FeedParserEntry[]>;
 };
 
 export class ContentListener extends FeedWatcher {
@@ -29,43 +32,74 @@ export class ContentListener extends FeedWatcher {
   searchOptions: Fuse.IFuseOptions<ContentFeedItem> | null;
   processor: (item: any, showTitle: string) => ContentFeedItem;
 
+  private initialLoadAttached = false;
+
   constructor(feedUrl: string, options?: ContentListenerOptions) {
-    super(feedUrl, { interval: options.rssInterval });
-    this.processor = options.processor || defaultProcessor;
-    this.searchOptions = options.searchOptions || null;
+    super(feedUrl, {
+      interval: options?.rssInterval,
+      attempts: options?.attempts,
+      retryTime: options?.retryTime,
+      fetch: options?.fetch,
+      // A show feed that is still down keeps polling and does not fail boot.
+      pollAfterFailedStart: true,
+    });
+    this.processor = options?.processor || defaultProcessor;
+    this.searchOptions = options?.searchOptions || null;
     this.isStream = this.isStream.bind(this);
   }
 
+  private attachInitialLoad() {
+    if (this.initialLoadAttached) return;
+    this.initialLoadAttached = true;
+    this.on(FeedWatcherEvents.INITIAL, (entries: FeedParserEntry[]) => {
+      try {
+        this.finishLoad(entries);
+      } catch (err) {
+        console.error(
+          `Could not fetch content feed: ${formatFeedError(err)}`,
+        );
+      }
+    });
+  }
+
+  private finishLoad(entries: FeedParserEntry[]) {
+    if (this.fuse) return;
+    this.title = entries[0].meta.title; // extract Feed program title
+    this.albumArt = entries[0].meta.image.url; // extract Feed program album art
+    this.episodes = entries
+      .map((entry) => this.processor(entry, this.title))
+      .reverse(); // map entries from RSS feed to episode format using processor
+    this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client
+    this.emit(
+      ContentListenerEvents.READY,
+      `${this.title} feed loaded with ${this.episodes.length} items.`,
+    );
+    this.on(FeedWatcherEvents.ERROR, (error) =>
+      console.error(`Error checking ${this.title}: ${formatFeedError(error)}`),
+    );
+    this.listen(); // listen for new entries on RSS
+  }
+
   public async initialize() {
+    this.attachInitialLoad();
     try {
       const entries = await this.start();
-      this.title = entries[0].meta.title; // extract Feed program title
-      this.albumArt = entries[0].meta.image.url; // extract Feed program album art
-      this.episodes = entries
-        .map((entry) => this.processor(entry, this.title))
-        .reverse(); // map entries from RSS feed to episode format using processor
-
-      this.emit(
-        ContentListenerEvents.READY,
-        `${this.title} feed loaded with ${this.episodes.length} items.`
-      );
-      this.on(FeedWatcherEvents.ERROR, (error) =>
-        console.error(
-          `Error checking ${this.title}: ${formatFeedError(error)}`
-        )
-      );
+      this.finishLoad(entries);
     } catch (err) {
       const detail = formatFeedError(err);
       this.emit(
         ContentListenerEvents.ERROR,
-        `Could not fetch content feed: ${detail}`
+        `Could not fetch content feed: ${detail}`,
       );
       console.error(`Could not fetch content feed: ${detail}`);
+      if (this.recoveryPolling) {
+        console.error(
+          `Content feed will keep checking in the background: ${this.feedurl}`,
+        );
+        return;
+      }
       throw err;
     }
-
-    this.fuse = new FuseJS(this.episodes, this.searchOptions); // start search client
-    this.listen(); // listen for new entries on RSS
   }
 
   private listen() {
