@@ -150,28 +150,38 @@ describe("feed request errors", () => {
     );
   });
 
-  it("backs off after three permanent failures and doubles the wait", () => {
+  it("backs off after three failures of any kind and doubles the wait", () => {
     const idle = { consecutivePermanent: 0, backoffStep: 0 };
+    const timeout = {
+      isAxiosError: true,
+      message: "timeout of 20000ms exceeded",
+      code: "ECONNABORTED",
+    };
     const first = nextFeedPoll(idle, axiosError(404));
-    const second = nextFeedPoll(first, axiosError(403));
-    const third = nextFeedPoll(second, axiosError(404));
+    const second = nextFeedPoll(first, new Error("No entries in the feed"));
+    const third = nextFeedPoll(second, axiosError(500));
     const fourth = nextFeedPoll(third, axiosError(404));
     const capped = nextFeedPoll(
       { consecutivePermanent: 10, backoffStep: 8 },
       axiosError(404),
     );
-    const recovered = nextFeedPoll(third, axiosError(503));
+    const once = nextFeedPoll(idle, timeout);
+    const continued = nextFeedPoll(second, axiosError(503));
 
+    assert.equal(once.delayMs, null);
+    assert.equal(once.consecutivePermanent, 1);
     assert.equal(first.delayMs, null);
+    assert.equal(first.consecutivePermanent, 1);
     assert.equal(second.delayMs, null);
+    assert.equal(second.consecutivePermanent, 2);
     assert.equal(third.delayMs, 5 * 60 * 1000);
     assert.equal(third.backoffStep, 1);
     assert.equal(fourth.delayMs, 10 * 60 * 1000);
     assert.equal(fourth.backoffStep, 2);
     assert.equal(capped.delayMs, 60 * 60 * 1000);
-    assert.equal(recovered.delayMs, null);
-    assert.equal(recovered.consecutivePermanent, 0);
-    assert.equal(recovered.backoffStep, 0);
+    assert.equal(continued.delayMs, 5 * 60 * 1000);
+    assert.equal(continued.consecutivePermanent, 3);
+    assert.equal(continued.backoffStep, 1);
   });
 
   it("treats 404 as permanent and 429 and 503 as retryable", () => {
