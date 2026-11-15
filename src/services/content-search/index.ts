@@ -39,6 +39,13 @@ export default function ContentSearch({ contentBot }: Providers) {
 
     const feedListener = rssProviders[show] as ContentListener;
 
+    if (!feedListener.hasLoaded()) {
+      interaction.reply({
+        content: "That show's feed is still loading. Try again in a few minutes.",
+      });
+      return;
+    }
+
     const embeds = [];
 
     const returnMessage: InteractionReplyOptions = {

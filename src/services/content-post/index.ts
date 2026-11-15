@@ -48,10 +48,15 @@ export default function ContentPost({
       });
       return;
     }
-    rssProviders[show].emit(
-      ContentListenerEvents.NEW,
-      rssProviders[show].fetchRecent()
-    );
+    const recent = rssProviders[show].fetchRecent();
+    if (!recent) {
+      message.reply({
+        content: "That show's feed is still loading.",
+      });
+      return;
+    }
+
+    rssProviders[show].emit(ContentListenerEvents.NEW, recent);
   });
 
   // YouTube Streams

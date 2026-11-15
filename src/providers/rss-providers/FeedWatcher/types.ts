@@ -94,6 +94,9 @@ export type FeedParserEntry = {
 
 export enum FeedWatcherEvents {
   NEW = "new",
+  // First successful fetch after start() failed. Not NEW: the backlog is not
+  // a batch of episodes that just appeared.
+  INITIAL = "initialLoad",
   STOP = "stop",
   // Not "error": EventEmitter crashes the process if that name is emitted
   // and no listener is attached.

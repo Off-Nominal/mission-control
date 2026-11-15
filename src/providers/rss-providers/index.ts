@@ -4,6 +4,12 @@ import mcconfig from "../../mcconfig";
 import { ContentListener, ContentListenerEvents } from "./ContentListener";
 import { simpleCastFeedMapper, youtubeFeedMapper } from "./FeedWatcher";
 import { NewsManager, NewsManagerEvents } from "./NewsListener";
+import {
+  beginContentFeedLoad,
+  CONTENT_FEED_RETRY_MS,
+  ContentFeedRetryTimer,
+  scheduleContentFeedRetry,
+} from "./content-boot";
 
 // WeMartians
 const wmFeedListener = new ContentListener(mcconfig.content.rss.wm, {
@@ -99,15 +105,37 @@ newsFeedListener.on(NewsManagerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
 
+function runOptionalContentFeed(
+  name: string,
+  listener: ContentListener,
+  timer: ContentFeedRetryTimer,
+): Promise<void> {
+  const load = () => listener.initialize();
+  return beginContentFeedLoad(name, load, () =>
+    scheduleContentFeedRetry(name, load, timer, CONTENT_FEED_RETRY_MS),
+  );
+}
+
+const contentFeedRetries: Record<string, ContentFeedRetryTimer> = {};
+
+function optionalContentTask(name: string, listener: ContentListener) {
+  const timer = (contentFeedRetries[name] ??= { current: null });
+  return {
+    name,
+    required: false,
+    run: () => runOptionalContentFeed(name, listener, timer),
+  };
+}
+
 export function rssBootTasks() {
   return [
-    { name: "wmFeedListener", run: () => wmFeedListener.initialize() },
-    { name: "mecoFeedListener", run: () => mecoFeedListener.initialize() },
-    { name: "ofnFeedListener", run: () => ofnFeedListener.initialize() },
-    { name: "rprFeedListener", run: () => rprFeedListener.initialize() },
-    { name: "hlFeedListener", run: () => hlFeedListener.initialize() },
-    { name: "hhFeedListener", run: () => hhFeedListener.initialize() },
-    { name: "ytFeedListener", run: () => ytFeedListener.initialize() },
+    optionalContentTask("wmFeedListener", wmFeedListener),
+    optionalContentTask("mecoFeedListener", mecoFeedListener),
+    optionalContentTask("ofnFeedListener", ofnFeedListener),
+    optionalContentTask("rprFeedListener", rprFeedListener),
+    optionalContentTask("hlFeedListener", hlFeedListener),
+    optionalContentTask("hhFeedListener", hhFeedListener),
+    optionalContentTask("ytFeedListener", ytFeedListener),
     { name: "newsFeed", run: () => newsFeedListener.initialize() },
   ];
 }
