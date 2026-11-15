@@ -8,6 +8,8 @@ export type BootTask = {
 export type BootPhase = {
   name: string;
   tasks: BootTask[];
+  // Re-run failed required tasks until they succeed.
+  retryUntilReady?: boolean;
 };
 
 export type BootTaskFailure = {
