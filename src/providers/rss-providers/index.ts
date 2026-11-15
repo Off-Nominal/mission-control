@@ -116,28 +116,26 @@ function runOptionalContentFeed(
   );
 }
 
-const hhFeedRetry: ContentFeedRetryTimer = { current: null };
-const ytFeedRetry: ContentFeedRetryTimer = { current: null };
+const contentFeedRetries: Record<string, ContentFeedRetryTimer> = {};
+
+function optionalContentTask(name: string, listener: ContentListener) {
+  const timer = (contentFeedRetries[name] ??= { current: null });
+  return {
+    name,
+    required: false,
+    run: () => runOptionalContentFeed(name, listener, timer),
+  };
+}
 
 export function rssBootTasks() {
   return [
-    { name: "wmFeedListener", run: () => wmFeedListener.initialize() },
-    { name: "mecoFeedListener", run: () => mecoFeedListener.initialize() },
-    { name: "ofnFeedListener", run: () => ofnFeedListener.initialize() },
-    { name: "rprFeedListener", run: () => rprFeedListener.initialize() },
-    { name: "hlFeedListener", run: () => hlFeedListener.initialize() },
-    {
-      name: "hhFeedListener",
-      required: false,
-      run: () =>
-        runOptionalContentFeed("hhFeedListener", hhFeedListener, hhFeedRetry),
-    },
-    {
-      name: "ytFeedListener",
-      required: false,
-      run: () =>
-        runOptionalContentFeed("ytFeedListener", ytFeedListener, ytFeedRetry),
-    },
+    optionalContentTask("wmFeedListener", wmFeedListener),
+    optionalContentTask("mecoFeedListener", mecoFeedListener),
+    optionalContentTask("ofnFeedListener", ofnFeedListener),
+    optionalContentTask("rprFeedListener", rprFeedListener),
+    optionalContentTask("hlFeedListener", hlFeedListener),
+    optionalContentTask("hhFeedListener", hhFeedListener),
+    optionalContentTask("ytFeedListener", ytFeedListener),
     { name: "newsFeed", run: () => newsFeedListener.initialize() },
   ];
 }
