@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { beginSeasonLoad, describeNdb2Failure } from "./boot";
 
 describe("NDB2 season load", () => {

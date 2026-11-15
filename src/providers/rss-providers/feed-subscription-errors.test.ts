@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { readFileSync } from "node:fs";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { resolve } from "node:path";
 import { FeedWatcherEvents } from "./FeedWatcher/types";
 import {

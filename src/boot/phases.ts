@@ -27,9 +27,12 @@ function listenApi(): Promise<void> {
 }
 
 // Everything that can finish without a Discord gateway session.
+// Required tasks are retried until they succeed so a down dependency
+// cannot leave the process up with Discord disconnected.
 export function foundationPhase(): BootPhase {
   return {
     name: "foundation",
+    retryUntilReady: true,
     tasks: [
       { name: "api", run: listenApi },
       { name: "db", run: connectDatabase },

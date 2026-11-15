@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
-import { BootPhaseError, runBootSequence } from "./run-boot-sequence";
+import { describe, it } from "vitest";
+import {
+  BootPhaseError,
+  nextFoundationRetryDelay,
+  runBootSequence,
+} from "./run-boot-sequence";
 import { BootPhase } from "./types";
 
 describe("boot sequence", () => {
@@ -138,5 +142,89 @@ describe("boot sequence", () => {
     ]);
 
     assert.deepEqual(calls, ["db", "ndb2Client", "helper"]);
+  });
+
+  it("retries only the required tasks that failed, then continues", async () => {
+    const calls: string[] = [];
+    const delays: number[] = [];
+    let feedCalls = 0;
+
+    await runBootSequence(
+      [
+        {
+          name: "foundation",
+          retryUntilReady: true,
+          tasks: [
+            {
+              name: "db",
+              run: async () => {
+                calls.push("db");
+              },
+            },
+            {
+              name: "api",
+              run: async () => {
+                calls.push("api");
+              },
+            },
+            {
+              name: "feeds",
+              run: async () => {
+                feedCalls += 1;
+                calls.push(`feeds${feedCalls}`);
+                if (feedCalls < 3) {
+                  throw new Error("Request failed with status code 404");
+                }
+              },
+            },
+            {
+              name: "yt",
+              required: false,
+              run: async () => {
+                calls.push("yt");
+                throw new Error("Request failed with status code 404");
+              },
+            },
+          ],
+        },
+        {
+          name: "discord",
+          tasks: [
+            {
+              name: "helper",
+              run: async () => {
+                calls.push("helper");
+              },
+            },
+          ],
+        },
+      ],
+      undefined,
+      {
+        sleep: async (ms) => {
+          delays.push(ms);
+        },
+      },
+    );
+
+    assert.deepEqual(calls, [
+      "db",
+      "api",
+      "feeds1",
+      "yt",
+      "feeds2",
+      "feeds3",
+      "helper",
+    ]);
+    assert.deepEqual(delays, [5_000, 10_000]);
+  });
+
+  it("caps the foundation retry wait at one minute", () => {
+    assert.equal(nextFoundationRetryDelay(0), 5_000);
+    assert.equal(nextFoundationRetryDelay(1), 10_000);
+    assert.equal(nextFoundationRetryDelay(2), 20_000);
+    assert.equal(nextFoundationRetryDelay(3), 40_000);
+    assert.equal(nextFoundationRetryDelay(4), 60_000);
+    assert.equal(nextFoundationRetryDelay(5), 60_000);
   });
 });
