@@ -4,6 +4,12 @@ import mcconfig from "../../mcconfig";
 import { ContentListener, ContentListenerEvents } from "./ContentListener";
 import { simpleCastFeedMapper, youtubeFeedMapper } from "./FeedWatcher";
 import { NewsManager, NewsManagerEvents } from "./NewsListener";
+import {
+  beginContentFeedLoad,
+  CONTENT_FEED_RETRY_MS,
+  ContentFeedRetryTimer,
+  scheduleContentFeedRetry,
+} from "./content-boot";
 
 // WeMartians
 const wmFeedListener = new ContentListener(mcconfig.content.rss.wm, {
@@ -99,6 +105,20 @@ newsFeedListener.on(NewsManagerEvents.ERROR, (message) => {
   bootLogger.addLog(LogStatus.FAILURE, message);
 });
 
+function runOptionalContentFeed(
+  name: string,
+  listener: ContentListener,
+  timer: ContentFeedRetryTimer,
+): Promise<void> {
+  const load = () => listener.initialize();
+  return beginContentFeedLoad(name, load, () =>
+    scheduleContentFeedRetry(name, load, timer, CONTENT_FEED_RETRY_MS),
+  );
+}
+
+const hhFeedRetry: ContentFeedRetryTimer = { current: null };
+const ytFeedRetry: ContentFeedRetryTimer = { current: null };
+
 export function rssBootTasks() {
   return [
     { name: "wmFeedListener", run: () => wmFeedListener.initialize() },
@@ -106,8 +126,18 @@ export function rssBootTasks() {
     { name: "ofnFeedListener", run: () => ofnFeedListener.initialize() },
     { name: "rprFeedListener", run: () => rprFeedListener.initialize() },
     { name: "hlFeedListener", run: () => hlFeedListener.initialize() },
-    { name: "hhFeedListener", run: () => hhFeedListener.initialize() },
-    { name: "ytFeedListener", run: () => ytFeedListener.initialize() },
+    {
+      name: "hhFeedListener",
+      required: false,
+      run: () =>
+        runOptionalContentFeed("hhFeedListener", hhFeedListener, hhFeedRetry),
+    },
+    {
+      name: "ytFeedListener",
+      required: false,
+      run: () =>
+        runOptionalContentFeed("ytFeedListener", ytFeedListener, ytFeedRetry),
+    },
     { name: "newsFeed", run: () => newsFeedListener.initialize() },
   ];
 }

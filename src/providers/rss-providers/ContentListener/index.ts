@@ -78,11 +78,16 @@ export class ContentListener extends FeedWatcher {
     });
   }
 
+  public hasLoaded(): boolean {
+    return this.fuse != null;
+  }
+
   public fetchRecent() {
     return this.episodes[this.episodes.length - 1];
   }
 
   public search(term: string) {
+    if (!this.fuse) return [];
     return this.fuse.search(term);
   }
 
