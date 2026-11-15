@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import { ContentListener, ContentListenerEvents } from "../ContentListener";
 import { FeedWatcher } from "./index";
 import { FeedParserEntry, FeedWatcherEvents } from "./types";
