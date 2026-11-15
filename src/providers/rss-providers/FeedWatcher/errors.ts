@@ -30,24 +30,22 @@ export function formatFeedError(error: unknown): string {
   return String(error);
 }
 
-// Keep the normal interval through a short streak, then double the wait.
+// Every failed check counts, including HTTP 4xx, HTTP 5xx, timeouts, and
+// empty feeds. The normal interval holds for a short streak, then the wait doubles.
 export const FEED_FAILURES_BEFORE_BACKOFF = 3;
 export const FEED_BACKOFF_START_MS = 5 * 60 * 1000;
 export const FEED_BACKOFF_MAX_MS = 60 * 60 * 1000;
 
 export type FeedPollState = {
+  // Counts every failed poll. The name predates counting timeouts and 5xx.
   consecutivePermanent: number;
   backoffStep: number;
 };
 
 export function nextFeedPoll(
   state: FeedPollState,
-  error: unknown,
+  _error: unknown,
 ): FeedPollState & { delayMs: number | null } {
-  if (!isPermanentRequestFailure(error)) {
-    return { consecutivePermanent: 0, backoffStep: 0, delayMs: null };
-  }
-
   const consecutivePermanent = state.consecutivePermanent + 1;
   if (
     state.backoffStep === 0 &&

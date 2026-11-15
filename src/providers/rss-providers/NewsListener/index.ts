@@ -23,7 +23,7 @@ import {
 
 export { NewsManagerEvents };
 
-const FEED_INTERVAL = 60; // five minutes interval for checking news sources
+const FEED_INTERVAL = 60; // seconds between checks for each news source
 
 export type CmsNewsFeed = {
   data: NewsFeedDocument;
