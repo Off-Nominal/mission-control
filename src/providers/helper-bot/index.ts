@@ -4,18 +4,8 @@ import bootLogger from "../../logger";
 import fetchGuild from "../../helpers/fetchGuild";
 import { LogStatus } from "../../logger/Logger";
 
-export enum HelperBotEvents {
-  THREAD_DIGEST_SEND = "threadDigestSend",
-  STARSHIP_UPDATE = "starshipSiteUpdate",
-  SEND_DELINQUENTS = "sendDelinquents",
-}
-
 const helperBot = new Client({
-  partials: [
-    Partials.Message,
-    Partials.Channel,
-    Partials.GuildMember,
-  ],
+  partials: [Partials.Channel, Partials.GuildMember],
   intents: [mcconfig.discord.clients.helper.intents],
 });
 
