@@ -27,7 +27,6 @@ import DBTest from "./services/db-test";
 import Shunt from "./services/shunt";
 import Poll from "./services/poll";
 import MarsTime from "./services/mars-time";
-import ChannelSummary from "./services/channel-summary";
 import CelebrateMembership from "./services/celebrate-membership";
 import LaunchEvents from "./services/launch-events";
 import EventNotifications from "./services/event-notifications";
@@ -38,7 +37,6 @@ import CreateEventFromThread from "./services/create-event-from-thread";
 const services = [
   AddModsToThread,
   AnnounceStream,
-  ChannelSummary,
   CelebrateMembership,
   ContentPost,
   ContentSearch,
