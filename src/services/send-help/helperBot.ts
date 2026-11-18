@@ -34,11 +34,6 @@ export function sendHelperBotHelp(interaction: Interaction) {
         value:
           "`/marstime` to get Mars Coordinated Time, or add `spacecraft` option and select a vehicle from the list.",
       },
-      {
-        name: "Summary Bot - get a bot-interpreted summary of channel activity",
-        value:
-          "`/summary` with a `duration` integer in hours. Type `/summary help` for more info.",
-      },
     ]);
 
   interaction.reply({ embeds: [embed] });

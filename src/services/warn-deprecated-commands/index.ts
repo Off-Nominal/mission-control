@@ -44,9 +44,7 @@ export default function WarnDeprecatedCommands({ helperBot }: Providers) {
       }
 
       case "!summary": {
-        message.channel.send(
-          "`!summary` no longer accepts text initiated commands. Use the new slash commands by typing `/summary` and selecting your time window."
-        );
+        message.channel.send("The `!summary` command has been removed.");
         break;
       }
 

@@ -48,7 +48,6 @@ const mcconfig = {
           GatewayIntentBits.GuildMessages,
           GatewayIntentBits.DirectMessages,
           GatewayIntentBits.GuildMembers,
-          GatewayIntentBits.GuildMessageReactions,
           GatewayIntentBits.MessageContent,
         ],
       },
@@ -89,9 +88,6 @@ const mcconfig = {
     },
     youtube: {
       key: process.env.PROV_YT_KEY,
-    },
-    rapidApi: {
-      key: process.env.PROV_RAPID_API_KEY,
     },
     sanity: {
       cmsId: process.env.PROV_SANITY_CMS_ID,
