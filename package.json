@@ -37,7 +37,7 @@
     "@sanity/types": "^2.30.5",
     "@types/node-schedule": "^2.1.6",
     "axios": "^1.20.0",
-    "cloudinary": "^1.27.0",
+    "cloudinary": "^2.7.0",
     "date-fns": "^2.25.0",
     "discord-api-types": "^0.37.100",
     "discord.js": "^14.19.3",
