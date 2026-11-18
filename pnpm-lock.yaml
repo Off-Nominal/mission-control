@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  undici@<6.24.0: '>=6.24.0 <7'
+
 importers:
 
   .:
@@ -1870,8 +1873,8 @@ packages:
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
-  undici@6.21.3:
-    resolution: {integrity: sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==}
+  undici@6.29.1:
+    resolution: {integrity: sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==}
     engines: {node: '>=18.17'}
 
   universal-github-app-jwt@1.2.0:
@@ -2088,7 +2091,7 @@ snapshots:
       discord-api-types: 0.38.38
       magic-bytes.js: 1.10.0
       tslib: 2.7.0
-      undici: 6.21.3
+      undici: 6.29.1
 
   '@discordjs/util@1.2.0':
     dependencies:
@@ -2713,7 +2716,7 @@ snapshots:
       lodash.snakecase: 4.1.1
       magic-bytes.js: 1.10.0
       tslib: 2.7.0
-      undici: 6.21.3
+      undici: 6.29.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -3740,7 +3743,7 @@ snapshots:
 
   undici-types@8.9.0: {}
 
-  undici@6.21.3: {}
+  undici@6.29.1: {}
 
   universal-github-app-jwt@1.2.0:
     dependencies:
