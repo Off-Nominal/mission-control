@@ -28,7 +28,7 @@
   "homepage": "https://github.com/Off-Nominal/mission-control#readme",
   "dependencies": {
     "@discordjs/builders": "^1.13.0",
-    "@discordjs/rest": "^2.4.0",
+    "@discordjs/rest": "^2.6.3",
     "@discordjs/ws": "1.2.3",
     "@octokit/auth-app": "^6.1.2",
     "@offnominal/ndb2-api-types": "^0.20.0",
@@ -39,7 +39,7 @@
     "axios": "^1.20.0",
     "date-fns": "^2.25.0",
     "discord-api-types": "^0.37.100",
-    "discord.js": "^14.19.3",
+    "discord.js": "^14.28.1",
     "express": "^4.21.0",
     "feedparser": "^2.2.10",
     "filtrex": "^3.0.0",
