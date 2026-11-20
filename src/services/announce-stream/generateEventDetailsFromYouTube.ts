@@ -4,7 +4,7 @@ import {
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
 } from "discord.js";
-import { youtube_v3 } from "googleapis";
+import { youtube_v3 } from "@googleapis/youtube";
 
 export default function generateEventDetailsFromYouTube(
   video: youtube_v3.Schema$Video

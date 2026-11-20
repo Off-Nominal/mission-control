@@ -2,7 +2,7 @@ import { ChannelType, Client } from "discord.js";
 import { ContentFeedItem } from "../../actions/post-to-content-channel";
 import { Providers } from "../../providers";
 import { ContentListenerEvents } from "../../providers/rss-providers/ContentListener";
-import { youtube_v3 } from "googleapis";
+import { youtube_v3 } from "@googleapis/youtube";
 import fetchYouTubeVideo from "../../actions/fetch-youtube-video";
 import generateEventDetailsFromYouTube from "./generateEventDetailsFromYouTube";
 import createDiscordEvent from "../../actions/create-discord-event";
