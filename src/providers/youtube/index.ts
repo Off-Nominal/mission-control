@@ -1,9 +1,9 @@
-import { google } from "googleapis";
+import { youtube } from "@googleapis/youtube";
 import mcconfig from "../../mcconfig";
 
-const youtube = google.youtube({
+const youtubeClient = youtube({
   version: "v3",
   auth: mcconfig.providers.youtube.key,
 });
 
-export default youtube;
+export default youtubeClient;

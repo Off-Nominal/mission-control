@@ -1,4 +1,4 @@
-import { youtube_v3 } from "googleapis";
+import { youtube_v3 } from "@googleapis/youtube";
 
 export default async function fetchYouTubeVideo(
   client: youtube_v3.Youtube,
